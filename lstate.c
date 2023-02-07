@@ -73,9 +73,16 @@ static unsigned int luai_makeseed (lua_State *L) {
   unsigned int h = cast_uint(time(NULL));
   int p = 0;
   addbuff(buff, p, L);  /* heap variable */
+  /*
+  { size_t t = ((size_t)((L))); 
+    memcpy(buff + p, &t, sizeof(t)); 
+    p += sizeof(t); 
+  }
+  */
   addbuff(buff, p, &h);  /* local variable */
   addbuff(buff, p, &lua_newstate);  /* public function */
   lua_assert(p == sizeof(buff));
+  // 就是生成一个随机的 buffer
   return luaS_hash(buff, p, h);
 }
 
@@ -381,7 +388,7 @@ LUA_API lua_State *lua_newstate (lua_Alloc f, void *ud) {
   g->gcstp = GCSTPGC;  /* no GC while building state */
   g->strt.size = g->strt.nuse = 0;
   g->strt.hash = NULL;
-  setnilvalue(&g->l_registry);
+  setnilvalue(&g->l_registry); // ((&g->l_registry)->tt_=(((0) | ((0) << 4))))
   g->panic = NULL;
   g->gcstate = GCSpause;
   g->gckind = KGC_INC;
