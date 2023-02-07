@@ -247,7 +247,7 @@ static void f_luaopen (lua_State *L, void *ud) {
 ** any memory (to avoid errors)
 */
 static void preinit_thread (lua_State *L, global_State *g) {
-  G(L) = g;
+  G(L) = g; // L->l_G = g
   L->stack = NULL;
   L->ci = NULL;
   L->nci = 0;
@@ -258,7 +258,7 @@ static void preinit_thread (lua_State *L, global_State *g) {
   L->hookmask = 0;
   L->basehookcount = 0;
   L->allowhook = 1;
-  resethookcount(L);
+  resethookcount(L); // L->hookcount = L->basehookcount
   L->openupval = NULL;
   L->status = LUA_OK;
   L->errfunc = 0;
@@ -356,17 +356,22 @@ LUA_API lua_State *lua_newstate (lua_Alloc f, void *ud) {
   int i;
   lua_State *L;
   global_State *g;
+  /* 把 lua_Alloc f 返回的内存空间的 void* 强转为 LG* */
   LG *l = cast(LG *, (*f)(ud, NULL, LUA_TTHREAD, sizeof(LG)));
   if (l == NULL) return NULL;
   L = &l->l.l;
   g = &l->g;
-  L->tt = LUA_VTHREAD;
-  g->currentwhite = bitmask(WHITE0BIT);
+  L->tt = LUA_VTHREAD; /*0b1000*/
+  g->currentwhite = bitmask(WHITE0BIT); /*0b1000*/
   L->marked = luaC_white(g);
   preinit_thread(L, g);
-  g->allgc = obj2gco(L);  /* by now, only object is the main thread */
+  g->allgc = obj2gco(L);  /* by now, only object is the main thread
+                            (&(((union GCUnion *)((L)))->gc)); // CommonHeader
+                          */
   L->next = NULL;
-  incnny(L);  /* main thread is always non yieldable */
+  incnny(L);  /* main thread is always non yieldable 
+                ((L)->nCcalls += 0x10000) = 0x10000 十六进制
+              */
   g->frealloc = f;
   g->ud = ud;
   g->warnf = NULL;

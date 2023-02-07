@@ -54,6 +54,9 @@
 #define LUA_ERRERR	5
 
 
+/*
+** 这样就可以直接用 lua_State 去声明变量了 , 而不用 struct lua_State 去声明了
+*/
 typedef struct lua_State lua_State;
 
 

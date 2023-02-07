@@ -1007,8 +1007,17 @@ LUALIB_API const char *luaL_gsub (lua_State *L, const char *s,
   return lua_tostring(L, -1);
 }
 
-
+/**
+ * @brief 
+ * 
+ * @param ud void* 可以接收任何类型指针 不用
+ * @param ptr 
+ * @param osize 不使用
+ * @param nsize 如果 nsize 为 0 , 释放 ptr
+ * @return void* 
+ */
 static void *l_alloc (void *ud, void *ptr, size_t osize, size_t nsize) {
+  /* It works around some compiler warnings. Some compilers will warn if you don't use a function parameter. */
   (void)ud; (void)osize;  /* not used */
   if (nsize == 0) {
     free(ptr);
