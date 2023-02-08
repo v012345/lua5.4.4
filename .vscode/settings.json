@@ -1,5 +1,10 @@
 {
     "cmake.generator": "Visual Studio 17 2022",
+    "cmake.debugConfig": {
+        "args": [
+            "-v"
+        ]
+    },
     "files.associations": {
         "iostream": "cpp",
         "xstring": "cpp",
