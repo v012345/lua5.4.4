@@ -238,14 +238,14 @@ static void init_registry (lua_State *L, global_State *g) {
 static void f_luaopen (lua_State *L, void *ud) {
   global_State *g = G(L);
   UNUSED(ud);
-  stack_init(L, L);  /* init stack */
-  init_registry(L, g);
-  luaS_init(L);
-  luaT_init(L);
-  luaX_init(L);
+  stack_init(L, L);  /* init stack */ // 主线程的数据栈
+  init_registry(L, g); //初始化注册表
+  luaS_init(L); //给出一个基本的字符串池
+  luaT_init(L); //初始化元表的字符串
+  luaX_init(L); //初始化词法分析用的token串
   g->gcstp = 0;  /* allow gc */
   setnilvalue(&g->nilvalue);  /* now state is complete */
-  luai_userstateopen(L);
+  luai_userstateopen(L); // 宏定义的接口 , 用户去实现
 }
 
 

@@ -4,6 +4,9 @@
 ** See Copyright Notice in lua.h
 */
 
+/*
+ 对象操作的一些函数
+*/
 
 #ifndef lobject_h
 #define lobject_h

@@ -10,6 +10,7 @@
 
 #include <limits.h>
 #include <stddef.h>
+#include <stdio.h> // 我自己加的 , 为了打印东西
 
 
 #include "lua.h"
@@ -266,27 +267,27 @@ typedef l_uint32 Instruction;
 ** created/deleted/resumed/yielded.
 */
 #if !defined(luai_userstateopen)
-#define luai_userstateopen(L)		((void)L)
+#define luai_userstateopen(L)		((void)L);printf("luai_userstateopen\n")
 #endif
 
 #if !defined(luai_userstateclose)
-#define luai_userstateclose(L)		((void)L)
+#define luai_userstateclose(L)		((void)L);printf("luai_userstateclose\n")
 #endif
 
 #if !defined(luai_userstatethread)
-#define luai_userstatethread(L,L1)	((void)L)
+#define luai_userstatethread(L,L1)	((void)L);printf("luai_userstatethread\n")
 #endif
 
 #if !defined(luai_userstatefree)
-#define luai_userstatefree(L,L1)	((void)L)
+#define luai_userstatefree(L,L1)	((void)L);printf("luai_userstatefree\n")
 #endif
 
 #if !defined(luai_userstateresume)
-#define luai_userstateresume(L,n)	((void)L)
+#define luai_userstateresume(L,n)	((void)L);printf("luai_userstateresume\n")
 #endif
 
 #if !defined(luai_userstateyield)
-#define luai_userstateyield(L,n)	((void)L)
+#define luai_userstateyield(L,n)	((void)L);printf("luai_userstateyield\n")
 #endif
 
 
