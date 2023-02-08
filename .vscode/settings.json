@@ -2,7 +2,10 @@
     "cmake.generator": "Visual Studio 17 2022",
     "cmake.debugConfig": {
         "args": [
-            "-v"
+            "${fileWorkspaceFolder}${pathSeparator}res${pathSeparator}scripts${pathSeparator}main.out",
+            // "-o",
+            // "${fileWorkspaceFolder}${pathSeparator}res${pathSeparator}scripts${pathSeparator}main.out",
+            // "${fileWorkspaceFolder}${pathSeparator}res${pathSeparator}scripts${pathSeparator}main.lua"
         ]
     },
     "files.associations": {
