@@ -42,12 +42,18 @@ static int GetFilesInfoInDirectory(lua_State *L)
         std::cout << i << std::endl;
         lua_pushinteger(L, i);
         lua_newtable(L);
-        lua_pushstring(L, "is_directory");
-        lua_pushboolean(L, directoryOrFile.is_directory());
-        lua_settable(L, -3);
-        lua_pushstring(L, "last_write_time");
-        lua_pushinteger(L, std::filesystem::last_write_time(directoryOrFile.path()).time_since_epoch() / std::chrono::milliseconds(1));
-        lua_settable(L, -3);
+        {
+            {
+                lua_pushstring(L, "is_directory");
+                lua_pushboolean(L, directoryOrFile.is_directory());
+                lua_settable(L, -3);
+            }
+            {
+                lua_pushstring(L, "last_write_time");
+                lua_pushinteger(L, std::filesystem::last_write_time(directoryOrFile.path()).time_since_epoch() / std::chrono::milliseconds(1));
+                lua_settable(L, -3);
+            }
+        }
         lua_settable(L, -3);
         i++;
     }
