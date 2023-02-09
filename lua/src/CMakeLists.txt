@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(lua-5.4.4) 
+project(lua-5.4.4)
 
 add_library(lualib STATIC
     lapi.c
@@ -38,10 +38,10 @@ add_library(lualib STATIC
     lzio.c
 )
 
+add_library(lua::lualib ALIAS lualib)
 
 add_executable(lua lua.c)
 target_link_libraries(lua lualib)
 
 add_executable(luac luac.c)
 target_link_libraries(luac lualib)
-
