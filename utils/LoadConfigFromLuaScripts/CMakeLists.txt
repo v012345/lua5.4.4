@@ -1,3 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
 project(LoadConfigFromLuaScripts)
-add_subdirectory("lua")
+add_executable(${PROJECT_NAME} LoadConfigFromLuaScripts.cpp)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lua/src)
+target_link_libraries(${PROJECT_NAME} lualib)
