@@ -30,11 +30,6 @@ static int GetFileLastModifiedTimestamp(lua_State *L)
 
 static int GetFilesInfoInDirectory(lua_State *L)
 {
-    // const char *directory = lua_tostring(L, 1);
-    // lua_newtable(L);
-    // std::size_t timestamp = std::filesystem::last_write_time(file).time_since_epoch() / std::chrono::milliseconds(1);
-    // lua_pushinteger(L, timestamp);
-    std::cout << "GetFilesInfoInDirectory" << std::endl;
     lua_newtable(L);
     size_t i = 1;
     for (auto &&directoryOrFile : std::filesystem::directory_iterator(std::filesystem::path(lua_tostring(L, 1))))
@@ -53,25 +48,14 @@ static int GetFilesInfoInDirectory(lua_State *L)
                 lua_pushinteger(L, std::filesystem::last_write_time(directoryOrFile.path()).time_since_epoch() / std::chrono::milliseconds(1));
                 lua_settable(L, -3);
             }
+            {
+                lua_pushstring(L, "filename");
+                lua_pushstring(L, directoryOrFile.path().filename().string().c_str());
+                lua_settable(L, -3);
+            }
         }
         lua_settable(L, -3);
         i++;
     }
-
-    // lua_newtable(L);
-    // for (size_t i = 0; i < 3; i++)
-    // {
-    //     lua_pushinteger(L, i + 1);
-    //     //  lua_pushstring(L, "kkkk");
-    //     lua_newtable(L);
-    //     for (size_t i = 0; i < 1; i++)
-    //     {
-    //         lua_pushstring(L, "kkkk");
-    //         lua_pushstring(L, "ssss");
-    //         lua_settable(L, -3);
-    //     }
-    //     lua_settable(L, -3);
-    // }
-
     return 1;
 }
