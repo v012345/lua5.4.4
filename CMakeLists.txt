@@ -1,3 +1,3 @@
 cmake_minimum_required(VERSION 3.20)
 project(ToolSets)
-add_subdirectory("lua5.4.4")
+add_subdirectory("lua")
