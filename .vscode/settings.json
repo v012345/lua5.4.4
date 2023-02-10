@@ -2,7 +2,7 @@
     "cmake.generator": "Visual Studio 17 2022",
     "cmake.debugConfig": {
         "args": [
-            "${fileWorkspaceFolder}${pathSeparator}res${pathSeparator}scripts${pathSeparator}main.lua", // only effect in debug mode
+            "${fileWorkspaceFolder}${pathSeparator}res${pathSeparator}scripts${pathSeparator}initMd5Map.lua", // only effect in debug mode
         ]
     },
     "files.associations": {
