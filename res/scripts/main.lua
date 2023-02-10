@@ -1,17 +1,23 @@
 local sMainLuaFilePath = GetMainLuaFilePath()
 package.path = string.format("%s/utils/?.lua;%s/config/?.lua;", sMainLuaFilePath, sMainLuaFilePath) .. package.path
 require "tools"
-local md5 = require "md5"
 local config = require "config"
+local md5File = sMainLuaFilePath .. "/config/" .. config.trunk.svn.src_md5 .. ".lua"
 
 
 
 
 
-PrintTableToJson(config)
-
-local vvv = md5.sumhexa(md5, GetFileContent("C:\\Users\\Meteor\\Desktop\\aa.txt"))
-PrintTableToJson(vvv)
-
-PrintTableToJson(GetFileMd5("C:\\Users\\Meteor\\Desktop\\aa.txt"))
+if IsFileExist(md5File) then
+    local md5Map = require(config.trunk.svn.src_md5)
+    for file, info in pairs(md5Map) do
+        local l = GetFileLastModifiedTimestamp(file)
+        if l > info.last_write_time then
+            print(info.filename)
+        end
+    end
+else
+    local info = GetFilesInfoInDirectoryRecursively(config.trunk.svn.src)
+    WriteConfigTableToFile(md5File, info)
+end
 return

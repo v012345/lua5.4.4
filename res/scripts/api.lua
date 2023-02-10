@@ -22,3 +22,8 @@ function GetMainLuaFilePath() return "" end
 ---@param file string
 ---@return string
 function GetFileMd5(file) return "" end
+
+---comment
+---@param file any
+---@return boolean
+function IsFileExist(file) return true end
