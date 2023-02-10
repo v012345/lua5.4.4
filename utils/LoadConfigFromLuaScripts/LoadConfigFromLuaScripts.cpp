@@ -5,17 +5,22 @@
 static int GetFileLastModifiedTimestamp(lua_State *L);
 static int GetFilesInfoInDirectory(lua_State *L);
 static int CopyFile(lua_State *L);
+static int GetMainLuaFilePath(lua_State *L);
+
+std::string sMainLuaFilePath;
 
 int main(int argc, char const *argv[])
 {
     if (argc > 1 && std::filesystem::exists(argv[1]))
     {
         std::cout << "enter " << argv[1] << std::endl;
+        sMainLuaFilePath = argv[1];
         lua_State *L = luaL_newstate();
         luaL_openlibs(L);
         lua_register(L, "GetFileLastModifiedTimestamp", GetFileLastModifiedTimestamp);
         lua_register(L, "GetFilesInfoInDirectory", GetFilesInfoInDirectory);
         lua_register(L, "CopyFile", CopyFile);
+        lua_register(L, "GetMainLuaFilePath", GetMainLuaFilePath);
         luaL_dofile(L, argv[1]);
         std::cout << "leave " << argv[1] << std::endl;
     }
@@ -73,5 +78,11 @@ static int CopyFile(lua_State *L)
     }
     std::filesystem::copy(from, to, std::filesystem::copy_options::overwrite_existing);
     lua_pushboolean(L, true);
+    return 1;
+}
+
+static int GetMainLuaFilePath(lua_State *L)
+{
+    lua_pushstring(L, std::filesystem::path(sMainLuaFilePath).parent_path().string().c_str());
     return 1;
 }
