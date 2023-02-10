@@ -13,3 +13,12 @@ function GetFilesInfoInDirectory(path) return {} end
 ---@param target string
 ---@return boolean
 function CopyFile(origin, target) return true end
+
+---comment
+---@return string
+function GetMainLuaFilePath() return "" end
+
+---comment
+---@param file string
+---@return string
+function GetFileMd5(file) return "" end
