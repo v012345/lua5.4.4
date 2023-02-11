@@ -12,6 +12,8 @@
 #include <d3d12.h>
 #include <dxgi1_4.h>
 #include <tchar.h>
+#include <lua.hpp>
+#include "md5file.h"
 
 #ifdef _DEBUG
 #define DX12_ENABLE_DEBUG_LAYER
