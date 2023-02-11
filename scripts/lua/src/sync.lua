@@ -16,12 +16,17 @@ if IsFileExist(md5File) then
 
     for file, fileInfo in pairs(md5Map) do
         if GetFileLastModifiedTimestamp(file) > fileInfo.last_write_time and fileInfo.md5 ~= GetFileMd5(file) then
-            syncFiles[#syncFiles+1] = file
+            syncFiles[#syncFiles + 1] = file
         end
     end
     for _, file in pairs(syncFiles) do
         print(string.format("copy %s", file))
         CopyFile(file, string.gsub(file, from, to, 1))
+        md5Map[file].last_write_time = GetFileLastModifiedTimestamp(file)
+        md5Map[file].md5 = GetFileMd5(file)
+    end
+    if #syncFiles > 0 then
+        WriteConfigTableToFile(md5File, md5Map)
     end
     print(string.format("sync %s files", #syncFiles))
 else
