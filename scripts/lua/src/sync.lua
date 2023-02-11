@@ -15,7 +15,7 @@ if IsFileExist(md5File) then
     local md5Map = require(md5)
 
     for file, fileInfo in pairs(md5Map) do
-        if GetFileLastModifiedTimestamp(file) > fileInfo.last_write_time then
+        if GetFileLastModifiedTimestamp(file) > fileInfo.last_write_time and fileInfo.md5 ~= GetFileMd5(file) then
             syncFiles[#syncFiles+1] = file
         end
     end
