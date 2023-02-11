@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
-project(LoadConfigFromLuaScripts)
-add_executable(${PROJECT_NAME} LoadConfigFromLuaScripts.cpp)
+project(SyncTool)
+add_executable(${PROJECT_NAME} SyncTool.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lua/src)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/libs/CalculateMd5/include)
 target_link_libraries(${PROJECT_NAME} lualib CalculateMd5)

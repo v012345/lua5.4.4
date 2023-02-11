@@ -27,3 +27,6 @@ function GetFileMd5(file) return "" end
 ---@param file any
 ---@return boolean
 function IsFileExist(file) return true end
+
+---命令行参数
+argv = {}

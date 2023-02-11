@@ -13,4 +13,3 @@ for _, versionControls in pairs(config) do
     end
 end
 return
--- local md5File = sMainLuaFilePath .. "/config/" .. config.trunk.svn.src_md5 .. ".lua"

@@ -1,4 +1,4 @@
 cmake_minimum_required(VERSION 3.20)
 project(utils)
-add_subdirectory("LoadConfigFromLuaScripts")
+add_subdirectory("SyncTool")
 

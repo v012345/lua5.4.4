@@ -4,7 +4,9 @@ require "tools"
 local config = require "config"
 local md5File = sMainLuaFilePath .. "/config/" .. config.trunk.svn.src_md5 .. ".lua"
 
-
+print(11111)
+PrintTableToJson(argv[1])
+print(2222)
 
 
 
