@@ -15,14 +15,13 @@ if IsFileExist(md5File) then
     local md5Map = require(md5)
 
     for file, fileInfo in pairs(md5Map) do
-        CopyFile(file, string.gsub(file, from, to, 1))
         if GetFileLastModifiedTimestamp(file) > fileInfo.last_write_time then
             syncFiles[#syncFiles+1] = file
         end
-        print(string.format("copy %s", fileInfo.filename))
     end
     for _, file in pairs(syncFiles) do
         print(string.format("copy %s", file))
+        CopyFile(file, string.gsub(file, from, to, 1))
     end
     print(string.format("sync %s files", #syncFiles))
 else
