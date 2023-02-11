@@ -11,7 +11,20 @@ local md5 = config[argv[3]][argv[4]][argv[5] .. "_md5"]
 local md5File = sMainLuaFilePath .. "/../config/" .. md5 .. ".lua"
 
 if IsFileExist(md5File) then
-    print("diff")
+    local syncFiles = {}
+    local md5Map = require(md5)
+
+    for file, fileInfo in pairs(md5Map) do
+        CopyFile(file, string.gsub(file, from, to, 1))
+        if GetFileLastModifiedTimestamp(file) > fileInfo.last_write_time then
+            syncFiles[#syncFiles+1] = file
+        end
+        print(string.format("copy %s", fileInfo.filename))
+    end
+    for _, file in pairs(syncFiles) do
+        print(string.format("copy %s", file))
+    end
+    print(string.format("sync %s files", #syncFiles))
 else
     local info = GetFilesInfoInDirectoryRecursively(from)
     WriteConfigTableToFile(md5File, info)
