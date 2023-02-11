@@ -60,6 +60,7 @@ function GetFilesInfoInDirectoryRecursively(path)
                 if file.is_directory then
                     recursive(folder .. "/" .. file.filename)
                 else
+                    print(string.format("collecting %s info", file.filename))
                     info[folder .. "/" .. file.filename] = file
                 end
             end
