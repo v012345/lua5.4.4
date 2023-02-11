@@ -10,14 +10,20 @@ local md5 = config[argv[3]][argv[4]][argv[5] .. "_md5"]
 
 local md5File = sMainLuaFilePath .. "/../config/" .. md5 .. ".lua"
 
-local info = GetFilesInfoInDirectoryRecursively(from)
-WriteConfigTableToFile(md5File, info)
-local md5Map = require(md5)
+if IsFileExist(md5File) then
+    print("diff")
+else
+    local info = GetFilesInfoInDirectoryRecursively(from)
+    WriteConfigTableToFile(md5File, info)
+    local md5Map = require(md5)
 
-for file, fileInfo in pairs(md5Map) do
-    CopyFile(file, string.gsub(file, from, to, 1))
-    print(string.format("copy %s", fileInfo.filename))
+    for file, fileInfo in pairs(md5Map) do
+        CopyFile(file, string.gsub(file, from, to, 1))
+        print(string.format("copy %s", fileInfo.filename))
+    end
 end
+
+
 
 local end_at = os.time()
 
