@@ -102,8 +102,10 @@ function WriteConfigTableToFile(file, config)
     local file = io.open(file, "w")
     if file then
         file:write("local config = ")
+        print("writing.....")
         file:write(dumpTable(config))
         file:write("return config")
+        print("writed")
         file:close()
         return true
     end
