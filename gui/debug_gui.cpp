@@ -70,11 +70,6 @@ int main(int argc, char const *argv[])
         /* code */
     }
     lua_main lua_script(argv[1]);
-    // lua_State *L = luaL_newstate();
-    // luaL_openlibs(L);
-    // luaL_dofile(L, argv[1]);
-    // lua_getglobal(L, "update");
-    // lua_pcall(L, 0, 0, 0);
     // Create application window
     // ImGui_ImplWin32_EnableDpiAwareness();
     WNDCLASSEXW wc = {sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"debug tool", NULL};
@@ -175,6 +170,11 @@ int main(int argc, char const *argv[])
 
             if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
                 counter++;
+            if (ImGui::Button("Compare Diff"))
+            {
+                lua_script.compare();
+            }
+
             ImGui::SameLine();
             ImGui::Text("counter = %d", counter);
 

@@ -20,3 +20,13 @@ void lua_main::update()
         lua_pcall(this->L, 0, 0, 0);
     }
 }
+
+void lua_main::compare()
+{
+    if (this->L != nullptr)
+    {
+        lua_getglobal(L, "add_action");
+        lua_pushstring(L, "compare");
+        lua_pcall(this->L, 1, 0, 0);
+    }
+}

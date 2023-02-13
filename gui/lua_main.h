@@ -11,4 +11,5 @@ public:
     lua_main(std::string);
     ~lua_main();
     void update();
+    void compare();
 };

@@ -129,6 +129,7 @@
     },
     "Lua.diagnostics.globals": [
         "argv",
-        "update"
+        "update",
+        "add_action"
     ],
 }
