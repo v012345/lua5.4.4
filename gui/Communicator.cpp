@@ -17,7 +17,7 @@ void Communicator::update()
 {
     if (this->L != nullptr)
     {
-        lua_getglobal(L, "update");
+        auto i = lua_getglobal(L, "update"); // 返回这个东西的类型 ** basic types
         lua_pcall(this->L, 0, 0, 0);
     }
 }
