@@ -2,11 +2,14 @@ cmake_minimum_required(VERSION 3.20.0)
 project(imGui)
 add_subdirectory(backends)
 add_executable(${PROJECT_NAME}
-    main.cpp
+
+    # main.cpp
+    debug_gui.cpp
     imgui.cpp
     imgui_demo.cpp
     imgui_draw.cpp
     imgui_widgets.cpp
+    lua_main.cpp
     imgui_tables.cpp
 )
 
