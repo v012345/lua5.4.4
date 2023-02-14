@@ -9,7 +9,7 @@ static int CopyFile(lua_State *L);
 static int GetMainLuaFilePath(lua_State *L);
 static int GetFileMd5(lua_State *L);
 static int IsFileExist(lua_State *L);
-static int GetCommandLineArgv(lua_State *L);
+static int GetFilesTypeInDirectory(lua_State *L);
 
 std::string sMainLuaFilePath;
 
@@ -37,7 +37,7 @@ int main(int argc, char const *argv[])
         lua_register(L, "GetMainLuaFilePath", GetMainLuaFilePath);
         lua_register(L, "GetFileMd5", GetFileMd5);
         lua_register(L, "IsFileExist", IsFileExist);
-        lua_register(L, "GetCommandLineArgv", GetCommandLineArgv);
+        lua_register(L, "GetFilesTypeInDirectory", GetFilesTypeInDirectory);
         luaL_dofile(L, argv[1]);
         std::cout << "leave " << argv[1] << std::endl;
     }
@@ -49,6 +49,19 @@ static int GetFileLastModifiedTimestamp(lua_State *L)
     const char *file = lua_tostring(L, 1);
     size_t timestamp = std::filesystem::last_write_time(file).time_since_epoch() / std::chrono::milliseconds(1);
     lua_pushinteger(L, timestamp);
+    return 1;
+}
+
+static int GetFilesTypeInDirectory(lua_State *L)
+{
+    lua_newtable(L);
+    lua_newtable(L);
+    for (auto &&directoryOrFile : std::filesystem::directory_iterator(std::filesystem::path(lua_tostring(L, 1))))
+    {
+        lua_pushstring(L, directoryOrFile.path().filename().string().c_str());
+        lua_pushboolean(L, directoryOrFile.is_directory());
+        lua_settable(L, -3);
+    }
     return 1;
 }
 
@@ -120,13 +133,6 @@ static int GetFileMd5(lua_State *L)
 }
 
 static int IsFileExist(lua_State *L)
-{
-    const char *file = lua_tostring(L, 1);
-    lua_pushboolean(L, std::filesystem::exists(file));
-    return 1;
-}
-
-static int GetCommandLineArgv(lua_State *L)
 {
     const char *file = lua_tostring(L, 1);
     lua_pushboolean(L, std::filesystem::exists(file));

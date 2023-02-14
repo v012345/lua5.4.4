@@ -70,6 +70,31 @@ function GetFilesInfoInDirectoryRecursively(path)
     return info
 end
 
+function GetFilesOfDirectoryRecursively(path)
+    local tExcludeFile = {
+        [".vscode"] = true,
+        [".vs"] = true,
+        [".svn"] = true,
+        [".git"] = true,
+    }
+    local info = {};
+    local function recursive(folder)
+        local files = GetFilesTypeInDirectory(folder)
+        for file, isDirectory in pairs(files) do
+            if not tExcludeFile[file] then
+                if isDirectory then
+                    recursive(folder .. "/" .. file)
+                else
+                    --print(file)
+                    info[#info+1] = folder .. "/" .. file
+                end
+            end
+        end
+    end
+    recursive(path)
+    return info
+end
+
 ---comment
 ---@param file string
 ---@param config table

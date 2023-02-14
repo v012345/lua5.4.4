@@ -9,6 +9,11 @@ function GetFileLastModifiedTimestamp(file) return 0 end
 function GetFilesInfoInDirectory(path) return {} end
 
 ---comment
+---@param path string
+---@return table
+function GetFilesTypeInDirectory(path) return {} end
+
+---comment
 ---@param origin string
 ---@param target string
 ---@return boolean
