@@ -14,6 +14,11 @@ function GetFilesInfoInDirectory(path) return {} end
 function GetFilesTypeInDirectory(path) return {} end
 
 ---comment
+---@param files table
+---@return nil
+function CopyFileMultiThreads(files) return nil end
+
+---comment
 ---@param origin string
 ---@param target string
 ---@return boolean

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <filesystem>
 #include "md5file.h"
+#include <map>
 
 static int GetFileLastModifiedTimestamp(lua_State *L);
 static int GetFilesInfoInDirectory(lua_State *L);
@@ -10,6 +11,7 @@ static int GetMainLuaFilePath(lua_State *L);
 static int GetFileMd5(lua_State *L);
 static int IsFileExist(lua_State *L);
 static int GetFilesTypeInDirectory(lua_State *L);
+static int CopyFileMultiThreads(lua_State *L);
 
 std::string sMainLuaFilePath;
 
@@ -38,6 +40,7 @@ int main(int argc, char const *argv[])
         lua_register(L, "GetFileMd5", GetFileMd5);
         lua_register(L, "IsFileExist", IsFileExist);
         lua_register(L, "GetFilesTypeInDirectory", GetFilesTypeInDirectory);
+        lua_register(L, "CopyFileMultiThreads", CopyFileMultiThreads);
         luaL_dofile(L, argv[1]);
         std::cout << "leave " << argv[1] << std::endl;
     }
@@ -102,6 +105,32 @@ static int GetFilesInfoInDirectory(lua_State *L)
         lua_settable(L, -3);
         i++;
     }
+    return 1;
+}
+
+static int CopyFileMultiThreads(lua_State *L)
+{
+
+    // std::map<size_t, std::string> *v;
+    // if (lua_istable(L, -1))
+    // {
+    //     std::cout << "error! me is not a table";
+    // }
+    
+    // auto v = lua_touserdata(L, -1);
+    // v = (std::map<size_t, std::string> *)
+    // for (auto &&i : *v)
+    // {
+    //     std::cout << i.second << std::endl;
+    // }
+
+    // auto parent_path = std::filesystem::path(to).parent_path();
+    // if (!std::filesystem::exists(parent_path))
+    // {
+    //     std::filesystem::create_directories(parent_path);
+    // }
+    // std::filesystem::copy(from, to, std::filesystem::copy_options::overwrite_existing);
+    // lua_pushboolean(L, true);
     return 1;
 }
 
