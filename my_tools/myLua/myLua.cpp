@@ -124,7 +124,55 @@ static int GetFilesInfoInDirectory(lua_State *L)
 
 int GetFilesMd5(lua_State *L)
 {
-    
+    luaL_checktype(L, 1, LUA_TTABLE);
+    std::vector<std::string> files;
+
+    size_t n = lua_rawlen(L, 1);
+
+    for (size_t i = 1; i <= n; i++)
+    {
+        int ret_type = lua_rawgeti(L, 1, i);
+        if (ret_type == LUA_TSTRING)
+        {
+            files.push_back(lua_tostring(L, -1));
+        }
+        lua_pop(L, 1);
+    }
+    int processor_count = std::thread::hardware_concurrency();
+    std::vector<std::thread> workers;
+    std::map<std::string, std::string> filesMd5;
+    std::mutex mutex;
+    for (size_t i = 0; i < processor_count; i++)
+    {
+        workers.push_back(std::thread([&]()
+                                      {
+            while (true)
+        {
+            mutex.lock();
+            if (files.empty())
+            {
+                mutex.unlock();
+                return;
+            }
+            std::string file = files.front();
+            files.erase(files.begin());
+            mutex.unlock();
+            filesMd5.insert(std::make_pair(file, getFileMD5(file)));
+        } }));
+    }
+    for (auto &&worker : workers)
+    {
+        worker.join();
+    }
+
+    lua_newtable(L);
+    for (auto &&file : filesMd5)
+    {
+        lua_pushstring(L, file.first.c_str());
+        lua_pushstring(L, file.second.c_str());
+        lua_settable(L, -3);
+    }
+    return 1;
 }
 
 static int CopyFileMultiThreads(lua_State *L)
