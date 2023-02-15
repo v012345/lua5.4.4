@@ -274,11 +274,14 @@ typedef StackValue *StkId;
 /*
 ** Common Header for all collectable objects (in macro form, to be
 ** included in other objects)
+@param tt 数据的类型
 */
 #define CommonHeader	struct GCObject *next; lu_byte tt; lu_byte marked
 
 
-/* Common type for all collectable objects */
+/* Common type for all collectable objects 
+@param tt 数据的类型
+*/
 typedef struct GCObject {
   CommonHeader;
 } GCObject;

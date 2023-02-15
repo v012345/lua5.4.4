@@ -3,6 +3,11 @@
 #include <filesystem>
 #include "md5file.h"
 #include <map>
+#include <thread>
+#include <vector>
+#include <mutex>
+#include <chrono>
+#include <string>
 
 static int GetFileLastModifiedTimestamp(lua_State *L);
 static int GetFilesInfoInDirectory(lua_State *L);
@@ -116,7 +121,7 @@ static int CopyFileMultiThreads(lua_State *L)
     // {
     //     std::cout << "error! me is not a table";
     // }
-    
+
     // auto v = lua_touserdata(L, -1);
     // v = (std::map<size_t, std::string> *)
     // for (auto &&i : *v)
@@ -131,7 +136,7 @@ static int CopyFileMultiThreads(lua_State *L)
     // }
     // std::filesystem::copy(from, to, std::filesystem::copy_options::overwrite_existing);
     // lua_pushboolean(L, true);
-    return 1;
+    return 0;
 }
 
 static int CopyFile(lua_State *L)

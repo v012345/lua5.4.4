@@ -234,6 +234,7 @@ static void init_registry (lua_State *L, global_State *g) {
 
 /*
 ** open parts of the state that may cause memory-allocation errors.
+** 进行一些要用栈 和 串 的初始化
 */
 static void f_luaopen (lua_State *L, void *ud) {
   global_State *g = G(L);
@@ -252,6 +253,7 @@ static void f_luaopen (lua_State *L, void *ud) {
 /*
 ** preinitialize a thread with consistent values without allocating
 ** any memory (to avoid errors)
+** 就是简单初始化 不分配内存空间 , 但是 L->l_G = g
 */
 static void preinit_thread (lua_State *L, global_State *g) {
   G(L) = g; // L->l_G = g
@@ -411,6 +413,7 @@ LUA_API lua_State *lua_newstate (lua_Alloc f, void *ud) {
   setgcparam(g->genmajormul, LUAI_GENMAJORMUL);
   g->genminormul = LUAI_GENMINORMUL;
   for (i=0; i < LUA_NUMTAGS; i++) g->mt[i] = NULL;
+  // 初始化了一些 栈与串 
   if (luaD_rawrunprotected(L, f_luaopen, NULL) != LUA_OK) {
     /* memory allocation error: free partial state */
     close_state(L);
