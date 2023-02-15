@@ -48,6 +48,7 @@
 
 /*
 ** Union of all Lua values
+** 这是基本数据 , 所以在要返回复杂结构 , 就要用到 userdata
 */
 typedef union Value {
   struct GCObject *gc;    /* collectable objects */
