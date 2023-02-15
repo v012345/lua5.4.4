@@ -253,8 +253,8 @@ typedef struct global_State {
   l_mem GCdebt;  /* bytes allocated not yet compensated by the collector */
   lu_mem GCestimate;  /* an estimate of the non-garbage memory in use */
   lu_mem lastatomic;  /* see function 'genstep' in file 'lgc.c' */
-  stringtable strt;  /* hash table for strings */
-  TValue l_registry;
+  stringtable strt;  /* hash table for strings 全局字符串表, 字符串池化，使得整个虚拟机中短字符串只有一份实例。 */
+  TValue l_registry; /* 注册表（管理全局数据） ，Registry表可以用debug.getregistry获取。注册表 就是一个全局的table（即整个虚拟机中只有一个注册表），它只能被C代码访问，通常，它用来保存 那些需要在几个模块中共享的数据。比如通过luaL_newmetatable创建的元表就是放在全局的注册表中。 */
   TValue nilvalue;  /* a nil value */
   unsigned int seed;  /* randomized seed for hashes */
   lu_byte currentwhite;
@@ -288,10 +288,10 @@ typedef struct global_State {
   GCObject *finobjrold;  /* list of really old objects with finalizers */
   struct lua_State *twups;  /* list of threads with open upvalues */
   lua_CFunction panic;  /* to be called in unprotected errors */
-  struct lua_State *mainthread;
+  struct lua_State *mainthread; /* 主lua_State。在一个独立的lua虚拟机里, global_State是一个全局的结构, 而lua_State可以有多个。 lua_newstate会创建出一个lua_State, 绑在 lua_State *mainthread.可以说是主线程、主执行栈。 */
   TString *memerrmsg;  /* message for memory-allocation errors */
-  TString *tmname[TM_N];  /* array with tag-method names */
-  struct Table *mt[LUA_NUMTAGS];  /* metatables for basic types */
+  TString *tmname[TM_N];  /* array with tag-method names 预定义了元方法名字数组 */
+  struct Table *mt[LUA_NUMTAGS];  /* metatables for basic types 存储了基础类型的元表信息。每一个Lua 的基本数据类型都有一个元表。  */
   TString *strcache[STRCACHE_N][STRCACHE_M];  /* cache for strings in API */
   lua_WarnFunction warnf;  /* warning function */
   void *ud_warn;         /* auxiliary data to 'warnf' */
@@ -308,7 +308,7 @@ struct lua_State {
   unsigned short nci;  /* number of items in 'ci' list */
   StkId top;  /* first free slot in the stack 状态机的栈顶*/
   global_State *l_G;
-  CallInfo *ci;  /* call info for current function */
+  CallInfo *ci;  /* call info for current function  Callinfo (方法调用栈) 的当前栈 */
   StkId stack_last;  /* end of stack (last element + 1) */
   StkId stack;  /* stack base */
   UpVal *openupval;  /* list of open upvalues in this stack */
@@ -316,7 +316,7 @@ struct lua_State {
   GCObject *gclist;
   struct lua_State *twups;  /* list of threads with open upvalues */
   struct lua_longjmp *errorJmp;  /* current error recover point */
-  CallInfo base_ci;  /* CallInfo for first level (C calling Lua) */
+  CallInfo base_ci;  /* CallInfo for first level (C calling Lua) Callinfo (方法调用栈) 的最低层 */
   volatile lua_Hook hook;
   ptrdiff_t errfunc;  /* current error handling function (stack index) */
   l_uint32 nCcalls;  /* number of nested (non-yieldable | C)  calls */
