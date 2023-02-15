@@ -4,8 +4,14 @@ package.path = string.format("%s/../utils/?.lua;%s/../config/?.lua;", sMainLuaFi
     .path
 require "tools"
 -- StackDump(1, 2, "ji", {})
--- CopyFileMultiThreads(GetFilesOfDirectoryRecursively("D:/Closers.cocos/client/trunk/Resources/src"))
-CopyFileMultiThreads({ ["aaa"] = "bbbb",["ccc"] = "dddd" })
+local from = "D:/Closers.cocos/client/trunk/Resources"
+local info = GetFilesOfDirectoryRecursively(from)
+-- CopyFileMultiThreads()
+local map = {}
+for key, value in pairs(info) do
+    map[value] = string.gsub(value, from, "D:/temp", 1)
+end
+CopyFileMultiThreads(map)
 
 local end_at = os.time()
 

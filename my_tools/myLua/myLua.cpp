@@ -31,32 +31,32 @@ int main(int argc, char const *argv[])
 
     if (argc > 1 && std::filesystem::exists(argv[1]))
     {
-
-        std::cout << "enter " << argv[1] << std::endl;
-        sMainLuaFilePath = argv[1];
-        lua_State *L = luaL_newstate();
-        luaL_openlibs(L);
-        lua_newtable(L);
-        for (size_t i = 0; i < argc; i++)
-        {
-            lua_pushinteger(L, i + 1);
-            lua_pushstring(L, argv[i]);
-            lua_settable(L, -3);
-        }
-        lua_setglobal(L, "argv");
-
-        lua_register(L, "GetFileLastModifiedTimestamp", GetFileLastModifiedTimestamp);
-        lua_register(L, "GetFilesInfoInDirectory", GetFilesInfoInDirectory);
-        lua_register(L, "CopyFile", CopyFile);
-        lua_register(L, "GetMainLuaFilePath", GetMainLuaFilePath);
-        lua_register(L, "GetFileMd5", GetFileMd5);
-        lua_register(L, "IsFileExist", IsFileExist);
-        lua_register(L, "GetFilesTypeInDirectory", GetFilesTypeInDirectory);
-        lua_register(L, "CopyFileMultiThreads", CopyFileMultiThreads);
-        lua_register(L, "StackDump", StackDump);
-        luaL_dofile(L, argv[1]);
-        std::cout << "leave " << argv[1] << std::endl;
     }
+    std::cout << "enter " << argv[1] << std::endl;
+    sMainLuaFilePath = argv[1];
+    lua_State *L = luaL_newstate();
+    luaL_openlibs(L);
+    lua_newtable(L);
+    for (size_t i = 0; i < argc; i++)
+    {
+        lua_pushinteger(L, i + 1);
+        lua_pushstring(L, argv[i]);
+        lua_settable(L, -3);
+    }
+    lua_setglobal(L, "argv");
+
+    lua_register(L, "GetFileLastModifiedTimestamp", GetFileLastModifiedTimestamp);
+    lua_register(L, "GetFilesInfoInDirectory", GetFilesInfoInDirectory);
+    lua_register(L, "CopyFile", CopyFile);
+    lua_register(L, "GetMainLuaFilePath", GetMainLuaFilePath);
+    lua_register(L, "GetFileMd5", GetFileMd5);
+    lua_register(L, "IsFileExist", IsFileExist);
+    lua_register(L, "GetFilesTypeInDirectory", GetFilesTypeInDirectory);
+    lua_register(L, "CopyFileMultiThreads", CopyFileMultiThreads);
+    lua_register(L, "StackDump", StackDump);
+    luaL_dofile(L, argv[1]);
+    luaL_dofile(L, "D:/NightOwlTools/Lua/scripts/lua/src/test.lua");
+    std::cout << "leave " << argv[1] << std::endl;
     std::cout << "bye bye" << std::endl;
     return 0;
 }
@@ -122,17 +122,76 @@ static int GetFilesInfoInDirectory(lua_State *L)
     return 1;
 }
 
+int GetFilesMd5(lua_State *L)
+{
+    
+}
+
 static int CopyFileMultiThreads(lua_State *L)
 {
     std::cout << "CopyFileMultiThreads" << std::endl;
     luaL_checktype(L, 1, LUA_TTABLE);
     lua_pushnil(L);
+    std::map<std::string, std::string> copyFilesList;
+    std::vector<std::thread> copyWorkers;
+    std::mutex mutex;
     while (lua_next(L, -2))
     {
-        const char *key = lua_tostring(L, -2);
-        const char *val = lua_tostring(L, -1);
-        printf("%s => %s\n", key, val);
+        std::string from = lua_tostring(L, -2);
+        // const char *from =
+        std::string to = lua_tostring(L, -1);
+        // const char *to = lua_tostring(L, -1);
+        // printf("%s => %s\n", key, val);
+        if (false)
+        {
+            auto parent_path = std::filesystem::path(to).parent_path();
+            if (!std::filesystem::exists(parent_path))
+            {
+                std::filesystem::create_directories(parent_path);
+            }
+
+            std::filesystem::copy(from, to, std::filesystem::copy_options::overwrite_existing);
+        }
+        else
+        {
+            copyFilesList.insert(std::make_pair(from, to));
+        }
+
         lua_pop(L, 1); // 把栈顶的值移出栈，让key成为栈顶以便继续遍历
+    }
+    for (size_t i = 0; i < 6; i++)
+    {
+        copyWorkers.push_back(std::thread([&]()
+                                          {
+            while (true)
+        {
+            mutex.lock();
+            if (copyFilesList.empty())
+            {
+                mutex.unlock();
+                return;
+            }
+            std::string form_ = copyFilesList.begin()->first;
+            std::string to_ = copyFilesList.begin()->second;
+            copyFilesList.erase(copyFilesList.begin());
+            // table_name = all_tables.front();
+            // primary_key = primary_keys.front();
+            // primary_keys.erase(primary_keys.begin());
+            // all_tables.erase(all_tables.begin());
+            mutex.unlock();
+            auto parent_path = std::filesystem::path(to_).parent_path();
+            if (!std::filesystem::exists(parent_path))
+            {
+                std::filesystem::create_directories(parent_path);
+            }
+            // std::filesystem::copy(form_, to_, std::filesystem::copy_options::overwrite_existing);
+            getFileMD5(form_);
+        } }));
+    }
+    int processor_count = std::thread::hardware_concurrency();
+    for (auto &&copyWorker : copyWorkers)
+    {
+        copyWorker.join();
     }
 
     return 0;
