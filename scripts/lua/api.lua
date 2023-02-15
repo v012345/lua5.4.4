@@ -38,5 +38,10 @@ function GetFileMd5(file) return "" end
 ---@return boolean
 function IsFileExist(file) return true end
 
+---comment
+---@param ... unknown
+---@return nil
+function StackDump(...) return nil end
+
 ---命令行参数
 argv = {}
