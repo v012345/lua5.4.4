@@ -175,7 +175,12 @@ LUA_API int lua_absindex (lua_State *L, int idx) {
          : cast_int(L->top - L->ci->func) + idx;
 }
 
-
+/**
+ * @brief 返回参数的个数
+ * 
+ * @param L 
+ * @return int
+ */
 LUA_API int lua_gettop (lua_State *L) {
   return cast_int(L->top - (L->ci->func + 1));
 }
