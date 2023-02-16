@@ -768,7 +768,13 @@ const TValue *luaH_getshortstr (Table *t, TString *key) {
   }
 }
 
-
+/**
+ * @brief 返回
+ * 
+ * @param t 
+ * @param key 
+ * @return const TValue* 
+ */
 const TValue *luaH_getstr (Table *t, TString *key) {
   if (key->tt == LUA_VSHRSTR)
     return luaH_getshortstr(t, key);

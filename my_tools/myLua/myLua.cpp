@@ -20,6 +20,7 @@ static int GetFilesTypeInDirectory(lua_State *L);
 static int CopyFileMultiThreads(lua_State *L);
 int StackDump(lua_State *L);
 int GetFilesMd5(lua_State *L);
+int Test(lua_State *L);
 
 std::string sMainLuaFilePath;
 
@@ -65,6 +66,7 @@ int main(int argc, char const *argv[])
         lua_register(L, "CopyFileMultiThreads", CopyFileMultiThreads);
         lua_register(L, "StackDump", StackDump);
         lua_register(L, "GetFilesMd5", GetFilesMd5);
+        lua_register(L, "Test", Test);
         if (std::filesystem::exists(argv[1]))
         {
             luaL_dofile(L, argv[1]);
@@ -327,6 +329,20 @@ static int IsFileExist(lua_State *L)
     const char *file = lua_tostring(L, 1);
     lua_pushboolean(L, std::filesystem::exists(file));
     return 1;
+}
+
+int Test(lua_State *L)
+{
+    std::cout << lua_gettop(L) << std::endl;
+    // std::cout << lua_gettop(L) << std::endl;
+    lua_pushstring(L, "aaa");
+    std::cout << lua_gettop(L) << std::endl;
+    lua_gettable(L, 5);
+    std::cout << lua_gettop(L) << std::endl;
+    lua_settop(L, 1);
+
+    std::cout << lua_tonumber(L, -1) << std::endl;
+    return 0;
 }
 
 int StackDump(lua_State *L)
