@@ -679,7 +679,13 @@ LUA_API int lua_getglobal (lua_State *L, const char *name) {
   return auxgetstr(L, G, name);
 }
 
-
+/**
+ * @brief 首先使用栈顶的值做为 key , 在 栈[idx] 的元素中找这个 key 对应的值 , 之后把现在栈顶的 key 弹出 , 把找到的值放到栈顶
+ * 
+ * @param L
+ * @param idx
+ * @return int 
+ */
 LUA_API int lua_gettable (lua_State *L, int idx) {
   const TValue *slot;
   TValue *t;
