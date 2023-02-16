@@ -176,7 +176,7 @@ LUA_API int lua_absindex (lua_State *L, int idx) {
 }
 
 /**
- * @brief 返回参数的个数
+ * @brief 返回参数的个数 ; 返回栈顶元素的索引 因为索引是从 1 开始编号的， 所以这个结果等于堆栈上的元素个数（因此返回 0 表示堆栈为空）
  * 
  * @param L 
  * @return int
@@ -185,7 +185,13 @@ LUA_API int lua_gettop (lua_State *L) {
   return cast_int(L->top - (L->ci->func + 1));
 }
 
-
+/**
+ * @brief 参数允许传入任何可接受的索引以及 0 。 它将把堆栈的栈顶设为这个索引。 如果新的栈顶比原来的大，超出部分的新元素将被填为 nil 。 如果 index 为 0 ，把栈上所有元素移除。
+ * 
+ * @param L 
+ * @param idx 
+ * @return LUA_API 
+ */
 LUA_API void lua_settop (lua_State *L, int idx) {
   CallInfo *ci;
   StkId func, newtop;
