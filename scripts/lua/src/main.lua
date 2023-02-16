@@ -1,23 +1,12 @@
 local start_at = os.time()
-local sMainLuaFilePath = GetMainLuaFilePath()
-package.path = string.format(
-        "%s/../utils/?.lua;%s/../config/?.lua;%s/module/?.lua;",
-        sMainLuaFilePath,
-        sMainLuaFilePath,
-        sMainLuaFilePath) .. package
-    .path
+local s = GetMainLuaFilePath()
+package.path = string.format("%s/../utils/?.lua;%s/../config/?.lua;%s/module/?.lua;", s, s, s) .. package.path
 require "tools"
 
-if argv[3] then
-    local scprit = require(argv[3])
-    if scprit then
-        scprit:run()
-    end
+if argv["module"] then
+    require(argv["module"]):run()
 else
-    local scprit = require "test"
-    if scprit then
-        scprit:run()
-    end
+    (require "test"):run()
 end
 
 local end_at = os.time()

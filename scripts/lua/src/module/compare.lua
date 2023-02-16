@@ -1,40 +1,50 @@
 local compare = {}
 function compare:run()
     local config = require "config"
+    local gitSrc = config["git"][argv["branch"]]["src"]
+    local svnSrc = config["svn"][argv["branch"]]["src"]
 
+    local gitSrcInfo = GetFilesInfoInDirectoryRecursivelyMultiThreads(gitSrc)
+    local svnSrcInfo = GetFilesInfoInDirectoryRecursivelyMultiThreads(svnSrc)
 
-    local git = config["git"][argv[3]]["src"]
-    local svn = config["svn"][argv[3]]["src"]
+    local isSame = true
+    for gitSrcFileName, gitSrcFileMd5 in pairs(gitSrcInfo) do
+        local svnSrcFileName = string.gsub(gitSrcFileName, gitSrc, svnSrc, 1)
 
-    local gitInfo = GetFilesInfoInDirectoryRecursivelyMultiThreads(git)
-    local svnInfo = GetFilesInfoInDirectoryRecursivelyMultiThreads(svn)
-    -- PrintTableToJson(svnInfo)
-    local hasDiff = false
-    for file, gitFileMd5 in pairs(gitInfo) do
-        local svnFileMd5 = svnInfo[string.gsub(file, git, svn, 1)]
-        if svnFileMd5 == gitFileMd5 then
-            gitInfo[file]                           = nil
-            svnInfo[string.gsub(file, git, svn, 1)] = nil
+        local svnSrcFileMd5 = svnSrcInfo[svnSrcFileName]
+        if gitSrcFileMd5 == svnSrcFileMd5 then
+            gitSrcInfo[gitSrcFileName] = nil
+            svnSrcInfo[svnSrcFileName] = nil
         else
-            hasDiff = true
+            isSame = false
         end
     end
-    if not hasDiff then
-        print("no different")
+    if isSame then
+        print("-------------- no different --------------")
+        return
     end
-    for fileName, _ in pairs(gitInfo) do
-        local svnFileMd5 = svnInfo[string.gsub(fileName, git, svn, 1)]
-        if svnFileMd5 then
-            print(string.gsub(fileName, git, "", 1) .. " is different")
-            gitInfo[fileName] = nil
-            svnInfo[string.gsub(fileName, git, svn, 1)] = nil
+    local count = 0
+    for gitSrcFileName, _ in pairs(gitSrcInfo) do
+        local svnSrcFileName = string.gsub(gitSrcFileName, gitSrc, svnSrc, 1)
+
+        local svnSrcFileMd5 = svnSrcInfo[svnSrcFileName]
+        if svnSrcFileMd5 then
+            print(string.gsub(gitSrcFileName, gitSrc, "", 1) .. " is different")
+            gitSrcInfo[gitSrcFileName] = nil
+            svnSrcInfo[svnSrcFileName] = nil
+            count = count + 1
         end
     end
-    for fileName, _ in pairs(gitInfo) do
-        print(string.gsub(fileName, git, "", 1) .. " only exists in git")
+    if count > 0 then
+        print(count .. " files are different")
+        print()
+        print()
     end
-    for fileName, _ in pairs(gitInfo) do
-        print(string.gsub(fileName, svn, "", 1) .. " only exists in git")
+    for gitSrcFileName, _ in pairs(gitSrcInfo) do
+        print(string.gsub(gitSrcFileName, gitSrc, "", 1) .. " only exists in git")
+    end
+    for svnSrcFileName, _ in pairs(svnSrcInfo) do
+        print(string.gsub(svnSrcFileName, svnSrc, "", 1) .. " only exists in svn")
     end
 end
 

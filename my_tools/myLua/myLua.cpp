@@ -37,11 +37,21 @@ int main(int argc, char const *argv[])
         lua_State *L = luaL_newstate();
         luaL_openlibs(L);
         lua_newtable(L);
-        for (size_t i = 0; i < argc; i++)
+        for (size_t i = 2; i < argc; i++)
         {
-            lua_pushinteger(L, i + 1);
-            lua_pushstring(L, argv[i]);
-            lua_settable(L, -3);
+
+            if (std::string("-m").compare(argv[i]) == 0)
+            {
+                lua_pushstring(L, "module");
+                lua_pushstring(L, argv[i + 1]);
+                lua_settable(L, -3);
+            }
+            if (std::string("-b").compare(argv[i]) == 0)
+            {
+                lua_pushstring(L, "branch");
+                lua_pushstring(L, argv[i + 1]);
+                lua_settable(L, -3);
+            }
         }
         lua_setglobal(L, "argv");
 
