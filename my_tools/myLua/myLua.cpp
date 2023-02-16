@@ -19,6 +19,7 @@ static int IsFileExist(lua_State *L);
 static int GetFilesTypeInDirectory(lua_State *L);
 static int CopyFileMultiThreads(lua_State *L);
 int StackDump(lua_State *L);
+int GetFilesMd5(lua_State *L);
 
 std::string sMainLuaFilePath;
 
@@ -31,33 +32,41 @@ int main(int argc, char const *argv[])
 
     if (argc > 1 && std::filesystem::exists(argv[1]))
     {
-    }
-    std::cout << "enter " << argv[1] << std::endl;
-    sMainLuaFilePath = argv[1];
-    lua_State *L = luaL_newstate();
-    luaL_openlibs(L);
-    lua_newtable(L);
-    for (size_t i = 0; i < argc; i++)
-    {
-        lua_pushinteger(L, i + 1);
-        lua_pushstring(L, argv[i]);
-        lua_settable(L, -3);
-    }
-    lua_setglobal(L, "argv");
+        std::cout << "enter " << argv[1] << std::endl;
+        sMainLuaFilePath = argv[1];
+        lua_State *L = luaL_newstate();
+        luaL_openlibs(L);
+        lua_newtable(L);
+        for (size_t i = 0; i < argc; i++)
+        {
+            lua_pushinteger(L, i + 1);
+            lua_pushstring(L, argv[i]);
+            lua_settable(L, -3);
+        }
+        lua_setglobal(L, "argv");
 
-    lua_register(L, "GetFileLastModifiedTimestamp", GetFileLastModifiedTimestamp);
-    lua_register(L, "GetFilesInfoInDirectory", GetFilesInfoInDirectory);
-    lua_register(L, "CopyFile", CopyFile);
-    lua_register(L, "GetMainLuaFilePath", GetMainLuaFilePath);
-    lua_register(L, "GetFileMd5", GetFileMd5);
-    lua_register(L, "IsFileExist", IsFileExist);
-    lua_register(L, "GetFilesTypeInDirectory", GetFilesTypeInDirectory);
-    lua_register(L, "CopyFileMultiThreads", CopyFileMultiThreads);
-    lua_register(L, "StackDump", StackDump);
-    luaL_dofile(L, argv[1]);
-    luaL_dofile(L, "D:/NightOwlTools/Lua/scripts/lua/src/test.lua");
-    std::cout << "leave " << argv[1] << std::endl;
-    std::cout << "bye bye" << std::endl;
+        lua_register(L, "GetFileLastModifiedTimestamp", GetFileLastModifiedTimestamp);
+        lua_register(L, "GetFilesInfoInDirectory", GetFilesInfoInDirectory);
+        lua_register(L, "CopyFile", CopyFile);
+        lua_register(L, "GetMainLuaFilePath", GetMainLuaFilePath);
+        lua_register(L, "GetFileMd5", GetFileMd5);
+        lua_register(L, "IsFileExist", IsFileExist);
+        lua_register(L, "GetFilesTypeInDirectory", GetFilesTypeInDirectory);
+        lua_register(L, "CopyFileMultiThreads", CopyFileMultiThreads);
+        lua_register(L, "StackDump", StackDump);
+        lua_register(L, "GetFilesMd5", GetFilesMd5);
+        if (std::filesystem::exists(argv[1]))
+        {
+            luaL_dofile(L, argv[1]);
+            std::cout << "leave " << argv[1] << std::endl;
+        }
+        else
+        {
+            std::cout << "miss file " << argv[1] << std::endl;
+        }
+        std::cout << "bye bye" << std::endl;
+    }
+
     return 0;
 }
 
@@ -142,6 +151,7 @@ int GetFilesMd5(lua_State *L)
     std::vector<std::thread> workers;
     std::map<std::string, std::string> filesMd5;
     std::mutex mutex;
+    std::mutex mutex2;
     for (size_t i = 0; i < processor_count; i++)
     {
         workers.push_back(std::thread([&]()
@@ -157,7 +167,10 @@ int GetFilesMd5(lua_State *L)
             std::string file = files.front();
             files.erase(files.begin());
             mutex.unlock();
-            filesMd5.insert(std::make_pair(file, getFileMD5(file)));
+            std::string md5 = getFileMD5(file);
+            mutex2.lock();
+            filesMd5.insert(std::make_pair(file, md5));
+            mutex2.unlock();
         } }));
     }
     for (auto &&worker : workers)

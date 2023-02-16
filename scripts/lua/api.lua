@@ -43,5 +43,10 @@ function IsFileExist(file) return true end
 ---@return nil
 function StackDump(...) return nil end
 
+---comment
+---@param files table
+---@return table
+function GetFilesMd5(files) return {} end
+
 ---命令行参数
 argv = {}

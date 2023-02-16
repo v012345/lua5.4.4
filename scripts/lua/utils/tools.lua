@@ -45,6 +45,34 @@ function GetFileContent(file)
     return contents
 end
 
+function GetFilesInfoInDirectoryRecursivelyMultiThreads(path)
+    local tExcludeFile = {
+        [".vscode"] = true,
+        [".vs"] = true,
+        [".svn"] = true,
+        [".git"] = true,
+        ["imports"] = true,
+    }
+    local info = {};
+    local function recursive(folder)
+        local files = GetFilesTypeInDirectory(folder)
+
+        for file, is_directory in pairs(files) do
+            if not tExcludeFile[file] then
+                local path = table.concat({ folder, file }, "/")
+                if is_directory then
+                    recursive(path)
+                else
+                    info[#info + 1] = path
+                end
+            end
+        end
+    end
+    recursive(path)
+
+    return GetFilesMd5(info)
+end
+
 function GetFilesInfoInDirectoryRecursively(path)
     local tExcludeFile = {
         [".vscode"] = true,
@@ -86,7 +114,7 @@ function GetFilesOfDirectoryRecursively(path)
                     recursive(folder .. "/" .. file)
                 else
                     --print(file)
-                    info[#info+1] = folder .. "/" .. file
+                    info[#info + 1] = folder .. "/" .. file
                 end
             end
         end

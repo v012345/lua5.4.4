@@ -3,10 +3,8 @@ local sMainLuaFilePath = GetMainLuaFilePath()
 package.path = string.format("%s/../utils/?.lua;%s/../config/?.lua;", sMainLuaFilePath, sMainLuaFilePath) .. package
     .path
 require "tools"
--- StackDump(1, 2, "ji", {})
 local from = "D:/Closers.cocos/client/trunk/Resources"
 local info = GetFilesOfDirectoryRecursively(from)
--- CopyFileMultiThreads()
 local map = {}
 for key, value in pairs(info) do
     map[value] = string.gsub(value, from, "D:/temp", 1)
