@@ -2,9 +2,9 @@ local SVN_TRUNK = "D:/Closers.cocos/client/trunk/Resources/"
 local SVN_TEST = "D:/Closers.cocos/client/branches/test/Resources/"
 local SVN_ONLINE = "D:/Closers.cocos/client/branches/online/Resources/"
 
-local GIT_TRUNK = "D:/BlackMoonExtend/Client/GameCode/Resources/"
-local GIT_TEST = "D:/BlackMoon/Client/Resources/"
-local GIT_ONLINE = "D:/BlackMoon/Client/Resources/"
+local GIT_TRUNK = "D:/BlackMoonExtend/Client/Resources/"
+local GIT_TEST = "D:/BlackMoonExtend/Client/Resources/"
+local GIT_ONLINE = "D:/BlackMoonExtend/Client/Resources/"
 local config = {
     git = {
         online = {
