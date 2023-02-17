@@ -715,7 +715,14 @@ LUA_API int lua_gettable (lua_State *L, int idx) {
   return ttype(s2v(L->top - 1));
 }
 
-
+/**
+ * @brief 主要针对表的 , L[idx] 如果是一个关联数组(php叫法) , 那么 就把 L[idx] 这个表的 k 对应的 value 表到栈顶
+ * 
+ * @param L 
+ * @param idx 
+ * @param k 
+ * @return LUA_API 
+ */
 LUA_API int lua_getfield (lua_State *L, int idx, const char *k) {
   lua_lock(L);
   return auxgetstr(L, index2value(L, idx), k);

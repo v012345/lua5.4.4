@@ -335,13 +335,16 @@ int Test(lua_State *L)
 {
     std::cout << lua_gettop(L) << std::endl;
     // std::cout << lua_gettop(L) << std::endl;
-    lua_pushstring(L, "aaa");
+    // lua_pushstring(L, "aaa");
     std::cout << lua_gettop(L) << std::endl;
-    lua_gettable(L, 5);
+    // lua_gettable(L, 5);
     std::cout << lua_gettop(L) << std::endl;
-    lua_settop(L, 1);
-
-    std::cout << lua_tonumber(L, -1) << std::endl;
+    // lua_settop(L, 1);
+    lua_getfield(L, -1, "cc");
+    lua_getfield(L, -1, "aa");
+    std::cout << lua_gettop(L) << std::endl;
+    std::cout << lua_tostring(L, -1) << std::endl;
+    std::cout << lua_gettop(L) << std::endl;
     return 0;
 }
 
