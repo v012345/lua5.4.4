@@ -8,10 +8,11 @@ function GetFileLastModifiedTimestamp(file) return 0 end
 ---@return table
 function GetFilesInfoInDirectory(path) return {} end
 
----comment
----@param path string
+---递归出给出文件夹的全部文件
+---@param folder string 文件夹
+---@param exclude table 排除的文件夹
 ---@return table
-function GetFilesTypeInDirectory(path) return {} end
+function GetFilesInFolder(folder, exclude) return {} end
 
 ---comment
 ---@param files table

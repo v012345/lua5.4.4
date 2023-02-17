@@ -125,7 +125,8 @@
         "string_view": "cpp",
         "xthread": "cpp",
         "stdio.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "hash_set": "cpp"
     },
     "Lua.diagnostics.globals": [
         "argv",

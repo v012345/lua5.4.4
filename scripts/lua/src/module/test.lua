@@ -1,6 +1,7 @@
 local test = {}
 function test:run()
-    Test(1, 2, "ji", { 1, "33" }, { aaa = "bbb" }, { cc = { aa = "123123123" } })
+    GetFilesMd5(GetFilesInFolder("D:/Closers.cocos/client/branches/test",
+        { ".vscode", ".vs", ".svn", ".git", "imports" }))
 end
 
 return test

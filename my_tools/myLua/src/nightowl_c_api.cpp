@@ -10,7 +10,7 @@ namespace NIGHTOWL
         lua_register(L, "CopyFile", CopyFile);
         lua_register(L, "GetFileMd5", GetFileMd5);
         lua_register(L, "IsFileExist", IsFileExist);
-        lua_register(L, "GetFilesTypeInDirectory", GetFilesTypeInDirectory);
+        lua_register(L, "GetFilesInFolder", Lua_GetFilesInFolder);
         lua_register(L, "CopyFileMultiThreads", CopyFileMultiThreads);
         lua_register(L, "StackDump", StackDump);
         lua_register(L, "GetFilesMd5", GetFilesMd5);
@@ -25,17 +25,45 @@ namespace NIGHTOWL
         return 1;
     }
 
-    int GetFilesTypeInDirectory(lua_State *L)
+    int Lua_GetFilesInFolder(lua_State *L)
     {
-        lua_newtable(L);
-        lua_newtable(L);
-        for (auto &&directoryOrFile : std::filesystem::directory_iterator(std::filesystem::path(lua_tostring(L, 1))))
+        std::filesystem::path folder(lua_tostring(L, 1));
+        size_t j = lua_rawlen(L, 2);
+        std::unordered_set<std::string> exclude;
+        for (size_t i = 1; i <= j; i++)
         {
-            lua_pushstring(L, directoryOrFile.path().filename().string().c_str());
-            lua_pushboolean(L, directoryOrFile.is_directory());
-            lua_settable(L, -3);
+            lua_rawgeti(L, 2, i);
+            exclude.insert(lua_tostring(L, -1));
+            lua_pop(L, 1);
         }
+        std::cout << folder << std::endl;
+        for (auto &&i : exclude)
+        {
+            std::cout << i << std::endl;
+        }
+        lua_newtable(L);
+        GetFilesInFolder(L, folder, exclude);
+
         return 1;
+    }
+
+    void GetFilesInFolder(lua_State *L, std::filesystem::path folder, std::unordered_set<std::string> &exclude)
+    {
+
+        for (auto &&directoryOrFile : std::filesystem::directory_iterator(folder))
+        {
+            if (directoryOrFile.is_directory())
+            {
+                if (exclude.find(directoryOrFile.path().filename().string()) == exclude.end())
+                    GetFilesInFolder(L, directoryOrFile, exclude);
+            }
+            else
+            {
+                lua_pushinteger(L, lua_rawlen(L, -1) + 1);
+                lua_pushstring(L, directoryOrFile.path().string().c_str());
+                lua_settable(L, -3);
+            }
+        }
     }
 
     int GetFilesInfoInDirectory(lua_State *L)
