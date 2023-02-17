@@ -790,9 +790,13 @@ const TValue *luaH_getstr (Table *t, TString *key) {
 }
 
 
-/*
-** main search function
-*/
+/**
+ * @brief main search function 在 表 t 中 拿到 key 对应的 value
+ * 
+ * @param t 
+ * @param key 
+ * @return const TValue* 
+ */
 const TValue *luaH_get (Table *t, const TValue *key) {
   switch (ttypetag(key)) {
     case LUA_VSHRSTR: return luaH_getshortstr(t, tsvalue(key));
