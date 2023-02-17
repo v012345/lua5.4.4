@@ -750,9 +750,13 @@ const TValue *luaH_getint (Table *t, lua_Integer key) {
 }
 
 
-/*
-** search function for short strings
-*/
+/**
+ * @brief search function for short strings
+ * 
+ * @param t 
+ * @param key 
+ * @return const TValue* 
+ */
 const TValue *luaH_getshortstr (Table *t, TString *key) {
   Node *n = hashstr(t, key);
   lua_assert(key->tt == LUA_VSHRSTR);
@@ -769,7 +773,7 @@ const TValue *luaH_getshortstr (Table *t, TString *key) {
 }
 
 /**
- * @brief 返回
+ * @brief 返回 table 中 key (字符串) 的 value
  * 
  * @param t 
  * @param key 
