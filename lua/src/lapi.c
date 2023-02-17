@@ -765,7 +765,13 @@ static Table *gettable (lua_State *L, int idx) {
   return hvalue(t);
 }
 
-
+/**
+ * @brief 与 lua_gettable 一样 , 就是 lua_gettable 会触发 __index .
+ * 
+ * @param L 
+ * @param idx 
+ * @return LUA_API 
+ */
 LUA_API int lua_rawget (lua_State *L, int idx) {
   Table *t;
   const TValue *val;
@@ -892,7 +898,13 @@ LUA_API void lua_setglobal (lua_State *L, const char *name) {
   auxsetstr(L, G, name);
 }
 
-
+/**
+ * @brief 就是把 栈顶的 第一个元素当作 value , 把第二个元素当作 key , 把 表 L[idx][key] = value 了 , 同时把第一个元素与第二个元素 pop 出了
+ * 
+ * @param L 
+ * @param idx 
+ * @return
+ */
 LUA_API void lua_settable (lua_State *L, int idx) {
   TValue *t;
   const TValue *slot;
@@ -953,7 +965,13 @@ static void aux_rawset (lua_State *L, int idx, TValue *key, int n) {
   lua_unlock(L);
 }
 
-
+/**
+ * @brief 类似于 lua_settable，但是是作一个直接赋值（不触发__newindex）
+ * 
+ * @param L 
+ * @param idx 
+ * @return LUA_API 
+ */
 LUA_API void lua_rawset (lua_State *L, int idx) {
   aux_rawset(L, idx, s2v(L->top - 2), 2);
 }
