@@ -908,7 +908,14 @@ LUA_API void lua_settable (lua_State *L, int idx) {
   lua_unlock(L);
 }
 
-
+/**
+ * @brief 把栈顶的元素 放到 表 L[idx] 的指定 key 中 , 没有这个 key 就生成这个 key , 之后把之前那个 栈顶的元素 pop 了
+ * 
+ * @param L 
+ * @param idx 
+ * @param k 
+ * @return LUA_API 
+ */
 LUA_API void lua_setfield (lua_State *L, int idx, const char *k) {
   lua_lock(L);  /* unlock done in 'auxsetstr' */
   auxsetstr(L, index2value(L, idx), k);

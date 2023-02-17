@@ -336,17 +336,27 @@ int Test(lua_State *L)
     std::cout << lua_gettop(L) << std::endl;
     // std::cout << lua_gettop(L) << std::endl;
     // lua_pushstring(L, "aaa");
-    std::cout << lua_gettop(L) << std::endl;
+    // std::cout << lua_gettop(L) << std::endl;
     // lua_gettable(L, 5);
-    std::cout << lua_gettop(L) << std::endl;
+    // std::cout << lua_gettop(L) << std::endl;
     // lua_settop(L, 1);
     lua_getfield(L, -1, "cc");
     lua_getfield(L, -1, "aa");
     std::cout << lua_gettop(L) << std::endl;
     std::cout << lua_tostring(L, -1) << std::endl;
-    std::cout << lua_gettop(L) << std::endl;
-    luaS_new(L,"eeeedddd");
-    std::cout << lua_gettop(L) << std::endl;
+    lua_getfield(L, 6, "cc");
+    // std::cout << lua_gettop(L) << std::endl;
+    lua_pushstring(L,">>>>>>>>>>>>>>>");
+    lua_setfield(L,-2,"aa");
+     lua_getfield(L,-1,"aa");
+    // lua_getfield(L, -1, "aa");
+    // lua_pushstring(L,">>>>>>>>>>>>>>>");
+    // lua_getfield(L, -2, "aa");
+    // lua_getfield(L, -1, "aa");
+    std::cout <<  lua_type(L,lua_gettop(L)) << std::endl;
+    std::cout <<  lua_tostring(L, -1)<< std::endl;
+    // std::cout << lua_tostring(L, -1) << std::endl;
+    // std::cout << lua_gettop(L) << std::endl;
     return 0;
 }
 
