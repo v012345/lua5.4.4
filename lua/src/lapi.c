@@ -650,12 +650,21 @@ LUA_API int lua_pushthread (lua_State *L) {
 ** get functions (Lua -> stack)
 */
 
-
+/**
+ * @brief 把在 表 t 中找到的值放到栈顶
+ * 
+ * @param L 状态机
+ * @param t 表
+ * @param k key
+ * @return l_sinline 
+ */
 l_sinline int auxgetstr (lua_State *L, const TValue *t, const char *k) {
   const TValue *slot;
   TString *str = luaS_new(L, k);
   if (luaV_fastget(L, t, str, slot, luaH_getstr)) {
+    // 把生成的 slot 拉到 现在的 L->top 之后
     setobj2s(L, L->top, slot);
+    // 把 L->top 向到动一下 , 指向上在的 slot
     api_incr_top(L);
   }
   else {
