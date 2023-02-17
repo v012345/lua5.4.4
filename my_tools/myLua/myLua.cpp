@@ -364,6 +364,7 @@ int Test(lua_State *L)
     // lua_getfield(L, -1, "aa");
     std::cout << lua_type(L, lua_gettop(L)) << std::endl;
     std::cout << lua_tostring(L, -1) << std::endl;
+    std::cout << lua_typename(L,lua_type(L,-1)) << std::endl;
     // std::cout << lua_tostring(L, -1) << std::endl;
     // std::cout << lua_gettop(L) << std::endl;
     return 0;

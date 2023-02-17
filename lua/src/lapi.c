@@ -295,13 +295,25 @@ LUA_API void lua_pushvalue (lua_State *L, int idx) {
 ** access functions (stack -> C)
 */
 
-
+/**
+ * @brief 返回 L[idx] 的类型
+ * 
+ * @param L 
+ * @param idx 
+ * @return LUA_API 
+ */
 LUA_API int lua_type (lua_State *L, int idx) {
   const TValue *o = index2value(L, idx);
   return (isvalid(L, o) ? ttype(o) : LUA_TNONE);
 }
 
-
+/**
+ * @brief t 就是 lua_type 定义的那几个类型
+ * 
+ * @param L 
+ * @param t 
+ * @return LUA_API const* 
+ */
 LUA_API const char *lua_typename (lua_State *L, int t) {
   UNUSED(L);
   api_check(L, LUA_TNONE <= t && t < LUA_NUMTYPES, "invalid type");
