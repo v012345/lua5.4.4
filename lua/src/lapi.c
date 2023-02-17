@@ -860,9 +860,13 @@ LUA_API int lua_getiuservalue (lua_State *L, int idx, int n) {
 ** set functions (stack -> Lua)
 */
 
-/*
-** t[k] = value at the top of the stack (where 'k' is a string)
-*/
+/**
+ * @brief t[k] = value at the top of the stack (where 'k' is a string) ,
+ * 
+ * @param L 
+ * @param t 
+ * @param k 
+ */
 static void auxsetstr (lua_State *L, const TValue *t, const char *k) {
   const TValue *slot;
   TString *str = luaS_new(L, k);

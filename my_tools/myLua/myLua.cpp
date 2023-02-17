@@ -345,6 +345,8 @@ int Test(lua_State *L)
     std::cout << lua_gettop(L) << std::endl;
     std::cout << lua_tostring(L, -1) << std::endl;
     std::cout << lua_gettop(L) << std::endl;
+    luaS_new(L,"eeeedddd");
+    std::cout << lua_gettop(L) << std::endl;
     return 0;
 }
 
