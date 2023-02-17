@@ -783,7 +783,14 @@ LUA_API int lua_rawget (lua_State *L, int idx) {
   return finishrawget(L, val);
 }
 
-
+/**
+ * @brief L[idx] 应该是数组 , 那么就将 L[idx][n] 置于栈顶
+ * 
+ * @param L 
+ * @param idx 
+ * @param n 
+ * @return LUA_API 
+ */
 LUA_API int lua_rawgeti (lua_State *L, int idx, lua_Integer n) {
   Table *t;
   lua_lock(L);
@@ -983,7 +990,14 @@ LUA_API void lua_rawsetp (lua_State *L, int idx, const void *p) {
   aux_rawset(L, idx, &k, 1);
 }
 
-
+/**
+ * @brief 把栈顶元素 v 赋值给表 L[idx][n] , 然后把 v 弹出
+ * 
+ * @param L 
+ * @param idx 
+ * @param n 
+ * @return
+ */
 LUA_API void lua_rawseti (lua_State *L, int idx, lua_Integer n) {
   Table *t;
   lua_lock(L);
