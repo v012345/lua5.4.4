@@ -164,3 +164,15 @@ function WriteConfigTableToFile(file, config)
     end
     return false
 end
+
+local C_GetFilesInFolder = GetFilesInFolder
+function GetFilesInFolder(folder, exclude)
+    local files = {}
+    local origin_files = C_GetFilesInFolder(folder, exclude)
+    if origin_files then
+        for _, file in ipairs(origin_files) do
+            files[#files + 1] = string.gsub(file, "\\", "/")
+        end
+    end
+    return files
+end

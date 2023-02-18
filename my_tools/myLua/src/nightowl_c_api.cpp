@@ -13,10 +13,34 @@ namespace NIGHTOWL
         lua_register(L, "GetFilesInFolder", Lua_GetFilesInFolder);
         lua_register(L, "CopyFileMultiThreads", CopyFileMultiThreads);
         lua_register(L, "StackDump", StackDump);
+        lua_register(L, "GetFilesLastModifiedTimestamp", GetFilesLastModifiedTimestamp);
         lua_register(L, "GetFilesMd5", GetFilesMd5);
         lua_register(L, "Test", Test);
     }
 
+    int GetFilesLastModifiedTimestamp(lua_State *L)
+    {
+        std::vector<std::string> timestamp;
+
+        size_t filesCount = lua_rawlen(L, 1);
+
+        for (size_t i = 1; i <= filesCount; i++)
+        {
+            lua_rawgeti(L, 1, i);
+            std::string file = lua_tostring(L, -1);
+            timestamp.push_back(file);
+            lua_pop(L, 1);
+        }
+        lua_newtable(L);
+        for (auto &&i : timestamp)
+        {
+            size_t t = std::filesystem::last_write_time(i).time_since_epoch() / std::chrono::milliseconds(1);
+            lua_pushstring(L, i.c_str());
+            lua_pushinteger(L, t);
+            lua_settable(L, -3);
+        }
+        return 1;
+    }
     int GetFileLastModifiedTimestamp(lua_State *L)
     {
         const char *file = lua_tostring(L, 1);

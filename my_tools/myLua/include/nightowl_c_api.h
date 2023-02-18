@@ -22,5 +22,6 @@ namespace NIGHTOWL
     int StackDump(lua_State *L);
     int GetFilesMd5(lua_State *L);
     int Test(lua_State *L);
+    int GetFilesLastModifiedTimestamp(lua_State *L);
     void C_API(lua_State *L);
 }

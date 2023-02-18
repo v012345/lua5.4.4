@@ -49,5 +49,10 @@ function StackDump(...) return nil end
 ---@return table
 function GetFilesMd5(files) return {} end
 
+---comment
+---@param files table
+---@return table
+function GetFilesLastModifiedTimestamp(files) return {} end
+
 ---命令行参数
 argv = {}
