@@ -450,6 +450,13 @@ LUA_API const char *lua_tolstring (lua_State *L, int idx, size_t *len) {
 }
 
 
+/**
+ * @brief 返回栈顶元素的长度
+ * 
+ * @param L 
+ * @param idx 
+ * @return LUA_API 
+ */
 LUA_API lua_Unsigned lua_rawlen (lua_State *L, int idx) {
   const TValue *o = index2value(L, idx);
   switch (ttypetag(o)) {
