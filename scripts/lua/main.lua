@@ -16,6 +16,7 @@ print("script main.lua")
 
 local a =  XML:new("philjfiajfiaef")
 print(a:GetPath())
+a = nil
 local end_at = os.time()
 print(string.format("run time : %ss", end_at - start_at))
 return

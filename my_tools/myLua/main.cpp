@@ -1,7 +1,7 @@
 #include <lua.hpp>
 #include <filesystem>
 #include "nightowl_c_api.h"
-#include "XML.hpp"
+#include "nightowl_cpp_api.hpp"
 #define LUA_MAIN_SCRIPT "./main.lua"
 int main(int argc, char const *argv[])
 {
@@ -41,7 +41,7 @@ int main(int argc, char const *argv[])
     if (std::filesystem::exists(LUA_MAIN_SCRIPT))
     {
         NIGHTOWL::C_API(L);
-        NIGHTOWL::LUA_REGISTER_CPP_CLASS(L);
+        NIGHTOWL::REGISTER_CPP_CLASSES_TO_LUA(L);
         luaL_dofile(L, LUA_MAIN_SCRIPT);
     }
     return 0;

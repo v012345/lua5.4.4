@@ -1,11 +1,11 @@
 
-#include "XML.hpp"
+#include "nightowl_cpp_api.hpp"
 
 namespace NIGHTOWL
 {
-    void LUA_REGISTER_CPP_CLASS(lua_State *L)
+    void REGISTER_CPP_CLASSES_TO_LUA(lua_State *L)
     {
-        const luaL_Reg *lib = libs;
+        const luaL_Reg *lib = my_libs;
         for (; lib->func; lib++)
         {
             luaL_requiref(L, lib->name, lib->func, 1);
@@ -35,10 +35,13 @@ namespace NIGHTOWL
         return 1;
     }
 
-    int SET_METATABLE(lua_State *L)
+    int REGISTER_XML_TO_LUA(lua_State *L)
     {
+        std::cout << lua_gettop(L) << std::endl;
         luaL_newmetatable(L, "XML");
+        std::cout << lua_gettop(L) << std::endl;
         lua_pushvalue(L, -1);
+         std::cout << lua_gettop(L) << std::endl;
         lua_setfield(L, -2, "__index");
         luaL_setfuncs(L, method, 0);
         return 1;

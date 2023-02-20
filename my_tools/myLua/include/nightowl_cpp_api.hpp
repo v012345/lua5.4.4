@@ -13,8 +13,8 @@
 #include "pugiconfig.hpp"
 namespace NIGHTOWL
 {
-    int SET_METATABLE(lua_State *L);
-    void LUA_REGISTER_CPP_CLASS(lua_State *L);
+    int REGISTER_XML_TO_LUA(lua_State *L);
+    void REGISTER_CPP_CLASSES_TO_LUA(lua_State *L);
 
     class XML
     {
@@ -23,7 +23,7 @@ namespace NIGHTOWL
 
     public:
         XML(std::string file_path);
-        const std::string& GetPath() const { return file_path; }
+        const std::string &GetPath() const { return file_path; }
         ~XML();
     };
     int C_API_NEW_XML(lua_State *L);
@@ -32,16 +32,12 @@ namespace NIGHTOWL
 
     XML *GetXML(lua_State *L, int arg);
     static const luaL_Reg method[] = {
-        // {"SetAge", pcf_SetAge},
-        // {"GetAge", pcf_GetAge},
-        // {"SetName", pcf_SetName},
         {"GetPath", GetPath},
-        // {"ShowSelfInfo", pcf_ShowSelfInfo},
         {"new", C_API_NEW_XML},
         {"__gc", C_API_RELEASE_XML},
         {NULL, NULL}};
-    static const luaL_Reg libs[] = {
-        {"XML", SET_METATABLE},
+    static const luaL_Reg my_libs[] = {
+        {"XML", REGISTER_XML_TO_LUA},
         {NULL, NULL}};
 
 }
