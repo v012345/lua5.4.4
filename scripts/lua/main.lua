@@ -7,13 +7,15 @@ require "tools"
 -- local a = require "test"
 -- a:run()
 -- (require "test"):run()
-if argv["module"] then
-    require(argv["module"]):run()
-else
-    (require "test"):run()
-end
+-- if argv["module"] then
+--     require(argv["module"]):run()
+-- else
+--     (require "test"):run()
+-- end
 print("script main.lua")
 
+local a =  XML:new("philjfiajfiaef")
+print(a:GetPath())
 local end_at = os.time()
 print(string.format("run time : %ss", end_at - start_at))
 return
