@@ -281,7 +281,13 @@ LUA_API void lua_copy (lua_State *L, int fromidx, int toidx) {
   lua_unlock(L);
 }
 
-
+/**
+ * @brief Pushes a copy of the element at the given index onto the stack.
+ * 
+ * @param L 
+ * @param idx 
+ * @return
+ */
 LUA_API void lua_pushvalue (lua_State *L, int idx) {
   lua_lock(L);
   setobj2s(L, L->top, index2value(L, idx));
