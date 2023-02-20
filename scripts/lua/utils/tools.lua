@@ -45,84 +45,6 @@ function GetFileContent(file)
     return contents
 end
 
-function GetFilesInfoInDirectoryRecursivelyMultiThreads(path)
-    local tExcludeFile = {
-        [".vscode"] = true,
-        [".vs"] = true,
-        [".svn"] = true,
-        [".git"] = true,
-        ["imports"] = true,
-    }
-    local info = {};
-    local function recursive(folder)
-        local files = GetFilesTypeInDirectory(folder)
-
-        for file, is_directory in pairs(files) do
-            if not tExcludeFile[file] then
-                local path = table.concat({ folder, file }, "/")
-                if is_directory then
-                    recursive(path)
-                else
-                    info[#info + 1] = path
-                end
-            end
-        end
-    end
-    recursive(path)
-
-    return GetFilesMd5(info)
-end
-
-function GetFilesInfoInDirectoryRecursively(path)
-    local tExcludeFile = {
-        [".vscode"] = true,
-        [".vs"] = true,
-        [".svn"] = true,
-        [".git"] = true,
-    }
-    local info = {};
-    local function recursive(folder)
-        local files = GetFilesInfoInDirectory(folder)
-        for _, file in ipairs(files) do
-            if not tExcludeFile[file.filename] then
-                if file.is_directory then
-                    recursive(folder .. "/" .. file.filename)
-                else
-                    print(string.format("collecting %s info", file.filename))
-                    info[folder .. "/" .. file.filename] = file
-                end
-            end
-        end
-    end
-    recursive(path)
-    return info
-end
-
-function GetFilesOfDirectoryRecursively(path)
-    local tExcludeFile = {
-        [".vscode"] = true,
-        [".vs"] = true,
-        [".svn"] = true,
-        [".git"] = true,
-    }
-    local info = {};
-    local function recursive(folder)
-        local files = GetFilesTypeInDirectory(folder)
-        for file, isDirectory in pairs(files) do
-            if not tExcludeFile[file] then
-                if isDirectory then
-                    recursive(folder .. "/" .. file)
-                else
-                    --print(file)
-                    info[#info + 1] = folder .. "/" .. file
-                end
-            end
-        end
-    end
-    recursive(path)
-    return info
-end
-
 ---comment
 ---@param file string
 ---@param config table
@@ -168,6 +90,7 @@ end
 local C_GetFilesInFolder = GetFilesInFolder
 function GetFilesInFolder(folder, exclude)
     local files = {}
+    exclude = exclude or { ".vscode", ".vs", ".svn", ".git", "imports" }
     local origin_files = C_GetFilesInFolder(folder, exclude)
     if origin_files then
         for _, file in ipairs(origin_files) do

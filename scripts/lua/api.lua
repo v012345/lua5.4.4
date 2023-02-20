@@ -3,10 +3,6 @@
 ---@return integer
 function GetFileLastModifiedTimestamp(file) return 0 end
 
----comment
----@param path string
----@return table
-function GetFilesInfoInDirectory(path) return {} end
 
 ---递归出给出文件夹的全部文件
 ---@param folder string 文件夹
@@ -33,6 +29,11 @@ function GetMainLuaFilePath() return "" end
 ---@param file string
 ---@return string
 function GetFileMd5(file) return "" end
+
+---comment
+---@param file any
+---@return nil
+function DeleteFile(file) return nil end
 
 ---comment
 ---@param file any

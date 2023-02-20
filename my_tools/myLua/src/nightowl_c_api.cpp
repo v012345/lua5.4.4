@@ -6,8 +6,8 @@ namespace NIGHTOWL
     void C_API(lua_State *L)
     {
         lua_register(L, "GetFileLastModifiedTimestamp", GetFileLastModifiedTimestamp);
-        lua_register(L, "GetFilesInfoInDirectory", GetFilesInfoInDirectory);
         lua_register(L, "CopyFile", CopyFile);
+        lua_register(L, "DeleteFile", DeleteFile);
         lua_register(L, "GetFileMd5", GetFileMd5);
         lua_register(L, "IsFileExist", IsFileExist);
         lua_register(L, "GetFilesInFolder", Lua_GetFilesInFolder);
@@ -60,11 +60,6 @@ namespace NIGHTOWL
             exclude.insert(lua_tostring(L, -1));
             lua_pop(L, 1);
         }
-        std::cout << folder << std::endl;
-        for (auto &&i : exclude)
-        {
-            std::cout << i << std::endl;
-        }
         lua_newtable(L);
         GetFilesInFolder(L, folder, exclude);
 
@@ -89,45 +84,10 @@ namespace NIGHTOWL
             }
         }
     }
-
-    int GetFilesInfoInDirectory(lua_State *L)
+    int DeleteFile(lua_State *L)
     {
-        lua_newtable(L);
-        size_t i = 1;
-        for (auto &&directoryOrFile : std::filesystem::directory_iterator(std::filesystem::path(lua_tostring(L, 1))))
-        {
-            lua_pushinteger(L, i);
-            lua_newtable(L);
-            {
-                {
-                    lua_pushstring(L, "is_directory");
-                    lua_pushboolean(L, directoryOrFile.is_directory());
-                    lua_settable(L, -3);
-                }
-                {
-                    lua_pushstring(L, "last_write_time");
-                    lua_pushinteger(L, std::filesystem::last_write_time(directoryOrFile.path()).time_since_epoch() / std::chrono::milliseconds(1));
-                    lua_settable(L, -3);
-                }
-                {
-                    lua_pushstring(L, "filename");
-                    lua_pushstring(L, directoryOrFile.path().filename().string().c_str());
-                    lua_settable(L, -3);
-                }
-                {
-
-                    lua_pushstring(L, "md5");
-                    if (directoryOrFile.is_directory())
-                        lua_pushstring(L, "");
-                    else
-                        lua_pushstring(L, getFileMD5(directoryOrFile.path().string()).c_str());
-                    lua_settable(L, -3);
-                }
-            }
-            lua_settable(L, -3);
-            i++;
-        }
-        return 1;
+        remove(lua_tostring(L, 1));
+        return 0;
     }
 
     int GetFilesMd5(lua_State *L)

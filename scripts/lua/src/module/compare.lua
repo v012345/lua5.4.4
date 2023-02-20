@@ -4,8 +4,8 @@ function compare:run()
     local gitSrc = config["git"][argv["branch"]]["src"]
     local svnSrc = config["svn"][argv["branch"]]["src"]
 
-    local gitSrcInfo = GetFilesInfoInDirectoryRecursivelyMultiThreads(gitSrc)
-    local svnSrcInfo = GetFilesInfoInDirectoryRecursivelyMultiThreads(svnSrc)
+    local gitSrcInfo = GetFilesMd5(GetFilesInFolder(gitSrc))
+    local svnSrcInfo = GetFilesMd5(GetFilesInFolder(svnSrc))
 
     local isSame = true
     for gitSrcFileName, gitSrcFileMd5 in pairs(gitSrcInfo) do
