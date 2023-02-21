@@ -26,7 +26,7 @@ int main(int argc, char const *argv[])
     if (std::filesystem::exists(LUA_MAIN_SCRIPT))
     {
         NIGHTOWL::C_API(L);
-        NIGHTOWL::REGISTER_CPP_CLASSES_TO_LUA(L);
+        NIGHTOWL::REGISTER_LIBS_TO_LUA(L);
         luaL_dofile(L, LUA_MAIN_SCRIPT);
     }
     return 0;

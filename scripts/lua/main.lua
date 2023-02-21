@@ -14,9 +14,9 @@ require "tools"
 -- end
 -- print("script main.lua")
 
--- local a =  XML:new("philjfiajfiaef")
--- print(a:GetPath())
--- a = nil
+local a =  XML:new("philjfiajfiaef")
+print(a:GetPath())
+a = nil
 
 print(argv[1])
 local end_at = os.time()
