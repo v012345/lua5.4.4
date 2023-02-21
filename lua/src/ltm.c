@@ -47,7 +47,7 @@ LUAI_DDEF const char *const luaT_typenames_[LUA_TOTALTYPES] = {
  * __le <=
  * __concat ..
  * __eq ==
- * __unm -
+ * __unm - 取反
  * __call 是一个函数 , 第一个参数是表本身 , 之后是传入的参数 , 那么 这个表就可以当一个函数来用 (就是在表返回加())
  * @param L 
  */
