@@ -55,5 +55,4 @@ function GetFilesMd5(files) return {} end
 ---@return table
 function GetFilesLastModifiedTimestamp(files) return {} end
 
----命令行参数
-argv = {}
+

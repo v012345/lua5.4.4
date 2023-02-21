@@ -1,6 +1,6 @@
 --- 脚本的入口文件
 local start_at = os.time()
-print(package.path)
+-- print(package.path)
 -- local s = GetMainLuaFilePath()
 package.path = "./utils/?.lua;./config/?.lua;./src/module/?.lua;" .. package.path
 require "tools"
@@ -12,11 +12,13 @@ require "tools"
 -- else
 --     (require "test"):run()
 -- end
-print("script main.lua")
+-- print("script main.lua")
 
-local a =  XML:new("philjfiajfiaef")
-print(a:GetPath())
-a = nil
+-- local a =  XML:new("philjfiajfiaef")
+-- print(a:GetPath())
+-- a = nil
+
+print(argv[1])
 local end_at = os.time()
 print(string.format("run time : %ss", end_at - start_at))
 return

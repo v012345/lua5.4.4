@@ -3,41 +3,26 @@
 #include "nightowl_c_api.h"
 #include "nightowl_cpp_api.hpp"
 #define LUA_MAIN_SCRIPT "./main.lua"
+#define LUA_ARGV_SCRIPT "./argv.lua"
 int main(int argc, char const *argv[])
 {
 
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
-    lua_newtable(L);
-    for (size_t i = 0; i < argc; i++)
+    if (std::filesystem::exists(LUA_ARGV_SCRIPT))
     {
-        std::cout << argv[i] << std::endl;
-        if (std::string("-b").compare(argv[i]) == 0)
+        luaL_dofile(L, LUA_ARGV_SCRIPT);
+        lua_getglobal(L, "argv");
+        for (size_t i = 0; i < argc; i++)
         {
-            lua_pushstring(L, "branch");
-            lua_pushstring(L, argv[i + 1]);
+            lua_pushinteger(L, i + 1);
+            lua_pushstring(L, argv[i]);
             lua_settable(L, -3);
         }
-        else if (std::string("-m").compare(argv[i]) == 0)
-        {
-            lua_pushstring(L, "module");
-            lua_pushstring(L, argv[i + 1]);
-            lua_settable(L, -3);
-        }
-        else if (std::string("-f").compare(argv[i]) == 0)
-        {
-            lua_pushstring(L, "from");
-            lua_pushstring(L, argv[i + 1]);
-            lua_settable(L, -3);
-        }
-        else if (std::string("-t").compare(argv[i]) == 0)
-        {
-            lua_pushstring(L, "to");
-            lua_pushstring(L, argv[i + 1]);
-            lua_settable(L, -3);
-        }
+        lua_getglobal(L, "ProcessArgv");
+        lua_pcall(L, 0, 0, 0);
     }
-    lua_setglobal(L, "argv");
+
     if (std::filesystem::exists(LUA_MAIN_SCRIPT))
     {
         NIGHTOWL::C_API(L);

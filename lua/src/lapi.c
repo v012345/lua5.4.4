@@ -1034,7 +1034,13 @@ LUA_API void lua_rawseti (lua_State *L, int idx, lua_Integer n) {
   lua_unlock(L);
 }
 
-
+/**
+ * @brief 把 栈顶元素 设置成 L[objindex] 的 metatable
+ * 
+ * @param L 
+ * @param objindex 
+ * @return LUA_API 
+ */
 LUA_API int lua_setmetatable (lua_State *L, int objindex) {
   TValue *obj;
   Table *mt;
