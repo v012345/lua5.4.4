@@ -3,9 +3,37 @@
 
 namespace NIGHTOWL
 {
+    XML::XML(std::string file_path)
+    {
+        this->file_path = file_path;
+    }
+
+    int XML::GET_PATH(lua_State *L)
+    {
+        XML *pStu = XML::GET_XML(L, 1);
+
+        const std::string &name = pStu->GET_PATH();
+        lua_pushstring(L, name.c_str());
+        return 1;
+    }
+
+    XML::~XML()
+    {
+    }
+
+    static const luaL_Reg LIBS[] = {
+        {"XML", XML::REGISTER_TO_LUA},
+        {NULL, NULL}};
+
+    const luaL_Reg XML::METHODS_MAP[] = {
+        {"getPath", XML::GET_PATH},
+        {"new", XML::CREATE_OBJECT},
+        {"__gc", XML::DESTROY_OBJECT},
+        {NULL, NULL}};
+
     void REGISTER_LIBS_TO_LUA(lua_State *L)
     {
-        const luaL_Reg *lib = libs;
+        const luaL_Reg *lib = LIBS;
         for (; lib->func; lib++)
         {
             luaL_requiref(L, lib->name, lib->func, 1);
@@ -13,22 +41,7 @@ namespace NIGHTOWL
         }
     }
 
-    XML::XML(std::string file_path)
-    {
-        this->file_path = file_path;
-    }
-
-    XML::~XML()
-    {
-    }
-
-    const luaL_Reg XML::METHODS_MAP[] = {
-        {"GetPath", XML::GetPath},
-        {"new", XML::C_API_NEW_XML},
-        {"__gc", XML::C_API_RELEASE_XML},
-        {NULL, NULL}};
-
-    int XML::C_API_NEW_XML(lua_State *L)
+    int XML::CREATE_OBJECT(lua_State *L)
     {
 
         std::string path = luaL_checkstring(L, -1);
@@ -50,7 +63,7 @@ namespace NIGHTOWL
         return 1;
     }
 
-    XML *XML::GetXML(lua_State *L, int arg)
+    XML *XML::GET_XML(lua_State *L, int arg)
     {
         // 从栈顶取userdata，这个是C++的对象指针
         luaL_checktype(L, arg, LUA_TUSERDATA);
@@ -58,20 +71,11 @@ namespace NIGHTOWL
         luaL_argcheck(L, userData != NULL, 1, "user data error");
         return *(XML **)userData;
     }
-    int XML::C_API_RELEASE_XML(lua_State *L)
+    int XML::DESTROY_OBJECT(lua_State *L)
     {
-        XML *pStu = XML::GetXML(L, 1);
+        XML *pStu = XML::GET_XML(L, 1);
         if (pStu)
             delete pStu;
-        return 1;
-    }
-
-    int XML::GetPath(lua_State *L)
-    {
-        XML *pStu = XML::GetXML(L, 1);
-
-        const std::string &name = pStu->GetPath();
-        lua_pushstring(L, name.c_str());
         return 1;
     }
 

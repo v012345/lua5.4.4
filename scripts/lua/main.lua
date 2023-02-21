@@ -15,7 +15,7 @@ require "tools"
 -- print("script main.lua")
 
 local a =  XML:new("philjfiajfiaef")
-print(a:GetPath())
+print(a:getPath())
 a = nil
 
 print(argv[1])
