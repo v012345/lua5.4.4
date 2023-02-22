@@ -2,6 +2,7 @@
 ** $Id: lobject.c $
 ** Some generic functions over Lua objects
 ** See Copyright Notice in lua.h
+** 对象操作的一些函数
 */
 
 #define lobject_c

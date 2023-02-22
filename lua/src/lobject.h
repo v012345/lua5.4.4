@@ -350,7 +350,7 @@ typedef struct GCObject {
 ** ===================================================================
 */
 
-/* Variant tags for strings */
+/* Variant tags for strings 这个小类型区分放在类型字节的高四位 , 所以为外部 API 所不可见 */
 #define LUA_VSHRSTR	makevariant(LUA_TSTRING, 0)  /* short strings */
 #define LUA_VLNGSTR	makevariant(LUA_TSTRING, 1)  /* long strings */
 
@@ -379,7 +379,7 @@ typedef struct GCObject {
 */
 typedef struct TString {
   CommonHeader;
-  lu_byte extra;  /* reserved words for short strings; "has hash" for longs */
+  lu_byte extra;  /* reserved words for short strings; "has hash" for longs ; 对于短字符串 , extra 用于记录这个字符串是否为保留字 , 这个标记用于词法分析器对保留字的快速判断; 对于长字符串 , 可以用于惰性求哈希值*/
   lu_byte shrlen;  /* length for short strings */
   unsigned int hash;
   union {
@@ -394,7 +394,7 @@ typedef struct TString {
 /*
 ** Get the actual string (array of bytes) from a 'TString'.
 */
-#define getstr(ts)  ((ts)->contents)
+#define getstr(ts)  ((ts)->contents) // 拿到 TString 里 C 字符串指针
 
 
 /* get the actual string (array of bytes) from a Lua value */

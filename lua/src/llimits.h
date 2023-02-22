@@ -201,6 +201,7 @@ typedef l_uint32 Instruction;
 ** #("function") = 8, #("__newindex") = 10.)
 */
 #if !defined(LUAI_MAXSHORTLEN)
+// 区分长短字符串的界限 , 不可以少于 10 , 因为 __newindex 的长度为 10
 #define LUAI_MAXSHORTLEN	40
 #endif
 

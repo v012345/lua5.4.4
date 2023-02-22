@@ -2,6 +2,7 @@
 ** $Id: lstring.c $
 ** String table (keeps all strings handled by Lua)
 ** See Copyright Notice in lua.h
+** 字符串池
 */
 
 #define lstring_c
@@ -28,9 +29,13 @@
 #define MAXSTRTB	cast_int(luaM_limitN(MAX_INT, TString*))
 
 
-/*
-** equality for long strings
-*/
+/**
+ * @brief equality for long strings , 长字符串比较 , 1.比是不是同一个串 2.长度等不等 3.内容比较
+ * 
+ * @param a 
+ * @param b 
+ * @return int 
+ */
 int luaS_eqlngstr (TString *a, TString *b) {
   size_t len = a->u.lnglen;
   lua_assert(a->tt == LUA_VLNGSTR && b->tt == LUA_VLNGSTR);

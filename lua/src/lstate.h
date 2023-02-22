@@ -253,7 +253,7 @@ typedef struct global_State {
   l_mem GCdebt;  /* bytes allocated not yet compensated by the collector | 内部感知的内存大小 */
   lu_mem GCestimate;  /* an estimate of the non-garbage memory in use */
   lu_mem lastatomic;  /* see function 'genstep' in file 'lgc.c' */
-  stringtable strt;  /* hash table for strings 全局字符串表, 字符串池化，使得整个虚拟机中短字符串只有一份实例。 */
+  stringtable strt;  /* hash table for strings 全局字符串表, 字符串池化，使得整个虚拟机中短字符串只有一份实例 , 是一个 hash 表 */
   TValue l_registry; /* 注册表（管理全局数据） ，Registry表可以用debug.getregistry获取。注册表 就是一个全局的table（即整个虚拟机中只有一个注册表），它只能被C代码访问，通常，它用来保存 那些需要在几个模块中共享的数据。比如通过luaL_newmetatable创建的元表就是放在全局的注册表中。 */
   TValue nilvalue;  /* a nil value */
   unsigned int seed;  /* randomized seed for hashes */
