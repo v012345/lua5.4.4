@@ -1014,8 +1014,8 @@ LUALIB_API const char *luaL_gsub (lua_State *L, const char *s,
  * 
  * @param ud void* 可以接收任何类型指针 不用
  * @param ptr 
- * @param osize 不使用
- * @param nsize 如果 nsize 为 0 , 释放 ptr
+ * @param osize 内存块的原始大小 这里为不使用
+ * @param nsize 内存块新的大小 如果 nsize 为 0 , 释放 ptr
  * @return void* 
  */
 static void *l_alloc (void *ud, void *ptr, size_t osize, size_t nsize) {

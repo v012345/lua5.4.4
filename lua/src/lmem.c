@@ -2,6 +2,7 @@
 ** $Id: lmem.c $
 ** Interface to Memory Manager
 ** See Copyright Notice in lua.h
+** 内存管理接口
 */
 
 #define lmem_c
@@ -35,6 +36,10 @@ static void *firsttry (global_State *g, void *block, size_t os, size_t ns) {
     return (*g->frealloc)(g->ud, block, os, ns);
 }
 #else
+/**
+ * @brief 使用 global_State 上的 内存分配器 (lua_Alloc) 管理内存
+ * 
+ */
 #define firsttry(g,block,os,ns)    ((*g->frealloc)(g->ud, block, os, ns))
 #endif
 
@@ -144,6 +149,7 @@ void luaM_free_ (lua_State *L, void *block, size_t osize) {
 ** collector is not yet fully initialized. Also, it should not be called
 ** when 'gcstopem' is true, because then the interpreter is in the
 ** middle of a collection step.
+** firsttry 宏 如果失败了 , 回使用 tryagain 再回分配一次 , 这回会先释放一些内存
 */
 static void *tryagain (lua_State *L, void *block,
                        size_t osize, size_t nsize) {
@@ -156,13 +162,20 @@ static void *tryagain (lua_State *L, void *block,
 }
 
 
-/*
-** Generic allocation routine.
-*/
+/**
+ * @brief Generic allocation routine. 分配新内存 , 释放不用的内存 , 扩展不够用的内存
+ * 
+ * @param L 
+ * @param block 
+ * @param osize 
+ * @param nsize 
+ * @return void* 
+ */
 void *luaM_realloc_ (lua_State *L, void *block, size_t osize, size_t nsize) {
   void *newblock;
   global_State *g = G(L);
   lua_assert((osize == 0) == (block == NULL));
+  // 使用 global_State 上的 frealloc (内存分配器 , 就是 luaL_newstate 时传入的官方默认函数) 管理内存
   newblock = firsttry(g, block, osize, nsize);
   if (l_unlikely(newblock == NULL && nsize > 0)) {
     newblock = tryagain(L, block, osize, nsize);
