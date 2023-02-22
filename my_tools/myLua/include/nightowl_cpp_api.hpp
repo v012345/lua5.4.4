@@ -10,7 +10,7 @@
 #include <string>
 #include <unordered_set>
 #include "md5file.h"
-#include "pugiconfig.hpp"
+#include "pugixml.hpp"
 namespace NIGHTOWL
 {
 
@@ -18,16 +18,24 @@ namespace NIGHTOWL
     {
     private:
         std::string file_path;
+        pugi::xml_document doc;
+        pugi::xml_parse_result result;
 
     public:
         XML(std::string file_path);
-        const std::string &GET_PATH() const { return file_path; }
-        static int REGISTER_TO_LUA(lua_State *L);
+        const std::string &getPath() const { return file_path; }
+        const std::string &getParseResult() const { return result.description(); }
+
         static int CREATE(lua_State *L);
         static int DESTROY(lua_State *L);
         static int GET_PATH(lua_State *L);
-        static XML *GET(lua_State *L, int arg);
+        static int GET_PARSER_RESULT(lua_State *L);
         static const luaL_Reg METHODS_MAP[];
+
+        static XML *GET(lua_State *L, int arg);
+
+        static int REGISTER_TO_LUA(lua_State *L);
+
         ~XML();
     };
 

@@ -14,11 +14,10 @@ require "tools"
 -- end
 -- print("script main.lua")
 
-local a =  XML:new("philjfiajfiaef")
+local a =  XML:new("C:/Users/Meteor/Desktop/UiPetEvolveMain - Copy.csd")
 print(a:getPath())
 a = nil
 
-print(argv[1])
 local end_at = os.time()
 print(string.format("run time : %ss", end_at - start_at))
 return

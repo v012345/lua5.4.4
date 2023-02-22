@@ -6,13 +6,22 @@ namespace NIGHTOWL
     XML::XML(std::string file_path)
     {
         this->file_path = file_path;
+        this->result = this->doc.load_file(file_path.c_str());
+    }
+    int XML::GET_PARSER_RESULT(lua_State *L)
+    {
+        XML *xml = XML::GET(L, 1);
+
+        const std::string &r = xml->getParseResult();
+        lua_pushstring(L, r.c_str());
+        return 1;
     }
     int XML::GET_PATH(lua_State *L)
     {
         XML *xml = XML::GET(L, 1);
 
-        const std::string &path = xml->GET_PATH();
-        lua_pushstring(L, path.c_str());
+        const std::string &p = xml->getPath();
+        lua_pushstring(L, p.c_str());
         return 1;
     }
     XML::~XML()
