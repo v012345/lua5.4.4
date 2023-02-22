@@ -189,6 +189,7 @@ static void growstrtab (lua_State *L, stringtable *tb) {
 
 /*
 ** Checks whether short string exists and reuses it or creates a new one.
+** 内部化短字符串 , 
 */
 static TString *internshrstr (lua_State *L, const char *str, size_t l) {
   TString *ts;

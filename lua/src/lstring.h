@@ -36,7 +36,7 @@
 
 
 /*
-** equality for short strings, which are always internalized
+** equality for short strings, which are always internalized ; 只需要比较对象地址即可
 */
 #define eqshrstr(a,b)	check_exp((a)->tt == LUA_VSHRSTR, (a) == (b))
 
