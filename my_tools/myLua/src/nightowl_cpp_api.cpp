@@ -19,7 +19,6 @@ namespace NIGHTOWL
     {
     }
 
-
     const luaL_Reg XML::METHODS_MAP[] = {
         {"getPath", XML::GET_PATH},
         {"new", XML::CREATE},
@@ -40,8 +39,8 @@ namespace NIGHTOWL
     {
 
         std::string path = luaL_checkstring(L, -1);
-        XML **ppStu = (XML **)lua_newuserdata(L, sizeof(XML));
-        (*ppStu) = new XML(path);
+        XML **xml = (XML **)lua_newuserdata(L, sizeof(XML *));
+        *xml = new XML(path);
         luaL_getmetatable(L, "XML");
         lua_setmetatable(L, -2);
         return 1;
