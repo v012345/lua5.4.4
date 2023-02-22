@@ -81,6 +81,15 @@ static void *firsttry (global_State *g, void *block, size_t os, size_t ns) {
 #define MINSIZEARRAY	4
 
 
+/// @brief 用来管理可变长数组 , 当数组空间不够时 , 扩大为原来的两倍
+/// @param L 
+/// @param block 
+/// @param nelems 
+/// @param psize 
+/// @param size_elems 
+/// @param limit 
+/// @param what 
+/// @return 
 void *luaM_growaux_ (lua_State *L, void *block, int nelems, int *psize,
                      int size_elems, int limit, const char *what) {
   void *newblock;
@@ -188,6 +197,15 @@ void *luaM_realloc_ (lua_State *L, void *block, size_t osize, size_t nsize) {
 }
 
 
+/**
+ * @brief 就是调用 luaM_realloc_  来分配内存
+ * 
+ * @param L 
+ * @param block 
+ * @param osize 
+ * @param nsize 
+ * @return void* 
+ */
 void *luaM_saferealloc_ (lua_State *L, void *block, size_t osize,
                                                     size_t nsize) {
   void *newblock = luaM_realloc_(L, block, osize, nsize);
