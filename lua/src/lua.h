@@ -75,7 +75,7 @@ typedef struct lua_State lua_State;
 #define LUA_TUSERDATA		7
 #define LUA_TTHREAD		8
 
-#define LUA_NUMTYPES		9
+#define LUA_NUMTYPES		9 // lua 数据类型的数量
 
 
 
@@ -421,7 +421,7 @@ LUA_API void (lua_closeslot) (lua_State *L, int idx);
 #define lua_getuservalue(L,idx)	lua_getiuservalue(L,idx,1)
 #define lua_setuservalue(L,idx)	lua_setiuservalue(L,idx,1)
 
-#define LUA_NUMTAGS		LUA_NUMTYPES
+#define LUA_NUMTAGS		LUA_NUMTYPES // lua 数据类型的数量
 
 /* }============================================================== */
 

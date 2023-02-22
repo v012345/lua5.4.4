@@ -2,6 +2,7 @@
 ** $Id: lstate.c $
 ** Global State
 ** See Copyright Notice in lua.h
+** 全局状态机!
 */
 
 #define lstate_c
@@ -38,9 +39,9 @@ typedef struct LX {
 } LX;
 
 
-/*
-** Main thread combines a thread state and the global state
-*/
+/**
+ * @brief Main thread combines a thread state and the global state 为了避免内存碎片 , 减少内存分配与释放的次数 , 所以把 全局状态机 与 主线程状态放到了一个结构体中
+ */
 typedef struct LG {
   LX l;
   global_State g;
@@ -288,6 +289,7 @@ static void close_state (lua_State *L) {
   luaM_freearray(L, G(L)->strt.hash, G(L)->strt.size);
   freestack(L);
   lua_assert(gettotalbytes(g) == sizeof(LG));
+  // 这里要求 LG 结构体中 LX (主线程) 必须定义在结构的前面 , 否则关闭虚拟机的时候就无法正确的释放内存
   (*g->frealloc)(g->ud, fromstate(L), sizeof(LG), 0);  /* free main block */
 }
 
