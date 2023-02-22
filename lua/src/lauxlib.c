@@ -2,6 +2,7 @@
 ** $Id: lauxlib.c $
 ** Auxiliary functions for building Lua libraries
 ** See Copyright Notice in lua.h
+** 库编写用到的辅助函数
 */
 
 #define lauxlib_c
