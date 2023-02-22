@@ -2,6 +2,7 @@
 ** $Id: lgc.c $
 ** Garbage Collector
 ** See Copyright Notice in lua.h
+** 垃圾回收
 */
 
 #define lgc_c

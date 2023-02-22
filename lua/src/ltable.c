@@ -2,6 +2,7 @@
 ** $Id: ltable.c $
 ** Lua tables (hash)
 ** See Copyright Notice in lua.h
+** LuaH_* H是hash的意思
 */
 
 #define ltable_c

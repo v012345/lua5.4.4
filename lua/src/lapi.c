@@ -2,6 +2,7 @@
 ** $Id: lapi.c $
 ** Lua API
 ** See Copyright Notice in lua.h
+** C 语言接口
 */
 
 #define lapi_c

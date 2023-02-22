@@ -2,6 +2,7 @@
 ** $Id: lctype.c $
 ** 'ctype' functions for Lua
 ** See Copyright Notice in lua.h
+** C 标准库中 ctype 相关实现
 */
 
 #define lctype_c

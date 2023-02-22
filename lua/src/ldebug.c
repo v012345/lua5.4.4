@@ -2,6 +2,7 @@
 ** $Id: ldebug.c $
 ** Debug Interface
 ** See Copyright Notice in lua.h
+** Debug 接口
 */
 
 #define ldebug_c

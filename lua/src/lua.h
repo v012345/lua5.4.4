@@ -122,9 +122,10 @@ typedef const char * (*lua_Reader) (lua_State *L, void *ud, size_t *sz);
 typedef int (*lua_Writer) (lua_State *L, const void *p, size_t sz, void *ud);
 
 
-/*
-** Type for memory-allocation functions
-*/
+/**
+ * @brief Type for memory-allocation functions , 内存管理函数的签名 , 可以自定义 , 也可以用官方默认的
+ * 
+ */
 typedef void * (*lua_Alloc) (void *ud, void *ptr, size_t osize, size_t nsize);
 
 
