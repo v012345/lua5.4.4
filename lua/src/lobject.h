@@ -732,13 +732,14 @@ typedef union Node {
 #define setnorealasize(t)	((t)->flags |= BITRAS)
 
 
+/// @brief Lua 的 表 结构
 typedef struct Table {
   CommonHeader;
   lu_byte flags;  /* 1<<p means tagmethod(p) is not present */
-  lu_byte lsizenode;  /* log2 of size of 'node' array */
+  lu_byte lsizenode;  /* log2 of size of 'node' array 哈希表的大小 , 由于哈希表的大小一定为 2 的整数次幂 , 所以这里表示的是幂次 , 而不是实际大小 */
   unsigned int alimit;  /* "limit" of 'array' array */
   TValue *array;  /* array part */
-  Node *node;
+  Node *node;  // 哈希表
   Node *lastfree;  /* any free position is before this position */
   struct Table *metatable;
   GCObject *gclist;
