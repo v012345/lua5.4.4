@@ -388,7 +388,7 @@ LUA_API lua_State *lua_newstate (lua_Alloc f, void *ud) {
   g->warnf = NULL;
   g->ud_warn = NULL;
   g->mainthread = L;
-  g->seed = luai_makeseed(L);
+  g->seed = luai_makeseed(L);  // 启动时生成的一个随机数种子 , 主要是在求字符串哈希时使用
   g->gcstp = GCSTPGC;  /* no GC while building state */
   g->strt.size = g->strt.nuse = 0;
   g->strt.hash = NULL;

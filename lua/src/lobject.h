@@ -375,7 +375,7 @@ typedef struct GCObject {
 
 
 /*
-** Header for a string value.
+** Header for a string value. 一个 GC 头 , 一个额外 extra  , 一个 contents ...
 */
 typedef struct TString {
   CommonHeader;

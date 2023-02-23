@@ -147,10 +147,13 @@ struct lua_longjmp;  /* defined in ldo.c */
 #define KGC_GEN		1	/* generational gc */
 
 
+/**
+ * @brief 字符串的哈希表 , 有大小 , 元素的个数 , 与一个 TString 的二维组数(一个哈希桶)
+ */
 typedef struct stringtable {
-  TString **hash;
-  int nuse;  /* number of elements */
-  int size;
+  TString **hash; //字符串的哈希表的哈希桶
+  int nuse;  /* number of elements 表中字符串的数量 */
+  int size; // 哈希桶的大小 , 就是预定容量, luaS_init 时给出 初始化大小 MINSTRTABSIZE , 之后可以调整大小
 } stringtable;
 
 
@@ -256,7 +259,7 @@ typedef struct global_State {
   stringtable strt;  /* hash table for strings 全局字符串表, 字符串池化，使得整个虚拟机中短字符串只有一份实例 , 是一个 hash 表 */
   TValue l_registry; /* 注册表（管理全局数据） ，Registry表可以用debug.getregistry获取。注册表 就是一个全局的table（即整个虚拟机中只有一个注册表），它只能被C代码访问，通常，它用来保存 那些需要在几个模块中共享的数据。比如通过luaL_newmetatable创建的元表就是放在全局的注册表中。 */
   TValue nilvalue;  /* a nil value */
-  unsigned int seed;  /* randomized seed for hashes */
+  unsigned int seed;  /* randomized seed for hashes 启动时生成的一个随机数种子 , 主要是在求字符串哈希时使用 */
   lu_byte currentwhite;
   lu_byte gcstate;  /* state of garbage collector */
   lu_byte gckind;  /* kind of GC running */

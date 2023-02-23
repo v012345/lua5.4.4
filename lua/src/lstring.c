@@ -175,7 +175,9 @@ void luaS_remove (lua_State *L, TString *ts) {
   tb->nuse--;
 }
 
-
+/// @brief 如果有空间 , 那么就把 字符串 表的大小 扩大 两位 , 并重新排列所有字符串的位置
+/// @param L 
+/// @param tb 
 static void growstrtab (lua_State *L, stringtable *tb) {
   if (l_unlikely(tb->nuse == MAX_INT)) {  /* too many strings? */
     luaC_fullgc(L, 1);  /* try to free some... */
@@ -189,7 +191,7 @@ static void growstrtab (lua_State *L, stringtable *tb) {
 
 /*
 ** Checks whether short string exists and reuses it or creates a new one.
-** 内部化短字符串 , 
+** 内部化短字符串 , 先看哈希桶里有没有 str , 有直接返回 , 没有就新创建一个放到桶里
 */
 static TString *internshrstr (lua_State *L, const char *str, size_t l) {
   TString *ts;
@@ -260,7 +262,11 @@ TString *luaS_new (lua_State *L, const char *str) {
   return p[0];
 }
 
-
+/// @brief Userdata 的构造函数
+/// @param L 
+/// @param s 
+/// @param nuvalue 
+/// @return 
 Udata *luaS_newudata (lua_State *L, size_t s, int nuvalue) {
   Udata *u;
   int i;
