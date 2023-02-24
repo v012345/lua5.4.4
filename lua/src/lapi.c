@@ -834,7 +834,11 @@ LUA_API int lua_rawgetp (lua_State *L, int idx, const void *p) {
   return finishrawget(L, luaH_get(t, &k));
 }
 
-
+/// @brief 创建一个新的 table 对象并将其压入 Lua 栈中
+/// @param L Lua 状态机
+/// @param narray 表示预分配数组部分的元素数量
+/// @param nrec 表示预分配哈希部分的元素数量
+/// @return 
 LUA_API void lua_createtable (lua_State *L, int narray, int nrec) {
   Table *t;
   lua_lock(L);
