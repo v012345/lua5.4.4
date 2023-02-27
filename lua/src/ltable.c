@@ -148,6 +148,7 @@ static int l_hashfloat (lua_Number n) {
 /*
 ** returns the 'main' position of an element in a table (that is,
 ** the index of its hash value).
+对应不同类型的 key 算出hash之后 , 映射到 table 的 node 数组上
 */
 static Node *mainpositionTV (const Table *t, const TValue *key) {
   switch (ttypetag(key)) {

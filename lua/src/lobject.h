@@ -693,6 +693,10 @@ typedef union Closure {
 ** of the key's fields ('key_tt' and 'key_val') not forming a proper
 ** 'TValue' allows for a smaller size for 'Node' both in 4-byte
 ** and 8-byte alignments.
+是一个联合体 , 如果是使用 i_val 那就表示 Node 是一个普通的 TValue ,
+如果使用 u , 那么这个 Node 就保护了 Key 与 Vaule , 同时啊 ,
+这个 Key 也有类型(key_tt)与值(key_val) , 值是类型(tt_)与值(value_) , 
+还有一个 next 表示什么我再看看
 */
 typedef union Node {
   struct NodeKey {
