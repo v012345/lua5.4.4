@@ -135,7 +135,7 @@ typedef struct TValue {
 #define setobjt2t	setobj
 /* to new object */
 #define setobj2n	setobj
-/* to table */
+/* to table 把 给出的 value 赋值给 table 指定的 node (类型与值)*/
 #define setobj2t	setobj
 
 
@@ -281,7 +281,9 @@ typedef StackValue *StkId;
 
 
 /* Common type for all collectable objects 
-@param tt 数据的类型
+@param tt 一个字节的类型标志，用于记录对象的具体类型，以便在垃圾回收时做出不同的处理
+@param marked 一个字节的标记，用于记录对象是否被标记为可达，以便在垃圾回收时判断对象是否需要被回收
+@param GCObject*next 指向下一个垃圾回收对象的指针，用于将所有的垃圾回收对象串联起来，形成一个链表
 */
 typedef struct GCObject {
   CommonHeader;
@@ -697,19 +699,21 @@ typedef union Closure {
 如果使用 u , 那么这个 Node 就保护了 Key 与 Vaule , 同时啊 ,
 这个 Key 也有类型(key_tt)与值(key_val) , 值是类型(tt_)与值(value_) , 
 还有一个 next 表示什么我再看看
+
+还有啊 , 因为这是一个联合体 , 所以可以使用 i_val , 拿到值 , 因为在 u , 前两个数据与TValue一致
 */
 typedef union Node {
   struct NodeKey {
     TValuefields;  /* fields for value */
     lu_byte key_tt;  /* key type */
-    int next;  /* for chaining */
+    int next;  /* for chaining 相对于当前节点的偏移量*/
     Value key_val;  /* key value */
   } u;
   TValue i_val;  /* direct access to node's value as a proper 'TValue' */
 } Node;
 
 
-/* copy a value into a key */
+/* copy a value into a key , 把 obj 的类型给 key 的类型 , 把 obj 的值给 key 的值  */
 #define setnodekey(L,node,obj) \
 	{ Node *n_=(node); const TValue *io_=(obj); \
 	  n_->u.key_val = io_->value_; n_->u.key_tt = io_->tt_; \

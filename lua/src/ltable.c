@@ -187,7 +187,13 @@ static Node *mainpositionTV (const Table *t, const TValue *key) {
   }
 }
 
-
+/**
+ * @brief 如果 nd 要放到 table 中 , 那么 nd 会在 table 中的 main position
+ * 
+ * @param t 
+ * @param nd 
+ * @return Node*
+ */
 l_sinline Node *mainpositionfromnode (const Table *t, Node *nd) {
   TValue key;
   getnodekey(cast(lua_State *, NULL), &key, nd);
@@ -690,6 +696,7 @@ void luaH_newkey (lua_State *L, Table *t, const TValue *key, TValue *value) {
       return;
     }
     lua_assert(!isdummy(t));
+    // 因为 next 链的存在 , mp 中的 key 可以与 传进来的 key 不一样!
     othern = mainpositionfromnode(t, mp);
     if (othern != mp) {  /* is colliding node out of its main position? */
       /* yes; move colliding node into free position */
