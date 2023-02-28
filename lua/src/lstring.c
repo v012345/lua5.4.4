@@ -44,7 +44,14 @@ int luaS_eqlngstr (TString *a, TString *b) {
      (memcmp(getstr(a), getstr(b), len) == 0));  /* equal contents */
 }
 
-
+/**
+ * @brief 计算字符串哈希值 , 使用 djb2 算法
+ * 
+ * @param str 
+ * @param l 
+ * @param seed 
+ * @return unsigned int 
+ */
 unsigned int luaS_hash (const char *str, size_t l, unsigned int seed) {
   unsigned int h = seed ^ cast_uint(l);
   for (; l > 0; l--)

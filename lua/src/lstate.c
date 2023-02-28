@@ -69,21 +69,21 @@ typedef struct LG {
   { size_t t = cast_sizet(e); \
     memcpy(b + p, &t, sizeof(t)); p += sizeof(t); }
 
+/**
+ * @brief 利用时间 与 内存地址随机性 生成一个随机数种子
+ * 
+ * @param L 
+ * @return unsigned int 
+ */
 static unsigned int luai_makeseed (lua_State *L) {
   char buff[3 * sizeof(size_t)];
   unsigned int h = cast_uint(time(NULL));
   int p = 0;
   addbuff(buff, p, L);  /* heap variable */
-  /*
-  { size_t t = ((size_t)((L))); 
-    memcpy(buff + p, &t, sizeof(t)); 
-    p += sizeof(t); 
-  }
-  */
   addbuff(buff, p, &h);  /* local variable */
   addbuff(buff, p, &lua_newstate);  /* public function */
   lua_assert(p == sizeof(buff));
-  // 就是生成一个随机的 buffer
+  // 求出随机生成的 buff 字符串 相对于 当前时间的 hash , 一个 unsigned int 值 , 来作为全局状态机的随机数种子
   return luaS_hash(buff, p, h);
 }
 

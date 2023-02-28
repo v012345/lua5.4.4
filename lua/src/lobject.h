@@ -381,14 +381,14 @@ typedef struct GCObject {
 */
 typedef struct TString {
   CommonHeader;
-  lu_byte extra;  /* reserved words for short strings; "has hash" for longs ; 对于短字符串 , extra 用于记录这个字符串是否为保留字 , 这个标记用于词法分析器对保留字的快速判断; 对于长字符串 , 可以用于惰性求哈希值*/
+  lu_byte extra;  /*对于短字符串 , extra 用于记录这个字符串是否为保留字 , 这个标记用于词法分析器对保留字的快速判断; 对于长字符串 , 可以用于惰性求哈希值 reserved words for short strings; "has hash" for longs */
   lu_byte shrlen;  /* length for short strings */
-  unsigned int hash;
+  unsigned int hash; /* 字符串的哈希值，用于字符串的查找和比较操作 */
   union {
     size_t lnglen;  /* length for long strings */
     struct TString *hnext;  /* linked list for hash table */
   } u;
-  char contents[1];
+  char contents[1]; /* 字符串的具体内容，以 null 结尾 */
 } TString;
 
 
@@ -396,7 +396,7 @@ typedef struct TString {
 /*
 ** Get the actual string (array of bytes) from a 'TString'.
 */
-#define getstr(ts)  ((ts)->contents) // 拿到 TString 里 C 字符串指针
+#define getstr(ts)  ((ts)->contents) // 拿到 TString 里 C 字符串指针 contents
 
 
 /* get the actual string (array of bytes) from a Lua value */
@@ -546,28 +546,28 @@ typedef struct AbsLineInfo {
 ** Function Prototypes
 */
 typedef struct Proto {
-  CommonHeader;
-  lu_byte numparams;  /* number of fixed (named) parameters */
-  lu_byte is_vararg;
-  lu_byte maxstacksize;  /* number of registers needed by this function */
-  int sizeupvalues;  /* size of 'upvalues' */
-  int sizek;  /* size of 'k' */
-  int sizecode;
-  int sizelineinfo;
-  int sizep;  /* size of 'p' */
-  int sizelocvars;
-  int sizeabslineinfo;  /* size of 'abslineinfo' */
-  int linedefined;  /* debug information  */
-  int lastlinedefined;  /* debug information  */
-  TValue *k;  /* constants used by the function */
-  Instruction *code;  /* opcodes */
-  struct Proto **p;  /* functions defined inside the function */
-  Upvaldesc *upvalues;  /* upvalue information */
-  ls_byte *lineinfo;  /* information about source lines (debug information) */
-  AbsLineInfo *abslineinfo;  /* idem */
-  LocVar *locvars;  /* information about local variables (debug information) */
-  TString  *source;  /* used for debug information */
-  GCObject *gclist;
+  CommonHeader; /* 通用对象头部 */
+  lu_byte numparams;  /* 函数的固定参数个数 number of fixed (named) parameters */
+  lu_byte is_vararg; /* 表示该函数是否为变长参数函数 */
+  lu_byte maxstacksize;  /* 表示该函数执行时最多需要多少个栈空间 number of registers needed by this function */
+  int sizeupvalues;  /* 函数中的Upvalue数量 size of 'upvalues' */
+  int sizek;  /* 常量表中元素的个数 size of 'k' */
+  int sizecode; /* 指令表中元素的个数 */
+  int sizelineinfo; /* 行号信息表中元素的个数 */
+  int sizep;  /* 函数原型表中元素的个数（用于表示内嵌函数） size of 'p' */
+  int sizelocvars; /* 局部变量表中元素的个数 */
+  int sizeabslineinfo;  /* 绝对行号信息表中元素的个数 size of 'abslineinfo' */
+  int linedefined;  /* 函数定义在源代码中的第一行行号 debug information  */
+  int lastlinedefined;  /* 函数定义在源代码中的最后一行行号 debug information  */
+  TValue *k;  /* 常量表，用于存放函数中用到的常量 constants used by the function */
+  Instruction *code;  /* 指令表，存放函数中的指令 opcodes */
+  struct Proto **p;  /* 函数原型表，用于存放内嵌函数的原型 functions defined inside the function */
+  Upvaldesc *upvalues;  /* 存储函数中用到的Upvalue信息 upvalue information */
+  ls_byte *lineinfo;  /* 行号信息表，存储每个指令对应的源代码行号 information about source lines (debug information) */
+  AbsLineInfo *abslineinfo;  /* 绝对行号信息表，存储每个指令对应的源代码绝对行号 idem */
+  LocVar *locvars;  /* 局部变量表，存储函数中局部变量的信息 information about local variables (debug information) */
+  TString  *source;  /* 指向源代码文件名的指针 used for debug information */
+  GCObject *gclist; /* GC链表节点 */
 } Proto;
 
 /* }================================================================== */
@@ -623,15 +623,15 @@ typedef struct Proto {
 ** Upvalues for Lua closures
 */
 typedef struct UpVal {
-  CommonHeader;
-  lu_byte tbc;  /* true if it represents a to-be-closed variable */
-  TValue *v;  /* points to stack or to its own value */
+  CommonHeader; /* 通用的 GCObject 结构体头部 */
+  lu_byte tbc;  /* true 表示该 Upvalue 是一个 to-be-closed 变量，即需要执行清理动作 true if it represents a to-be-closed variable */
+  TValue *v;  /* 如果该 Upvalue 关联的局部变量仍在栈上，则指向该局部变量的位置；否则，指向该 Upvalue 的值 points to stack or to its own value */
   union {
     struct {  /* (when open) */
       struct UpVal *next;  /* linked list */
       struct UpVal **previous;
-    } open;
-    TValue value;  /* the value (when closed) */
+    } open; /* 当该 Upvalue 关联的局部变量仍在栈上时，它表示一个链表节点，其中 next 指向下一个 Upvalue，而 previous 是指向该 Upvalue 指针的地址 */
+    TValue value;  /* 当该 Upvalue 关联的局部变量已经从栈上移除时，value 就是 Upvalue 的值 the value (when closed) */
   } u;
 } UpVal;
 
