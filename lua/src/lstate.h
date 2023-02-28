@@ -152,8 +152,8 @@ struct lua_longjmp;  /* defined in ldo.c */
  */
 typedef struct stringtable {
   TString **hash; //字符串的哈希表的哈希桶
-  int nuse;  /* number of elements 表中字符串的数量 */
-  int size; // 哈希桶的大小 , 就是预定容量, luaS_init 时给出 初始化大小 MINSTRTABSIZE , 之后可以调整大小
+  int nuse;  /* 表中已存储的短串的数量  number of elements */
+  int size; // 哈希桶的大小 , 就是预定容量, luaS_init 时给出 初始化大小 MINSTRTABSIZE ( 2^7 = 128 ), 之后可以调整大小 , 注意 size 是 2 的幂次
 } stringtable;
 
 

@@ -385,8 +385,8 @@ typedef struct TString {
   lu_byte shrlen;  /* length for short strings */
   unsigned int hash; /* 字符串的哈希值，用于字符串的查找和比较操作 */
   union {
-    size_t lnglen;  /* length for long strings */
-    struct TString *hnext;  /* linked list for hash table */
+    size_t lnglen;  /* TString 是长串时 , 表示长符的长度  length for long strings */
+    struct TString *hnext;  /* 短串时 , 某个桶中的中 , 当作链表使用 linked list for hash table */
   } u;
   char contents[1]; /* 字符串的具体内容，以 null 结尾 */
 } TString;
@@ -789,6 +789,7 @@ typedef struct Table {
 
 /*
 ** 'module' operation for hashing (size is always a power of 2)
+** 这里由于 size 是 2 的幂次 , 所以可以使用 size - 1 与 s 做按位与来快速求余数
 */
 #define lmod(s,size) \
 	(check_exp((size&(size-1))==0, (cast_int((s) & ((size)-1)))))

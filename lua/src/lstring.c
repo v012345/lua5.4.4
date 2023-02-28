@@ -30,8 +30,11 @@
 
 
 /**
- * @brief equality for long strings , 长字符串比较 , 1.比是不是同一个串 2.长度等不等 3.内容比较
- * 
+ * @brief equality for long strings
+ * 长字符串比较
+ * 1.比是不是同一个串
+ * 2.长度等不等
+ * 3.内容比较
  * @param a 
  * @param b 
  * @return int 
@@ -73,16 +76,25 @@ unsigned int luaS_hashlongstr (TString *ts) {
 
 static void tablerehash (TString **vect, int osize, int nsize) {
   int i;
+  // 如果要扩大 , 那么新申请来的空间初始化一下
   for (i = osize; i < nsize; i++)  /* clear new elements */
     vect[i] = NULL;
+  // 把原来数据重新分发来各自的桶里
   for (i = 0; i < osize; i++) {  /* rehash old part of the array */
-    TString *p = vect[i];
+    TString *p = vect[i]; // 用 p 指向各个桶
+    // 把当前桶清空
     vect[i] = NULL;
+    // 遍历这个桶
     while (p) {  /* for each string in the list */
+      // 保存 p 的后继指针
       TString *hnext = p->u.hnext;  /* save next */
+      // 计算出新的桶的位置
       unsigned int h = lmod(p->hash, nsize);  /* new position */
-      p->u.hnext = vect[h];  /* chain it into array */
+      // 把新桶也连到 p 后面
+      p->u.hnext = vect[h];  /* chain it into array  */
+      // 使用新桶的第一个元素为 p
       vect[h] = p;
+      // 下一个元素开始
       p = hnext;
     }
   }
@@ -93,6 +105,7 @@ static void tablerehash (TString **vect, int osize, int nsize) {
 ** Resize the string table. If allocation fails, keep the current size.
 ** (This can degrade performance, but any non-zero size should work
 ** correctly.)
+** 调用 tablerehash , 这调用之前 , 要注意内存的分配
 */
 void luaS_resize (lua_State *L, int nsize) {
   stringtable *tb = &G(L)->strt;
@@ -182,7 +195,7 @@ void luaS_remove (lua_State *L, TString *ts) {
   tb->nuse--;
 }
 
-/// @brief 如果有空间 , 那么就把 字符串 表的大小 扩大 两位 , 并重新排列所有字符串的位置
+/// @brief 如果有空间 , 那么就把 字符串 表的大小 扩大 两倍 , 并重新排列所有字符串的位置
 /// @param L 
 /// @param tb 
 static void growstrtab (lua_State *L, stringtable *tb) {
@@ -203,10 +216,12 @@ static void growstrtab (lua_State *L, stringtable *tb) {
 static TString *internshrstr (lua_State *L, const char *str, size_t l) {
   TString *ts;
   global_State *g = G(L);
-  stringtable *tb = &g->strt;
-  unsigned int h = luaS_hash(str, l, g->seed);
-  TString **list = &tb->hash[lmod(h, tb->size)];
+  stringtable *tb = &g->strt; // 全局字符串 hash 表
+  unsigned int h = luaS_hash(str, l, g->seed); // 算出短串的 hash 值
+  TString **list = &tb->hash[lmod(h, tb->size)]; // 定位到 hash 值所在的哈希桶的地址的指针
   lua_assert(str != NULL);  /* otherwise 'memcmp'/'memcpy' are undefined */
+
+  // 在当前桶中遍历 , 看是否已经存在 , 如果存在就返回这个 TString 的地址
   for (ts = *list; ts != NULL; ts = ts->u.hnext) {
     if (l == ts->shrlen && (memcmp(str, getstr(ts), l * sizeof(char)) == 0)) {
       /* found! */
@@ -215,6 +230,8 @@ static TString *internshrstr (lua_State *L, const char *str, size_t l) {
       return ts;
     }
   }
+  // 到这里说明没有找到
+
   /* else must create a new string */
   if (tb->nuse >= tb->size) {  /* need to grow string table? */
     growstrtab(L, tb);
@@ -230,9 +247,14 @@ static TString *internshrstr (lua_State *L, const char *str, size_t l) {
 }
 
 
-/*
-** new string (with explicit length)
-*/
+/**
+ * @brief new string (with explicit length) , 当 l <= LUAI_MAXSHORTLEN , 使用内部化短字符串
+ * 
+ * @param L 
+ * @param str 
+ * @param l 字符串长度
+ * @return TString* 
+ */
 TString *luaS_newlstr (lua_State *L, const char *str, size_t l) {
   if (l <= LUAI_MAXSHORTLEN)  /* short string? */
     return internshrstr(L, str, l);

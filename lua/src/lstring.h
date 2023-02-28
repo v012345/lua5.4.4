@@ -30,13 +30,14 @@
 
 
 /*
-** test whether a string is a reserved word
+** 判断一个串是不是保留字 test whether a string is a reserved word
 */
 #define isreserved(s)	((s)->tt == LUA_VSHRSTR && (s)->extra > 0)
 
 
 /*
-** equality for short strings, which are always internalized ; 只需要比较对象地址即可
+** equality for short strings, which are always internalized ;
+** 短字符串经过内部化后 , 在 g 上只有一份 , 那么只要是短字符串且地址相等那么两个字符串就是相等的
 */
 #define eqshrstr(a,b)	check_exp((a)->tt == LUA_VSHRSTR, (a) == (b))
 

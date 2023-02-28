@@ -133,7 +133,8 @@
         "stdlib.h": "c",
         "hash_set": "cpp",
         "lctype.h": "c",
-        "lmem.h": "c"
+        "lmem.h": "c",
+        "lstring.h": "c"
     },
     "Lua.diagnostics.globals": [
         "argv",
