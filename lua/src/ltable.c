@@ -88,9 +88,10 @@
 
 #define hashpointer(t,p)	hashmod(t, point2uint(p))
 
-
+/// @brief 一个不可改写的空哈希表
 #define dummynode		(&dummynode_)
 
+/// @brief 一个不可改写的空哈希表
 static const Node dummynode_ = {
   {{NULL}, LUA_VEMPTY,  /* value's value and type */
    LUA_VNIL, 0, {NULL}}  /* key type, next, and key value */
@@ -351,9 +352,16 @@ static unsigned int findindex (lua_State *L, Table *t, TValue *key,
   }
 }
 
-
+/**
+ * @brief 
+ * 
+ * @param L 
+ * @param t 
+ * @param key 
+ * @return int 
+ */
 int luaH_next (lua_State *L, Table *t, StkId key) {
-  unsigned int asize = luaH_realasize(t);
+  unsigned int asize = luaH_realasize(t); // 先拿到数组部分的大小
   unsigned int i = findindex(L, t, s2v(key), asize);  /* find original key */
   for (; i < asize; i++) {  /* try first array part */
     if (!isempty(&t->array[i])) {  /* a non-empty entry? */
@@ -696,7 +704,7 @@ void luaH_newkey (lua_State *L, Table *t, const TValue *key, TValue *value) {
       return;
     }
     lua_assert(!isdummy(t));
-    // 因为 next 链的存在 , mp 中的 key 可以与 传进来的 key 不一样!
+    // 因为 next 链的存在 , mp 中的 key 可能与 传进来的 key 不一样!
     othern = mainpositionfromnode(t, mp);
     if (othern != mp) {  /* is colliding node out of its main position? */
       /* yes; move colliding node into free position */

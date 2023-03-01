@@ -1364,7 +1364,13 @@ LUA_API int lua_error (lua_State *L) {
   return 0;  /* to avoid warnings */
 }
 
-
+/**
+ * @brief 用于遍历 table , idx 表示 table 在栈中的什么位置
+ * 
+ * @param L 
+ * @param idx 
+ * @return LUA_API 
+ */
 LUA_API int lua_next (lua_State *L, int idx) {
   Table *t;
   int more;
