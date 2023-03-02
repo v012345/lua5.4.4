@@ -10,7 +10,6 @@
 
 #include <limits.h>
 #include <stddef.h>
-#include <stdio.h> // 我自己加的 , 为了打印东西
 
 
 #include "lua.h"
@@ -201,7 +200,6 @@ typedef l_uint32 Instruction;
 ** #("function") = 8, #("__newindex") = 10.)
 */
 #if !defined(LUAI_MAXSHORTLEN)
-// 区分长短字符串的界限 , 不可以少于 10 , 因为 __newindex 的长度为 10
 #define LUAI_MAXSHORTLEN	40
 #endif
 
@@ -268,27 +266,27 @@ typedef l_uint32 Instruction;
 ** created/deleted/resumed/yielded.
 */
 #if !defined(luai_userstateopen)
-#define luai_userstateopen(L)		((void)L);printf("luai_userstateopen\n")
+#define luai_userstateopen(L)		((void)L)
 #endif
 
 #if !defined(luai_userstateclose)
-#define luai_userstateclose(L)		((void)L);printf("luai_userstateclose\n")
+#define luai_userstateclose(L)		((void)L)
 #endif
 
 #if !defined(luai_userstatethread)
-#define luai_userstatethread(L,L1)	((void)L);printf("luai_userstatethread\n")
+#define luai_userstatethread(L,L1)	((void)L)
 #endif
 
 #if !defined(luai_userstatefree)
-#define luai_userstatefree(L,L1)	((void)L);printf("luai_userstatefree\n")
+#define luai_userstatefree(L,L1)	((void)L)
 #endif
 
 #if !defined(luai_userstateresume)
-#define luai_userstateresume(L,n)	((void)L);printf("luai_userstateresume\n")
+#define luai_userstateresume(L,n)	((void)L)
 #endif
 
 #if !defined(luai_userstateyield)
-#define luai_userstateyield(L,n)	((void)L);printf("luai_userstateyield\n")
+#define luai_userstateyield(L,n)	((void)L)
 #endif
 
 

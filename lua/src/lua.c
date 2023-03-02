@@ -648,10 +648,6 @@ static int pmain (lua_State *L) {
 
 
 int main (int argc, char **argv) {
-  for (size_t i = 0; i < argc; i++)
-  {
-    printf("%s\n",argv[i]);
-  }
   int status, result;
   lua_State *L = luaL_newstate();  /* create state */
   if (L == NULL) {
