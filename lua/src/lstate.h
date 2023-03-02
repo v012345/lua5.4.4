@@ -173,32 +173,32 @@ typedef struct stringtable {
 ** before the function starts or after it ends.
 */
 typedef struct CallInfo {
-  StkId func;  /* function index in the stack */
-  StkId	top;  /* top for this function */
-  struct CallInfo *previous, *next;  /* dynamic call link */
-  union {
+  StkId func;  /* 当前调用的函数在栈中的位置 function index in the stack */
+  StkId	top;  /* 当前栈顶位置，指向当前函数栈帧的栈顶位置 top for this function */
+  struct CallInfo *previous, *next;  /* CallInfo 对象的双向链表，用于维护调用栈 dynamic call link */
+  union { // 联合体，用于保存不同类型函数的信
     struct {  /* only for Lua functions */
       const Instruction *savedpc;
       volatile l_signalT trap;
       int nextraargs;  /* # of extra arguments in vararg functions */
-    } l;
+    } l; // 只对 Lua 函数有效，保存了当前 Lua 函数执行的一些信息，比如指令指针、附加的参数个数、当前状态的 trap 等
     struct {  /* only for C functions */
       lua_KFunction k;  /* continuation in case of yields */
       ptrdiff_t old_errfunc;
       lua_KContext ctx;  /* context info. in case of yields */
-    } c;
+    } c; // 只对 C 函数有效，保存了当前 C 函数执行的一些信息，比如 continuation、旧的 error function 等
   } u;
   union {
-    int funcidx;  /* called-function index */
-    int nyield;  /* number of values yielded */
-    int nres;  /* number of values returned */
+    int funcidx;  /* 只对 Lua 函数有效，保存当前函数调用的索引位置 called-function index */
+    int nyield;  /* 只对协程有效，保存协程已经 yield 的次数 number of values yielded */
+    int nres;  /*  当前函数调用返回值的数量 number of values returned */
     struct {  /* info about transferred values (for call/return hooks) */
       unsigned short ftransfer;  /* offset of first value transferred */
       unsigned short ntransfer;  /* number of values transferred */
-    } transferinfo;
-  } u2;
-  short nresults;  /* expected number of results from this function */
-  unsigned short callstatus;
+    } transferinfo; // 用于保存调用钩子函数时传递的信息，比如转移值的偏移量和数量
+  } u2; // 联合体，用于保存各种类型函数的返回值信息
+  short nresults;  /* 期望从当前函数返回的值的数量 expected number of results from this function */
+  unsigned short callstatus; // 调用状态，有多个预定义的状态值，包括 CIST_HOOKED、CIST_YPCALL、CIST_LUA 等
 } CallInfo;
 
 
@@ -305,28 +305,28 @@ typedef struct global_State {
 ** 'per thread' state
 */
 struct lua_State {
-  CommonHeader;
-  lu_byte status;
-  lu_byte allowhook;
-  unsigned short nci;  /* number of items in 'ci' list */
-  StkId top;  /* first free slot in the stack 状态机的栈顶*/
-  global_State *l_G;
-  CallInfo *ci;  /* call info for current function  Callinfo (方法调用栈) 的当前栈 */
-  StkId stack_last;  /* end of stack (last element + 1) */
-  StkId stack;  /* stack base */
-  UpVal *openupval;  /* list of open upvalues in this stack */
-  StkId tbclist;  /* list of to-be-closed variables */
-  GCObject *gclist;
-  struct lua_State *twups;  /* list of threads with open upvalues */
-  struct lua_longjmp *errorJmp;  /* current error recover point */
-  CallInfo base_ci;  /* CallInfo for first level (C calling Lua) Callinfo (方法调用栈) 的最低层 */
-  volatile lua_Hook hook;
-  ptrdiff_t errfunc;  /* current error handling function (stack index) */
-  l_uint32 nCcalls;  /* number of nested (non-yieldable | C)  calls */
-  int oldpc;  /* last pc traced */
-  int basehookcount;
-  int hookcount;
-  volatile l_signalT hookmask;
+  CommonHeader; //  Lua 对象系统中的公共头部，用于识别对象类型和 GC 回收等
+  lu_byte status; // 当前状态，包括运行中、暂停、错误等
+  lu_byte allowhook; // 是否允许调试钩子
+  unsigned short nci;  /* 当前状态机的调用信息（Callinfo）栈中的调用信息个数 number of items in 'ci' list */
+  StkId top;  /* 栈顶指针，即堆栈中最后一个空闲的位置 first free slot in the stack */
+  global_State *l_G; // 全局状态信息
+  CallInfo *ci;  /* 当前的调用信息（Callinfo） call info for current function */
+  StkId stack_last;  /*  栈的结尾位置（最后一个元素的下一个位置） end of stack (last element + 1) */
+  StkId stack;  /* 栈的开始位置 stack base */
+  UpVal *openupval;  /* 当前打开的 Upvalue 列表 list of open upvalues in this stack */
+  StkId tbclist;  /* 待关闭的 Upvalue 列表 list of to-be-closed variables */
+  GCObject *gclist; // 待 GC 的对象列表
+  struct lua_State *twups;  /* 当前线程的 open upvalue 列表 list of threads with open upvalues */
+  struct lua_longjmp *errorJmp;  /* 当前错误恢复点，用于处理 Lua 错误 current error recover point */
+  CallInfo base_ci;  /* 根据调用信息（Callinfo）创建的一个基础的调用信息（Callinfo）结构体，即第一个被 C 调用的函数的调用信息 CallInfo for first level (C calling Lua) */
+  volatile lua_Hook hook; // 当前调试钩子函数
+  ptrdiff_t errfunc;  /* 当前错误处理函数的栈索引 current error handling function (stack index) */
+  l_uint32 nCcalls;  /* 嵌套的 C 函数调用数量 number of nested (non-yieldable | C)  calls */
+  int oldpc;  /* 上一个被跟踪的指令位置 last pc traced */
+  int basehookcount; // 钩子函数调用次数的基准值
+  int hookcount; // 计数当前的钩子函数调用次数
+  volatile l_signalT hookmask; // 钩子函数的类型掩码
 };
 
 

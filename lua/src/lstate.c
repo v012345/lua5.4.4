@@ -188,23 +188,23 @@ LUAI_FUNC void luaE_incCstack (lua_State *L) {
 static void stack_init (lua_State *L1, lua_State *L) {
   int i; CallInfo *ci;
   /* initialize stack array */
-  L1->stack = luaM_newvector(L, BASIC_STACK_SIZE + EXTRA_STACK, StackValue);
+  L1->stack = luaM_newvector(L, BASIC_STACK_SIZE + EXTRA_STACK, StackValue); // 分配数据栈 , 
   L1->tbclist = L1->stack;
   for (i = 0; i < BASIC_STACK_SIZE + EXTRA_STACK; i++)
-    setnilvalue(s2v(L1->stack + i));  /* erase new stack */
-  L1->top = L1->stack;
-  L1->stack_last = L1->stack + BASIC_STACK_SIZE;
-  /* initialize first ci */
-  ci = &L1->base_ci;
+    setnilvalue(s2v(L1->stack + i));  /* 初始化分配来的栈 erase new stack */
+  L1->top = L1->stack; // top指向最后一个空闲的位置 , 现在栈底就是最后一个空闲的位置
+  L1->stack_last = L1->stack + BASIC_STACK_SIZE; // stack_last指向数据栈的最后一个元素
+  /* 初始化第一个CallInfo对象 initialize first ci */
+  ci = &L1->base_ci; // ci 指向 L1->base_ci
   ci->next = ci->previous = NULL;
   ci->callstatus = CIST_C;
-  ci->func = L1->top;
+  ci->func = L1->top; // 将func指针指向栈顶，因为这个CallInfo记录的是整个Lua栈的状态，而不仅仅是当前函数调用的状态
   ci->u.c.k = NULL;
   ci->nresults = 0;
   setnilvalue(s2v(L1->top));  /* 'function' entry for this 'ci' */
   L1->top++;
-  ci->top = L1->top + LUA_MINSTACK;
-  L1->ci = ci;
+  ci->top = L1->top + LUA_MINSTACK; // ci->top指向栈顶指针的后面LUA_MINSTACK个元素，这些元素预留给函数调用
+  L1->ci = ci; // 将ci设置为当前lua_State的ci字段，表示这是当前正在执行的函数调用信息
 }
 
 
