@@ -1147,25 +1147,40 @@ struct CallS {  /* data to 'f_call' */
   int nresults;
 };
 
-
+/**
+ * @brief 通过调用 luaD_callnoyield 来执行 Lua 函数或 C 函数
+ * 
+ * @param L 
+ * @param ud 
+ */
 static void f_call (lua_State *L, void *ud) {
   struct CallS *c = cast(struct CallS *, ud);
   luaD_callnoyield(L, c->func, c->nresults);
 }
 
 
-
+/**
+ * @brief 
+ * 
+ * @param L  Lua 状态机
+ * @param nargs 传递给函数的参数个数
+ * @param nresults 期望返回值的个数
+ * @param errfunc 错误处理函数在栈中的位置
+ * @param ctx 自定义的上下文变量
+ * @param k 一个可选的 continuation 函数
+ * @return LUA_API int
+ */
 LUA_API int lua_pcallk (lua_State *L, int nargs, int nresults, int errfunc,
                         lua_KContext ctx, lua_KFunction k) {
-  struct CallS c;
-  int status;
-  ptrdiff_t func;
+  struct CallS c; // 保存调用信息
+  int status; // 返回值
+  ptrdiff_t func; // 错误处理函数的索引或者 0
   lua_lock(L);
   api_check(L, k == NULL || !isLua(L->ci),
-    "cannot use continuations inside hooks");
-  api_checknelems(L, nargs+1);
-  api_check(L, L->status == LUA_OK, "cannot do calls on non-normal thread");
-  checkresults(L, nargs, nresults);
+    "cannot use continuations inside hooks");  // 这个宏会检查是否可以使用 continuation 函数。如果 k 不为 NULL，则需要判断当前是否在 hook 函数中调用，因为在 hook 函数中不能使用 continuation 函数。
+  api_checknelems(L, nargs+1); // 这个宏会检查栈中是否有足够的元素可以被调用函数使用。因为在调用函数时，需要将函数和其参数一起压入栈中，所以需要检查栈是否有足够的空间。
+  api_check(L, L->status == LUA_OK, "cannot do calls on non-normal thread");  // 这个宏会检查 Lua 状态机的状态是否为 LUA_OK，因为只有在 LUA_OK 状态下才能进行函数调用。如果当前状态不是 LUA_OK，则不能进行函数调用。
+  checkresults(L, nargs, nresults); // 这个函数会检查期望返回值的数量是否合法。因为 Lua 的函数可以返回多个值，所以需要检查期望返回值的数量是否合法。
   if (errfunc == 0)
     func = 0;
   else {
@@ -1173,6 +1188,7 @@ LUA_API int lua_pcallk (lua_State *L, int nargs, int nresults, int errfunc,
     api_check(L, ttisfunction(s2v(o)), "error handler must be a function");
     func = savestack(L, o);
   }
+  // 获取被调用的函数
   c.func = L->top - (nargs+1);  /* function to be called */
   if (k == NULL || !yieldable(L)) {  /* no continuation or no yieldable? */
     c.nresults = nresults;  /* do a 'conventional' protected call */

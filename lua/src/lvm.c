@@ -1150,7 +1150,7 @@ void luaV_execute (lua_State *L, CallInfo *ci) {
  returning:  /* trap already set */
   cl = clLvalue(s2v(ci->func));
   k = cl->p->k;
-  pc = ci->u.l.savedpc;
+  pc = ci->u.l.savedpc;  // 当前正在执行的指令
   if (l_unlikely(trap)) {
     if (pc == cl->p->code) {  /* first instruction (not resuming)? */
       if (cl->p->is_vararg)
