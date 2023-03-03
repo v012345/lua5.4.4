@@ -135,7 +135,9 @@
         "lctype.h": "c",
         "lmem.h": "c",
         "lstring.h": "c",
-        "ljumptab.h": "c"
+        "ljumptab.h": "c",
+        "lstate.h": "c",
+        "lobject.h": "c"
     },
     "Lua.diagnostics.globals": [
         "argv",

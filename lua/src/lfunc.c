@@ -32,11 +32,17 @@ CClosure *luaF_newCclosure (lua_State *L, int nupvals) {
   return c;
 }
 
-
+/**
+ * @brief 创建一个新的 Lua 闭包对象
+ * 
+ * @param L 
+ * @param nupvals 前闭包中的 upvalue 数量
+ * @return LClosure* 
+ */
 LClosure *luaF_newLclosure (lua_State *L, int nupvals) {
   GCObject *o = luaC_newobj(L, LUA_VLCL, sizeLclosure(nupvals));
   LClosure *c = gco2lcl(o);
-  c->p = NULL;
+  c->p = NULL; // 创建了一个闭包对象，还没有与任何 Proto 对象关联，因此这里将其设置为 NULL
   c->nupvalues = cast_byte(nupvals);
   while (nupvals--) c->upvals[nupvals] = NULL;
   return c;
