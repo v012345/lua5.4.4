@@ -62,19 +62,19 @@ typedef struct Token {
 /* state of the lexer plus state of the parser when shared by all
    functions */
 typedef struct LexState {
-  int current;  /* current character (charint) */
-  int linenumber;  /* input line counter */
-  int lastline;  /* line of last token 'consumed' */
-  Token t;  /* current token */
-  Token lookahead;  /* look ahead token */
-  struct FuncState *fs;  /* current function (parser) */
-  struct lua_State *L;
-  ZIO *z;  /* input stream */
-  Mbuffer *buff;  /* buffer for tokens */
-  Table *h;  /* to avoid collection/reuse strings */
-  struct Dyndata *dyd;  /* dynamic structures used by the parser */
-  TString *source;  /* current source name */
-  TString *envn;  /* environment variable name */
+  int current;  /* 当前字符（以字符整数的形式存储） current character (charint) */
+  int linenumber;  /* 输入行数计数器 input line counter */
+  int lastline;  /* 上一个标记的行数 line of last token 'consumed' */
+  Token t;  /* 当前标记 current token */
+  Token lookahead;  /* 向前看的标记 look ahead token */
+  struct FuncState *fs;  /* 当前函数（解析器） current function (parser) */
+  struct lua_State *L; // Lua 状态机
+  ZIO *z;  /* 输入流 input stream */
+  Mbuffer *buff;  /* 用于标记的缓冲区 buffer for tokens */
+  Table *h;  /* 用于避免收集/重用字符串 to avoid collection/reuse strings */
+  struct Dyndata *dyd;  /* 解析器使用的动态结构 dynamic structures used by the parser */
+  TString *source;  /* 当前源名称 current source name */
+  TString *envn;  /* 环境变量名称 environment variable name */
 } LexState;
 
 
