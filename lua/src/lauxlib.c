@@ -780,11 +780,11 @@ LUALIB_API int luaL_loadfilex (lua_State *L, const char *filename,
   int status, readstatus;
   int c;
   int fnameindex = lua_gettop(L) + 1;  /* index of filename on the stack */
-  if (filename == NULL) {
+  if (filename == NULL) { //使用标准输入流
     lua_pushliteral(L, "=stdin");
     lf.f = stdin;
   }
-  else {
+  else { // 打开相应的文件
     lua_pushfstring(L, "@%s", filename);
     lf.f = fopen(filename, "r");
     if (lf.f == NULL) return errfile(L, "open", fnameindex);

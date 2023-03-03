@@ -603,7 +603,14 @@ LUA_API const char *lua_pushvfstring (lua_State *L, const char *fmt,
   return ret;
 }
 
-
+/**
+ * @brief 在Lua栈上推入格式化后的字符串，并返回指向该字符串的指针
+ * 
+ * @param L 
+ * @param fmt 
+ * @param ... 
+ * @return LUA_API const* 
+ */
 LUA_API const char *lua_pushfstring (lua_State *L, const char *fmt, ...) {
   const char *ret;
   va_list argp;
