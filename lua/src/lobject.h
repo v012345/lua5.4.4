@@ -281,9 +281,9 @@ typedef StackValue *StkId;
 
 
 /* Common type for all collectable objects 
-@param tt 一个字节的类型标志，用于记录对象的具体类型，以便在垃圾回收时做出不同的处理
-@param marked 一个字节的标记，用于记录对象是否被标记为可达，以便在垃圾回收时判断对象是否需要被回收
-@param GCObject*next 指向下一个垃圾回收对象的指针，用于将所有的垃圾回收对象串联起来，形成一个链表
+@param tt 一个字节的类型标志,用于记录对象的具体类型,以便在垃圾回收时做出不同的处理
+@param marked 一个字节的标记,用于记录对象是否被标记为可达,以便在垃圾回收时判断对象是否需要被回收
+@param GCObject*next 指向下一个垃圾回收对象的指针,用于将所有的垃圾回收对象串联起来,形成一个链表
 */
 typedef struct GCObject {
   CommonHeader;
@@ -383,12 +383,12 @@ typedef struct TString {
   CommonHeader;
   lu_byte extra;  /*对于短字符串 , extra 用于记录这个字符串是否为保留字 , 这个标记用于词法分析器对保留字的快速判断; 对于长字符串 , 可以用于惰性求哈希值 reserved words for short strings; "has hash" for longs */
   lu_byte shrlen;  /* length for short strings */
-  unsigned int hash; /* 字符串的哈希值，用于字符串的查找和比较操作 */
+  unsigned int hash; /* 字符串的哈希值,用于字符串的查找和比较操作 */
   union {
     size_t lnglen;  /* TString 是长串时 , 表示长符的长度  length for long strings */
     struct TString *hnext;  /* 短串时 , 某个桶中的中 , 当作链表使用 linked list for hash table */
   } u;
-  char contents[1]; /* 字符串的具体内容，以 null 结尾 */
+  char contents[1]; /* 字符串的具体内容,以 null 结尾 */
 } TString;
 
 
@@ -559,13 +559,13 @@ typedef struct Proto {
   int sizeabslineinfo;  /* 绝对行号信息表中元素的个数 size of 'abslineinfo' */
   int linedefined;  /* 函数定义在源代码中的第一行行号 debug information  */
   int lastlinedefined;  /* 函数定义在源代码中的最后一行行号 debug information  */
-  TValue *k;  /* 常量表，用于存放函数中用到的常量 constants used by the function */
-  Instruction *code;  /* 指令表，存放函数中的指令 opcodes */
-  struct Proto **p;  /* 函数原型表，用于存放内嵌函数的原型 functions defined inside the function */
+  TValue *k;  /* 常量表,用于存放函数中用到的常量 constants used by the function */
+  Instruction *code;  /* 指令表,存放函数中的指令 opcodes */
+  struct Proto **p;  /* 函数原型表,用于存放内嵌函数的原型 functions defined inside the function */
   Upvaldesc *upvalues;  /* 存储函数中用到的Upvalue信息 upvalue information */
-  ls_byte *lineinfo;  /* 行号信息表，存储每个指令对应的源代码行号 information about source lines (debug information) */
-  AbsLineInfo *abslineinfo;  /* 绝对行号信息表，存储每个指令对应的源代码绝对行号 idem */
-  LocVar *locvars;  /* 局部变量表，存储函数中局部变量的信息 information about local variables (debug information) */
+  ls_byte *lineinfo;  /* 行号信息表,存储每个指令对应的源代码行号 information about source lines (debug information) */
+  AbsLineInfo *abslineinfo;  /* 绝对行号信息表,存储每个指令对应的源代码绝对行号 idem */
+  LocVar *locvars;  /* 局部变量表,存储函数中局部变量的信息 information about local variables (debug information) */
   TString  *source;  /* 指向源代码文件名的指针 used for debug information */
   GCObject *gclist; /* GC链表节点 */
 } Proto;
@@ -624,14 +624,14 @@ typedef struct Proto {
 */
 typedef struct UpVal {
   CommonHeader; /* 通用的 GCObject 结构体头部 */
-  lu_byte tbc;  /* true 表示该 Upvalue 是一个 to-be-closed 变量，即需要执行清理动作 true if it represents a to-be-closed variable */
-  TValue *v;  /* 如果该 Upvalue 关联的局部变量仍在栈上，则指向该局部变量的位置；否则，指向该 Upvalue 的值 points to stack or to its own value */
+  lu_byte tbc;  /* true 表示该 Upvalue 是一个 to-be-closed 变量,即需要执行清理动作 true if it represents a to-be-closed variable */
+  TValue *v;  /* 如果该 Upvalue 关联的局部变量仍在栈上,则指向该局部变量的位置；否则,指向该 Upvalue 的值 points to stack or to its own value */
   union {
     struct {  /* (when open) */
       struct UpVal *next;  /* linked list */
       struct UpVal **previous;
-    } open; /* 当该 Upvalue 关联的局部变量仍在栈上时，它表示一个链表节点，其中 next 指向下一个 Upvalue，而 previous 是指向该 Upvalue 指针的地址 */
-    TValue value;  /* 当该 Upvalue 关联的局部变量已经从栈上移除时，value 就是 Upvalue 的值 the value (when closed) */
+    } open; /* 当该 Upvalue 关联的局部变量仍在栈上时,它表示一个链表节点,其中 next 指向下一个 Upvalue,而 previous 是指向该 Upvalue 指针的地址 */
+    TValue value;  /* 当该 Upvalue 关联的局部变量已经从栈上移除时,value 就是 Upvalue 的值 the value (when closed) */
   } u;
 } UpVal;
 
@@ -742,15 +742,15 @@ typedef union Node {
 
 /// @brief Lua 的 表 结构
 typedef struct Table {
-  CommonHeader; // 一个指向 GCObject 的指针，用于垃圾回收
-  lu_byte flags;  /* 1<<p means tagmethod(p) is not present  用于标识表是否有某些特殊的属性，例如是否需要调用元方法、是否为弱表等等*/
+  CommonHeader; // 一个指向 GCObject 的指针,用于垃圾回收
+  lu_byte flags;  /* 1<<p means tagmethod(p) is not present  用于标识表是否有某些特殊的属性,例如是否需要调用元方法、是否为弱表等等*/
   lu_byte lsizenode;  /* log2 of size of 'node' array 哈希表的大小 , 由于哈希表的大小一定为 2 的整数次幂 , 所以这里表示的是幂次 , 而不是实际大小 . node 数组的大小为 2^lsizenode */
   unsigned int alimit;  /* "limit" of 'array' array 数组部分的大小。array[0] 至 array[alimit-1] 表示数组部分 */
   TValue *array;  /* array part */
   Node *node;  // 哈希表
-  Node *lastfree;  /* any free position is before this position  指向 Node 数组中的一个空闲位置，用于快速分配新的节点*/
+  Node *lastfree;  /* any free position is before this position  指向 Node 数组中的一个空闲位置,用于快速分配新的节点*/
   struct Table *metatable;
-  GCObject *gclist; // 用于垃圾回收，指向下一个需要回收的对象
+  GCObject *gclist; // 用于垃圾回收,指向下一个需要回收的对象
 } Table;
 
 

@@ -27,7 +27,7 @@ std::string getFileMD5(const std::string &filename)
             new unsigned char[bufferLen]{}};
         unsigned long long totalReadCount = 0;
         decltype(fin.gcount()) readCount = 0;
-        // 读取文件内容，调用MD5Update()更新MD5值
+        // 读取文件内容,调用MD5Update()更新MD5值
         while (fin.read(reinterpret_cast<char *>(buffer.get()), bufferLen))
         {
 

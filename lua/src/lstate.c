@@ -198,13 +198,13 @@ static void stack_init (lua_State *L1, lua_State *L) {
   ci = &L1->base_ci; // ci 指向 L1->base_ci
   ci->next = ci->previous = NULL;
   ci->callstatus = CIST_C;
-  ci->func = L1->top; // 将func指针指向栈顶，因为这个CallInfo记录的是整个Lua栈的状态，而不仅仅是当前函数调用的状态
+  ci->func = L1->top; // 将func指针指向栈顶,因为这个CallInfo记录的是整个Lua栈的状态,而不仅仅是当前函数调用的状态
   ci->u.c.k = NULL;
   ci->nresults = 0;
   setnilvalue(s2v(L1->top));  /* 'function' entry for this 'ci' */
   L1->top++;
-  ci->top = L1->top + LUA_MINSTACK; // ci->top指向栈顶指针的后面LUA_MINSTACK个元素，这些元素预留给函数调用
-  L1->ci = ci; // 将ci设置为当前lua_State的ci字段，表示这是当前正在执行的函数调用信息
+  ci->top = L1->top + LUA_MINSTACK; // ci->top指向栈顶指针的后面LUA_MINSTACK个元素,这些元素预留给函数调用
+  L1->ci = ci; // 将ci设置为当前lua_State的ci字段,表示这是当前正在执行的函数调用信息
 }
 
 

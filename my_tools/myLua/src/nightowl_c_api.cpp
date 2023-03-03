@@ -177,7 +177,7 @@ namespace NIGHTOWL
                 copyFilesList.insert(std::make_pair(from, to));
             }
 
-            lua_pop(L, 1); // 把栈顶的值移出栈，让key成为栈顶以便继续遍历
+            lua_pop(L, 1); // 把栈顶的值移出栈,让key成为栈顶以便继续遍历
         }
         for (size_t i = 0; i < 6; i++)
         {
