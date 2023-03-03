@@ -109,7 +109,12 @@ LUA_API int lua_setcstacklimit (lua_State *L, unsigned int limit) {
   return LUAI_MAXCCALLS;  /* warning?? */
 }
 
-
+/**
+ * @brief 创建一个新的调用信息(CallInfo)对象，并将其插入到 L->ci 后面
+ * 
+ * @param L 
+ * @return CallInfo* 
+ */
 CallInfo *luaE_extendCI (lua_State *L) {
   CallInfo *ci;
   lua_assert(L->ci->next == NULL);
