@@ -257,7 +257,7 @@ static void f_luaopen (lua_State *L, void *ud) {
 ** 就是简单初始化 不分配内存空间 , 但是 L->l_G = g
 */
 static void preinit_thread (lua_State *L, global_State *g) {
-  G(L) = g; // L->l_G = g
+  G(L) = g;
   L->stack = NULL;
   L->ci = NULL;
   L->nci = 0;
@@ -372,17 +372,13 @@ LUA_API lua_State *lua_newstate (lua_Alloc f, void *ud) {
   if (l == NULL) return NULL;
   L = &l->l.l;
   g = &l->g;
-  L->tt = LUA_VTHREAD; /*0b1000*/
-  g->currentwhite = bitmask(WHITE0BIT); /*0b1000*/
+  L->tt = LUA_VTHREAD;
+  g->currentwhite = bitmask(WHITE0BIT);
   L->marked = luaC_white(g);
   preinit_thread(L, g);
-  g->allgc = obj2gco(L);  /* by now, only object is the main thread
-                            (&(((union GCUnion *)((L)))->gc)); // CommonHeader
-                          */
+  g->allgc = obj2gco(L);  /* by now, only object is the main thread */
   L->next = NULL;
-  incnny(L);  /* main thread is always non yieldable 
-                ((L)->nCcalls += 0x10000) = 0x10000 十六进制
-              */
+  incnny(L);  /* main thread is always non yieldable */
   g->frealloc = f;
   g->ud = ud;
   g->warnf = NULL;
@@ -392,7 +388,7 @@ LUA_API lua_State *lua_newstate (lua_Alloc f, void *ud) {
   g->gcstp = GCSTPGC;  /* no GC while building state */
   g->strt.size = g->strt.nuse = 0;
   g->strt.hash = NULL;
-  setnilvalue(&g->l_registry); // ((&g->l_registry)->tt_=(((0) | ((0) << 4))))
+  setnilvalue(&g->l_registry);
   g->panic = NULL;
   g->gcstate = GCSpause;
   g->gckind = KGC_INC;
