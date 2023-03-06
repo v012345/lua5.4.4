@@ -629,8 +629,8 @@ typedef struct UpVal {
   union {
     struct {  /* (when open) */
       struct UpVal *next;  /* linked list */
-      struct UpVal **previous;
-    } open; /* 当该 Upvalue 关联的局部变量仍在栈上时,它表示一个链表节点,其中 next 指向下一个 Upvalue,而 previous 是指向该 Upvalue 指针的地址 */
+      struct UpVal **previous;  // 指向一个链表节点的前一个节点的 next 指针
+    } open; /* 当该 Upvalue 关联的局部变量仍在栈上时,它表示一个链表节点,其中 next 指向下一个 Upvalue */
     TValue value;  /* 当该 Upvalue 关联的局部变量已经从栈上移除时,value 就是 Upvalue 的值 the value (when closed) */
   } u;
 } UpVal;
