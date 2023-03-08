@@ -169,8 +169,8 @@ int luaD_rawrunprotected (lua_State *L, Pfunc f, void *ud) {
 static void correctstack (lua_State *L, StkId oldstack, StkId newstack) {
   CallInfo *ci;
   UpVal *up;
-  L->top = (L->top - oldstack) + newstack;
-  L->tbclist = (L->tbclist - oldstack) + newstack;
+  L->top = (L->top - oldstack) + newstack; // L->top - oldstack (L->top 与 oldstack 的相对位置) + newstack (现在 L->top 在 newstack 中的位置)
+  L->tbclist = (L->tbclist - oldstack) + newstack; // 同上 , 但是这里可以加深对 Upvalue 的理解
   for (up = L->openupval; up != NULL; up = up->u.open.next)
     up->v = s2v((uplevel(up) - oldstack) + newstack);
   for (ci = L->ci; ci != NULL; ci = ci->previous) {
