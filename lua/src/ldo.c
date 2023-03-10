@@ -150,12 +150,10 @@ int luaD_rawrunprotected(lua_State *L, Pfunc f, void *ud) {
     lj.status = LUA_OK;               // 初始化结构体成员status为LUA_OK
     lj.previous = L->errorJmp;        // 将当前的long jump链表头连接到结构体变量的previous指针域上 /* chain new error handler */
     L->errorJmp = &lj;                // 将当前结构体变量连接到lua_State结构体上的long jump链表头
-    // 这里是一个宏定义,用于跨平台地处理异常
-    LUAI_TRY(L, &lj, (*f)(L, ud); // 执行函数指针f指向的函数,参数为L和ud
-    );
-    L->errorJmp = lj.previous; // 恢复lua_State结构体上的long jump链表头 /* restore old error handler */
-    L->nCcalls = oldnCcalls;   // 恢复调用栈层数
-    return lj.status;          // 返回结构体成员status
+    LUAI_TRY(L, &lj, (*f)(L, ud););   // 这里是一个宏定义,用于跨平台地处理异常 执行函数指针f指向的函数,参数为L和ud
+    L->errorJmp = lj.previous;        // 恢复lua_State结构体上的long jump链表头 /* restore old error handler */
+    L->nCcalls = oldnCcalls;          // 恢复调用栈层数
+    return lj.status;                 // 返回结构体成员status
 }
 
 /* }====================================================== */
@@ -447,12 +445,13 @@ l_sinline void moveresults(lua_State *L, StkId res, int nres, int wanted) {
     L->top = res + wanted; /* top points after the last result */
 }
 
-/*
-** Finishes a function call: calls hook if necessary, moves current
-** number of results to proper place, and returns to previous call
-** info. If function has to close variables, hook must be called after
-** that.
-*/
+/// @brief Lua函数调用结束后的一些收尾工作
+/// Finishes a function call: calls hook if necessary, moves current
+/// number of results to proper place, and returns to previous call info.
+/// If function has to close variables, hook must be called after that.
+/// @param L 
+/// @param ci 
+/// @param nres 
 void luaD_poscall(lua_State *L, CallInfo *ci, int nres) {
     int wanted = ci->nresults;
     if (l_unlikely(L->hookmask && !hastocloseCfunc(wanted)))
