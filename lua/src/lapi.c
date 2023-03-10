@@ -582,6 +582,11 @@ LUA_API const char *lua_pushfstring(lua_State *L, const char *fmt, ...) {
     return ret;
 }
 
+/// @brief 新的C闭包
+/// @param L 
+/// @param fn a C function that will be the underlying implementation of the closure
+/// @param n the number of upvalues for the closure
+/// @return 
 LUA_API void lua_pushcclosure(lua_State *L, lua_CFunction fn, int n) {
     lua_lock(L);
     if (n == 0) {
