@@ -616,9 +616,7 @@ typedef struct Proto {
         checkliveness(L, io);                                                                                                                                                      \
     }
 
-/*
-** Upvalues for Lua closures
-*/
+///@brief Upvalues for Lua closures
 typedef struct UpVal {
     CommonHeader; /* 通用的 GCObject 结构体头部 */
     lu_byte tbc;  /* true 表示该 Upvalue 是一个 to-be-closed 变量,即需要执行清理动作 true if it represents a to-be-closed variable */
@@ -626,7 +624,7 @@ typedef struct UpVal {
     union {
         struct {                     /* (when open) */
             struct UpVal *next;      /* linked list */
-            struct UpVal **previous; // 指向一个链表节点的前一个节点的 next 指针
+            struct UpVal **previous; // 指向前一个结点指针的指针
         } open;                      /* 当该 Upvalue 关联的局部变量仍在栈上时,它表示一个链表节点,其中 next 指向下一个 Upvalue */
         TValue value;                /* 当该 Upvalue 关联的局部变量已经从栈上移除时,value 就是 Upvalue 的值 the value (when closed) */
     } u;
@@ -646,7 +644,7 @@ typedef struct CClosure {
 typedef struct LClosure {
     ClosureHeader;
     struct Proto *p;
-    UpVal *upvals[1]; /* list of upvalues */
+    UpVal *upvals[1]; /* 这是一个指针数组 list of upvalues */
 } LClosure;
 
 typedef union Closure {
