@@ -583,10 +583,10 @@ LUA_API const char *lua_pushfstring(lua_State *L, const char *fmt, ...) {
 }
 
 /// @brief 新的C闭包
-/// @param L 
+/// @param L
 /// @param fn a C function that will be the underlying implementation of the closure
 /// @param n the number of upvalues for the closure
-/// @return 
+/// @return
 LUA_API void lua_pushcclosure(lua_State *L, lua_CFunction fn, int n) {
     lua_lock(L);
     if (n == 0) {
@@ -1160,10 +1160,8 @@ LUA_API int lua_load(lua_State *L, lua_Reader reader, void *data, const char *ch
     if (status == LUA_OK) {                      /* no errors? */
         LClosure *f = clLvalue(s2v(L->top - 1)); /* get newly created function */
         if (f->nupvalues >= 1) {                 /* does it have an upvalue? */
-            /* get global table from registry */
-            const TValue *gt = getGtable(L);
-            /* set global table as 1st upvalue of 'f' (may be LUA_ENV) */
-            setobj(L, f->upvals[0]->v, gt);
+            const TValue *gt = getGtable(L);     /* get global table from registry */
+            setobj(L, f->upvals[0]->v, gt);      /* set global table as 1st upvalue of 'f' (may be LUA_ENV) */
             luaC_barrier(L, f->upvals[0], gt);
         }
     }

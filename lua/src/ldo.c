@@ -449,9 +449,9 @@ l_sinline void moveresults(lua_State *L, StkId res, int nres, int wanted) {
 /// Finishes a function call: calls hook if necessary, moves current
 /// number of results to proper place, and returns to previous call info.
 /// If function has to close variables, hook must be called after that.
-/// @param L 
-/// @param ci 
-/// @param nres 
+/// @param L
+/// @param ci
+/// @param nres
 void luaD_poscall(lua_State *L, CallInfo *ci, int nres) {
     int wanted = ci->nresults;
     if (l_unlikely(L->hookmask && !hastocloseCfunc(wanted)))
