@@ -17,17 +17,12 @@
 */
 #define MEMERRMSG "not enough memory"
 
-/*
-** Size of a TString: Size of the header plus space for the string
-** itself (including final '\0').
-*/
+/// @brief Size of a TString: Size of the header plus space for the string itself (including final '\0').
 #define sizelstring(l) (offsetof(TString, contents) + ((l) + 1) * sizeof(char))
 
 #define luaS_newliteral(L, s) (luaS_newlstr(L, "" s, (sizeof(s) / sizeof(char)) - 1))
 
-/*
-** 判断一个串是不是保留字 test whether a string is a reserved word
-*/
+/// @brief 判断一个串是不是保留字 test whether a string is a reserved word
 #define isreserved(s) ((s)->tt == LUA_VSHRSTR && (s)->extra > 0)
 
 /*
