@@ -318,15 +318,22 @@ struct lua_State {
 */
 #define completestate(g) ttisnil(&g->nilvalue)
 
-/*
-** Union of all collectable objects (only for conversions)
-** ISO C99, 6.5.2.3 p.5:
-** "if a union contains several structures that share a common initial
-** sequence [...], and if the union object currently contains one
-** of these structures, it is permitted to inspect the common initial
-** part of any of them anywhere that a declaration of the complete type
-** of the union is visible."
-*/
+/// @brief lua 可回收对象的联合体
+/// Union of all collectable objects (only for conversions)
+/// ISO C99, 6.5.2.3 p.5:
+/// "if a union contains several structures that share a common initial
+/// sequence [...], and if the union object currently contains one
+/// of these structures, it is permitted to inspect the common initial
+/// part of any of them anywhere that a declaration of the complete type
+/// of the union is visible."
+/// @param gc 对象的公共头部
+/// @param ts TString 字符串
+/// @param u Udata 用户数据
+/// @param cl Closure 闭包
+/// @param h Table 表
+/// @param p Proto 函数原型
+/// @param th lua_State 线程的状态机
+/// @param upv UpVal Upvalues
 union GCUnion {
     GCObject gc; /* common header */
     struct TString ts;
@@ -346,14 +353,23 @@ union GCUnion {
 #define cast_u(o) cast(union GCUnion *, (o))
 
 /* macros to convert a GCObject into a specific value */
+/// @brief gc对象转化为字符串
 #define gco2ts(o) check_exp(novariant((o)->tt) == LUA_TSTRING, &((cast_u(o))->ts))
+/// @brief gc对象转化为用户数据
 #define gco2u(o) check_exp((o)->tt == LUA_VUSERDATA, &((cast_u(o))->u))
+/// @brief gc对象转化为 lua 闭包
 #define gco2lcl(o) check_exp((o)->tt == LUA_VLCL, &((cast_u(o))->cl.l))
+/// @brief gc对象转化为 c 闭包
 #define gco2ccl(o) check_exp((o)->tt == LUA_VCCL, &((cast_u(o))->cl.c))
+/// @brief gc对象转化为闭包
 #define gco2cl(o) check_exp(novariant((o)->tt) == LUA_TFUNCTION, &((cast_u(o))->cl))
+/// @brief gc对象转化为表
 #define gco2t(o) check_exp((o)->tt == LUA_VTABLE, &((cast_u(o))->h))
+/// @brief gc对象转化为函数原型
 #define gco2p(o) check_exp((o)->tt == LUA_VPROTO, &((cast_u(o))->p))
+/// @brief gc对象转化为 lua 状态机
 #define gco2th(o) check_exp((o)->tt == LUA_VTHREAD, &((cast_u(o))->th))
+/// @brief gc对象转化为 Upvalue
 #define gco2upv(o) check_exp((o)->tt == LUA_VUPVAL, &((cast_u(o))->upv))
 
 /*
