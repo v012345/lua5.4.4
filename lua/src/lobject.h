@@ -38,10 +38,12 @@
 /* add variant bits to a type */
 #define makevariant(t, v) ((t) | ((v) << 4))
 
-/*
-** Union of all Lua values
-** 这是基本数据 , 所以在要返回复杂结构 , 就要用到 userdata
-*/
+/// @brief Union of all Lua values
+/// @param gc collectable objects 对应有 CommonHeader 的对象 , 包括 TString , Udata , Udata0 , Proto , UpVal , Closure , Table
+/// @param p light userdata 不需要 lua 来关心数据的生存期 , 不被 gc 回收
+/// @param f int (*) (lua_State *L) 不被 gc 回收
+/// @param i long long 不被 gc 回收
+/// @param n double 不被 gc 回收
 typedef union Value {
     struct GCObject *gc; /* collectable objects */
     void *p;             /* light userdata */
@@ -535,28 +537,28 @@ typedef struct AbsLineInfo {
 
 ///@brief Function Prototypes
 typedef struct Proto {
-    CommonHeader;             /* 通用对象头部 */
-    lu_byte numparams;        /* 函数的固定参数个数 number of fixed (named) parameters */
-    lu_byte is_vararg;        /* 表示该函数是否为变长参数函数 */
-    lu_byte maxstacksize;     /* 表示该函数执行时最多需要多少个栈空间(寄存器 , 对于函数来说,栈就是寄存器了) number of registers needed by this function */
-    int sizeupvalues;         /* 函数中的Upvalue数量 size of 'upvalues' */
-    int sizek;                /* 常量表中元素的个数 size of 'k' */
-    int sizecode;             /* 指令表中元素的个数 */
-    int sizelineinfo;         /* 行号信息表中元素的个数 */
-    int sizep;                /* 函数原型表中元素的个数（用于表示内嵌函数） size of 'p' */
-    int sizelocvars;          /* 局部变量表中元素的个数 */
-    int sizeabslineinfo;      /* 绝对行号信息表中元素的个数 size of 'abslineinfo' */
-    int linedefined;          /* 函数定义在源代码中的第一行行号 debug information  */
-    int lastlinedefined;      /* 函数定义在源代码中的最后一行行号 debug information  */
-    TValue *k;                /* 常量表,用于存放函数中用到的常量(就是字面量,只能是数字，布尔值，字符串，和nil这些基本类型) constants used by the function */
+    CommonHeader;      /* 通用对象头部 */
+    lu_byte numparams; /* 函数的固定参数个数 number of fixed (named) parameters */
+    lu_byte is_vararg; /* 表示该函数是否为变长参数函数 */
+    lu_byte maxstacksize; /* 表示该函数执行时最多需要多少个栈空间(寄存器 , 对于函数来说,栈就是寄存器了) number of registers needed by this function */
+    int sizeupvalues;     /* 函数中的Upvalue数量 size of 'upvalues' */
+    int sizek;            /* 常量表中元素的个数 size of 'k' */
+    int sizecode;         /* 指令表中元素的个数 */
+    int sizelineinfo;     /* 行号信息表中元素的个数 */
+    int sizep;            /* 函数原型表中元素的个数（用于表示内嵌函数） size of 'p' */
+    int sizelocvars;      /* 局部变量表中元素的个数 */
+    int sizeabslineinfo; /* 绝对行号信息表中元素的个数 size of 'abslineinfo' */
+    int linedefined;     /* 函数定义在源代码中的第一行行号 debug information  */
+    int lastlinedefined; /* 函数定义在源代码中的最后一行行号 debug information  */
+    TValue *k; /* 常量表,用于存放函数中用到的常量(就是字面量,只能是数字，布尔值，字符串，和nil这些基本类型) constants used by the function */
     Instruction *code;        /* 指令表,存放函数中的指令 opcodes */
     struct Proto **p;         /* 使用**,是因为一个函数里可以写多个函数,是一个树结构 functions defined inside the function */
     Upvaldesc *upvalues;      /* 存储函数中用到的Upvalue信息 upvalue information */
     ls_byte *lineinfo;        /* 行号信息表,存储每个指令对应的源代码行号 information about source lines (debug information) */
     AbsLineInfo *abslineinfo; /* 绝对行号信息表,存储每个指令对应的源代码绝对行号 idem */
-    LocVar *locvars;          /* 局部变量表,存储函数中局部变量的信息(固定参数，可变参数，和本地变量) information about local variables (debug information) */
-    TString *source;          /* 指向源代码文件名的指针 used for debug information */
-    GCObject *gclist;         /* GC链表节点 */
+    LocVar *locvars; /* 局部变量表,存储函数中局部变量的信息(固定参数，可变参数，和本地变量) information about local variables (debug information) */
+    TString *source; /* 指向源代码文件名的指针 used for debug information */
+    GCObject *gclist; /* GC链表节点 */
 } Proto;
 
 /* }================================================================== */
