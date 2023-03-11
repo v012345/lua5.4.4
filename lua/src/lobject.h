@@ -173,6 +173,7 @@ typedef StackValue *StkId;
 /* macro to test for a standard nil */
 #define ttisstrictnil(o) checktag((o), LUA_VNIL)
 
+/// @brief 把对象设置成nil
 #define setnilvalue(obj) settt_(obj, LUA_VNIL)
 
 #define isabstkey(v) checktag((v), LUA_VABSTKEY)
@@ -310,6 +311,7 @@ typedef struct GCObject {
 #define fltvalueraw(v) ((v).n)
 #define ivalueraw(v) ((v).i)
 
+/// @brief 把对象设置成浮点数
 #define setfltvalue(obj, x)                                                                                                                                                        \
     {                                                                                                                                                                              \
         TValue *io = (obj);                                                                                                                                                        \
@@ -324,6 +326,7 @@ typedef struct GCObject {
         val_(io).n = (x);                                                                                                                                                          \
     }
 
+/// @brief 把对象设置成整数
 #define setivalue(obj, x)                                                                                                                                                          \
     {                                                                                                                                                                              \
         TValue *io = (obj);                                                                                                                                                        \
@@ -373,20 +376,17 @@ typedef struct GCObject {
 /* set a string to a new object */
 #define setsvalue2n setsvalue
 
-/*
-** Header for a string value. 一个 GC 头 , 一个额外 extra  , 一个 contents ...
-*/
+/// @brief Header for a string value.
 typedef struct TString {
     CommonHeader;
-    lu_byte extra; /*对于短字符串 , extra 用于记录这个字符串是否为保留字 , 这个标记用于词法分析器对保留字的快速判断; 对于长字符串 , 可以用于惰性求哈希值 reserved words for short
-                      strings; "has hash" for longs */
+    lu_byte extra;     /*reserved words for short strings; "has hash" for longs */
     lu_byte shrlen;    /* length for short strings */
     unsigned int hash; /* 字符串的哈希值,用于字符串的查找和比较操作 */
     union {
         size_t lnglen;         /* TString 是长串时 , 表示长符的长度  length for long strings */
         struct TString *hnext; /* 短串时 , 某个桶中的中 , 当作链表使用 linked list for hash table */
     } u;
-    char contents[1]; /* 字符串的具体内容,以 null 结尾 */
+    char contents[1]; /* 一个柔性数组 字符串的具体内容,以 null 结尾 */
 } TString;
 
 /*
