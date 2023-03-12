@@ -997,11 +997,7 @@ static void warnfon(void *ud, const char *message, int tocont) {
     warnfcont(ud, message, tocont);                     /* finish processing */
 }
 
-/**
- * @brief 使用 lua_newstate 加入官方默认内存管理函数 生成一个 lua 状态机
- *
- * @return lua_State *
- */
+/// @brief 使用 lua_newstate 加入官方默认内存管理函数 生成一个 lua 状态机
 LUALIB_API lua_State *luaL_newstate(void) {
     lua_State *L = lua_newstate(l_alloc, NULL);
     if (l_likely(L)) {
