@@ -298,14 +298,14 @@ struct lua_State {
     GCObject *gclist;             // 待 GC 的对象列表
     struct lua_State *twups;      /* 当前线程的 open upvalue 列表 list of threads with open upvalues */
     struct lua_longjmp *errorJmp; /* 当前错误恢复点,用于处理 Lua 错误 current error recover point */
-    CallInfo base_ci; /* 根据调用信息（Callinfo）创建的一个基础的调用信息（Callinfo）结构体,即第一个被 C 调用的函数的调用信息 CallInfo for first level (C calling Lua) */
-    volatile lua_Hook hook;      // 当前调试钩子函数
-    ptrdiff_t errfunc;           /* 当前错误处理函数的栈索引 current error handling function (stack index) */
-    l_uint32 nCcalls;            /* 嵌套的 C 函数调用数量 number of nested (non-yieldable | C)  calls */
-    int oldpc;                   /* 上一个被跟踪的指令位置 last pc traced */
-    int basehookcount;           // 钩子函数调用次数的基准值
-    int hookcount;               // 计数当前的钩子函数调用次数
-    volatile l_signalT hookmask; // 钩子函数的类型掩码
+    CallInfo base_ci;             /* CallInfo for first level (C calling Lua) */
+    volatile lua_Hook hook;       // 当前调试钩子函数
+    ptrdiff_t errfunc;            /* 当前错误处理函数的栈索引 current error handling function (stack index) */
+    l_uint32 nCcalls;             /* 嵌套的 C 函数调用数量 number of nested (non-yieldable | C)  calls */
+    int oldpc;                    /* 上一个被跟踪的指令位置 last pc traced */
+    int basehookcount;            // 钩子函数调用次数的基准值
+    int hookcount;                // 计数当前的钩子函数调用次数
+    volatile l_signalT hookmask;  // 钩子函数的类型掩码
 };
 
 #define G(L) (L->l_G)

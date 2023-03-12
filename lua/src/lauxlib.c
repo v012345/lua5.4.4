@@ -706,13 +706,18 @@ LUALIB_API void luaL_unref (lua_State *L, int t, int ref) {
 ** =======================================================
 */
 
+/// @brief 管理文件的读取和缓存
 typedef struct LoadF {
   int n;  /* number of pre-read characters */
   FILE *f;  /* file being read */
   char buff[BUFSIZ];  /* area for reading file */
 } LoadF;
 
-
+/// @brief 用于从文件中读取 Lua 脚本的读取器函数 , 就是 lua_Reader 的实现
+/// @param L 
+/// @param ud 
+/// @param size 
+/// @return 
 static const char *getF (lua_State *L, void *ud, size_t *size) {
   LoadF *lf = (LoadF *)ud;
   (void)L;  /* not used */

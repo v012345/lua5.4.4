@@ -153,12 +153,9 @@ LUA_API lua_Number lua_version(lua_State *L) {
 */
 LUA_API int lua_absindex(lua_State *L, int idx) { return (idx > 0 || ispseudo(idx)) ? idx : cast_int(L->top - L->ci->func) + idx; }
 
-/**
- * @brief 返回参数的个数 ; 返回栈顶元素的索引 因为索引是从 1 开始编号的, 所以这个结果等于堆栈上的元素个数（因此返回 0 表示堆栈为空）
- *
- * @param L
- * @return int
- */
+/// @brief 返回参数的个数
+/// @param L
+/// @return int
 LUA_API int lua_gettop(lua_State *L) { return cast_int(L->top - (L->ci->func + 1)); }
 
 /**

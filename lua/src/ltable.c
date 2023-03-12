@@ -639,9 +639,9 @@ static Node *getfreepos(Table *t) {
 void luaH_newkey(lua_State *L, Table *t, const TValue *key, TValue *value) {
     Node *mp;
     TValue aux;
-    if (l_unlikely(ttisnil(key)))
+    if (l_unlikely(ttisnil(key))) // 如果 key 是 nil 直接报错
         luaG_runerror(L, "table index is nil");
-    else if (ttisfloat(key)) {
+    else if (ttisfloat(key)) { // 这里 float 是包括 integer 的
         lua_Number f = fltvalue(key);
         lua_Integer k;
         if (luaV_flttointeger(f, &k, F2Ieq)) { /* does key fit in an integer? */

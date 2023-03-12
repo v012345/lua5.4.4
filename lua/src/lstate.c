@@ -199,8 +199,8 @@ static void stack_init (lua_State *L1, lua_State *L) {
     setnilvalue(s2v(L1->stack + i));  /* 初始化分配来的栈 erase new stack */
   L1->top = L1->stack; // top指向最后一个空闲的位置 , 现在栈底就是最后一个空闲的位置
   L1->stack_last = L1->stack + BASIC_STACK_SIZE; // stack_last指向数据栈的最后一个元素
-  /* 初始化第一个CallInfo对象 initialize first ci */
-  ci = &L1->base_ci; // ci 指向 L1->base_ci
+  /* initialize first ci */
+  ci = &L1->base_ci; // L1->base_ci 记录的是整个Lua栈的状态
   ci->next = ci->previous = NULL;
   ci->callstatus = CIST_C;
   ci->func = L1->top; // 将func指针指向栈顶,因为这个CallInfo记录的是整个Lua栈的状态,而不仅仅是当前函数调用的状态
