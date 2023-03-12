@@ -77,9 +77,8 @@ static TValue *index2value(lua_State *L, int idx) {
     }
 }
 
-/*
-** Convert a valid actual index (not a pseudo-index) to its address.
-*/
+/// @brief 如果 idx 是负数 , 那么就是从栈顶数 , -1 就是 top 下面那个 . 如果 idx 是正数 , 那么就从 L->ci->func 开始数 , 1 就是 L->ci->func + 1;
+/// Convert a valid actual index (not a pseudo-index) to its address.
 l_sinline StkId index2stack(lua_State *L, int idx) {
     CallInfo *ci = L->ci;
     if (idx > 0) {
@@ -202,25 +201,19 @@ LUA_API void lua_closeslot(lua_State *L, int idx) {
     lua_unlock(L);
 }
 
-/*
-** Reverse the stack segment from 'from' to 'to'
-** (auxiliary to 'lua_rotate')
-** Note that we move(copy) only the value inside the stack.
-** (We do not move additional fields that may exist.)
-*/
+/// @brief 把栈从 from 到 to 作了一次反转
+/// Reverse the stack segment from 'from' to 'to' (auxiliary to 'lua_rotate') Note that we move(copy) only the value inside the stack. (We do not move additional fields that may exist.)
 l_sinline void reverse(lua_State *L, StkId from, StkId to) {
     for (; from < to; from++, to--) {
         TValue temp;
-        setobj(L, &temp, s2v(from));
-        setobjs2s(L, from, to);
-        setobj2s(L, to, &temp);
+        setobj(L, &temp, s2v(from)); // 把 from 复制到 temp 里
+        setobjs2s(L, from, to);      // 把 to 复制到 from 里
+        setobj2s(L, to, &temp);      // 把 temp 复制到 to
     }
 }
 
-/*
-** Let x = AB, where A is a prefix of length 'n'. Then,
-** rotate x n == BA. But BA == (A^r . B^r)^r.
-*/
+/// @brief n 与 idx 与相反 , n 为正从栈顶向下数 , 为负则从 idx 向上数 , 把 idx 到 top 中的元素 , 以 n 数出来的位置为界 , 上层的元素去下面 , 下层的元素到上面;
+/// Let x = AB, where A is a prefix of length 'n'. Then, rotate x n == BA. But BA == (A^r . B^r)^r.
 LUA_API void lua_rotate(lua_State *L, int idx, int n) {
     StkId p, t, m;
     lua_lock(L);

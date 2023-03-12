@@ -3,7 +3,7 @@ BasedOnStyle: LLVM
 # 缩进宽度
 IndentWidth: 4
 # 换行宽度
-ColumnLimit: 180
+ColumnLimit: 200
 # 空格是否保留
 UseTab: Never
 # 大括号是否单独一行

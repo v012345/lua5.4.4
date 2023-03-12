@@ -57,8 +57,8 @@ typedef union Value {
 ** an actual value plus a tag with its type.
 */
 
-#define TValuefields                                                                                                                                                               \
-    Value value_;                                                                                                                                                                  \
+#define TValuefields                                                                                                                                                                                   \
+    Value value_;                                                                                                                                                                                      \
     lu_byte tt_
 
 typedef struct TValue {
@@ -103,15 +103,15 @@ typedef struct TValue {
 /* set a value's tag */
 #define settt_(o, t) ((o)->tt_ = (t))
 
-/* main macro to copy values (from 'obj2' to 'obj1') */
-#define setobj(L, obj1, obj2)                                                                                                                                                      \
-    {                                                                                                                                                                              \
-        TValue *io1 = (obj1);                                                                                                                                                      \
-        const TValue *io2 = (obj2);                                                                                                                                                \
-        io1->value_ = io2->value_;                                                                                                                                                 \
-        settt_(io1, io2->tt_);                                                                                                                                                     \
-        checkliveness(L, io1);                                                                                                                                                     \
-        lua_assert(!isnonstrictnil(io1));                                                                                                                                          \
+/// @brief 两个 TValue 类型的对象 , 把 obj2 的 value_ 与 tt_ 都复制到 obj1 ; main macro to copy values (from 'obj2' to 'obj1')
+#define setobj(L, obj1, obj2)                                                                                                                                                                          \
+    {                                                                                                                                                                                                  \
+        TValue *io1 = (obj1);                                                                                                                                                                          \
+        const TValue *io2 = (obj2);                                                                                                                                                                    \
+        io1->value_ = io2->value_;                                                                                                                                                                     \
+        settt_(io1, io2->tt_);                                                                                                                                                                         \
+        checkliveness(L, io1);                                                                                                                                                                         \
+        lua_assert(!isnonstrictnil(io1));                                                                                                                                                              \
     }
 
 /*
@@ -230,13 +230,13 @@ typedef StackValue *StkId;
 
 #define thvalue(o) check_exp(ttisthread(o), gco2th(val_(o).gc))
 
-#define setthvalue(L, obj, x)                                                                                                                                                      \
-    {                                                                                                                                                                              \
-        TValue *io = (obj);                                                                                                                                                        \
-        lua_State *x_ = (x);                                                                                                                                                       \
-        val_(io).gc = obj2gco(x_);                                                                                                                                                 \
-        settt_(io, ctb(LUA_VTHREAD));                                                                                                                                              \
-        checkliveness(L, io);                                                                                                                                                      \
+#define setthvalue(L, obj, x)                                                                                                                                                                          \
+    {                                                                                                                                                                                                  \
+        TValue *io = (obj);                                                                                                                                                                            \
+        lua_State *x_ = (x);                                                                                                                                                                           \
+        val_(io).gc = obj2gco(x_);                                                                                                                                                                     \
+        settt_(io, ctb(LUA_VTHREAD));                                                                                                                                                                  \
+        checkliveness(L, io);                                                                                                                                                                          \
     }
 
 #define setthvalue2s(L, o, t) setthvalue(L, s2v(o), t)
@@ -254,9 +254,9 @@ typedef StackValue *StkId;
 ** included in other objects)
 @param tt 数据的类型
 */
-#define CommonHeader                                                                                                                                                               \
-    struct GCObject *next;                                                                                                                                                         \
-    lu_byte tt;                                                                                                                                                                    \
+#define CommonHeader                                                                                                                                                                                   \
+    struct GCObject *next;                                                                                                                                                                             \
+    lu_byte tt;                                                                                                                                                                                        \
     lu_byte marked
 
 /* Common type for all collectable objects
@@ -280,12 +280,12 @@ typedef struct GCObject {
 
 #define gcvalueraw(v) ((v).gc)
 
-#define setgcovalue(L, obj, x)                                                                                                                                                     \
-    {                                                                                                                                                                              \
-        TValue *io = (obj);                                                                                                                                                        \
-        GCObject *i_g = (x);                                                                                                                                                       \
-        val_(io).gc = i_g;                                                                                                                                                         \
-        settt_(io, ctb(i_g->tt));                                                                                                                                                  \
+#define setgcovalue(L, obj, x)                                                                                                                                                                         \
+    {                                                                                                                                                                                                  \
+        TValue *io = (obj);                                                                                                                                                                            \
+        GCObject *i_g = (x);                                                                                                                                                                           \
+        val_(io).gc = i_g;                                                                                                                                                                             \
+        settt_(io, ctb(i_g->tt));                                                                                                                                                                      \
     }
 
 /* }================================================================== */
@@ -312,33 +312,33 @@ typedef struct GCObject {
 #define ivalueraw(v) ((v).i)
 
 /// @brief 把对象设置成浮点数
-#define setfltvalue(obj, x)                                                                                                                                                        \
-    {                                                                                                                                                                              \
-        TValue *io = (obj);                                                                                                                                                        \
-        val_(io).n = (x);                                                                                                                                                          \
-        settt_(io, LUA_VNUMFLT);                                                                                                                                                   \
+#define setfltvalue(obj, x)                                                                                                                                                                            \
+    {                                                                                                                                                                                                  \
+        TValue *io = (obj);                                                                                                                                                                            \
+        val_(io).n = (x);                                                                                                                                                                              \
+        settt_(io, LUA_VNUMFLT);                                                                                                                                                                       \
     }
 
-#define chgfltvalue(obj, x)                                                                                                                                                        \
-    {                                                                                                                                                                              \
-        TValue *io = (obj);                                                                                                                                                        \
-        lua_assert(ttisfloat(io));                                                                                                                                                 \
-        val_(io).n = (x);                                                                                                                                                          \
+#define chgfltvalue(obj, x)                                                                                                                                                                            \
+    {                                                                                                                                                                                                  \
+        TValue *io = (obj);                                                                                                                                                                            \
+        lua_assert(ttisfloat(io));                                                                                                                                                                     \
+        val_(io).n = (x);                                                                                                                                                                              \
     }
 
 /// @brief 把对象设置成整数
-#define setivalue(obj, x)                                                                                                                                                          \
-    {                                                                                                                                                                              \
-        TValue *io = (obj);                                                                                                                                                        \
-        val_(io).i = (x);                                                                                                                                                          \
-        settt_(io, LUA_VNUMINT);                                                                                                                                                   \
+#define setivalue(obj, x)                                                                                                                                                                              \
+    {                                                                                                                                                                                                  \
+        TValue *io = (obj);                                                                                                                                                                            \
+        val_(io).i = (x);                                                                                                                                                                              \
+        settt_(io, LUA_VNUMINT);                                                                                                                                                                       \
     }
 
-#define chgivalue(obj, x)                                                                                                                                                          \
-    {                                                                                                                                                                              \
-        TValue *io = (obj);                                                                                                                                                        \
-        lua_assert(ttisinteger(io));                                                                                                                                               \
-        val_(io).i = (x);                                                                                                                                                          \
+#define chgivalue(obj, x)                                                                                                                                                                              \
+    {                                                                                                                                                                                                  \
+        TValue *io = (obj);                                                                                                                                                                            \
+        lua_assert(ttisinteger(io));                                                                                                                                                                   \
+        val_(io).i = (x);                                                                                                                                                                              \
     }
 
 /* }================================================================== */
@@ -361,13 +361,13 @@ typedef struct GCObject {
 
 #define tsvalue(o) check_exp(ttisstring(o), gco2ts(val_(o).gc))
 
-#define setsvalue(L, obj, x)                                                                                                                                                       \
-    {                                                                                                                                                                              \
-        TValue *io = (obj);                                                                                                                                                        \
-        TString *x_ = (x);                                                                                                                                                         \
-        val_(io).gc = obj2gco(x_);                                                                                                                                                 \
-        settt_(io, ctb(x_->tt));                                                                                                                                                   \
-        checkliveness(L, io);                                                                                                                                                      \
+#define setsvalue(L, obj, x)                                                                                                                                                                           \
+    {                                                                                                                                                                                                  \
+        TValue *io = (obj);                                                                                                                                                                            \
+        TString *x_ = (x);                                                                                                                                                                             \
+        val_(io).gc = obj2gco(x_);                                                                                                                                                                     \
+        settt_(io, ctb(x_->tt));                                                                                                                                                                       \
+        checkliveness(L, io);                                                                                                                                                                          \
     }
 
 /* set a string to the stack */
@@ -427,20 +427,20 @@ typedef struct TString {
 
 #define pvalueraw(v) ((v).p)
 
-#define setpvalue(obj, x)                                                                                                                                                          \
-    {                                                                                                                                                                              \
-        TValue *io = (obj);                                                                                                                                                        \
-        val_(io).p = (x);                                                                                                                                                          \
-        settt_(io, LUA_VLIGHTUSERDATA);                                                                                                                                            \
+#define setpvalue(obj, x)                                                                                                                                                                              \
+    {                                                                                                                                                                                                  \
+        TValue *io = (obj);                                                                                                                                                                            \
+        val_(io).p = (x);                                                                                                                                                                              \
+        settt_(io, LUA_VLIGHTUSERDATA);                                                                                                                                                                \
     }
 
-#define setuvalue(L, obj, x)                                                                                                                                                       \
-    {                                                                                                                                                                              \
-        TValue *io = (obj);                                                                                                                                                        \
-        Udata *x_ = (x);                                                                                                                                                           \
-        val_(io).gc = obj2gco(x_);                                                                                                                                                 \
-        settt_(io, ctb(LUA_VUSERDATA));                                                                                                                                            \
-        checkliveness(L, io);                                                                                                                                                      \
+#define setuvalue(L, obj, x)                                                                                                                                                                           \
+    {                                                                                                                                                                                                  \
+        TValue *io = (obj);                                                                                                                                                                            \
+        Udata *x_ = (x);                                                                                                                                                                               \
+        val_(io).gc = obj2gco(x_);                                                                                                                                                                     \
+        settt_(io, ctb(LUA_VUSERDATA));                                                                                                                                                                \
+        checkliveness(L, io);                                                                                                                                                                          \
     }
 
 /* Ensures that addresses after this type are always fully aligned. */
@@ -537,28 +537,28 @@ typedef struct AbsLineInfo {
 
 ///@brief Function Prototypes
 typedef struct Proto {
-    CommonHeader;      /* 通用对象头部 */
-    lu_byte numparams; /* 函数的固定参数个数 number of fixed (named) parameters */
-    lu_byte is_vararg; /* 表示该函数是否为变长参数函数 */
-    lu_byte maxstacksize; /* 表示该函数执行时最多需要多少个栈空间(寄存器 , 对于函数来说,栈就是寄存器了) number of registers needed by this function */
-    int sizeupvalues;     /* 函数中的Upvalue数量 size of 'upvalues' */
-    int sizek;            /* 常量表中元素的个数 size of 'k' */
-    int sizecode;         /* 指令表中元素的个数 */
-    int sizelineinfo;     /* 行号信息表中元素的个数 */
-    int sizep;            /* 函数原型表中元素的个数（用于表示内嵌函数） size of 'p' */
-    int sizelocvars;      /* 局部变量表中元素的个数 */
-    int sizeabslineinfo; /* 绝对行号信息表中元素的个数 size of 'abslineinfo' */
-    int linedefined;     /* 函数定义在源代码中的第一行行号 debug information  */
-    int lastlinedefined; /* 函数定义在源代码中的最后一行行号 debug information  */
-    TValue *k; /* 常量表,用于存放函数中用到的常量(就是字面量,只能是数字，布尔值，字符串，和nil这些基本类型) constants used by the function */
+    CommonHeader;             /* 通用对象头部 */
+    lu_byte numparams;        /* 函数的固定参数个数 number of fixed (named) parameters */
+    lu_byte is_vararg;        /* 表示该函数是否为变长参数函数 */
+    lu_byte maxstacksize;     /* 表示该函数执行时最多需要多少个栈空间(寄存器 , 对于函数来说,栈就是寄存器了) number of registers needed by this function */
+    int sizeupvalues;         /* 函数中的Upvalue数量 size of 'upvalues' */
+    int sizek;                /* 常量表中元素的个数 size of 'k' */
+    int sizecode;             /* 指令表中元素的个数 */
+    int sizelineinfo;         /* 行号信息表中元素的个数 */
+    int sizep;                /* 函数原型表中元素的个数（用于表示内嵌函数） size of 'p' */
+    int sizelocvars;          /* 局部变量表中元素的个数 */
+    int sizeabslineinfo;      /* 绝对行号信息表中元素的个数 size of 'abslineinfo' */
+    int linedefined;          /* 函数定义在源代码中的第一行行号 debug information  */
+    int lastlinedefined;      /* 函数定义在源代码中的最后一行行号 debug information  */
+    TValue *k;                /* 常量表,用于存放函数中用到的常量(就是字面量,只能是数字，布尔值，字符串，和nil这些基本类型) constants used by the function */
     Instruction *code;        /* 指令表,存放函数中的指令 opcodes */
     struct Proto **p;         /* 使用**,是因为一个函数里可以写多个函数,是一个树结构 functions defined inside the function */
     Upvaldesc *upvalues;      /* 存储函数中用到的Upvalue信息 upvalue information */
     ls_byte *lineinfo;        /* 行号信息表,存储每个指令对应的源代码行号 information about source lines (debug information) */
     AbsLineInfo *abslineinfo; /* 绝对行号信息表,存储每个指令对应的源代码绝对行号 idem */
-    LocVar *locvars; /* 局部变量表,存储函数中局部变量的信息(固定参数，可变参数，和本地变量) information about local variables (debug information) */
-    TString *source; /* 指向源代码文件名的指针 used for debug information */
-    GCObject *gclist; /* GC链表节点 */
+    LocVar *locvars;          /* 局部变量表,存储函数中局部变量的信息(固定参数，可变参数，和本地变量) information about local variables (debug information) */
+    TString *source;          /* 指向源代码文件名的指针 used for debug information */
+    GCObject *gclist;         /* GC链表节点 */
 } Proto;
 
 /* }================================================================== */
@@ -591,31 +591,31 @@ typedef struct Proto {
 
 #define fvalueraw(v) ((v).f)
 
-#define setclLvalue(L, obj, x)                                                                                                                                                     \
-    {                                                                                                                                                                              \
-        TValue *io = (obj);                                                                                                                                                        \
-        LClosure *x_ = (x);                                                                                                                                                        \
-        val_(io).gc = obj2gco(x_);                                                                                                                                                 \
-        settt_(io, ctb(LUA_VLCL));                                                                                                                                                 \
-        checkliveness(L, io);                                                                                                                                                      \
+#define setclLvalue(L, obj, x)                                                                                                                                                                         \
+    {                                                                                                                                                                                                  \
+        TValue *io = (obj);                                                                                                                                                                            \
+        LClosure *x_ = (x);                                                                                                                                                                            \
+        val_(io).gc = obj2gco(x_);                                                                                                                                                                     \
+        settt_(io, ctb(LUA_VLCL));                                                                                                                                                                     \
+        checkliveness(L, io);                                                                                                                                                                          \
     }
 
 #define setclLvalue2s(L, o, cl) setclLvalue(L, s2v(o), cl)
 
-#define setfvalue(obj, x)                                                                                                                                                          \
-    {                                                                                                                                                                              \
-        TValue *io = (obj);                                                                                                                                                        \
-        val_(io).f = (x);                                                                                                                                                          \
-        settt_(io, LUA_VLCF);                                                                                                                                                      \
+#define setfvalue(obj, x)                                                                                                                                                                              \
+    {                                                                                                                                                                                                  \
+        TValue *io = (obj);                                                                                                                                                                            \
+        val_(io).f = (x);                                                                                                                                                                              \
+        settt_(io, LUA_VLCF);                                                                                                                                                                          \
     }
 
-#define setclCvalue(L, obj, x)                                                                                                                                                     \
-    {                                                                                                                                                                              \
-        TValue *io = (obj);                                                                                                                                                        \
-        CClosure *x_ = (x);                                                                                                                                                        \
-        val_(io).gc = obj2gco(x_);                                                                                                                                                 \
-        settt_(io, ctb(LUA_VCCL));                                                                                                                                                 \
-        checkliveness(L, io);                                                                                                                                                      \
+#define setclCvalue(L, obj, x)                                                                                                                                                                         \
+    {                                                                                                                                                                                                  \
+        TValue *io = (obj);                                                                                                                                                                            \
+        CClosure *x_ = (x);                                                                                                                                                                            \
+        val_(io).gc = obj2gco(x_);                                                                                                                                                                     \
+        settt_(io, ctb(LUA_VCCL));                                                                                                                                                                     \
+        checkliveness(L, io);                                                                                                                                                                          \
     }
 
 ///@brief Upvalues for Lua closures
@@ -632,9 +632,9 @@ typedef struct UpVal {
     } u;
 } UpVal;
 
-#define ClosureHeader                                                                                                                                                              \
-    CommonHeader;                                                                                                                                                                  \
-    lu_byte nupvalues;                                                                                                                                                             \
+#define ClosureHeader                                                                                                                                                                                  \
+    CommonHeader;                                                                                                                                                                                      \
+    lu_byte nupvalues;                                                                                                                                                                                 \
     GCObject *gclist
 
 typedef struct CClosure {
@@ -674,13 +674,13 @@ typedef union Closure {
  */
 #define hvalue(o) check_exp(ttistable(o), gco2t(val_(o).gc))
 
-#define sethvalue(L, obj, x)                                                                                                                                                       \
-    {                                                                                                                                                                              \
-        TValue *io = (obj);                                                                                                                                                        \
-        Table *x_ = (x);                                                                                                                                                           \
-        val_(io).gc = obj2gco(x_);                                                                                                                                                 \
-        settt_(io, ctb(LUA_VTABLE));                                                                                                                                               \
-        checkliveness(L, io);                                                                                                                                                      \
+#define sethvalue(L, obj, x)                                                                                                                                                                           \
+    {                                                                                                                                                                                                  \
+        TValue *io = (obj);                                                                                                                                                                            \
+        Table *x_ = (x);                                                                                                                                                                               \
+        val_(io).gc = obj2gco(x_);                                                                                                                                                                     \
+        settt_(io, ctb(LUA_VTABLE));                                                                                                                                                                   \
+        checkliveness(L, io);                                                                                                                                                                          \
     }
 
 #define sethvalue2s(L, o, h) sethvalue(L, s2v(o), h)
@@ -709,23 +709,23 @@ typedef union Node {
 } Node;
 
 /* copy a value into a key , 把 obj 的类型给 key 的类型 , 把 obj 的值给 key 的值  */
-#define setnodekey(L, node, obj)                                                                                                                                                   \
-    {                                                                                                                                                                              \
-        Node *n_ = (node);                                                                                                                                                         \
-        const TValue *io_ = (obj);                                                                                                                                                 \
-        n_->u.key_val = io_->value_;                                                                                                                                               \
-        n_->u.key_tt = io_->tt_;                                                                                                                                                   \
-        checkliveness(L, io_);                                                                                                                                                     \
+#define setnodekey(L, node, obj)                                                                                                                                                                       \
+    {                                                                                                                                                                                                  \
+        Node *n_ = (node);                                                                                                                                                                             \
+        const TValue *io_ = (obj);                                                                                                                                                                     \
+        n_->u.key_val = io_->value_;                                                                                                                                                                   \
+        n_->u.key_tt = io_->tt_;                                                                                                                                                                       \
+        checkliveness(L, io_);                                                                                                                                                                         \
     }
 
 /* copy a value from a key */
-#define getnodekey(L, obj, node)                                                                                                                                                   \
-    {                                                                                                                                                                              \
-        TValue *io_ = (obj);                                                                                                                                                       \
-        const Node *n_ = (node);                                                                                                                                                   \
-        io_->value_ = n_->u.key_val;                                                                                                                                               \
-        io_->tt_ = n_->u.key_tt;                                                                                                                                                   \
-        checkliveness(L, io_);                                                                                                                                                     \
+#define getnodekey(L, obj, node)                                                                                                                                                                       \
+    {                                                                                                                                                                                                  \
+        TValue *io_ = (obj);                                                                                                                                                                           \
+        const Node *n_ = (node);                                                                                                                                                                       \
+        io_->value_ = n_->u.key_val;                                                                                                                                                                   \
+        io_->tt_ = n_->u.key_tt;                                                                                                                                                                       \
+        checkliveness(L, io_);                                                                                                                                                                         \
     }
 
 /*
