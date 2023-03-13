@@ -170,9 +170,7 @@ void luaF_unlinkupval(UpVal *uv) {
     if (uv->u.open.next) uv->u.open.next->u.open.previous = uv->u.open.previous;
 }
 
-/*
-** Close all upvalues up to the given stack level.
-*/
+/// @brief Close all upvalues up to the given stack level.
 void luaF_closeupval(lua_State *L, StkId level) {
     UpVal *uv;
     StkId upl; /* stack index pointed by 'uv' */
@@ -200,10 +198,7 @@ static void poptbclist(lua_State *L) {
     L->tbclist = tbc;
 }
 
-/*
-** Close all upvalues and to-be-closed variables up to the given stack
-** level.
-*/
+/// @brief Close all upvalues and to-be-closed variables up to the given stack level.
 void luaF_close(lua_State *L, StkId level, int status, int yy) {
     ptrdiff_t levelrel = savestack(L, level);
     luaF_closeupval(L, level);                /* first, close the upvalues */

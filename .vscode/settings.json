@@ -137,7 +137,8 @@
         "ljumptab.h": "c",
         "lstate.h": "c",
         "lobject.h": "c",
-        "llimits.h": "c"
+        "llimits.h": "c",
+        "stdarg.h": "c"
     },
     "Lua.diagnostics.globals": [
         "argv",
