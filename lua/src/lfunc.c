@@ -29,20 +29,16 @@ CClosure *luaF_newCclosure(lua_State *L, int nupvals) {
     return c;
 }
 
-/**
- * @brief 创建一个新的 Lua 闭包对象
- *
- * @param L
- * @param nupvals 前闭包中的 upvalue 数量
- * @return LClosure*
- */
+/// @brief 创建一个新的 Lua 闭包对象
+/// @param L
+/// @param nupvals 前闭包中的 upvalue 数量
+/// @return LClosure*
 LClosure *luaF_newLclosure(lua_State *L, int nupvals) {
     GCObject *o = luaC_newobj(L, LUA_VLCL, sizeLclosure(nupvals));
     LClosure *c = gco2lcl(o);
     c->p = NULL; // 创建了一个闭包对象,还没有与任何 Proto 对象关联,因此这里将其设置为 NULL
     c->nupvalues = cast_byte(nupvals);
-    while (nupvals--)
-        c->upvals[nupvals] = NULL;
+    while (nupvals--) c->upvals[nupvals] = NULL;
     return c;
 }
 
@@ -73,8 +69,7 @@ static UpVal *newupval(lua_State *L, int tbc, StkId level, UpVal **prev) {
     uv->tbc = tbc;
     uv->u.open.next = next; /* link it to list of open upvalues */
     uv->u.open.previous = prev;
-    if (next)
-        next->u.open.previous = &uv->u.open.next;
+    if (next) next->u.open.previous = &uv->u.open.next;
     *prev = uv;
     if (!isintwups(L)) {        /* thread not in list of threads with upvalues? */
         L->twups = G(L)->twups; /* link it to the list */
@@ -129,8 +124,7 @@ static void checkclosemth(lua_State *L, StkId level) {
     if (ttisnil(tm)) {                           /* no metamethod? */
         int idx = cast_int(level - L->ci->func); /* variable index */
         const char *vname = luaG_findlocal(L, L->ci, idx, NULL);
-        if (vname == NULL)
-            vname = "?";
+        if (vname == NULL) vname = "?";
         luaG_runerror(L, "variable '%s' got a non-closable value", vname);
     }
 }
@@ -166,9 +160,8 @@ static void prepcallclosemth(lua_State *L, StkId level, int status, int yy) {
 */
 void luaF_newtbcupval(lua_State *L, StkId level) {
     lua_assert(level > L->tbclist);
-    if (l_isfalse(s2v(level)))
-        return;              /* false doesn't need to be closed */
-    checkclosemth(L, level); /* value must have a close method */
+    if (l_isfalse(s2v(level))) return; /* false doesn't need to be closed */
+    checkclosemth(L, level);           /* value must have a close method */
     while (cast_uint(level - L->tbclist) > MAXDELTA) {
         L->tbclist += MAXDELTA; /* create a dummy node at maximum delta */
         L->tbclist->tbclist.delta = 0;
@@ -180,8 +173,7 @@ void luaF_newtbcupval(lua_State *L, StkId level) {
 void luaF_unlinkupval(UpVal *uv) {
     lua_assert(upisopen(uv));
     *uv->u.open.previous = uv->u.open.next;
-    if (uv->u.open.next)
-        uv->u.open.next->u.open.previous = uv->u.open.previous;
+    if (uv->u.open.next) uv->u.open.next->u.open.previous = uv->u.open.previous;
 }
 
 /*
@@ -210,8 +202,7 @@ static void poptbclist(lua_State *L) {
     StkId tbc = L->tbclist;
     lua_assert(tbc->tbclist.delta > 0); /* first element cannot be dummy */
     tbc -= tbc->tbclist.delta;
-    while (tbc > L->stack && tbc->tbclist.delta == 0)
-        tbc -= MAXDELTA; /* remove dummy nodes */
+    while (tbc > L->stack && tbc->tbclist.delta == 0) tbc -= MAXDELTA; /* remove dummy nodes */
     L->tbclist = tbc;
 }
 
@@ -276,8 +267,7 @@ const char *luaF_getlocalname(const Proto *f, int local_number, int pc) {
     for (i = 0; i < f->sizelocvars && f->locvars[i].startpc <= pc; i++) {
         if (pc < f->locvars[i].endpc) { /* is variable active? */
             local_number--;
-            if (local_number == 0)
-                return getstr(f->locvars[i].varname);
+            if (local_number == 0) return getstr(f->locvars[i].varname);
         }
     }
     return NULL; /* not found */

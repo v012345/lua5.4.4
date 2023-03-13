@@ -167,14 +167,12 @@ static int forlimit(lua_State *L, lua_Integer init, const TValue *lim, lua_Integ
         if (!tonumber(lim, &flim)) /* cannot convert to float? */
             luaG_forerror(L, lim, "limit");
         /* else 'flim' is a float out of integer bounds */
-        if (luai_numlt(0, flim)) { /* if it is positive, it is too large */
-            if (step < 0)
-                return 1;        /* initial value must be less than it */
-            *p = LUA_MAXINTEGER; /* truncate */
-        } else {                 /* it is less than min integer */
-            if (step > 0)
-                return 1;        /* initial value must be greater than it */
-            *p = LUA_MININTEGER; /* truncate */
+        if (luai_numlt(0, flim)) {  /* if it is positive, it is too large */
+            if (step < 0) return 1; /* initial value must be less than it */
+            *p = LUA_MAXINTEGER;    /* truncate */
+        } else {                    /* it is less than min integer */
+            if (step > 0) return 1; /* initial value must be greater than it */
+            *p = LUA_MININTEGER;    /* truncate */
         }
     }
     return (step > 0 ? init > *p : init < *p); /* not to run? */
@@ -197,8 +195,7 @@ static int forprep(lua_State *L, StkId ra) {
         lua_Integer init = ivalue(pinit);
         lua_Integer step = ivalue(pstep);
         lua_Integer limit;
-        if (step == 0)
-            luaG_runerror(L, "'for' step is zero");
+        if (step == 0) luaG_runerror(L, "'for' step is zero");
         setivalue(s2v(ra + 3), init); /* control variable */
         if (forlimit(L, init, plimit, &limit, step))
             return 1; /* skip the loop */
@@ -221,14 +218,10 @@ static int forprep(lua_State *L, StkId ra) {
         lua_Number init;
         lua_Number limit;
         lua_Number step;
-        if (l_unlikely(!tonumber(plimit, &limit)))
-            luaG_forerror(L, plimit, "limit");
-        if (l_unlikely(!tonumber(pstep, &step)))
-            luaG_forerror(L, pstep, "step");
-        if (l_unlikely(!tonumber(pinit, &init)))
-            luaG_forerror(L, pinit, "initial value");
-        if (step == 0)
-            luaG_runerror(L, "'for' step is zero");
+        if (l_unlikely(!tonumber(plimit, &limit))) luaG_forerror(L, plimit, "limit");
+        if (l_unlikely(!tonumber(pstep, &step))) luaG_forerror(L, pstep, "step");
+        if (l_unlikely(!tonumber(pinit, &init))) luaG_forerror(L, pinit, "initial value");
+        if (step == 0) luaG_runerror(L, "'for' step is zero");
         if (luai_numlt(0, step) ? luai_numlt(limit, init) : luai_numlt(init, limit))
             return 1; /* skip the loop */
         else {
@@ -272,10 +265,9 @@ void luaV_finishget(lua_State *L, const TValue *t, TValue *key, StkId val, const
         if (slot == NULL) { /* 't' is not a table? */
             lua_assert(!ttistable(t));
             tm = luaT_gettmbyobj(L, t, TM_INDEX);
-            if (l_unlikely(notm(tm)))
-                luaG_typeerror(L, t, "index"); /* no metamethod */
-                                               /* else will try the metamethod */
-        } else {                               /* 't' is a table */
+            if (l_unlikely(notm(tm))) luaG_typeerror(L, t, "index"); /* no metamethod */
+                                                                     /* else will try the metamethod */
+        } else {                                                     /* 't' is a table */
             lua_assert(isempty(slot));
             tm = fasttm(L, hvalue(t)->metatable, TM_INDEX); /* table's metamethod */
             if (tm == NULL) {                               /* no metamethod? */
@@ -322,8 +314,7 @@ void luaV_finishset(lua_State *L, const TValue *t, TValue *key, TValue *val, con
             /* else will try the metamethod */
         } else { /* not a table; check metamethod */
             tm = luaT_gettmbyobj(L, t, TM_NEWINDEX);
-            if (l_unlikely(notm(tm)))
-                luaG_typeerror(L, t, "index");
+            if (l_unlikely(notm(tm))) luaG_typeerror(L, t, "index");
         }
         /* try the metamethod */
         if (ttisfunction(tm)) {
@@ -566,8 +557,7 @@ int luaV_equalobj(lua_State *L, const TValue *t1, const TValue *t2) {
         else if (L == NULL)
             return 0;
         tm = fasttm(L, uvalue(t1)->metatable, TM_EQ);
-        if (tm == NULL)
-            tm = fasttm(L, uvalue(t2)->metatable, TM_EQ);
+        if (tm == NULL) tm = fasttm(L, uvalue(t2)->metatable, TM_EQ);
         break; /* will try TM */
     }
     case LUA_VTABLE: {
@@ -576,8 +566,7 @@ int luaV_equalobj(lua_State *L, const TValue *t1, const TValue *t2) {
         else if (L == NULL)
             return 0;
         tm = fasttm(L, hvalue(t1)->metatable, TM_EQ);
-        if (tm == NULL)
-            tm = fasttm(L, hvalue(t2)->metatable, TM_EQ);
+        if (tm == NULL) tm = fasttm(L, hvalue(t2)->metatable, TM_EQ);
         break; /* will try TM */
     }
     default:
@@ -611,8 +600,7 @@ static void copy2buff(StkId top, int n, char *buff) {
 ** from 'L->top - total' up to 'L->top - 1'.
 */
 void luaV_concat(lua_State *L, int total) {
-    if (total == 1)
-        return; /* "all" values already concatenated */
+    if (total == 1) return; /* "all" values already concatenated */
     do {
         StkId top = L->top;
         int n = 2; /* number of elements handled in this pass (at least 2) */
@@ -629,8 +617,7 @@ void luaV_concat(lua_State *L, int total) {
             /* collect total length and number of strings */
             for (n = 1; n < total && tostring(L, s2v(top - n - 1)); n++) {
                 size_t l = vslen(s2v(top - n - 1));
-                if (l_unlikely(l >= (MAX_SIZE / sizeof(char)) - tl))
-                    luaG_runerror(L, "string length overflow");
+                if (l_unlikely(l >= (MAX_SIZE / sizeof(char)) - tl)) luaG_runerror(L, "string length overflow");
                 tl += l;
             }
             if (tl <= LUAI_MAXSHORTLEN) { /* is result a short string? */
@@ -657,8 +644,7 @@ void luaV_objlen(lua_State *L, StkId ra, const TValue *rb) {
     case LUA_VTABLE: {
         Table *h = hvalue(rb);
         tm = fasttm(L, h->metatable, TM_LEN);
-        if (tm)
-            break;                        /* metamethod? break switch to call it */
+        if (tm) break;                    /* metamethod? break switch to call it */
         setivalue(s2v(ra), luaH_getn(h)); /* else primitive len */
         return;
     }
@@ -688,8 +674,7 @@ void luaV_objlen(lua_State *L, StkId ra, const TValue *rb) {
 */
 lua_Integer luaV_idiv(lua_State *L, lua_Integer m, lua_Integer n) {
     if (l_unlikely(l_castS2U(n) + 1u <= 1u)) { /* special cases: -1 or 0 */
-        if (n == 0)
-            luaG_runerror(L, "attempt to divide by zero");
+        if (n == 0) luaG_runerror(L, "attempt to divide by zero");
         return intop(-, 0, m); /* n==-1; avoid overflow with 0x80000...//-1 */
     } else {
         lua_Integer q = m / n;         /* perform C division */
@@ -706,8 +691,7 @@ lua_Integer luaV_idiv(lua_State *L, lua_Integer m, lua_Integer n) {
 */
 lua_Integer luaV_mod(lua_State *L, lua_Integer m, lua_Integer n) {
     if (l_unlikely(l_castS2U(n) + 1u <= 1u)) { /* special cases: -1 or 0 */
-        if (n == 0)
-            luaG_runerror(L, "attempt to perform 'n%%0'");
+        if (n == 0) luaG_runerror(L, "attempt to perform 'n%%0'");
         return 0; /* m % -1 == 0; avoid overflow with 0x80000...%-1 */
     } else {
         lua_Integer r = m % n;
@@ -868,120 +852,120 @@ void luaV_finishOp(lua_State *L) {
 ** Arithmetic operations with immediate operands. 'iop' is the integer
 ** operation, 'fop' is the float operation.
 */
-#define op_arithI(L, iop, fop)                                                                                                                                                     \
-    {                                                                                                                                                                              \
-        TValue *v1 = vRB(i);                                                                                                                                                       \
-        int imm = GETARG_sC(i);                                                                                                                                                    \
-        if (ttisinteger(v1)) {                                                                                                                                                     \
-            lua_Integer iv1 = ivalue(v1);                                                                                                                                          \
-            pc++;                                                                                                                                                                  \
-            setivalue(s2v(ra), iop(L, iv1, imm));                                                                                                                                  \
-        } else if (ttisfloat(v1)) {                                                                                                                                                \
-            lua_Number nb = fltvalue(v1);                                                                                                                                          \
-            lua_Number fimm = cast_num(imm);                                                                                                                                       \
-            pc++;                                                                                                                                                                  \
-            setfltvalue(s2v(ra), fop(L, nb, fimm));                                                                                                                                \
-        }                                                                                                                                                                          \
+#define op_arithI(L, iop, fop)                                                                                                                                                                         \
+    {                                                                                                                                                                                                  \
+        TValue *v1 = vRB(i);                                                                                                                                                                           \
+        int imm = GETARG_sC(i);                                                                                                                                                                        \
+        if (ttisinteger(v1)) {                                                                                                                                                                         \
+            lua_Integer iv1 = ivalue(v1);                                                                                                                                                              \
+            pc++;                                                                                                                                                                                      \
+            setivalue(s2v(ra), iop(L, iv1, imm));                                                                                                                                                      \
+        } else if (ttisfloat(v1)) {                                                                                                                                                                    \
+            lua_Number nb = fltvalue(v1);                                                                                                                                                              \
+            lua_Number fimm = cast_num(imm);                                                                                                                                                           \
+            pc++;                                                                                                                                                                                      \
+            setfltvalue(s2v(ra), fop(L, nb, fimm));                                                                                                                                                    \
+        }                                                                                                                                                                                              \
     }
 
 /*
 ** Auxiliary function for arithmetic operations over floats and others
 ** with two register operands.
 */
-#define op_arithf_aux(L, v1, v2, fop)                                                                                                                                              \
-    {                                                                                                                                                                              \
-        lua_Number n1;                                                                                                                                                             \
-        lua_Number n2;                                                                                                                                                             \
-        if (tonumberns(v1, n1) && tonumberns(v2, n2)) {                                                                                                                            \
-            pc++;                                                                                                                                                                  \
-            setfltvalue(s2v(ra), fop(L, n1, n2));                                                                                                                                  \
-        }                                                                                                                                                                          \
+#define op_arithf_aux(L, v1, v2, fop)                                                                                                                                                                  \
+    {                                                                                                                                                                                                  \
+        lua_Number n1;                                                                                                                                                                                 \
+        lua_Number n2;                                                                                                                                                                                 \
+        if (tonumberns(v1, n1) && tonumberns(v2, n2)) {                                                                                                                                                \
+            pc++;                                                                                                                                                                                      \
+            setfltvalue(s2v(ra), fop(L, n1, n2));                                                                                                                                                      \
+        }                                                                                                                                                                                              \
     }
 
 /*
 ** Arithmetic operations over floats and others with register operands.
 */
-#define op_arithf(L, fop)                                                                                                                                                          \
-    {                                                                                                                                                                              \
-        TValue *v1 = vRB(i);                                                                                                                                                       \
-        TValue *v2 = vRC(i);                                                                                                                                                       \
-        op_arithf_aux(L, v1, v2, fop);                                                                                                                                             \
+#define op_arithf(L, fop)                                                                                                                                                                              \
+    {                                                                                                                                                                                                  \
+        TValue *v1 = vRB(i);                                                                                                                                                                           \
+        TValue *v2 = vRC(i);                                                                                                                                                                           \
+        op_arithf_aux(L, v1, v2, fop);                                                                                                                                                                 \
     }
 
 /*
 ** Arithmetic operations with K operands for floats.
 */
-#define op_arithfK(L, fop)                                                                                                                                                         \
-    {                                                                                                                                                                              \
-        TValue *v1 = vRB(i);                                                                                                                                                       \
-        TValue *v2 = KC(i);                                                                                                                                                        \
-        lua_assert(ttisnumber(v2));                                                                                                                                                \
-        op_arithf_aux(L, v1, v2, fop);                                                                                                                                             \
+#define op_arithfK(L, fop)                                                                                                                                                                             \
+    {                                                                                                                                                                                                  \
+        TValue *v1 = vRB(i);                                                                                                                                                                           \
+        TValue *v2 = KC(i);                                                                                                                                                                            \
+        lua_assert(ttisnumber(v2));                                                                                                                                                                    \
+        op_arithf_aux(L, v1, v2, fop);                                                                                                                                                                 \
     }
 
 /*
 ** Arithmetic operations over integers and floats.
 */
-#define op_arith_aux(L, v1, v2, iop, fop)                                                                                                                                          \
-    {                                                                                                                                                                              \
-        if (ttisinteger(v1) && ttisinteger(v2)) {                                                                                                                                  \
-            lua_Integer i1 = ivalue(v1);                                                                                                                                           \
-            lua_Integer i2 = ivalue(v2);                                                                                                                                           \
-            pc++;                                                                                                                                                                  \
-            setivalue(s2v(ra), iop(L, i1, i2));                                                                                                                                    \
-        } else                                                                                                                                                                     \
-            op_arithf_aux(L, v1, v2, fop);                                                                                                                                         \
+#define op_arith_aux(L, v1, v2, iop, fop)                                                                                                                                                              \
+    {                                                                                                                                                                                                  \
+        if (ttisinteger(v1) && ttisinteger(v2)) {                                                                                                                                                      \
+            lua_Integer i1 = ivalue(v1);                                                                                                                                                               \
+            lua_Integer i2 = ivalue(v2);                                                                                                                                                               \
+            pc++;                                                                                                                                                                                      \
+            setivalue(s2v(ra), iop(L, i1, i2));                                                                                                                                                        \
+        } else                                                                                                                                                                                         \
+            op_arithf_aux(L, v1, v2, fop);                                                                                                                                                             \
     }
 
 /*
 ** Arithmetic operations with register operands.
 */
-#define op_arith(L, iop, fop)                                                                                                                                                      \
-    {                                                                                                                                                                              \
-        TValue *v1 = vRB(i);                                                                                                                                                       \
-        TValue *v2 = vRC(i);                                                                                                                                                       \
-        op_arith_aux(L, v1, v2, iop, fop);                                                                                                                                         \
+#define op_arith(L, iop, fop)                                                                                                                                                                          \
+    {                                                                                                                                                                                                  \
+        TValue *v1 = vRB(i);                                                                                                                                                                           \
+        TValue *v2 = vRC(i);                                                                                                                                                                           \
+        op_arith_aux(L, v1, v2, iop, fop);                                                                                                                                                             \
     }
 
 /*
 ** Arithmetic operations with K operands.
 */
-#define op_arithK(L, iop, fop)                                                                                                                                                     \
-    {                                                                                                                                                                              \
-        TValue *v1 = vRB(i);                                                                                                                                                       \
-        TValue *v2 = KC(i);                                                                                                                                                        \
-        lua_assert(ttisnumber(v2));                                                                                                                                                \
-        op_arith_aux(L, v1, v2, iop, fop);                                                                                                                                         \
+#define op_arithK(L, iop, fop)                                                                                                                                                                         \
+    {                                                                                                                                                                                                  \
+        TValue *v1 = vRB(i);                                                                                                                                                                           \
+        TValue *v2 = KC(i);                                                                                                                                                                            \
+        lua_assert(ttisnumber(v2));                                                                                                                                                                    \
+        op_arith_aux(L, v1, v2, iop, fop);                                                                                                                                                             \
     }
 
 /*
 ** Bitwise operations with constant operand.
 */
-#define op_bitwiseK(L, op)                                                                                                                                                         \
-    {                                                                                                                                                                              \
-        TValue *v1 = vRB(i);                                                                                                                                                       \
-        TValue *v2 = KC(i);                                                                                                                                                        \
-        lua_Integer i1;                                                                                                                                                            \
-        lua_Integer i2 = ivalue(v2);                                                                                                                                               \
-        if (tointegerns(v1, &i1)) {                                                                                                                                                \
-            pc++;                                                                                                                                                                  \
-            setivalue(s2v(ra), op(i1, i2));                                                                                                                                        \
-        }                                                                                                                                                                          \
+#define op_bitwiseK(L, op)                                                                                                                                                                             \
+    {                                                                                                                                                                                                  \
+        TValue *v1 = vRB(i);                                                                                                                                                                           \
+        TValue *v2 = KC(i);                                                                                                                                                                            \
+        lua_Integer i1;                                                                                                                                                                                \
+        lua_Integer i2 = ivalue(v2);                                                                                                                                                                   \
+        if (tointegerns(v1, &i1)) {                                                                                                                                                                    \
+            pc++;                                                                                                                                                                                      \
+            setivalue(s2v(ra), op(i1, i2));                                                                                                                                                            \
+        }                                                                                                                                                                                              \
     }
 
 /*
 ** Bitwise operations with register operands.
 */
-#define op_bitwise(L, op)                                                                                                                                                          \
-    {                                                                                                                                                                              \
-        TValue *v1 = vRB(i);                                                                                                                                                       \
-        TValue *v2 = vRC(i);                                                                                                                                                       \
-        lua_Integer i1;                                                                                                                                                            \
-        lua_Integer i2;                                                                                                                                                            \
-        if (tointegerns(v1, &i1) && tointegerns(v2, &i2)) {                                                                                                                        \
-            pc++;                                                                                                                                                                  \
-            setivalue(s2v(ra), op(i1, i2));                                                                                                                                        \
-        }                                                                                                                                                                          \
+#define op_bitwise(L, op)                                                                                                                                                                              \
+    {                                                                                                                                                                                                  \
+        TValue *v1 = vRB(i);                                                                                                                                                                           \
+        TValue *v2 = vRC(i);                                                                                                                                                                           \
+        lua_Integer i1;                                                                                                                                                                                \
+        lua_Integer i2;                                                                                                                                                                                \
+        if (tointegerns(v1, &i1) && tointegerns(v2, &i2)) {                                                                                                                                            \
+            pc++;                                                                                                                                                                                      \
+            setivalue(s2v(ra), op(i1, i2));                                                                                                                                                            \
+        }                                                                                                                                                                                              \
     }
 
 /*
@@ -989,40 +973,40 @@ void luaV_finishOp(lua_State *L) {
 ** for all numbers, but the fast track improves performance for
 ** integers.
 */
-#define op_order(L, opi, opn, other)                                                                                                                                               \
-    {                                                                                                                                                                              \
-        int cond;                                                                                                                                                                  \
-        TValue *rb = vRB(i);                                                                                                                                                       \
-        if (ttisinteger(s2v(ra)) && ttisinteger(rb)) {                                                                                                                             \
-            lua_Integer ia = ivalue(s2v(ra));                                                                                                                                      \
-            lua_Integer ib = ivalue(rb);                                                                                                                                           \
-            cond = opi(ia, ib);                                                                                                                                                    \
-        } else if (ttisnumber(s2v(ra)) && ttisnumber(rb))                                                                                                                          \
-            cond = opn(s2v(ra), rb);                                                                                                                                               \
-        else                                                                                                                                                                       \
-            Protect(cond = other(L, s2v(ra), rb));                                                                                                                                 \
-        docondjump();                                                                                                                                                              \
+#define op_order(L, opi, opn, other)                                                                                                                                                                   \
+    {                                                                                                                                                                                                  \
+        int cond;                                                                                                                                                                                      \
+        TValue *rb = vRB(i);                                                                                                                                                                           \
+        if (ttisinteger(s2v(ra)) && ttisinteger(rb)) {                                                                                                                                                 \
+            lua_Integer ia = ivalue(s2v(ra));                                                                                                                                                          \
+            lua_Integer ib = ivalue(rb);                                                                                                                                                               \
+            cond = opi(ia, ib);                                                                                                                                                                        \
+        } else if (ttisnumber(s2v(ra)) && ttisnumber(rb))                                                                                                                                              \
+            cond = opn(s2v(ra), rb);                                                                                                                                                                   \
+        else                                                                                                                                                                                           \
+            Protect(cond = other(L, s2v(ra), rb));                                                                                                                                                     \
+        docondjump();                                                                                                                                                                                  \
     }
 
 /*
 ** Order operations with immediate operand. (Immediate operand is
 ** always small enough to have an exact representation as a float.)
 */
-#define op_orderI(L, opi, opf, inv, tm)                                                                                                                                            \
-    {                                                                                                                                                                              \
-        int cond;                                                                                                                                                                  \
-        int im = GETARG_sB(i);                                                                                                                                                     \
-        if (ttisinteger(s2v(ra)))                                                                                                                                                  \
-            cond = opi(ivalue(s2v(ra)), im);                                                                                                                                       \
-        else if (ttisfloat(s2v(ra))) {                                                                                                                                             \
-            lua_Number fa = fltvalue(s2v(ra));                                                                                                                                     \
-            lua_Number fim = cast_num(im);                                                                                                                                         \
-            cond = opf(fa, fim);                                                                                                                                                   \
-        } else {                                                                                                                                                                   \
-            int isf = GETARG_C(i);                                                                                                                                                 \
-            Protect(cond = luaT_callorderiTM(L, s2v(ra), im, inv, isf, tm));                                                                                                       \
-        }                                                                                                                                                                          \
-        docondjump();                                                                                                                                                              \
+#define op_orderI(L, opi, opf, inv, tm)                                                                                                                                                                \
+    {                                                                                                                                                                                                  \
+        int cond;                                                                                                                                                                                      \
+        int im = GETARG_sB(i);                                                                                                                                                                         \
+        if (ttisinteger(s2v(ra)))                                                                                                                                                                      \
+            cond = opi(ivalue(s2v(ra)), im);                                                                                                                                                           \
+        else if (ttisfloat(s2v(ra))) {                                                                                                                                                                 \
+            lua_Number fa = fltvalue(s2v(ra));                                                                                                                                                         \
+            lua_Number fim = cast_num(im);                                                                                                                                                             \
+            cond = opf(fa, fim);                                                                                                                                                                       \
+        } else {                                                                                                                                                                                       \
+            int isf = GETARG_C(i);                                                                                                                                                                     \
+            Protect(cond = luaT_callorderiTM(L, s2v(ra), im, inv, isf, tm));                                                                                                                           \
+        }                                                                                                                                                                                              \
+        docondjump();                                                                                                                                                                                  \
     }
 
 /* }================================================================== */
@@ -1050,29 +1034,29 @@ void luaV_finishOp(lua_State *L) {
 
 #define updatebase(ci) (base = ci->func + 1)
 
-#define updatestack(ci)                                                                                                                                                            \
-    {                                                                                                                                                                              \
-        if (l_unlikely(trap)) {                                                                                                                                                    \
-            updatebase(ci);                                                                                                                                                        \
-            ra = RA(i);                                                                                                                                                            \
-        }                                                                                                                                                                          \
+#define updatestack(ci)                                                                                                                                                                                \
+    {                                                                                                                                                                                                  \
+        if (l_unlikely(trap)) {                                                                                                                                                                        \
+            updatebase(ci);                                                                                                                                                                            \
+            ra = RA(i);                                                                                                                                                                                \
+        }                                                                                                                                                                                              \
     }
 
 /*
 ** Execute a jump instruction. The 'updatetrap' allows signals to stop
 ** tight loops. (Without it, the local copy of 'trap' could never change.)
 */
-#define dojump(ci, i, e)                                                                                                                                                           \
-    {                                                                                                                                                                              \
-        pc += GETARG_sJ(i) + e;                                                                                                                                                    \
-        updatetrap(ci);                                                                                                                                                            \
+#define dojump(ci, i, e)                                                                                                                                                                               \
+    {                                                                                                                                                                                                  \
+        pc += GETARG_sJ(i) + e;                                                                                                                                                                        \
+        updatetrap(ci);                                                                                                                                                                                \
     }
 
 /* for test instructions, execute the jump instruction that follows it */
-#define donextjump(ci)                                                                                                                                                             \
-    {                                                                                                                                                                              \
-        Instruction ni = *pc;                                                                                                                                                      \
-        dojump(ci, ni, 1);                                                                                                                                                         \
+#define donextjump(ci)                                                                                                                                                                                 \
+    {                                                                                                                                                                                                  \
+        Instruction ni = *pc;                                                                                                                                                                          \
+        dojump(ci, ni, 1);                                                                                                                                                                             \
     }
 
 /*
@@ -1080,10 +1064,10 @@ void luaV_finishOp(lua_State *L) {
 ** was expected (parameter 'k'), else do next instruction, which must
 ** be a jump.
 */
-#define docondjump()                                                                                                                                                               \
-    if (cond != GETARG_k(i))                                                                                                                                                       \
-        pc++;                                                                                                                                                                      \
-    else                                                                                                                                                                           \
+#define docondjump()                                                                                                                                                                                   \
+    if (cond != GETARG_k(i))                                                                                                                                                                           \
+        pc++;                                                                                                                                                                                          \
+    else                                                                                                                                                                                               \
         donextjump(ci);
 
 /*
@@ -1113,21 +1097,21 @@ void luaV_finishOp(lua_State *L) {
 #define halfProtect(exp) (savestate(L, ci), (exp))
 
 /* 'c' is the limit of live values in the stack */
-#define checkGC(L, c)                                                                                                                                                              \
-    {                                                                                                                                                                              \
-        luaC_condGC(L, (savepc(L), L->top = (c)), updatetrap(ci));                                                                                                                 \
-        luai_threadyield(L);                                                                                                                                                       \
+#define checkGC(L, c)                                                                                                                                                                                  \
+    {                                                                                                                                                                                                  \
+        luaC_condGC(L, (savepc(L), L->top = (c)), updatetrap(ci));                                                                                                                                     \
+        luai_threadyield(L);                                                                                                                                                                           \
     }
 
 /* fetch an instruction and prepare its execution */
-#define vmfetch()                                                                                                                                                                  \
-    {                                                                                                                                                                              \
-        if (l_unlikely(trap)) {           /* stack reallocation or hooks? */                                                                                                       \
-            trap = luaG_traceexec(L, pc); /* handle hooks */                                                                                                                       \
-            updatebase(ci);               /* correct stack */                                                                                                                      \
-        }                                                                                                                                                                          \
-        i = *(pc++);                                                                                                                                                               \
-        ra = RA(i); /* WARNING: any stack reallocation invalidates 'ra' */                                                                                                         \
+#define vmfetch()                                                                                                                                                                                      \
+    {                                                                                                                                                                                                  \
+        if (l_unlikely(trap)) {           /* stack reallocation or hooks? */                                                                                                                           \
+            trap = luaG_traceexec(L, pc); /* handle hooks */                                                                                                                                           \
+            updatebase(ci);               /* correct stack */                                                                                                                                          \
+        }                                                                                                                                                                                              \
+        i = *(pc++);                                                                                                                                                                                   \
+        ra = RA(i); /* WARNING: any stack reallocation invalidates 'ra' */                                                                                                                             \
     }
 
 #define vmdispatch(o) switch (o)
@@ -1331,8 +1315,7 @@ returning: /* trap already set */
                 int b = GETARG_B(i); /* log2(hash size) + 1 */
                 int c = GETARG_C(i); /* array size */
                 Table *t;
-                if (b > 0)
-                    b = 1 << (b - 1); /* size is 2^(b - 1) */
+                if (b > 0) b = 1 << (b - 1); /* size is 2^(b - 1) */
                 lua_assert((!TESTARG_k(i)) == (GETARG_Ax(*pc) == 0));
                 if (TESTARG_k(i))                         /* non-zero extra argument? */
                     c += GETARG_Ax(*pc) * (MAXARG_C + 1); /* add it to size */
@@ -1340,8 +1323,7 @@ returning: /* trap already set */
                 L->top = ra + 1;                          /* correct top in case of emergency GC */
                 t = luaH_new(L);                          /* memory allocation */
                 sethvalue2s(L, ra, t);
-                if (b != 0 || c != 0)
-                    luaH_resize(L, t, c, b); /* idem */
+                if (b != 0 || c != 0) luaH_resize(L, t, c, b); /* idem */
                 checkGC(L, ra + 1);
                 vmbreak;
             }
@@ -1663,8 +1645,7 @@ returning: /* trap already set */
                 savepc(ci);
                 if (TESTARG_k(i)) {  /* may there be open upvalues? */
                     ci->u2.nres = n; /* save number of returns */
-                    if (L->top < ci->top)
-                        L->top = ci->top;
+                    if (L->top < ci->top) L->top = ci->top;
                     luaF_close(L, base, CLOSEKTOP, 1);
                     updatetrap(ci);
                     updatestack(ci);
@@ -1686,8 +1667,7 @@ returning: /* trap already set */
                     int nres;
                     L->ci = ci->previous; /* back to caller */
                     L->top = base - 1;
-                    for (nres = ci->nresults; l_unlikely(nres > 0); nres--)
-                        setnilvalue(s2v(L->top++)); /* all results are nil */
+                    for (nres = ci->nresults; l_unlikely(nres > 0); nres--) setnilvalue(s2v(L->top++)); /* all results are nil */
                 }
                 goto ret;
             }
@@ -1705,8 +1685,7 @@ returning: /* trap already set */
                     else {
                         setobjs2s(L, base - 1, ra); /* at least this result */
                         L->top = base;
-                        for (; l_unlikely(nres > 1); nres--)
-                            setnilvalue(s2v(L->top++)); /* complete missing results */
+                        for (; l_unlikely(nres > 1); nres--) setnilvalue(s2v(L->top++)); /* complete missing results */
                     }
                 }
             ret: /* return from a Lua function */
@@ -1735,9 +1714,8 @@ returning: /* trap already set */
                 vmbreak;
             }
             vmcase(OP_FORPREP) {
-                savestate(L, ci); /* in case of errors */
-                if (forprep(L, ra))
-                    pc += GETARG_Bx(i) + 1; /* skip the loop */
+                savestate(L, ci);                           /* in case of errors */
+                if (forprep(L, ra)) pc += GETARG_Bx(i) + 1; /* skip the loop */
                 vmbreak;
             }
             vmcase(OP_TFORPREP) {
@@ -1797,7 +1775,7 @@ returning: /* trap already set */
             }
             vmcase(OP_CLOSURE) {
                 Proto *p = cl->p->p[GETARG_Bx(i)];
-                halfProtect(pushclosure(L, p, cl->upvals, base, ra));
+                halfProtect(pushclosure(L, p, cl->upvals, base, ra)); // 在虚拟机运行的过程中被动态构造出的 lua 闭包
                 checkGC(L, ra + 1);
                 vmbreak;
             }

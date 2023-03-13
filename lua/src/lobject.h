@@ -500,9 +500,11 @@ typedef struct Udata0 {
 
 #define LUA_VPROTO makevariant(LUA_TPROTO, 0)
 
-/*
-** Description of an upvalue for function prototypes
-*/
+/// @brief Description of an upvalue for function prototypes
+/// @param name 表示 Upvalue 的名称, 主要用于调试信息
+/// @param instack Upvalue 是否存在于函数的栈空间（即寄存器）中.如果存在,则为 1,否则为 0.
+/// @param idx Upvalue 在栈空间或外部函数的 Upvalue 列表中的索引.如果上值存在于栈空间中,则为其在栈中的索引；否则为其在外部函数的上值列表中的索引.
+/// @param kind  0 表示全局变量, 1 表示局部变量, 2 表示 Upvalue, 3 表示表字段
 typedef struct Upvaldesc {
     TString *name;   /* upvalue name (for debug information) */
     lu_byte instack; /* whether it is in stack (register) */
@@ -550,13 +552,13 @@ typedef struct Proto {
     int sizeabslineinfo;      /* 绝对行号信息表中元素的个数 size of 'abslineinfo' */
     int linedefined;          /* 函数定义在源代码中的第一行行号 debug information  */
     int lastlinedefined;      /* 函数定义在源代码中的最后一行行号 debug information  */
-    TValue *k;                /* 常量表,用于存放函数中用到的常量(就是字面量,只能是数字，布尔值，字符串，和nil这些基本类型) constants used by the function */
+    TValue *k;                /* 常量表,用于存放函数中用到的常量(就是字面量,只能是数字,布尔值,字符串,和nil这些基本类型) constants used by the function */
     Instruction *code;        /* 指令表,存放函数中的指令 opcodes */
     struct Proto **p;         /* 使用**,是因为一个函数里可以写多个函数,是一个树结构 functions defined inside the function */
     Upvaldesc *upvalues;      /* 存储函数中用到的Upvalue信息 upvalue information */
     ls_byte *lineinfo;        /* 行号信息表,存储每个指令对应的源代码行号 information about source lines (debug information) */
     AbsLineInfo *abslineinfo; /* 绝对行号信息表,存储每个指令对应的源代码绝对行号 idem */
-    LocVar *locvars;          /* 局部变量表,存储函数中局部变量的信息(固定参数，可变参数，和本地变量) information about local variables (debug information) */
+    LocVar *locvars;          /* 局部变量表,存储函数中局部变量的信息(固定参数,可变参数,和本地变量) information about local variables (debug information) */
     TString *source;          /* 指向源代码文件名的指针 used for debug information */
     GCObject *gclist;         /* GC链表节点 */
 } Proto;
@@ -745,7 +747,7 @@ typedef struct Table {
     CommonHeader;      // 一个指向 GCObject 的指针,用于垃圾回收
     lu_byte flags;     /* 1<<p means tagmethod(p) is not present  用于标识表是否有某些特殊的属性,例如是否需要调用元方法、是否为弱表等等*/
     lu_byte lsizenode; /* log2 of size of 'node' array 哈希表的大小 , 由于哈希表的大小一定为 2 的整数次幂 , 所以这里表示的是幂次 , 而不是实际大小 . node 数组的大小为 2^lsizenode */
-    unsigned int alimit; /* "limit" of 'array' array 数组部分的大小。array[0] 至 array[alimit-1] 表示数组部分 */
+    unsigned int alimit; /* "limit" of 'array' array 数组部分的大小.array[0] 至 array[alimit-1] 表示数组部分 */
     TValue *array;       /* array part */
     Node *node;          // 哈希表
     Node *lastfree;      /* any free position is before this position  指向 Node 数组中的一个空闲位置,用于快速分配新的节点*/

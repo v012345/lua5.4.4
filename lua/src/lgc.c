@@ -79,33 +79,29 @@
 */
 #define gcvalueN(o) (iscollectable(o) ? gcvalue(o) : NULL)
 
-#define markvalue(g, o)                                                                                                                                                            \
-    {                                                                                                                                                                              \
-        checkliveness(g->mainthread, o);                                                                                                                                           \
-        if (valiswhite(o))                                                                                                                                                         \
-            reallymarkobject(g, gcvalue(o));                                                                                                                                       \
+#define markvalue(g, o)                                                                                                                                                                                \
+    {                                                                                                                                                                                                  \
+        checkliveness(g->mainthread, o);                                                                                                                                                               \
+        if (valiswhite(o)) reallymarkobject(g, gcvalue(o));                                                                                                                                            \
     }
 
-#define markkey(g, n)                                                                                                                                                              \
-    {                                                                                                                                                                              \
-        if keyiswhite (n)                                                                                                                                                          \
-            reallymarkobject(g, gckey(n));                                                                                                                                         \
+#define markkey(g, n)                                                                                                                                                                                  \
+    {                                                                                                                                                                                                  \
+        if keyiswhite (n) reallymarkobject(g, gckey(n));                                                                                                                                               \
     }
 
-#define markobject(g, t)                                                                                                                                                           \
-    {                                                                                                                                                                              \
-        if (iswhite(t))                                                                                                                                                            \
-            reallymarkobject(g, obj2gco(t));                                                                                                                                       \
+#define markobject(g, t)                                                                                                                                                                               \
+    {                                                                                                                                                                                                  \
+        if (iswhite(t)) reallymarkobject(g, obj2gco(t));                                                                                                                                               \
     }
 
 /*
 ** mark an object that can be NULL (either because it is really optional,
 ** or it was stripped as debug info, or inside an uncompleted structure)
 */
-#define markobjectN(g, t)                                                                                                                                                          \
-    {                                                                                                                                                                              \
-        if (t)                                                                                                                                                                     \
-            markobject(g, t);                                                                                                                                                      \
+#define markobjectN(g, t)                                                                                                                                                                              \
+    {                                                                                                                                                                                                  \
+        if (t) markobject(g, t);                                                                                                                                                                       \
     }
 
 static void reallymarkobject(global_State *g, GCObject *o);
@@ -174,8 +170,7 @@ static void linkgclist_(GCObject *o, GCObject **pnext, GCObject **list) {
 */
 static void clearkey(Node *n) {
     lua_assert(isempty(gval(n)));
-    if (keyiscollectable(n))
-        setdeadkey(n); /* unused key; remove it */
+    if (keyiscollectable(n)) setdeadkey(n); /* unused key; remove it */
 }
 
 /*
@@ -250,11 +245,7 @@ void luaC_fix(lua_State *L, GCObject *o) {
     g->fixedgc = o;
 }
 
-/*
-** create a new collectable object (with given type and size) and link
-** it to 'allgc' list.
-** 生成一个新的 需要进行垃圾回收的对象 , 把它链到 allgc 上
-*/
+/// @brief 生成一个新的 需要进行垃圾回收的对象 , 把它链到 allgc 上 ; create a new collectable object (with given type and size) and link it to 'allgc' list.
 GCObject *luaC_newobj(lua_State *L, int tt, size_t sz) {
     global_State *g = G(L);
     GCObject *o = cast(GCObject *, luaM_newobject(L, novariant(tt), sz));
@@ -329,8 +320,7 @@ static void reallymarkobject(global_State *g, GCObject *o) {
 */
 static void markmt(global_State *g) {
     int i;
-    for (i = 0; i < LUA_NUMTAGS; i++)
-        markobjectN(g, g->mt[i]);
+    for (i = 0; i < LUA_NUMTAGS; i++) markobjectN(g, g->mt[i]);
 }
 
 /*
@@ -543,8 +533,7 @@ static lu_mem traversetable(global_State *g, Table *h) {
 static int traverseudata(global_State *g, Udata *u) {
     int i;
     markobjectN(g, u->metatable); /* mark its metatable */
-    for (i = 0; i < u->nuvalue; i++)
-        markvalue(g, &u->uv[i].uv);
+    for (i = 0; i < u->nuvalue; i++) markvalue(g, &u->uv[i].uv);
     genlink(g, obj2gco(u));
     return 1 + u->nuvalue;
 }
@@ -604,18 +593,14 @@ static int traverseLclosure(global_State *g, LClosure *cl) {
 static int traversethread(global_State *g, lua_State *th) {
     UpVal *uv;
     StkId o = th->stack;
-    if (isold(th) || g->gcstate == GCSpropagate)
-        linkgclist(th, g->grayagain); /* insert into 'grayagain' list */
-    if (o == NULL)
-        return 1; /* stack not completely built yet */
+    if (isold(th) || g->gcstate == GCSpropagate) linkgclist(th, g->grayagain); /* insert into 'grayagain' list */
+    if (o == NULL) return 1;                                                   /* stack not completely built yet */
     lua_assert(g->gcstate == GCSatomic || th->openupval == NULL || isintwups(th));
     for (; o < th->top; o++) /* mark live elements in the stack */
         markvalue(g, s2v(o));
-    for (uv = th->openupval; uv != NULL; uv = uv->u.open.next)
-        markobject(g, uv);         /* open upvalues cannot be collected */
-    if (g->gcstate == GCSatomic) { /* final traversal? */
-        for (; o < th->stack_last + EXTRA_STACK; o++)
-            setnilvalue(s2v(o)); /* clear dead stack slice */
+    for (uv = th->openupval; uv != NULL; uv = uv->u.open.next) markobject(g, uv); /* open upvalues cannot be collected */
+    if (g->gcstate == GCSatomic) {                                                /* final traversal? */
+        for (; o < th->stack_last + EXTRA_STACK; o++) setnilvalue(s2v(o));        /* clear dead stack slice */
         /* 'remarkupvals' may have removed thread from 'twups' list */
         if (!isintwups(th) && th->openupval != NULL) {
             th->twups = g->twups; /* link it back to the list */
@@ -654,8 +639,7 @@ static lu_mem propagatemark(global_State *g) {
 
 static lu_mem propagateall(global_State *g) {
     lu_mem tot = 0;
-    while (g->gray)
-        tot += propagatemark(g);
+    while (g->gray) tot += propagatemark(g);
     return tot;
 }
 
@@ -737,8 +721,7 @@ static void clearbyvalues(global_State *g, GCObject *l, GCObject *f) {
 }
 
 static void freeupval(lua_State *L, UpVal *uv) {
-    if (upisopen(uv))
-        luaF_unlinkupval(uv);
+    if (upisopen(uv)) luaF_unlinkupval(uv);
     luaM_free(L, uv);
 }
 
@@ -810,8 +793,7 @@ static GCObject **sweeplist(lua_State *L, GCObject **p, int countin, int *counto
             p = &curr->next; /* go to next element */
         }
     }
-    if (countout)
-        *countout = i; /* number of elements traversed */
+    if (countout) *countout = i; /* number of elements traversed */
     return (*p == NULL) ? NULL : p;
 }
 
@@ -903,8 +885,7 @@ static void GCTM(lua_State *L) {
 static int runafewfinalizers(lua_State *L, int n) {
     global_State *g = G(L);
     int i;
-    for (i = 0; i < n && g->tobefnz; i++)
-        GCTM(L); /* call one finalizer */
+    for (i = 0; i < n && g->tobefnz; i++) GCTM(L); /* call one finalizer */
     return i;
 }
 
@@ -913,16 +894,14 @@ static int runafewfinalizers(lua_State *L, int n) {
 */
 static void callallpendingfinalizers(lua_State *L) {
     global_State *g = G(L);
-    while (g->tobefnz)
-        GCTM(L);
+    while (g->tobefnz) GCTM(L);
 }
 
 /*
 ** find last 'next' field in list 'p' list (to add elements in its end)
 */
 static GCObject **findlast(GCObject **p) {
-    while (*p != NULL)
-        p = &(*p)->next;
+    while (*p != NULL) p = &(*p)->next;
     return p;
 }
 
@@ -956,8 +935,7 @@ static void separatetobefnz(global_State *g, int all) {
 ** If pointer 'p' points to 'o', move it to the next element.
 */
 static void checkpointer(GCObject **p, GCObject *o) {
-    if (o == *p)
-        *p = o->next;
+    if (o == *p) *p = o->next;
 }
 
 /*
@@ -1071,8 +1049,7 @@ static GCObject **sweepgen(lua_State *L, global_State *g, GCObject **p, GCObject
                 curr->marked = cast_byte(marked | G_SURVIVAL | white);
             } else { /* all other objects will be old, and so keep their color */
                 setage(curr, nextage[getage(curr)]);
-                if (getage(curr) == G_OLD1 && *pfirstold1 == NULL)
-                    *pfirstold1 = curr; /* first OLD1 object in the list */
+                if (getage(curr) == G_OLD1 && *pfirstold1 == NULL) *pfirstold1 = curr; /* first OLD1 object in the list */
             }
             p = &curr->next; /* go to next element */
         }
@@ -1087,8 +1064,7 @@ static GCObject **sweepgen(lua_State *L, global_State *g, GCObject **p, GCObject
 */
 static void whitelist(global_State *g, GCObject *p) {
     int white = luaC_white(g);
-    for (; p != NULL; p = p->next)
-        p->marked = cast_byte((p->marked & ~maskgcbits) | white);
+    for (; p != NULL; p = p->next) p->marked = cast_byte((p->marked & ~maskgcbits) | white);
 }
 
 /*
@@ -1158,8 +1134,7 @@ static void markold(global_State *g, GCObject *from, GCObject *to) {
         if (getage(p) == G_OLD1) {
             lua_assert(!iswhite(p));
             changeage(p, G_OLD1, G_OLD); /* now they are old */
-            if (isblack(p))
-                reallymarkobject(g, p);
+            if (isblack(p)) reallymarkobject(g, p);
         }
     }
 }
@@ -1171,8 +1146,7 @@ static void finishgencycle(lua_State *L, global_State *g) {
     correctgraylists(g);
     checkSizes(L, g);
     g->gcstate = GCSpropagate; /* skip restart */
-    if (!g->gcemergency)
-        callallpendingfinalizers(L);
+    if (!g->gcemergency) callallpendingfinalizers(L);
 }
 
 /*
@@ -1408,8 +1382,7 @@ static void setpause(global_State *g) {
                     ? estimate * pause        /* no overflow */
                     : MAX_LMEM;               /* overflow; truncate to maximum */
     debt = gettotalbytes(g) - threshold;
-    if (debt > 0)
-        debt = 0;
+    if (debt > 0) debt = 0;
     luaE_setdebt(g, debt);
 }
 
@@ -1582,8 +1555,7 @@ static lu_mem singlestep(lua_State *L) {
 */
 void luaC_runtilstate(lua_State *L, int statesmask) {
     global_State *g = G(L);
-    while (!testbit(statesmask, g->gcstate))
-        singlestep(L);
+    while (!testbit(statesmask, g->gcstate)) singlestep(L);
 }
 
 /*
@@ -1597,8 +1569,8 @@ static void incstep(lua_State *L, global_State *g) {
     int stepmul = (getgcparam(g->gcstepmul) | 1); /* avoid division by 0 */
     l_mem debt = (g->GCdebt / WORK2MEM) * stepmul;
     l_mem stepsize = (g->gcstepsize <= log2maxs(l_mem)) ? ((cast(l_mem, 1) << g->gcstepsize) / WORK2MEM) * stepmul : MAX_LMEM; /* overflow; keep maximum value */
-    do {                             /* repeat until pause or enough "credit" (negative debt) */
-        lu_mem work = singlestep(L); /* perform one single step */
+    do {                                                                                                                       /* repeat until pause or enough "credit" (negative debt) */
+        lu_mem work = singlestep(L);                                                                                           /* perform one single step */
         debt -= work;
     } while (debt > -stepsize && g->gcstate != GCSpause);
     if (g->gcstate == GCSpause)

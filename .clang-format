@@ -13,3 +13,6 @@ BraceWrapping:
   SplitEmptyFunction: false
 # 括号内的空格
 SpaceInParentheses: false
+# while 或 if 后面只有一条语句时，将这条语句与 while 或 if 在同一行显示
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: true

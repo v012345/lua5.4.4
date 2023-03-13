@@ -888,7 +888,7 @@ int luaD_pcall(lua_State *L, Pfunc func, void *u, ptrdiff_t old_top, ptrdiff_t e
         L->ci = old_ci;
         L->allowhook = old_allowhooks;
         status = luaD_closeprotected(L, old_top, status); // 进行栈的恢复 , 将当前帧以及当前帧以上的帧全部出栈,最终将栈顶指针恢复到 old_top,以便后续进行错误信息的处理
-        luaD_seterrorobj(L, status, restorestack(L, old_top)); // 将当前的错误信息设置到错误对象中 , 其中 restorestack 函数用于将错误信息对象移动到恢复后的正确位置。
+        luaD_seterrorobj(L, status, restorestack(L, old_top)); // 将当前的错误信息设置到错误对象中 , 其中 restorestack 函数用于将错误信息对象移动到恢复后的正确位置.
         luaD_shrinkstack(L);                                   /* 将栈缩小到合适的大小 restore stack size in case of overflow */
     }
     L->errfunc = old_errfunc;

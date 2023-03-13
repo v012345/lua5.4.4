@@ -110,7 +110,7 @@ LUA_API int lua_setcstacklimit (lua_State *L, unsigned int limit) {
 }
 
 /**
- * @brief 创建一个新的调用信息(CallInfo)对象，并将其插入到 L->ci 后面
+ * @brief 创建一个新的调用信息(CallInfo)对象,并将其插入到 L->ci 后面
  * 
  * @param L 
  * @return CallInfo* 

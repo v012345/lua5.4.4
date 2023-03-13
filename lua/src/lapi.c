@@ -158,7 +158,7 @@ LUA_API int lua_absindex(lua_State *L, int idx) { return (idx > 0 || ispseudo(id
 LUA_API int lua_gettop(lua_State *L) { return cast_int(L->top - (L->ci->func + 1)); }
 
 /**
- * @brief 参数允许传入任何可接受的索引以及 0 。 它将把堆栈的栈顶设为这个索引。 如果新的栈顶比原来的大,超出部分的新元素将被填为 nil 。 如果 index 为 0 ,把栈上所有元素移除。
+ * @brief 参数允许传入任何可接受的索引以及 0 . 它将把堆栈的栈顶设为这个索引. 如果新的栈顶比原来的大,超出部分的新元素将被填为 nil . 如果 index 为 0 ,把栈上所有元素移除.
  *
  * @param L
  * @param idx
@@ -553,7 +553,7 @@ LUA_API const char *lua_pushvfstring(lua_State *L, const char *fmt, va_list argp
 }
 
 /**
- * @brief 在Lua栈上推入格式化后的字符串，并返回指向该字符串的指针
+ * @brief 在Lua栈上推入格式化后的字符串,并返回指向该字符串的指针
  *
  * @param L
  * @param fmt
@@ -1101,12 +1101,12 @@ LUA_API int lua_pcallk(lua_State *L, int nargs, int nresults, int errfunc, lua_K
     int status;     // 返回值
     ptrdiff_t func; // 错误处理函数的索引或者 0
     lua_lock(L);
-    api_check(L, k == NULL || !isLua(L->ci), "cannot use continuations inside hooks"); // 这个宏会检查是否可以使用 continuation 函数。如果 k 不为 NULL,则需要判断当前是否在 hook
-                                                                                       // 函数中调用,因为在 hook 函数中不能使用 continuation 函数。
-    api_checknelems(L, nargs + 1); // 这个宏会检查栈中是否有足够的元素可以被调用函数使用。因为在调用函数时,需要将函数和其参数一起压入栈中,所以需要检查栈是否有足够的空间。
+    api_check(L, k == NULL || !isLua(L->ci), "cannot use continuations inside hooks"); // 这个宏会检查是否可以使用 continuation 函数.如果 k 不为 NULL,则需要判断当前是否在 hook
+                                                                                       // 函数中调用,因为在 hook 函数中不能使用 continuation 函数.
+    api_checknelems(L, nargs + 1); // 这个宏会检查栈中是否有足够的元素可以被调用函数使用.因为在调用函数时,需要将函数和其参数一起压入栈中,所以需要检查栈是否有足够的空间.
     api_check(L, L->status == LUA_OK, "cannot do calls on non-normal thread"); // 这个宏会检查 Lua 状态机的状态是否为 LUA_OK,因为只有在 LUA_OK
-                                                                               // 状态下才能进行函数调用。如果当前状态不是 LUA_OK,则不能进行函数调用。
-    checkresults(L, nargs, nresults); // 这个函数会检查期望返回值的数量是否合法。因为 Lua 的函数可以返回多个值,所以需要检查期望返回值的数量是否合法。
+                                                                               // 状态下才能进行函数调用.如果当前状态不是 LUA_OK,则不能进行函数调用.
+    checkresults(L, nargs, nresults); // 这个函数会检查期望返回值的数量是否合法.因为 Lua 的函数可以返回多个值,所以需要检查期望返回值的数量是否合法.
     if (errfunc == 0)
         func = 0;
     else {
