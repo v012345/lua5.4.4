@@ -580,7 +580,7 @@ LUA_API const char *lua_pushfstring(lua_State *L, const char *fmt, ...) {
 LUA_API void lua_pushcclosure(lua_State *L, lua_CFunction fn, int n) {
     lua_lock(L);
     if (n == 0) {
-        setfvalue(s2v(L->top), fn);
+        setfvalue(s2v(L->top), fn); // 如果没有 upvalues , 就是一个普通的 c 函数
         api_incr_top(L);
     } else {
         CClosure *cl;

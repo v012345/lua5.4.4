@@ -41,7 +41,7 @@
 /// @brief Union of all Lua values
 /// @param gc collectable objects 对应有 CommonHeader 的对象 , 包括 TString , Udata , Udata0 , Proto , UpVal , Closure , Table
 /// @param p light userdata 不需要 lua 来关心数据的生存期 , 不被 gc 回收
-/// @param f int (*) (lua_State *L) 不被 gc 回收
+/// @param f int (*) (lua_State *L) 没有 upvalues , 就是一个普通的 c 函数 , 所以不用 gc 
 /// @param i long long 不被 gc 回收
 /// @param n double 不被 gc 回收
 typedef union Value {
