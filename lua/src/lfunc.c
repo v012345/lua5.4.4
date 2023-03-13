@@ -31,7 +31,7 @@ CClosure *luaF_newCclosure(lua_State *L, int nupvals) {
 
 /// @brief 创建一个新的 Lua 闭包对象
 /// @param L
-/// @param nupvals 前闭包中的 upvalue 数量
+/// @param nupvals 闭包中的 upvalue 数量
 /// @return LClosure*
 LClosure *luaF_newLclosure(lua_State *L, int nupvals) {
     GCObject *o = luaC_newobj(L, LUA_VLCL, sizeLclosure(nupvals));
@@ -57,10 +57,7 @@ void luaF_initupvals(lua_State *L, LClosure *cl) {
     }
 }
 
-/*
-** Create a new upvalue at the given level, and link it to the list of
-** open upvalues of 'L' after entry 'prev'.
-**/
+/// @brief a new upvalue at the given level, and link it to the list of open upvalues of 'L' after entry 'prev'.
 static UpVal *newupval(lua_State *L, int tbc, StkId level, UpVal **prev) {
     GCObject *o = luaC_newobj(L, LUA_VUPVAL, sizeof(UpVal));
     UpVal *uv = gco2upv(o);
@@ -78,10 +75,7 @@ static UpVal *newupval(lua_State *L, int tbc, StkId level, UpVal **prev) {
     return uv;
 }
 
-/*
-** Find and reuse, or create if it does not exist, an upvalue
-** at the given level.
-*/
+/// @brief Find and reuse, or create if it does not exist, an upvalue at the given level.
 UpVal *luaF_findupval(lua_State *L, StkId level) {
     UpVal **pp = &L->openupval; // pp 指向 L->openupval , 而 L->openupval 指向当前打开的 Upvalue 列表
     UpVal *p;

@@ -138,7 +138,7 @@ struct lua_longjmp; /* defined in ldo.c */
 typedef struct stringtable {
     TString **hash; // 字符串的哈希表的哈希桶
     int nuse;       /* 表中已存储的短串的数量  number of elements */
-    int size; // 哈希桶的大小 , 就是预定容量, luaS_init 时给出 初始化大小 MINSTRTABSIZE ( 2^7 = 128 ), 之后可以调整大小 , 注意 size 是 2 的幂次
+    int size;       // 哈希桶的大小 , 就是预定容量, luaS_init 时给出 初始化大小 MINSTRTABSIZE ( 2^7 = 128 ), 之后可以调整大小 , 注意 size 是 2 的幂次
 } stringtable;
 
 /*
@@ -211,8 +211,8 @@ typedef struct CallInfo {
 ** because of an error.  (Three bits are enough for error status.)
 */
 #define getcistrecst(ci) (((ci)->callstatus >> CIST_RECST) & 7)
-#define setcistrecst(ci, st)                                                                                                                                                       \
-    check_exp(((st)&7) == (st), /* status must fit in three bits */                                                                                                                \
+#define setcistrecst(ci, st)                                                                                                                                                                           \
+    check_exp(((st)&7) == (st), /* status must fit in three bits */                                                                                                                                    \
               ((ci)->callstatus = ((ci)->callstatus & ~(7 << CIST_RECST)) | ((st) << CIST_RECST)))
 
 /* active function is a Lua function */
@@ -237,8 +237,8 @@ typedef struct global_State {
     lu_mem lastatomic;  /* 用于垃圾回收中的原子操作计数器 see function 'genstep' in file 'lgc.c' */
     stringtable strt;   /* 全局字符串表,用于池化字符串,使得整个虚拟机中的短字符串只有一份实例 hash table for strings */
     TValue l_registry; /* 注册表,用于管理全局数据.Registry 表是一个全局的 table,用于保存那些需要在多个模块中共享的数据,比如通过 luaL_newmetatable 创建的元表 */
-    TValue nilvalue;   /* 一个 nil 值 a nil value */
-    unsigned int seed; /* 启动时生成的一个随机数种子,主要用于求字符串哈希时使用 randomized seed for hashes */
+    TValue nilvalue;      /* 一个 nil 值 a nil value */
+    unsigned int seed;    /* 启动时生成的一个随机数种子,主要用于求字符串哈希时使用 randomized seed for hashes */
     lu_byte currentwhite; // 垃圾回收中的当前白色标记
     lu_byte gcstate;      /* 垃圾回收器的状态 state of garbage collector */
     lu_byte gckind;       /* 垃圾回收器运行的类型 kind of GC running */
@@ -261,19 +261,19 @@ typedef struct global_State {
     GCObject *tobefnz;    /* 待回收的 userdata 对象链表 list of userdata to be GC */
     GCObject *fixedgc;    /* 不可回收的对象链表 list of objects not to be collected */
     /* fields for generational collector */
-    GCObject *survival;   /* 上一次 GC 后幸存下来的对象链表 start of objects that survived one GC cycle */
-    GCObject *old1;       /* 一代老对象链表 start of old1 objects */
-    GCObject *reallyold;  /* 超过一定周期的老对象链表 objects more than one cycle old ("really old") */
-    GCObject *firstold1;  /* 一代老对象链表中第一个 OLD1 对象 first OLD1 object in the list (if any) */
-    GCObject *finobjsur;  /* 存储带有 finalizer 的生存对象（即未被标记为垃圾的对象）,以链表形式连接起来 list of survival objects with finalizers */
-    GCObject *finobjold1; /* 存储带有 finalizer 的一代老对象链表中的对象,以链表形式连接起来 list of old1 objects with finalizers */
-    GCObject *finobjrold; /* 存储带有 finalizer 的真正老的对象链表中的对象,以链表形式连接起来 list of really old objects with finalizers */
+    GCObject *survival;      /* 上一次 GC 后幸存下来的对象链表 start of objects that survived one GC cycle */
+    GCObject *old1;          /* 一代老对象链表 start of old1 objects */
+    GCObject *reallyold;     /* 超过一定周期的老对象链表 objects more than one cycle old ("really old") */
+    GCObject *firstold1;     /* 一代老对象链表中第一个 OLD1 对象 first OLD1 object in the list (if any) */
+    GCObject *finobjsur;     /* 存储带有 finalizer 的生存对象（即未被标记为垃圾的对象）,以链表形式连接起来 list of survival objects with finalizers */
+    GCObject *finobjold1;    /* 存储带有 finalizer 的一代老对象链表中的对象,以链表形式连接起来 list of old1 objects with finalizers */
+    GCObject *finobjrold;    /* 存储带有 finalizer 的真正老的对象链表中的对象,以链表形式连接起来 list of really old objects with finalizers */
     struct lua_State *twups; /* 存储有开放 Upvalue 的线程链表,以链表形式连接起来 list of threads with open upvalues */
     lua_CFunction panic;     /* 指向一个回调函数,当出现未被保护的错误（unprotected error）时会被调用 to be called in unprotected errors */
     struct lua_State *mainthread; /* 指向主线程的指针,即创建 Lua 虚拟机时所创建的 lua_State 结构体 主lua_State.在一个独立的lua虚拟机里, global_State是一个全局的结构,
                                      而lua_State可以有多个. lua_newstate会创建出一个lua_State, 绑在 lua_State *mainthread.可以说是主线程、主执行栈. */
-    TString *memerrmsg;                        /* 用于存储内存分配错误信息的字符串对象 message for memory-allocation errors */
-    TString *tmname[TM_N];                     /* 预定义了元方法名字的数组 array with tag-method names */
+    TString *memerrmsg;           /* 用于存储内存分配错误信息的字符串对象 message for memory-allocation errors */
+    TString *tmname[TM_N];        /* 预定义了元方法名字的数组 array with tag-method names */
     struct Table *mt[LUA_NUMTAGS];             /* 存储基础类型的元表信息的数组.Lua 中的每种基本数据类型都有对应的元表 metatables for basic types */
     TString *strcache[STRCACHE_N][STRCACHE_M]; /* 用于缓存 API 中的字符串对象 cache for strings in API */
     lua_WarnFunction warnf;                    /* 指向一个回调函数,用于输出警告信息 warning function */
@@ -284,18 +284,19 @@ typedef struct global_State {
 ** 'per thread' state
 */
 struct lua_State {
-    CommonHeader;                 //  Lua 对象系统中的公共头部,用于识别对象类型和 GC 回收等
-    lu_byte status;               // 当前状态,包括运行中、暂停、错误等
-    lu_byte allowhook;            // 是否允许调试钩子
-    unsigned short nci;           /* 当前状态机的调用信息（Callinfo）栈中的调用信息个数 number of items in 'ci' list */
-    StkId top;                    /* 栈顶指针,即堆栈中最后一个空闲的位置 first free slot in the stack */
-    global_State *l_G;            // 全局状态信息
-    CallInfo *ci;                 /* 当前的调用信息（Callinfo） call info for current function */
-    StkId stack_last;             /*  栈的结尾位置（最后一个元素的下一个位置） end of stack (last element + 1) */
-    StkId stack;                  /* 栈的开始位置 stack base */
-    UpVal *openupval;             /* 当前打开的 Upvalue 列表 list of open upvalues in this stack */
-    StkId tbclist;                /* 待关闭的 Upvalue 列表 list of to-be-closed variables */
-    GCObject *gclist;             // 待 GC 的对象列表
+    CommonHeader;       //  Lua 对象系统中的公共头部,用于识别对象类型和 GC 回收等
+    lu_byte status;     // 当前状态,包括运行中、暂停、错误等
+    lu_byte allowhook;  // 是否允许调试钩子
+    unsigned short nci; /* 当前状态机的调用信息（Callinfo）栈中的调用信息个数 number of items in 'ci' list */
+    StkId top;          /* 栈顶指针,即堆栈中最后一个空闲的位置 first free slot in the stack */
+    global_State *l_G;  // 全局状态信息
+    CallInfo *ci;       /* 当前的调用信息（Callinfo） call info for current function */
+    StkId stack_last;   /*  栈的结尾位置（最后一个元素的下一个位置） end of stack (last element + 1) */
+    StkId stack;        /* 栈的开始位置 stack base */
+    UpVal *openupval; /* 指向 upvalues 链表的链头, 链头的 previous 指向 openupval; upvalues 链表最后一个元素的 next 指 NULL; upvalues 链表中除链头外 openupval 指向前一个元素的 next ; list of open
+                         upvalues in this stack */
+    StkId tbclist;    /* 待关闭的 Upvalue 列表 list of to-be-closed variables */
+    GCObject *gclist; // 待 GC 的对象列表
     struct lua_State *twups;      /* 当前线程的 open upvalue 列表 list of threads with open upvalues */
     struct lua_longjmp *errorJmp; /* 当前错误恢复点,用于处理 Lua 错误 current error recover point */
     CallInfo base_ci;             /* CallInfo for first level (C calling Lua) */

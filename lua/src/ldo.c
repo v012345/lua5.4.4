@@ -53,12 +53,11 @@
 
 /* C++ exceptions */
 #define LUAI_THROW(L, c) throw(c)
-#define LUAI_TRY(L, c, a)                                                                                                                                                          \
-    try {                                                                                                                                                                          \
-        a                                                                                                                                                                          \
-    } catch (...) {                                                                                                                                                                \
-        if ((c)->status == 0)                                                                                                                                                      \
-            (c)->status = -1;                                                                                                                                                      \
+#define LUAI_TRY(L, c, a)                                                                                                                                                                              \
+    try {                                                                                                                                                                                              \
+        a                                                                                                                                                                                              \
+    } catch (...) {                                                                                                                                                                                    \
+        if ((c)->status == 0) (c)->status = -1;                                                                                                                                                        \
     }
 #define luai_jmpbuf int /* dummy variable */
 
@@ -66,9 +65,9 @@
 
 /* in POSIX, try _longjmp/_setjmp (more efficient) */
 #define LUAI_THROW(L, c) _longjmp((c)->b, 1)
-#define LUAI_TRY(L, c, a)                                                                                                                                                          \
-    if (_setjmp((c)->b) == 0) {                                                                                                                                                    \
-        a                                                                                                                                                                          \
+#define LUAI_TRY(L, c, a)                                                                                                                                                                              \
+    if (_setjmp((c)->b) == 0) {                                                                                                                                                                        \
+        a                                                                                                                                                                                              \
     }
 #define luai_jmpbuf jmp_buf
 
@@ -76,9 +75,9 @@
 
 /* ISO C handling with long jumps */
 #define LUAI_THROW(L, c) longjmp((c)->b, 1)
-#define LUAI_TRY(L, c, a)                                                                                                                                                          \
-    if (setjmp((c)->b) == 0) {                                                                                                                                                     \
-        a                                                                                                                                                                          \
+#define LUAI_TRY(L, c, a)                                                                                                                                                                              \
+    if (setjmp((c)->b) == 0) {                                                                                                                                                                         \
+        a                                                                                                                                                                                              \
     }
 #define luai_jmpbuf jmp_buf
 
@@ -168,13 +167,11 @@ static void correctstack(lua_State *L, StkId oldstack, StkId newstack) {
     UpVal *up;
     L->top = (L->top - oldstack) + newstack;         // L->top - oldstack (L->top 与 oldstack 的相对位置) + newstack (现在 L->top 在 newstack 中的位置)
     L->tbclist = (L->tbclist - oldstack) + newstack; // 同上 , 但是这里可以加深对 Upvalue 的理解
-    for (up = L->openupval; up != NULL; up = up->u.open.next)
-        up->v = s2v((uplevel(up) - oldstack) + newstack);
+    for (up = L->openupval; up != NULL; up = up->u.open.next) up->v = s2v((uplevel(up) - oldstack) + newstack);
     for (ci = L->ci; ci != NULL; ci = ci->previous) {
         ci->top = (ci->top - oldstack) + newstack;
         ci->func = (ci->func - oldstack) + newstack;
-        if (isLua(ci))
-            ci->u.l.trap = 1; /* signal to update 'trap' in 'luaV_execute' */
+        if (isLua(ci)) ci->u.l.trap = 1; /* signal to update 'trap' in 'luaV_execute' */
     }
 }
 
@@ -206,8 +203,7 @@ int luaD_reallocstack(lua_State *L, int newsize, int raiseerror) {
     /* number of elements to be copied to the new stack */
     i = ((oldsize <= newsize) ? oldsize : newsize) + EXTRA_STACK;
     memcpy(newstack, L->stack, i * sizeof(StackValue));
-    for (; i < newsize + EXTRA_STACK; i++)
-        setnilvalue(s2v(newstack + i)); /* erase new segment */
+    for (; i < newsize + EXTRA_STACK; i++) setnilvalue(s2v(newstack + i)); /* erase new segment */
     correctstack(L, L->stack, newstack);
     luaM_freearray(L, L->stack, oldsize + EXTRA_STACK);
     L->stack = newstack;
@@ -226,9 +222,8 @@ int luaD_growstack(lua_State *L, int n, int raiseerror) {
            extra space reserved for errors, that is, thread is handling
            a stack error; cannot grow further than that. */
         lua_assert(stacksize(L) == ERRORSTACKSIZE);
-        if (raiseerror)
-            luaD_throw(L, LUA_ERRERR); /* error inside message handler */
-        return 0;                      /* if not 'raiseerror', just signal it */
+        if (raiseerror) luaD_throw(L, LUA_ERRERR); /* error inside message handler */
+        return 0;                                  /* if not 'raiseerror', just signal it */
     } else {
         int newsize = 2 * size; /* tentative new size */
         int needed = cast_int(L->top - L->stack) + n;
@@ -241,8 +236,7 @@ int luaD_growstack(lua_State *L, int n, int raiseerror) {
         else { /* stack overflow */
             /* add extra size to be able to handle the error message */
             luaD_reallocstack(L, ERRORSTACKSIZE, raiseerror);
-            if (raiseerror)
-                luaG_runerror(L, "stack overflow");
+            if (raiseerror) luaG_runerror(L, "stack overflow");
             return 0;
         }
     }
@@ -253,13 +247,11 @@ static int stackinuse(lua_State *L) {
     int res;
     StkId lim = L->top;
     for (ci = L->ci; ci != NULL; ci = ci->previous) {
-        if (lim < ci->top)
-            lim = ci->top;
+        if (lim < ci->top) lim = ci->top;
     }
     lua_assert(lim <= L->stack_last);
-    res = cast_int(lim - L->stack) + 1; /* part of stack in use */
-    if (res < LUA_MINSTACK)
-        res = LUA_MINSTACK; /* ensure a minimum size */
+    res = cast_int(lim - L->stack) + 1;         /* part of stack in use */
+    if (res < LUA_MINSTACK) res = LUA_MINSTACK; /* ensure a minimum size */
     return res;
 }
 
@@ -278,8 +270,7 @@ void luaD_shrinkstack(lua_State *L) {
     int max = inuse * 3;   /* maximum "reasonable" size */
     if (max > LUAI_MAXSTACK) {
         max = LUAI_MAXSTACK; /* respect stack limit */
-        if (nsize > LUAI_MAXSTACK)
-            nsize = LUAI_MAXSTACK;
+        if (nsize > LUAI_MAXSTACK) nsize = LUAI_MAXSTACK;
     }
     /* if thread is currently not handling a stack overflow and its
        size is larger than maximum "reasonable" size, shrink it */
@@ -318,11 +309,9 @@ void luaD_hook(lua_State *L, int event, int line, int ftransfer, int ntransfer) 
             ci->u2.transferinfo.ftransfer = ftransfer;
             ci->u2.transferinfo.ntransfer = ntransfer;
         }
-        if (isLua(ci) && L->top < ci->top)
-            L->top = ci->top;             /* protect entire activation register */
-        luaD_checkstack(L, LUA_MINSTACK); /* ensure minimum stack size */
-        if (ci->top < L->top + LUA_MINSTACK)
-            ci->top = L->top + LUA_MINSTACK;
+        if (isLua(ci) && L->top < ci->top) L->top = ci->top; /* protect entire activation register */
+        luaD_checkstack(L, LUA_MINSTACK);                    /* ensure minimum stack size */
+        if (ci->top < L->top + LUA_MINSTACK) ci->top = L->top + LUA_MINSTACK;
         L->allowhook = 0; /* cannot call hooks inside a hook */
         ci->callstatus |= mask;
         lua_unlock(L);
@@ -364,16 +353,14 @@ static void rethook(lua_State *L, CallInfo *ci, int nres) {
         int ftransfer;
         if (isLua(ci)) {
             Proto *p = ci_func(ci)->p;
-            if (p->is_vararg)
-                delta = ci->u.l.nextraargs + p->numparams + 1;
+            if (p->is_vararg) delta = ci->u.l.nextraargs + p->numparams + 1;
         }
         ci->func += delta; /* if vararg, back to virtual 'func' */
         ftransfer = cast(unsigned short, firstres - ci->func);
         luaD_hook(L, LUA_HOOKRET, -1, ftransfer, nres); /* call it */
         ci->func -= delta;
     }
-    if (isLua(ci = ci->previous))
-        L->oldpc = pcRel(ci->u.l.savedpc, ci_func(ci)->p); /* set 'oldpc' */
+    if (isLua(ci = ci->previous)) L->oldpc = pcRel(ci->u.l.savedpc, ci_func(ci)->p); /* set 'oldpc' */
 }
 
 /*
@@ -384,11 +371,10 @@ static void rethook(lua_State *L, CallInfo *ci, int nres) {
 StkId luaD_tryfuncTM(lua_State *L, StkId func) {
     const TValue *tm;
     StkId p;
-    checkstackGCp(L, 1, func);                   /* space for metamethod */
-    tm = luaT_gettmbyobj(L, s2v(func), TM_CALL); /* (after previous GC) */
-    if (l_unlikely(ttisnil(tm)))
-        luaG_callerror(L, s2v(func)); /* nothing to call */
-    for (p = L->top; p > func; p--)   /* open space for metamethod */
+    checkstackGCp(L, 1, func);                                 /* space for metamethod */
+    tm = luaT_gettmbyobj(L, s2v(func), TM_CALL);               /* (after previous GC) */
+    if (l_unlikely(ttisnil(tm))) luaG_callerror(L, s2v(func)); /* nothing to call */
+    for (p = L->top; p > func; p--)                            /* open space for metamethod */
         setobjs2s(L, p, p - 1);
     L->top++;              /* stack space pre-allocated by the caller */
     setobj2s(L, func, tm); /* metamethod is the new function to be called */
@@ -429,8 +415,7 @@ l_sinline void moveresults(lua_State *L, StkId res, int nres, int wanted) {
                 rethook(L, L->ci, nres);
             res = restorestack(L, savedres); /* close and hook can move stack */
             wanted = decodeNresults(wanted);
-            if (wanted == LUA_MULTRET)
-                wanted = nres; /* we want all results */
+            if (wanted == LUA_MULTRET) wanted = nres; /* we want all results */
         }
         break;
     }
@@ -454,8 +439,7 @@ l_sinline void moveresults(lua_State *L, StkId res, int nres, int wanted) {
 /// @param nres
 void luaD_poscall(lua_State *L, CallInfo *ci, int nres) {
     int wanted = ci->nresults;
-    if (l_unlikely(L->hookmask && !hastocloseCfunc(wanted)))
-        rethook(L, ci, nres);
+    if (l_unlikely(L->hookmask && !hastocloseCfunc(wanted))) rethook(L, ci, nres);
     /* move results to proper place */
     moveresults(L, ci->func, nres, wanted);
     /* function cannot be in any of these cases when returning */
@@ -517,10 +501,9 @@ retry:
         ci->func -= delta;          /* restore 'func' (if vararg) */
         for (i = 0; i < narg1; i++) /* move down function and arguments */
             setobjs2s(L, ci->func + i, func + i);
-        func = ci->func; /* moved-down function */
-        for (; narg1 <= nfixparams; narg1++)
-            setnilvalue(s2v(func + narg1)); /* complete missing arguments */
-        ci->top = func + 1 + fsize;         /* top for new function */
+        func = ci->func;                                                     /* moved-down function */
+        for (; narg1 <= nfixparams; narg1++) setnilvalue(s2v(func + narg1)); /* complete missing arguments */
+        ci->top = func + 1 + fsize;                                          /* top for new function */
         lua_assert(ci->top <= L->stack_last);
         ci->u.l.savedpc = p->code; /* starting point */
         ci->callstatus |= CIST_TAIL;
@@ -561,9 +544,8 @@ retry:
         int fsize = p->maxstacksize; /* frame size */
         checkstackGCp(L, fsize, func);
         L->ci = ci = prepCallInfo(L, func, nresults, 0, func + 1 + fsize);
-        ci->u.l.savedpc = p->code; /* starting point */
-        for (; narg < nfixparams; narg++)
-            setnilvalue(s2v(L->top++)); /* complete missing arguments */
+        ci->u.l.savedpc = p->code;                                    /* starting point */
+        for (; narg < nfixparams; narg++) setnilvalue(s2v(L->top++)); /* complete missing arguments */
         lua_assert(ci->top <= L->stack_last);
         return ci;
     }
@@ -582,12 +564,11 @@ retry:
 */
 l_sinline void ccall(lua_State *L, StkId func, int nResults, int inc) {
     CallInfo *ci;
-    L->nCcalls += inc; // 当前的 C 调用深度
-    if (l_unlikely(getCcalls(L) >= LUAI_MAXCCALLS))
-        luaE_checkcstack(L);                              // 检查 Lua 栈是否有足够的空间存储函数调用所需的参数和返回值
-    if ((ci = luaD_precall(L, func, nResults)) != NULL) { /* Lua function? */
-        ci->callstatus = CIST_FRESH;                      /* mark that it is a "fresh" execute */
-        luaV_execute(L, ci);                              /* call it */
+    L->nCcalls += inc;                                                   // 当前的 C 调用深度
+    if (l_unlikely(getCcalls(L) >= LUAI_MAXCCALLS)) luaE_checkcstack(L); // 检查 Lua 栈是否有足够的空间存储函数调用所需的参数和返回值
+    if ((ci = luaD_precall(L, func, nResults)) != NULL) {                /* Lua function? */
+        ci->callstatus = CIST_FRESH;                                     /* mark that it is a "fresh" execute */
+        luaV_execute(L, ci);                                             /* call it */
     }
     L->nCcalls -= inc;
 }
@@ -697,8 +678,7 @@ static void unroll(lua_State *L, void *ud) {
 static CallInfo *findpcall(lua_State *L) {
     CallInfo *ci;
     for (ci = L->ci; ci != NULL; ci = ci->previous) { /* search for a pcall */
-        if (ci->callstatus & CIST_YPCALL)
-            return ci;
+        if (ci->callstatus & CIST_YPCALL) return ci;
     }
     return NULL; /* no pending pcall */
 }
@@ -777,8 +757,7 @@ LUA_API int lua_resume(lua_State *L, lua_State *from, int nargs, int *nresults) 
     } else if (L->status != LUA_YIELD) /* ended with errors? */
         return resume_error(L, "cannot resume dead coroutine", nargs);
     L->nCcalls = (from) ? getCcalls(from) : 0;
-    if (getCcalls(L) >= LUAI_MAXCCALLS)
-        return resume_error(L, "C stack overflow", nargs);
+    if (getCcalls(L) >= LUAI_MAXCCALLS) return resume_error(L, "C stack overflow", nargs);
     L->nCcalls++;
     luai_userstateresume(L, nargs);
     api_checknelems(L, (L->status == LUA_OK) ? nargs + 1 : nargs);

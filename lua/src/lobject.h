@@ -602,6 +602,7 @@ typedef struct Proto {
         checkliveness(L, io);                                                                                                                                                                          \
     }
 
+/// @brief 把 cl 锚定到栈中 o 的位置上
 #define setclLvalue2s(L, o, cl) setclLvalue(L, s2v(o), cl)
 
 #define setfvalue(obj, x)                                                                                                                                                                              \
