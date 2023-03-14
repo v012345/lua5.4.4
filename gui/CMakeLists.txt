@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20.0)
-project(Gui)
-add_executable(${PROJECT_NAME} win32_directx12.cpp Communicator.cpp)
+project(ImGui)
+add_executable(${PROJECT_NAME} win32_directx12.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lua/src)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/libs/DearImGui)
