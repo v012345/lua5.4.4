@@ -4,8 +4,8 @@ local start_at = os.time()
 -- local s = GetMainLuaFilePath()
 package.path = "./utils/?.lua;./config/?.lua;./src/module/?.lua;" .. package.path
 require "tools"
--- local a = require "test"
--- a:run()
+local a = require "coroutine_example"
+a:run()
 -- (require "test"):run()
 -- if argv["module"] then
 --     require(argv["module"]):run()
@@ -13,10 +13,6 @@ require "tools"
 --     (require "test"):run()
 -- end
 -- print("script main.lua")
-
-local a =  XML:new("C:/Users/Meteor/Desktop/UiPetEvolveMain - Copy.csd")
-print(a:getPath())
-a = nil
 
 local end_at = os.time()
 print(string.format("run time : %ss", end_at - start_at))
