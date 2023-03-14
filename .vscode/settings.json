@@ -140,7 +140,8 @@
         "llimits.h": "c",
         "stdarg.h": "c",
         "lprefix.h": "c",
-        "lopcodes.h": "c"
+        "lopcodes.h": "c",
+        "lua.h": "c"
     },
     "Lua.diagnostics.globals": [
         "argv",
