@@ -135,14 +135,13 @@ void luaS_init(lua_State *L) {
     global_State *g = G(L);
     int i, j;
     stringtable *tb = &G(L)->strt;
-    tb->hash = luaM_newvector(L, MINSTRTABSIZE, TString *);
-    tablerehash(tb->hash, 0, MINSTRTABSIZE); /* clear array */
-    tb->size = MINSTRTABSIZE;
-    /* pre-create memory-error message */
-    g->memerrmsg = luaS_newliteral(L, MEMERRMSG);
-    luaC_fix(L, obj2gco(g->memerrmsg)); /* it should never be collected */
-    for (i = 0; i < STRCACHE_N; i++)    /* fill cache with valid strings */
-        for (j = 0; j < STRCACHE_M; j++) g->strcache[i][j] = g->memerrmsg;
+    tb->hash = luaM_newvector(L, MINSTRTABSIZE, TString *);                // 初始化哈希桶大小为 MINSTRTABSIZE = 128
+    tablerehash(tb->hash, 0, MINSTRTABSIZE);                               /* 把上一步申请来内存置NULL ; clear array */
+    tb->size = MINSTRTABSIZE;                                              // 显式指出哈希桶的大小
+    g->memerrmsg = luaS_newliteral(L, MEMERRMSG);                          /* pre-create memory-error message */
+    luaC_fix(L, obj2gco(g->memerrmsg));                                    /* it should never be collected */
+    for (i = 0; i < STRCACHE_N; i++)                                       /* fill cache with valid strings */
+        for (j = 0; j < STRCACHE_M; j++) g->strcache[i][j] = g->memerrmsg; // 临时初始化一下 , 之后会改的
 }
 
 /*
