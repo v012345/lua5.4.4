@@ -1,4 +1,4 @@
-// dear imgui, v1.89.3 WIP
+// dear imgui, v1.89.4 WIP
 // (widgets code)
 
 /*
@@ -32,12 +32,12 @@ Index of this file:
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include "imgui.h"
-#ifndef IMGUI_DISABLE
-
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
+
+#include "imgui.h"
+#ifndef IMGUI_DISABLE
 #include "imgui_internal.h"
 
 // System includes
@@ -498,8 +498,9 @@ bool ImGui::ButtonBehavior(const ImRect& bb, ImGuiID id, bool* out_hovered, bool
         g.HoveredWindow = window;
 
 #ifdef IMGUI_ENABLE_TEST_ENGINE
+    // Alternate registration spot, for when caller didn't use ItemAdd()
     if (id != 0 && g.LastItemData.ID != id)
-        IMGUI_TEST_ENGINE_ITEM_ADD(bb, id);
+        IMGUI_TEST_ENGINE_ITEM_ADD(id, bb, NULL);
 #endif
 
     bool pressed = false;
@@ -609,10 +610,11 @@ bool ImGui::ButtonBehavior(const ImRect& bb, ImGuiID id, bool* out_hovered, bool
         bool nav_activated_by_inputs = (g.NavActivatePressedId == id);
         if (!nav_activated_by_inputs && (flags & ImGuiButtonFlags_Repeat))
         {
-            // Avoid pressing both keys from triggering double amount of repeat events
+            // Avoid pressing multiple keys from triggering excessive amount of repeat events
             const ImGuiKeyData* key1 = GetKeyData(ImGuiKey_Space);
-            const ImGuiKeyData* key2 = GetKeyData(ImGuiKey_NavGamepadActivate);
-            const float t1 = ImMax(key1->DownDuration, key2->DownDuration);
+            const ImGuiKeyData* key2 = GetKeyData(ImGuiKey_Enter);
+            const ImGuiKeyData* key3 = GetKeyData(ImGuiKey_NavGamepadActivate);
+            const float t1 = ImMax(ImMax(key1->DownDuration, key2->DownDuration), key3->DownDuration);
             nav_activated_by_inputs = CalcTypematicRepeatAmount(t1 - g.IO.DeltaTime, t1, g.IO.KeyRepeatDelay, g.IO.KeyRepeatRate) > 0;
         }
         if (nav_activated_by_code || nav_activated_by_inputs)
@@ -2410,18 +2412,18 @@ bool ImGui::DragScalar(const char* label, ImGuiDataType data_type, void* p_data,
         const bool input_requested_by_tabbing = temp_input_allowed && (g.LastItemData.StatusFlags & ImGuiItemStatusFlags_FocusedByTabbing) != 0;
         const bool clicked = hovered && IsMouseClicked(0, id);
         const bool double_clicked = (hovered && g.IO.MouseClickedCount[0] == 2 && TestKeyOwner(ImGuiKey_MouseLeft, id));
-        const bool make_active = (input_requested_by_tabbing || clicked || double_clicked || g.NavActivateId == id || g.NavActivateInputId == id);
+        const bool make_active = (input_requested_by_tabbing || clicked || double_clicked || g.NavActivateId == id);
         if (make_active && (clicked || double_clicked))
             SetKeyOwner(ImGuiKey_MouseLeft, id);
         if (make_active && temp_input_allowed)
-            if (input_requested_by_tabbing || (clicked && g.IO.KeyCtrl) || double_clicked || g.NavActivateInputId == id)
+            if (input_requested_by_tabbing || (clicked && g.IO.KeyCtrl) || double_clicked || (g.NavActivateId == id && (g.NavActivateFlags & ImGuiActivateFlags_PreferInput)))
                 temp_input_is_active = true;
 
         // (Optional) simple click (without moving) turns Drag into an InputText
         if (g.IO.ConfigDragClickToInputText && temp_input_allowed && !temp_input_is_active)
             if (g.ActiveId == id && hovered && g.IO.MouseReleased[0] && !IsMouseDragPastThreshold(0, g.IO.MouseDragThreshold * DRAG_MOUSE_THRESHOLD_FACTOR))
             {
-                g.NavActivateId = g.NavActivateInputId = id;
+                g.NavActivateId = id;
                 g.NavActivateFlags = ImGuiActivateFlags_PreferInput;
                 temp_input_is_active = true;
             }
@@ -2462,7 +2464,7 @@ bool ImGui::DragScalar(const char* label, ImGuiDataType data_type, void* p_data,
     if (label_size.x > 0.0f)
         RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y + style.FramePadding.y), label);
 
-    IMGUI_TEST_ENGINE_ITEM_INFO(id, label, g.LastItemData.StatusFlags);
+    IMGUI_TEST_ENGINE_ITEM_INFO(id, label, g.LastItemData.StatusFlags | (temp_input_allowed ? ImGuiItemStatusFlags_Inputable : 0));
     return value_changed;
 }
 
@@ -3002,11 +3004,11 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* p_dat
         // Tabbing or CTRL-clicking on Slider turns it into an input box
         const bool input_requested_by_tabbing = temp_input_allowed && (g.LastItemData.StatusFlags & ImGuiItemStatusFlags_FocusedByTabbing) != 0;
         const bool clicked = hovered && IsMouseClicked(0, id);
-        const bool make_active = (input_requested_by_tabbing || clicked || g.NavActivateId == id || g.NavActivateInputId == id);
+        const bool make_active = (input_requested_by_tabbing || clicked || g.NavActivateId == id);
         if (make_active && clicked)
             SetKeyOwner(ImGuiKey_MouseLeft, id);
         if (make_active && temp_input_allowed)
-            if (input_requested_by_tabbing || (clicked && g.IO.KeyCtrl) || g.NavActivateInputId == id)
+            if (input_requested_by_tabbing || (clicked && g.IO.KeyCtrl) || (g.NavActivateId == id && (g.NavActivateFlags & ImGuiActivateFlags_PreferInput)))
                 temp_input_is_active = true;
 
         if (make_active && !temp_input_is_active)
@@ -3050,7 +3052,7 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* p_dat
     if (label_size.x > 0.0f)
         RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y + style.FramePadding.y), label);
 
-    IMGUI_TEST_ENGINE_ITEM_INFO(id, label, g.LastItemData.StatusFlags);
+    IMGUI_TEST_ENGINE_ITEM_INFO(id, label, g.LastItemData.StatusFlags | (temp_input_allowed ? ImGuiItemStatusFlags_Inputable : 0));
     return value_changed;
 }
 
@@ -3164,7 +3166,7 @@ bool ImGui::VSliderScalar(const char* label, const ImVec2& size, ImGuiDataType d
 
     const bool hovered = ItemHoverable(frame_bb, id);
     const bool clicked = hovered && IsMouseClicked(0, id);
-    if (clicked || g.NavActivateId == id || g.NavActivateInputId == id)
+    if (clicked || g.NavActivateId == id)
     {
         if (clicked)
             SetKeyOwner(ImGuiKey_MouseLeft, id);
@@ -3457,7 +3459,7 @@ bool ImGui::InputScalar(const char* label, ImGuiDataType data_type, void* p_data
         SetNextItemWidth(ImMax(1.0f, CalcItemWidth() - (button_size + style.ItemInnerSpacing.x) * 2));
         if (InputText("", buf, IM_ARRAYSIZE(buf), flags)) // PushId(label) + "" gives us the expected ID from outside point of view
             value_changed = DataTypeApplyFromText(buf, data_type, p_data, format);
-        IMGUI_TEST_ENGINE_ITEM_INFO(g.LastItemData.ID, label, g.LastItemData.StatusFlags);
+        IMGUI_TEST_ENGINE_ITEM_INFO(g.LastItemData.ID, label, g.LastItemData.StatusFlags | ImGuiItemStatusFlags_Inputable);
 
         // Step buttons
         const ImVec2 backup_frame_padding = style.FramePadding;
@@ -3841,7 +3843,7 @@ void ImGuiInputTextCallbackData::InsertChars(int pos, const char* new_text, cons
             return;
 
         // Contrary to STB_TEXTEDIT_INSERTCHARS() this is working in the UTF8 buffer, hence the mildly similar code (until we remove the U16 buffer altogether!)
-        ImGuiContext& g = *GImGui;
+        ImGuiContext& g = *Ctx;
         ImGuiInputTextState* edit_state = &g.InputTextState;
         IM_ASSERT(edit_state->ID != 0 && g.ActiveId == edit_state->ID);
         IM_ASSERT(Buf == edit_state->TextA.Data);
@@ -3945,8 +3947,9 @@ static bool InputTextFilterCharacter(unsigned int* p_char, ImGuiInputTextFlags f
     // Custom callback filter
     if (flags & ImGuiInputTextFlags_CallbackCharFilter)
     {
+        ImGuiContext& g = *GImGui;
         ImGuiInputTextCallbackData callback_data;
-        memset(&callback_data, 0, sizeof(ImGuiInputTextCallbackData));
+        callback_data.Ctx = &g;
         callback_data.EventFlag = ImGuiInputTextFlags_CallbackCharFilter;
         callback_data.EventChar = (ImWchar)c;
         callback_data.Flags = flags;
@@ -4091,7 +4094,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
     ImGuiInputTextState* state = GetInputTextState(id);
 
     const bool input_requested_by_tabbing = (item_status_flags & ImGuiItemStatusFlags_FocusedByTabbing) != 0;
-    const bool input_requested_by_nav = (g.ActiveId != id) && ((g.NavActivateInputId == id) || (g.NavActivateId == id && g.NavInputSource == ImGuiInputSource_Keyboard));
+    const bool input_requested_by_nav = (g.ActiveId != id) && ((g.NavActivateId == id) && ((g.NavActivateFlags & ImGuiActivateFlags_PreferInput) || (g.NavInputSource == ImGuiInputSource_Keyboard)));
 
     const bool user_clicked = hovered && io.MouseClicked[0];
     const bool user_scroll_finish = is_multiline && state != NULL && g.ActiveId == 0 && g.ActiveIdPreviousFrame == GetWindowScrollbarID(draw_window, ImGuiAxis_Y);
@@ -4183,7 +4186,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
         if (is_osx)
             SetKeyOwner(ImGuiMod_Alt, id);
         if (flags & (ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_AllowTabInput)) // Disable keyboard tabbing out as we will use the \t character.
-            SetKeyOwner(ImGuiKey_Tab, id);
+            SetShortcutRouting(ImGuiKey_Tab, id);
     }
 
     // We have an edge case if ActiveId was set through another widget (e.g. widget being swapped), clear id immediately (don't wait until the end of the function)
@@ -4313,8 +4316,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
 
         // We expect backends to emit a Tab key but some also emit a Tab character which we ignore (#2467, #1336)
         // (For Tab and Enter: Win32/SFML/Allegro are sending both keys and chars, GLFW and SDL are only sending keys. For Space they all send all threes)
-        const bool ignore_char_inputs = (io.KeyCtrl && !io.KeyAlt) || (is_osx && io.KeySuper);
-        if ((flags & ImGuiInputTextFlags_AllowTabInput) && IsKeyPressed(ImGuiKey_Tab) && !ignore_char_inputs && !io.KeyShift && !is_readonly)
+        if ((flags & ImGuiInputTextFlags_AllowTabInput) && Shortcut(ImGuiKey_Tab, id) && !is_readonly)
         {
             unsigned int c = '\t'; // Insert TAB
             if (InputTextFilterCharacter(&c, flags, callback, callback_user_data, ImGuiInputSource_Keyboard))
@@ -4323,6 +4325,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
 
         // Process regular text input (before we check for Return because using some IME will effectively send a Return?)
         // We ignore CTRL inputs, but need to allow ALT+CTRL as some keyboards (e.g. German) use AltGR (which _is_ Alt+Ctrl) to input certain characters.
+        const bool ignore_char_inputs = (io.KeyCtrl && !io.KeyAlt) || (is_osx && io.KeySuper);
         if (io.InputQueueCharacters.Size > 0)
         {
             if (!ignore_char_inputs && !is_readonly && !input_requested_by_nav)
@@ -4559,7 +4562,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
                 // The reason we specify the usage semantic (Completion/History) is that Completion needs to disable keyboard TABBING at the moment.
                 ImGuiInputTextFlags event_flag = 0;
                 ImGuiKey event_key = ImGuiKey_None;
-                if ((flags & ImGuiInputTextFlags_CallbackCompletion) != 0 && IsKeyPressed(ImGuiKey_Tab))
+                if ((flags & ImGuiInputTextFlags_CallbackCompletion) != 0 && Shortcut(ImGuiKey_Tab, id))
                 {
                     event_flag = ImGuiInputTextFlags_CallbackCompletion;
                     event_key = ImGuiKey_Tab;
@@ -4586,7 +4589,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
                 if (event_flag)
                 {
                     ImGuiInputTextCallbackData callback_data;
-                    memset(&callback_data, 0, sizeof(ImGuiInputTextCallbackData));
+                    callback_data.Ctx = &g;
                     callback_data.EventFlag = event_flag;
                     callback_data.Flags = flags;
                     callback_data.UserData = callback_user_data;
@@ -4649,6 +4652,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
         if (is_resizable)
         {
             ImGuiInputTextCallbackData callback_data;
+            callback_data.Ctx = &g;
             callback_data.EventFlag = ImGuiInputTextFlags_CallbackResize;
             callback_data.Flags = flags;
             callback_data.Buf = buf;
@@ -4915,7 +4919,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
     if (value_changed && !(flags & ImGuiInputTextFlags_NoMarkEdited))
         MarkItemEdited(id);
 
-    IMGUI_TEST_ENGINE_ITEM_INFO(id, label, g.LastItemData.StatusFlags);
+    IMGUI_TEST_ENGINE_ITEM_INFO(id, label, g.LastItemData.StatusFlags | ImGuiItemStatusFlags_Inputable);
     if ((flags & ImGuiInputTextFlags_EnterReturnsTrue) != 0)
         return validated;
     else
@@ -4978,28 +4982,32 @@ bool ImGui::ColorEdit3(const char* label, float col[3], ImGuiColorEditFlags flag
     return ColorEdit4(label, col, flags | ImGuiColorEditFlags_NoAlpha);
 }
 
+static void ColorEditRestoreH(const float* col, float* H)
+{
+    ImGuiContext& g = *GImGui;
+    IM_ASSERT(g.ColorEditCurrentID != 0);
+    if (g.ColorEditSavedID != g.ColorEditCurrentID || g.ColorEditSavedColor != ImGui::ColorConvertFloat4ToU32(ImVec4(col[0], col[1], col[2], 0)))
+        return;
+    *H = g.ColorEditSavedHue;
+}
+
 // ColorEdit supports RGB and HSV inputs. In case of RGB input resulting color may have undefined hue and/or saturation.
 // Since widget displays both RGB and HSV values we must preserve hue and saturation to prevent these values resetting.
 static void ColorEditRestoreHS(const float* col, float* H, float* S, float* V)
 {
-    // This check is optional. Suppose we have two color widgets side by side, both widgets display different colors, but both colors have hue and/or saturation undefined.
-    // With color check: hue/saturation is preserved in one widget. Editing color in one widget would reset hue/saturation in another one.
-    // Without color check: common hue/saturation would be displayed in all widgets that have hue/saturation undefined.
-    // g.ColorEditLastColor is stored as ImU32 RGB value: this essentially gives us color equality check with reduced precision.
-    // Tiny external color changes would not be detected and this check would still pass. This is OK, since we only restore hue/saturation _only_ if they are undefined,
-    // therefore this change flipping hue/saturation from undefined to a very tiny value would still be represented in color picker.
     ImGuiContext& g = *GImGui;
-    if (g.ColorEditLastColor != ImGui::ColorConvertFloat4ToU32(ImVec4(col[0], col[1], col[2], 0)))
+    IM_ASSERT(g.ColorEditCurrentID != 0);
+    if (g.ColorEditSavedID != g.ColorEditCurrentID || g.ColorEditSavedColor != ImGui::ColorConvertFloat4ToU32(ImVec4(col[0], col[1], col[2], 0)))
         return;
 
     // When S == 0, H is undefined.
     // When H == 1 it wraps around to 0.
-    if (*S == 0.0f || (*H == 0.0f && g.ColorEditLastHue == 1))
-        *H = g.ColorEditLastHue;
+    if (*S == 0.0f || (*H == 0.0f && g.ColorEditSavedHue == 1))
+        *H = g.ColorEditSavedHue;
 
     // When V == 0, S is undefined.
     if (*V == 0.0f)
-        *S = g.ColorEditLastSat;
+        *S = g.ColorEditSavedSat;
 }
 
 // Edit colors components (each component in 0.0f..1.0f range).
@@ -5022,6 +5030,9 @@ bool ImGui::ColorEdit4(const char* label, float col[4], ImGuiColorEditFlags flag
 
     BeginGroup();
     PushID(label);
+    const bool set_current_color_edit_id = (g.ColorEditCurrentID == 0);
+    if (set_current_color_edit_id)
+        g.ColorEditCurrentID = window->IDStack.back();
 
     // If we're not showing any slider there's no point in doing any HSV conversions
     const ImGuiColorEditFlags flags_untouched = flags;
@@ -5055,7 +5066,7 @@ bool ImGui::ColorEdit4(const char* label, float col[4], ImGuiColorEditFlags flag
         ColorConvertHSVtoRGB(f[0], f[1], f[2], f[0], f[1], f[2]);
     else if ((flags & ImGuiColorEditFlags_InputRGB) && (flags & ImGuiColorEditFlags_DisplayHSV))
     {
-        // Hue is lost when converting from greyscale rgb (saturation=0). Restore it.
+        // Hue is lost when converting from grayscale rgb (saturation=0). Restore it.
         ColorConvertRGBtoHSV(f[0], f[1], f[2], f[0], f[1], f[2]);
         ColorEditRestoreHS(col, &f[0], &f[1], &f[2]);
     }
@@ -5194,10 +5205,11 @@ bool ImGui::ColorEdit4(const char* label, float col[4], ImGuiColorEditFlags flag
                 f[n] = i[n] / 255.0f;
         if ((flags & ImGuiColorEditFlags_DisplayHSV) && (flags & ImGuiColorEditFlags_InputRGB))
         {
-            g.ColorEditLastHue = f[0];
-            g.ColorEditLastSat = f[1];
+            g.ColorEditSavedHue = f[0];
+            g.ColorEditSavedSat = f[1];
             ColorConvertHSVtoRGB(f[0], f[1], f[2], f[0], f[1], f[2]);
-            g.ColorEditLastColor = ColorConvertFloat4ToU32(ImVec4(f[0], f[1], f[2], 0));
+            g.ColorEditSavedID = g.ColorEditCurrentID;
+            g.ColorEditSavedColor = ColorConvertFloat4ToU32(ImVec4(f[0], f[1], f[2], 0));
         }
         if ((flags & ImGuiColorEditFlags_DisplayRGB) && (flags & ImGuiColorEditFlags_InputHSV))
             ColorConvertRGBtoHSV(f[0], f[1], f[2], f[0], f[1], f[2]);
@@ -5209,6 +5221,8 @@ bool ImGui::ColorEdit4(const char* label, float col[4], ImGuiColorEditFlags flag
             col[3] = f[3];
     }
 
+    if (set_current_color_edit_id)
+        g.ColorEditCurrentID = 0;
     PopID();
     EndGroup();
 
@@ -5282,6 +5296,9 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
     g.NextItemData.ClearFlags();
 
     PushID(label);
+    const bool set_current_color_edit_id = (g.ColorEditCurrentID == 0);
+    if (set_current_color_edit_id)
+        g.ColorEditCurrentID = window->IDStack.back();
     BeginGroup();
 
     if (!(flags & ImGuiColorEditFlags_NoSidePreview))
@@ -5330,7 +5347,7 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
     float R = col[0], G = col[1], B = col[2];
     if (flags & ImGuiColorEditFlags_InputRGB)
     {
-        // Hue is lost when converting from greyscale rgb (saturation=0). Restore it.
+        // Hue is lost when converting from grayscale rgb (saturation=0). Restore it.
         ColorConvertRGBtoHSV(R, G, B, H, S, V);
         ColorEditRestoreHS(col, &H, &S, &V);
     }
@@ -5385,10 +5402,7 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
         {
             S = ImSaturate((io.MousePos.x - picker_pos.x) / (sv_picker_size - 1));
             V = 1.0f - ImSaturate((io.MousePos.y - picker_pos.y) / (sv_picker_size - 1));
-
-            // Greatly reduces hue jitter and reset to 0 when hue == 255 and color is rapidly modified using SV square.
-            if (g.ColorEditLastColor == ColorConvertFloat4ToU32(ImVec4(col[0], col[1], col[2], 0)))
-                H = g.ColorEditLastHue;
+            ColorEditRestoreH(col, &H); // Greatly reduces hue jitter and reset to 0 when hue == 255 and color is rapidly modified using SV square.
             value_changed = value_changed_sv = true;
         }
         if (!(flags & ImGuiColorEditFlags_NoOptions))
@@ -5463,9 +5477,10 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
         if (flags & ImGuiColorEditFlags_InputRGB)
         {
             ColorConvertHSVtoRGB(H, S, V, col[0], col[1], col[2]);
-            g.ColorEditLastHue = H;
-            g.ColorEditLastSat = S;
-            g.ColorEditLastColor = ColorConvertFloat4ToU32(ImVec4(col[0], col[1], col[2], 0));
+            g.ColorEditSavedHue = H;
+            g.ColorEditSavedSat = S;
+            g.ColorEditSavedID = g.ColorEditCurrentID;
+            g.ColorEditSavedColor = ColorConvertFloat4ToU32(ImVec4(col[0], col[1], col[2], 0));
         }
         else if (flags & ImGuiColorEditFlags_InputHSV)
         {
@@ -5629,6 +5644,8 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
     if (value_changed && g.LastItemData.ID != 0) // In case of ID collision, the second EndGroup() won't catch g.ActiveId
         MarkItemEdited(g.LastItemData.ID);
 
+    if (set_current_color_edit_id)
+        g.ColorEditCurrentID = 0;
     PopID();
 
     return value_changed;
