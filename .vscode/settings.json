@@ -138,7 +138,9 @@
         "lstate.h": "c",
         "lobject.h": "c",
         "llimits.h": "c",
-        "stdarg.h": "c"
+        "stdarg.h": "c",
+        "lprefix.h": "c",
+        "lopcodes.h": "c"
     },
     "Lua.diagnostics.globals": [
         "argv",
