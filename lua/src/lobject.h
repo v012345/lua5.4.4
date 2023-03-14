@@ -119,7 +119,7 @@ typedef struct TValue {
 ** (They are mostly equal now, but may be different in the future.)
 */
 
-/* from stack to stack */
+/* from stack to stack 就是 o2 的值给 o1 */
 #define setobjs2s(L, o1, o2) setobj(L, s2v(o1), s2v(o2))
 /* to stack (not from same stack) 过程就是把 o2 赋值给 o1 */
 #define setobj2s(L, o1, o2) setobj(L, s2v(o1), o2)

@@ -449,6 +449,13 @@ void luaD_poscall(lua_State *L, CallInfo *ci, int nres) {
 
 #define next_ci(L) (L->ci->next ? L->ci->next : luaE_extendCI(L))
 
+/// @brief 准备一个 CallInfo
+/// @param L
+/// @param func 闭包在数据上的位置
+/// @param nret 函数返回值个数
+/// @param mask
+/// @param top 数据栈中 func 的位置 + 1 再 + func 执行需要的最大栈空间
+/// @return CallInfo*
 l_sinline CallInfo *prepCallInfo(lua_State *L, StkId func, int nret, int mask, StkId top) {
     CallInfo *ci = L->ci = next_ci(L); /* new frame */
     ci->func = func;
@@ -534,17 +541,17 @@ retry:
         precallC(L, func, nresults, clCvalue(s2v(func))->f); // 函数执行 C 函数调用,并返回 NULL；
         return NULL;
     case LUA_VLCF:                                      /* light C function */
-        precallC(L, func, nresults, fvalue(s2v(func))); // // 函数执行 C 函数调用,并返回 NULL；
+        precallC(L, func, nresults, fvalue(s2v(func))); // 函数执行 C 函数调用,并返回 NULL；
         return NULL;
-    case LUA_VLCL: {  /* Lua function */
-        CallInfo *ci; // 如果函数是 Lua 函数,则构造 CallInfo 结构体,并返回该结构体；
-        Proto *p = clLvalue(s2v(func))->p;
-        int narg = cast_int(L->top - func) - 1; /* number of real arguments */
-        int nfixparams = p->numparams;
-        int fsize = p->maxstacksize; /* frame size */
+    case LUA_VLCL: {                            /* Lua function */
+        CallInfo *ci;                           // 如果函数是 Lua 函数,则构造 CallInfo 结构体,并返回该结构体；
+        Proto *p = clLvalue(s2v(func))->p;      // 获取栈 func 位置上 lua 闭包中的函数原型
+        int narg = cast_int(L->top - func) - 1; /* 实际传来的参数个数 , 我不确定 self 算不算一个参数; number of real arguments */
+        int nfixparams = p->numparams;          // lua 函数签名中指定的参数个数
+        int fsize = p->maxstacksize;            /* 函数执行时最多需要多少个栈空间 frame size */
         checkstackGCp(L, fsize, func);
         L->ci = ci = prepCallInfo(L, func, nresults, 0, func + 1 + fsize);
-        ci->u.l.savedpc = p->code;                                    /* starting point */
+        ci->u.l.savedpc = p->code;                                    /* 设置入口指令 starting point */
         for (; narg < nfixparams; narg++) setnilvalue(s2v(L->top++)); /* complete missing arguments */
         lua_assert(ci->top <= L->stack_last);
         return ci;
@@ -843,19 +850,14 @@ int luaD_closeprotected(lua_State *L, ptrdiff_t level, int status) {
     }
 }
 
-/**
- * @brief 用于在保护模式下调用一个 C 函数,并在出现错误时恢复堆栈信息,处理错误
- * Call the C function 'func' in protected mode, restoring basic
- * thread information ('allowhook', etc.) and in particular
- * its stack level in case of errors.
- *
- * @param L
- * @param func 要调用的 C 函数
- * @param u 一个指向用户数据的指针
- * @param old_top 旧栈顶
- * @param ef 错误处理函数在栈中的索引
- * @return int
- */
+/// @brief 用于在保护模式下调用一个 C 函数,并在出现错误时恢复堆栈信息,处理错误
+/// Call the C function 'func' in protected mode, restoring basic thread information ('allowhook', etc.) and in particular its stack level in case of errors.
+/// @param L
+/// @param func 要调用的 C 函数
+/// @param u 一个指向用户数据的指针
+/// @param old_top 旧栈顶
+/// @param ef 错误处理函数在栈中的索引
+/// @return int
 int luaD_pcall(lua_State *L, Pfunc func, void *u, ptrdiff_t old_top, ptrdiff_t ef) {
     int status;
     CallInfo *old_ci = L->ci;              // 当前调用信息
