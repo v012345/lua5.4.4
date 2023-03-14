@@ -50,6 +50,8 @@ static void save(LexState *ls, int c) {
     b->buffer[luaZ_bufflen(b)++] = cast_char(c);
 }
 
+/// @brief 初始化词法分析要用保留字 , 直接内部化 , 并且不让 gc 回收
+/// @param L 
 void luaX_init(lua_State *L) {
     int i;
     TString *e = luaS_newliteral(L, LUA_ENV); /* create env name */
