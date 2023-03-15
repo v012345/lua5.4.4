@@ -141,7 +141,11 @@
         "stdarg.h": "c",
         "lprefix.h": "c",
         "lopcodes.h": "c",
-        "lua.h": "c"
+        "lua.h": "c",
+        "locale.h": "c",
+        "string.h": "c",
+        "llex.h": "c",
+        "corecrt.h": "c"
     },
     "Lua.diagnostics.globals": [
         "argv",

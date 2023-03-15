@@ -18,6 +18,9 @@
 #include "lstate.h"
 #include "lzio.h"
 
+/// @brief 从 LoadF 读一块 , 把读到的第一个字符放到 z->p , 所以 z->n = size - 1;
+/// @param z
+/// @return
 int luaZ_fill(ZIO *z) {
     size_t size;
     lua_State *L = z->L;
@@ -25,8 +28,7 @@ int luaZ_fill(ZIO *z) {
     lua_unlock(L);
     buff = z->reader(L, z->data, &size);
     lua_lock(L);
-    if (buff == NULL || size == 0)
-        return EOZ;
+    if (buff == NULL || size == 0) return EOZ;
     z->n = size - 1; /* discount char being returned */
     z->p = buff;
     return cast_uchar(*(z->p++));

@@ -48,21 +48,21 @@ enum RESERVED {
     TK_UNTIL,
     TK_WHILE,
     /* other terminal symbols */
-    TK_IDIV,
-    TK_CONCAT,
-    TK_DOTS,
-    TK_EQ,
-    TK_GE,
-    TK_LE,
-    TK_NE,
-    TK_SHL,
-    TK_SHR,
-    TK_DBCOLON,
-    TK_EOS,
-    TK_FLT,
-    TK_INT,
-    TK_NAME,
-    TK_STRING
+    TK_IDIV,    //: 整数除法运算符 //
+    TK_CONCAT,  // 字符串连接运算符 ..
+    TK_DOTS,    // 可变参数列表的省略符号 ...
+    TK_EQ,      // 等于运算符 ==
+    TK_GE,      // 大于等于运算符 >=
+    TK_LE,      // 小于等于运算符 <=
+    TK_NE,      // 不等于运算符 ~=
+    TK_SHL,     // 位左移运算符 <<
+    TK_SHR,     // 位右移运算符 >>
+    TK_DBCOLON, // 命名空间的分隔符 ::
+    TK_EOS,     // 输入流结束标志
+    TK_FLT,     // 浮点数类型
+    TK_INT,     // 整数类型
+    TK_NAME,    // 标识符
+    TK_STRING   // 字符串类型
 };
 
 /* number of reserved words */
