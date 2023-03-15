@@ -24,6 +24,9 @@ typedef struct Zio ZIO;
 /// @brief 可以简单理解从文件中读入一个字符
 #define zgetc(z) (((z)->n--) > 0 ? cast_uchar(*(z)->p++) : luaZ_fill(z))
 
+/// @brief 主要在 save 中使用 , 暂时存一个字符串
+/// @param n buffer 中已存的字符个数
+/// @param buffsize 申请来的 buffer 的长度
 typedef struct Mbuffer {
     char *buffer;
     size_t n;

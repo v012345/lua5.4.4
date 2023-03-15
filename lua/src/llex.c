@@ -26,6 +26,7 @@
 #include "ltable.h"
 #include "lzio.h"
 
+/// @brief 可以简单理解从文件中取下一个字符
 #define next(ls) (ls->current = zgetc(ls->z))
 
 #define currIsNewline(ls) (ls->current == '\n' || ls->current == '\r')
@@ -35,10 +36,14 @@ static const char *const luaX_tokens[] = {
     "and",  "break", "do",    "else", "elseif", "end", "false", "for", "function", "goto", "if", "in", "local", "nil",   "not",      "or",        "repeat", "return",  "then",
     "true", "until", "while", "//",   "..",     "...", "==",    ">=",  "<=",       "~=",   "<<", ">>", "::",    "<eof>", "<number>", "<integer>", "<name>", "<string>"};
 
+/// @brief 把 ls->current 放到 ls->buff 中 ; ls->current 中存入下一个字符
 #define save_and_next(ls) (save(ls, ls->current), next(ls))
 
 static l_noret lexerror(LexState *ls, const char *msg, int token);
 
+/// @brief 把 c 存放到 ls->buff 中 ; 会自动维护 ls->buff 的大小
+/// @param ls LexState
+/// @param c 一个字符
 static void save(LexState *ls, int c) {
     Mbuffer *b = ls->buff;
     if (luaZ_bufflen(b) + 1 > luaZ_sizebuffer(b)) {
@@ -51,7 +56,7 @@ static void save(LexState *ls, int c) {
 }
 
 /// @brief 初始化词法分析要用保留字 , 直接内部化 , 并且不让 gc 回收
-/// @param L 
+/// @param L
 void luaX_init(lua_State *L) {
     int i;
     TString *e = luaS_newliteral(L, LUA_ENV); /* create env name */
@@ -126,10 +131,7 @@ TString *luaX_newstring(LexState *ls, const char *str, size_t l) {
     return ts;
 }
 
-/*
-** increment line number and skips newline sequence (any of
-** \n, \r, \n\r, or \r\n)
-*/
+/// @brief line number and skips newline sequence (any of \\n, \\r, \\n\\r, or \\r\\n)
 static void inclinenumber(LexState *ls) {
     int old = ls->current;
     lua_assert(currIsNewline(ls));
@@ -431,6 +433,10 @@ static void read_string(LexState *ls, int del, SemInfo *seminfo) {
     seminfo->ts = luaX_newstring(ls, luaZ_buffer(ls->buff) + 1, luaZ_bufflen(ls->buff) - 2);
 }
 
+/// @brief 返回词法解析到的类型
+/// @param ls LexState
+/// @param seminfo SemInfo
+/// @return int 如果是单字 就是对应的 ASCII 码 , 如果是其他 就返回 RESERVED 枚举里的值
 static int llex(LexState *ls, SemInfo *seminfo) {
     luaZ_resetbuffer(ls->buff);
     for (;;) {
