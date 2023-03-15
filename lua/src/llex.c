@@ -249,6 +249,10 @@ static size_t skip_sep(LexState *ls) {
     return (ls->current == s) ? count + 2 : (count == 0) ? 1 : 0;
 }
 
+/// @brief
+/// @param ls
+/// @param seminfo SemInfo 如果 为 NULL , 那么就跳过一个长注释 , 否则就是一个多行字符串
+/// @param sep
 static void read_long_string(LexState *ls, SemInfo *seminfo, size_t sep) {
     int line = ls->linenumber; /* initial line (for error message) */
     save_and_next(ls);         /* skip 2nd '[' */

@@ -225,14 +225,11 @@ static TString *internshrstr(lua_State *L, const char *str, size_t l) {
     return ts;
 }
 
-/**
- * @brief new string (with explicit length) , 当 l <= LUAI_MAXSHORTLEN , 使用内部化短字符串
- *
- * @param L
- * @param str
- * @param l 字符串长度
- * @return TString*
- */
+/// @brief new string (with explicit length) , 当 l <= LUAI_MAXSHORTLEN , 使用内部化短字符串
+/// @param L
+/// @param str
+/// @param l 字符串长度
+/// @return TString*
 TString *luaS_newlstr(lua_State *L, const char *str, size_t l) {
     if (l <= LUAI_MAXSHORTLEN) /* short string? */
         return internshrstr(L, str, l);
