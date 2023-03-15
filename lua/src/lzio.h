@@ -21,6 +21,7 @@
 /// @param L Lua state (for reader)
 typedef struct Zio ZIO;
 
+/// @brief 可以简单理解从文件中读入一个字符
 #define zgetc(z) (((z)->n--) > 0 ? cast_uchar(*(z)->p++) : luaZ_fill(z))
 
 typedef struct Mbuffer {
@@ -48,6 +49,11 @@ LUAI_FUNC size_t luaZ_read(ZIO *z, void *b, size_t n); /* read next n bytes */
 /* --------- Private Part ------------------ */
 
 /// @brief 用于读取数据源
+/// @param n 还有多少字符没有读入
+/// @param p
+/// @param reader 用于读取数据源
+/// @param data 是一个 LoadF , 就是读入的文件
+/// @param L
 struct Zio {
     size_t n;          /* bytes still unread */
     const char *p;     /* current position in buffer */
