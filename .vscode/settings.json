@@ -145,7 +145,10 @@
         "locale.h": "c",
         "string.h": "c",
         "llex.h": "c",
-        "corecrt.h": "c"
+        "corecrt.h": "c",
+        "vcruntime.h": "c",
+        "limits.h": "c",
+        "stddef.h": "c"
     },
     "Lua.diagnostics.globals": [
         "argv",
