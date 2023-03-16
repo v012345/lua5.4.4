@@ -62,9 +62,7 @@
 #define LUA_USE_DLOPEN /* MacOS does not need -ldl */
 #endif
 
-/*
-@@ LUAI_IS32INT is true iff 'int' has (at least) 32 bits.
-*/
+/// @brief lua 的整数是不是至少有 32 位; @@ LUAI_IS32INT is true iff 'int' has (at least) 32 bits.
 #define LUAI_IS32INT ((UINT_MAX >> 30) >= 3)
 
 /* }================================================================== */
