@@ -135,14 +135,11 @@ l_noret luaD_throw(lua_State *L, int errcode) {
     }
 }
 
-/**
- * @brief 这段代码的作用是运行一个C函数指针,这个C函数指针指向的函数可能会发生异常
- *
- * @param L
- * @param f 函数指针,表示要运行的C函数
- * @param ud
- * @return int
- */
+/// @brief 这段代码的作用是运行一个C函数指针,这个C函数指针指向的函数可能会发生异常
+/// @param L
+/// @param f 函数指针,表示要运行的C函数
+/// @param ud
+/// @return int
 int luaD_rawrunprotected(lua_State *L, Pfunc f, void *ud) {
     l_uint32 oldnCcalls = L->nCcalls; // 保存调用栈层数
     struct lua_longjmp lj;            // 定义一个lua_longjmp类型的结构体变量lj
@@ -879,12 +876,12 @@ int luaD_pcall(lua_State *L, Pfunc func, void *u, ptrdiff_t old_top, ptrdiff_t e
 /*
 ** Execute a protected parser.
 */
-struct SParser { /* data to 'f_parser' */
-    ZIO *z;
-    Mbuffer buff; /* dynamic structure used by the scanner */
-    Dyndata dyd;  /* dynamic structures used by the parser */
-    const char *mode;
-    const char *name;
+struct SParser {      /* data to 'f_parser' */
+    ZIO *z;           // 用于读脚本文件
+    Mbuffer buff;     /* 脚本解析过程就是一个 buff , 其他都是指向这个的指针 ; dynamic structure used by the scanner */
+    Dyndata dyd;      /* 脚本解析过程就是一个 dyd , 其他都是指向这个的指针 ; dynamic structures used by the parser */
+    const char *mode; // 解析方式
+    const char *name; // 文件名
 };
 
 static void checkmode(lua_State *L, const char *mode, const char *x) {
@@ -912,6 +909,12 @@ static void f_parser(lua_State *L, void *ud) {
     luaF_initupvals(L, cl);
 }
 
+/// @brief 就是调用 f_parser 去解析 lua 脚本
+/// @param L 状态机
+/// @param z 脚本文件
+/// @param name 加上 @ 的脚本文件名
+/// @param mode 目前没有发现什么用处 , 可能是以什么方式解析脚本
+/// @return
 int luaD_protectedparser(lua_State *L, ZIO *z, const char *name, const char *mode) {
     struct SParser p;
     int status;
@@ -926,7 +929,7 @@ int luaD_protectedparser(lua_State *L, ZIO *z, const char *name, const char *mod
     p.dyd.label.arr = NULL;
     p.dyd.label.size = 0;
     luaZ_initbuffer(L, &p.buff);
-    status = luaD_pcall(L, f_parser, &p, savestack(L, L->top), L->errfunc);
+    status = luaD_pcall(L, f_parser, &p, savestack(L, L->top), L->errfunc); // p 会传给 f_parser 去处理
     luaZ_freebuffer(L, &p.buff);
     luaM_freearray(L, p.dyd.actvar.arr, p.dyd.actvar.size);
     luaM_freearray(L, p.dyd.gt.arr, p.dyd.gt.size);

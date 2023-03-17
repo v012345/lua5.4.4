@@ -88,10 +88,10 @@ typedef struct LexState {
     Token lookahead;      /* 向前看的标记 look ahead token */
     struct FuncState *fs; /* 当前函数（解析器） current function (parser) */
     struct lua_State *L;  // Lua 状态机
-    ZIO *z;               /* 输入流 input stream */
-    Mbuffer *buff;        /* 用于标记的缓冲区 buffer for tokens */
+    ZIO *z;               /* 输入流 , 指向 SParser 中的 z ; input stream */
+    Mbuffer *buff;        /* 用于标记的缓冲区 , 指向 SParser 中的 buff ; buffer for tokens */
     Table *h;             /* 用于避免收集/重用字符串 to avoid collection/reuse strings */
-    struct Dyndata *dyd;  /* 解析器使用的动态结构 dynamic structures used by the parser */
+    struct Dyndata *dyd;  /* 解析器使用的动态结构 , 指向 SParser 中的 dyd ; dynamic structures used by the parser */
     TString *source;      /* 当前源名称 current source name */
     TString *envn;        /* 环境变量名称 environment variable name */
 } LexState;
