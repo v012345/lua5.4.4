@@ -32,27 +32,28 @@ enum OpMode { iABC, iABx, iAsBx, iAx, isJ }; /* basic instruction formats */
 /*
 ** size and position of opcode arguments.
 */
-#define SIZE_C 8
-#define SIZE_B 8
-#define SIZE_Bx (SIZE_C + SIZE_B + 1)
-#define SIZE_A 8
-#define SIZE_Ax (SIZE_Bx + SIZE_A)
-#define SIZE_sJ (SIZE_Bx + SIZE_A)
 
-#define SIZE_OP 7
+#define SIZE_C 8                      // 8
+#define SIZE_B 8                      // 8
+#define SIZE_Bx (SIZE_C + SIZE_B + 1) // 17
+#define SIZE_A 8                      // 8
+#define SIZE_Ax (SIZE_Bx + SIZE_A)    // 25
+#define SIZE_sJ (SIZE_Bx + SIZE_A)    // 25
 
-#define POS_OP 0
+#define SIZE_OP 7 // 7
 
-#define POS_A (POS_OP + SIZE_OP)
-#define POS_k (POS_A + SIZE_A)
-#define POS_B (POS_k + 1)
-#define POS_C (POS_B + SIZE_B)
+#define POS_OP 0 // 0
 
-#define POS_Bx POS_k
+#define POS_A (POS_OP + SIZE_OP) // 7
+#define POS_k (POS_A + SIZE_A)   // 15
+#define POS_B (POS_k + 1)        // 16
+#define POS_C (POS_B + SIZE_B)   // 24
 
-#define POS_Ax POS_A
+#define POS_Bx POS_k // 15
 
-#define POS_sJ POS_A
+#define POS_Ax POS_A // 7
+
+#define POS_sJ POS_A // 7
 
 /*
 ** limits for opcode arguments.
