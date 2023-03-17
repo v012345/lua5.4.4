@@ -94,23 +94,23 @@ struct lua_longjmp {
 
 void luaD_seterrorobj(lua_State *L, int errcode, StkId oldtop) {
     switch (errcode) {
-    case LUA_ERRMEM: {                           /* memory error? */
-        setsvalue2s(L, oldtop, G(L)->memerrmsg); /* reuse preregistered msg. */
-        break;
-    }
-    case LUA_ERRERR: {
-        setsvalue2s(L, oldtop, luaS_newliteral(L, "error in error handling"));
-        break;
-    }
-    case LUA_OK: {                /* special case only for closing upvalues */
-        setnilvalue(s2v(oldtop)); /* no error message */
-        break;
-    }
-    default: {
-        lua_assert(errorstatus(errcode)); /* real error */
-        setobjs2s(L, oldtop, L->top - 1); /* error message on current top */
-        break;
-    }
+        case LUA_ERRMEM: {                           /* memory error? */
+            setsvalue2s(L, oldtop, G(L)->memerrmsg); /* reuse preregistered msg. */
+            break;
+        }
+        case LUA_ERRERR: {
+            setsvalue2s(L, oldtop, luaS_newliteral(L, "error in error handling"));
+            break;
+        }
+        case LUA_OK: {                /* special case only for closing upvalues */
+            setnilvalue(s2v(oldtop)); /* no error message */
+            break;
+        }
+        default: {
+            lua_assert(errorstatus(errcode)); /* real error */
+            setobjs2s(L, oldtop, L->top - 1); /* error message on current top */
+            break;
+        }
     }
     L->top = oldtop + 1;
 }
@@ -391,33 +391,33 @@ l_sinline void moveresults(lua_State *L, StkId res, int nres, int wanted) {
     StkId firstresult;
     int i;
     switch (wanted) { /* handle typical cases separately */
-    case 0:           /* no values needed */
-        L->top = res;
-        return;
-    case 1:                                   /* one value needed */
-        if (nres == 0)                        /* no results? */
-            setnilvalue(s2v(res));            /* adjust with nil */
-        else                                  /* at least one result */
-            setobjs2s(L, res, L->top - nres); /* move it to proper place */
-        L->top = res + 1;
-        return;
-    case LUA_MULTRET:
-        wanted = nres; /* we want all results */
-        break;
-    default:                           /* two/more results and/or to-be-closed variables */
-        if (hastocloseCfunc(wanted)) { /* to-be-closed variables? */
-            ptrdiff_t savedres = savestack(L, res);
-            L->ci->callstatus |= CIST_CLSRET; /* in case of yields */
-            L->ci->u2.nres = nres;
-            luaF_close(L, res, CLOSEKTOP, 1);
-            L->ci->callstatus &= ~CIST_CLSRET;
-            if (L->hookmask) /* if needed, call hook after '__close's */
-                rethook(L, L->ci, nres);
-            res = restorestack(L, savedres); /* close and hook can move stack */
-            wanted = decodeNresults(wanted);
-            if (wanted == LUA_MULTRET) wanted = nres; /* we want all results */
-        }
-        break;
+        case 0:       /* no values needed */
+            L->top = res;
+            return;
+        case 1:                                   /* one value needed */
+            if (nres == 0)                        /* no results? */
+                setnilvalue(s2v(res));            /* adjust with nil */
+            else                                  /* at least one result */
+                setobjs2s(L, res, L->top - nres); /* move it to proper place */
+            L->top = res + 1;
+            return;
+        case LUA_MULTRET:
+            wanted = nres; /* we want all results */
+            break;
+        default:                           /* two/more results and/or to-be-closed variables */
+            if (hastocloseCfunc(wanted)) { /* to-be-closed variables? */
+                ptrdiff_t savedres = savestack(L, res);
+                L->ci->callstatus |= CIST_CLSRET; /* in case of yields */
+                L->ci->u2.nres = nres;
+                luaF_close(L, res, CLOSEKTOP, 1);
+                L->ci->callstatus &= ~CIST_CLSRET;
+                if (L->hookmask) /* if needed, call hook after '__close's */
+                    rethook(L, L->ci, nres);
+                res = restorestack(L, savedres); /* close and hook can move stack */
+                wanted = decodeNresults(wanted);
+                if (wanted == LUA_MULTRET) wanted = nres; /* we want all results */
+            }
+            break;
     }
     /* generic case */
     firstresult = L->top - nres; /* index of first result */
@@ -495,34 +495,34 @@ l_sinline int precallC(lua_State *L, StkId func, int nresults, lua_CFunction f) 
 int luaD_pretailcall(lua_State *L, CallInfo *ci, StkId func, int narg1, int delta) {
 retry:
     switch (ttypetag(s2v(func))) {
-    case LUA_VCCL: /* C closure */
-        return precallC(L, func, LUA_MULTRET, clCvalue(s2v(func))->f);
-    case LUA_VLCF: /* light C function */
-        return precallC(L, func, LUA_MULTRET, fvalue(s2v(func)));
-    case LUA_VLCL: { /* Lua function */
-        Proto *p = clLvalue(s2v(func))->p;
-        int fsize = p->maxstacksize; /* frame size */
-        int nfixparams = p->numparams;
-        int i;
-        checkstackGCp(L, fsize - delta, func);
-        ci->func -= delta;          /* restore 'func' (if vararg) */
-        for (i = 0; i < narg1; i++) /* move down function and arguments */
-            setobjs2s(L, ci->func + i, func + i);
-        func = ci->func;                                                     /* moved-down function */
-        for (; narg1 <= nfixparams; narg1++) setnilvalue(s2v(func + narg1)); /* complete missing arguments */
-        ci->top = func + 1 + fsize;                                          /* top for new function */
-        lua_assert(ci->top <= L->stack_last);
-        ci->u.l.savedpc = p->code; /* starting point */
-        ci->callstatus |= CIST_TAIL;
-        L->top = func + narg1; /* set top */
-        return -1;
-    }
-    default: {                          /* not a function */
-        func = luaD_tryfuncTM(L, func); /* try to get '__call' metamethod */
-        /* return luaD_pretailcall(L, ci, func, narg1 + 1, delta); */
-        narg1++;
-        goto retry; /* try again */
-    }
+        case LUA_VCCL: /* C closure */
+            return precallC(L, func, LUA_MULTRET, clCvalue(s2v(func))->f);
+        case LUA_VLCF: /* light C function */
+            return precallC(L, func, LUA_MULTRET, fvalue(s2v(func)));
+        case LUA_VLCL: { /* Lua function */
+            Proto *p = clLvalue(s2v(func))->p;
+            int fsize = p->maxstacksize; /* frame size */
+            int nfixparams = p->numparams;
+            int i;
+            checkstackGCp(L, fsize - delta, func);
+            ci->func -= delta;          /* restore 'func' (if vararg) */
+            for (i = 0; i < narg1; i++) /* move down function and arguments */
+                setobjs2s(L, ci->func + i, func + i);
+            func = ci->func;                                                     /* moved-down function */
+            for (; narg1 <= nfixparams; narg1++) setnilvalue(s2v(func + narg1)); /* complete missing arguments */
+            ci->top = func + 1 + fsize;                                          /* top for new function */
+            lua_assert(ci->top <= L->stack_last);
+            ci->u.l.savedpc = p->code; /* starting point */
+            ci->callstatus |= CIST_TAIL;
+            L->top = func + narg1; /* set top */
+            return -1;
+        }
+        default: {                          /* not a function */
+            func = luaD_tryfuncTM(L, func); /* try to get '__call' metamethod */
+            /* return luaD_pretailcall(L, ci, func, narg1 + 1, delta); */
+            narg1++;
+            goto retry; /* try again */
+        }
     }
 }
 
@@ -537,30 +537,30 @@ retry:
 CallInfo *luaD_precall(lua_State *L, StkId func, int nresults) {
 retry:
     switch (ttypetag(s2v(func))) {
-    case LUA_VCCL:                                           /* C closure */
-        precallC(L, func, nresults, clCvalue(s2v(func))->f); // 函数执行 C 函数调用,并返回 NULL；
-        return NULL;
-    case LUA_VLCF:                                      /* light C function */
-        precallC(L, func, nresults, fvalue(s2v(func))); // 函数执行 C 函数调用,并返回 NULL；
-        return NULL;
-    case LUA_VLCL: {                            /* Lua function */
-        CallInfo *ci;                           // 如果函数是 Lua 函数,则构造 CallInfo 结构体,并返回该结构体；
-        Proto *p = clLvalue(s2v(func))->p;      // 获取栈 func 位置上 lua 闭包中的函数原型
-        int narg = cast_int(L->top - func) - 1; /* 实际传来的参数个数 , 我不确定 self 算不算一个参数; number of real arguments */
-        int nfixparams = p->numparams;          // lua 函数签名中指定的参数个数
-        int fsize = p->maxstacksize;            /* 函数执行时最多需要多少个栈空间 frame size */
-        checkstackGCp(L, fsize, func);
-        L->ci = ci = prepCallInfo(L, func, nresults, 0, func + 1 + fsize);
-        ci->u.l.savedpc = p->code;                                    /* 设置入口指令 starting point */
-        for (; narg < nfixparams; narg++) setnilvalue(s2v(L->top++)); /* complete missing arguments */
-        lua_assert(ci->top <= L->stack_last);
-        return ci;
-    }
-    default: {                          /* not a function */
-        func = luaD_tryfuncTM(L, func); /* try to get '__call' metamethod */
-        /* return luaD_precall(L, func, nresults); */
-        goto retry; /* try again with metamethod */
-    }
+        case LUA_VCCL:                                           /* C closure */
+            precallC(L, func, nresults, clCvalue(s2v(func))->f); // 函数执行 C 函数调用,并返回 NULL；
+            return NULL;
+        case LUA_VLCF:                                      /* light C function */
+            precallC(L, func, nresults, fvalue(s2v(func))); // 函数执行 C 函数调用,并返回 NULL；
+            return NULL;
+        case LUA_VLCL: {                            /* Lua function */
+            CallInfo *ci;                           // 如果函数是 Lua 函数,则构造 CallInfo 结构体,并返回该结构体；
+            Proto *p = clLvalue(s2v(func))->p;      // 获取栈 func 位置上 lua 闭包中的函数原型
+            int narg = cast_int(L->top - func) - 1; /* 实际传来的参数个数 , 我不确定 self 算不算一个参数; number of real arguments */
+            int nfixparams = p->numparams;          // lua 函数签名中指定的参数个数
+            int fsize = p->maxstacksize;            /* 函数执行时最多需要多少个栈空间 frame size */
+            checkstackGCp(L, fsize, func);
+            L->ci = ci = prepCallInfo(L, func, nresults, 0, func + 1 + fsize);
+            ci->u.l.savedpc = p->code;                                    /* 设置入口指令 starting point */
+            for (; narg < nfixparams; narg++) setnilvalue(s2v(L->top++)); /* complete missing arguments */
+            lua_assert(ci->top <= L->stack_last);
+            return ci;
+        }
+        default: {                          /* not a function */
+            func = luaD_tryfuncTM(L, func); /* try to get '__call' metamethod */
+            /* return luaD_precall(L, func, nresults); */
+            goto retry; /* try again with metamethod */
+        }
     }
 }
 
@@ -894,6 +894,9 @@ static void checkmode(lua_State *L, const char *mode, const char *x) {
     }
 }
 
+/// @brief 把 lua 脚本编译成 lua 字节码
+/// @param L
+/// @param ud SParser 一个编译时存东西的结构器
 static void f_parser(lua_State *L, void *ud) {
     LClosure *cl;
     struct SParser *p = cast(struct SParser *, ud);
