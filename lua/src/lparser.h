@@ -63,7 +63,7 @@ typedef enum {
 #define vkisindexed(k) (VINDEXED <= (k) && (k) <= VINDEXSTR)
 
 typedef struct expdesc {
-    expkind k;
+    expkind k; // 当前表达式的类型
     union {
         lua_Integer ival; /* for VKINT */
         lua_Number nval;  /* for VKFLT */

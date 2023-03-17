@@ -82,9 +82,7 @@ static int testnext(LexState *ls, int c) {
         return 0;
 }
 
-/*
-** Check that next token is 'c'.
-*/
+/// @brief 检查 LexState 上的 token 是不是 c 类型 ; Check that next token is 'c'.
 static void check(LexState *ls, int c) {
     if (ls->t.token != c) error_expected(ls, c);
 }
@@ -117,6 +115,7 @@ static void check_match(LexState *ls, int what, int who, int where) {
     }
 }
 
+/// @brief 检查当前 token 是不是 TK_NAME , 然后取下一个 token , 把被检查的 token 的字符串返回
 static TString *str_checkname(LexState *ls) {
     TString *ts;
     check(ls, TK_NAME);
@@ -305,18 +304,19 @@ static Upvaldesc *allocupvalue(FuncState *fs) {
     return &f->upvalues[fs->nups++];
 }
 
+/// @brief 当解析出来的表达式类型是 local 或 upvalue 时 , 要为当时函数生成新的 Upvaldesc
 static int newupvalue(FuncState *fs, TString *name, expdesc *v) {
     Upvaldesc *up = allocupvalue(fs);
     FuncState *prev = fs->prev;
     if (v->k == VLOCAL) {
-        up->instack = 1;
-        up->idx = v->u.var.ridx;
+        up->instack = 1; // local 变量在栈里
+        up->idx = v->u.var.ridx; // 在寄存器(数据栈)的位置 , 我不确定是不是相对于 func 的位置
         up->kind = getlocalvardesc(prev, v->u.var.vidx)->vd.kind;
         lua_assert(eqstr(name, getlocalvardesc(prev, v->u.var.vidx)->vd.name));
     } else {
-        up->instack = 0;
-        up->idx = cast_byte(v->u.info);
-        up->kind = prev->f->upvalues[v->u.info].kind;
+        up->instack = 0; // 来自上层函数的 upvalue 就不在栈里
+        up->idx = cast_byte(v->u.info); // 在上层函数 Upvaldesc 数组中的位置
+        up->kind = prev->f->upvalues[v->u.info].kind; // 与上层函数 Upvaldesc 的 kind 一至
         lua_assert(eqstr(name, prev->f->upvalues[v->u.info].name));
     }
     up->name = name;
@@ -391,10 +391,7 @@ static void singlevaraux(FuncState *fs, TString *n, expdesc *var, int base) {
     }
 }
 
-/*
-** Find a variable with the given name 'n', handling global variables
-** too.
-*/
+/// @brief Find a variable with the given name 'n', handling global variables too.
 static void singlevar(LexState *ls, expdesc *var) {
     TString *varname = str_checkname(ls);
     FuncState *fs = ls->fs;
@@ -977,6 +974,9 @@ static void primaryexp(LexState *ls, expdesc *v) {
     }
 }
 
+/// @brief 后缀的表达式 , 不知道什么意思
+/// @param ls
+/// @param v
 static void suffixedexp(LexState *ls, expdesc *v) {
     /* suffixedexp ->
          primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
