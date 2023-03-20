@@ -1130,13 +1130,13 @@ LUA_API int lua_pcallk(lua_State *L, int nargs, int nresults, int errfunc, lua_K
     return status;
 }
 
-/// @brief
+/// @brief 装载 lua 脚本 , 如果成功解析 , 则返回 0
 /// @param L
-/// @param reader
-/// @param data
-/// @param chunkname
-/// @param mode
-/// @return
+/// @param reader lua 脚本的读取函数 , 一般就是 getF
+/// @param data lua 文件的数据 , 一般是一上 LoadF 结构体
+/// @param chunkname lua 文件名
+/// @param mode 文件的类型 , 文本还是二进制y
+/// @return int
 LUA_API int lua_load(lua_State *L, lua_Reader reader, void *data, const char *chunkname, const char *mode) {
     ZIO z; // 文件读取对象 , SParser 与 LexState 中的 z 都是指这个 z
     int status;

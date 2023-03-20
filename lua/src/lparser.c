@@ -124,6 +124,7 @@ static TString *str_checkname(LexState *ls) {
     return ts;
 }
 
+/// @brief 初始化一个表达式描述结构
 static void init_exp(expdesc *e, expkind k, int i) {
     e->f = e->t = NO_JUMP;
     e->k = k;
@@ -309,13 +310,13 @@ static int newupvalue(FuncState *fs, TString *name, expdesc *v) {
     Upvaldesc *up = allocupvalue(fs);
     FuncState *prev = fs->prev;
     if (v->k == VLOCAL) {
-        up->instack = 1; // local 变量在栈里
+        up->instack = 1;         // local 变量在栈里
         up->idx = v->u.var.ridx; // 在寄存器(数据栈)的位置 , 我不确定是不是相对于 func 的位置
         up->kind = getlocalvardesc(prev, v->u.var.vidx)->vd.kind;
         lua_assert(eqstr(name, getlocalvardesc(prev, v->u.var.vidx)->vd.name));
     } else {
-        up->instack = 0; // 来自上层函数的 upvalue 就不在栈里
-        up->idx = cast_byte(v->u.info); // 在上层函数 Upvaldesc 数组中的位置
+        up->instack = 0;                              // 来自上层函数的 upvalue 就不在栈里
+        up->idx = cast_byte(v->u.info);               // 在上层函数 Upvaldesc 数组中的位置
         up->kind = prev->f->upvalues[v->u.info].kind; // 与上层函数 Upvaldesc 的 kind 一至
         lua_assert(eqstr(name, prev->f->upvalues[v->u.info].name));
     }
@@ -405,10 +406,7 @@ static void singlevar(LexState *ls, expdesc *var) {
     }
 }
 
-/*
-** Adjust the number of results from an expression list 'e' with 'nexps'
-** expressions to 'nvars' values.
-*/
+/// @brief Adjust the number of results from an expression list 'e' with 'nexps' expressions to 'nvars' values.
 static void adjust_assign(LexState *ls, int nvars, int nexps, expdesc *e) {
     FuncState *fs = ls->fs;
     int needed = nvars - nexps; /* extra values needed */
@@ -953,6 +951,7 @@ static void funcargs(LexState *ls, expdesc *f, int line) {
 ** =======================================================================
 */
 
+/// @brief 
 static void primaryexp(LexState *ls, expdesc *v) {
     /* primaryexp -> NAME | '(' expr ')' */
     switch (ls->t.token) {
@@ -978,8 +977,7 @@ static void primaryexp(LexState *ls, expdesc *v) {
 /// @param ls
 /// @param v
 static void suffixedexp(LexState *ls, expdesc *v) {
-    /* suffixedexp ->
-         primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
+    /* suffixedexp -> primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
     FuncState *fs = ls->fs;
     int line = ls->linenumber;
     primaryexp(ls, v);
@@ -1657,6 +1655,7 @@ static void funcstat(LexState *ls, int line) {
     luaK_fixline(ls->fs, line); /* definition "happens" in the first line */
 }
 
+/// @brief 处理一个表达式语句
 static void exprstat(LexState *ls) {
     /* stat -> func | assignment */
     FuncState *fs = ls->fs;
@@ -1783,7 +1782,7 @@ static void statement(LexState *ls) {
 static void mainfunc(LexState *ls, FuncState *fs) {
     BlockCnt bl;
     Upvaldesc *env;
-    open_func(ls, fs, &bl);
+    open_func(ls, fs, &bl); // 如果从这里入 open_func , 那么 ls->fs 为 NULL
     setvararg(fs, 0);       /* main function is always declared vararg */
     env = allocupvalue(fs); /* ...set environment upvalue */
     env->instack = 1;
@@ -1800,13 +1799,13 @@ static void mainfunc(LexState *ls, FuncState *fs) {
 LClosure *luaY_parser(lua_State *L, ZIO *z, Mbuffer *buff, Dyndata *dyd, const char *name, int firstchar) {
     LexState lexstate;
     FuncState funcstate;
-    LClosure *cl = luaF_newLclosure(L, 1); /* create main closure */
+    LClosure *cl = luaF_newLclosure(L, 1); /* 主闭包 create main closure */
     setclLvalue2s(L, L->top, cl);          /* anchor it (to avoid being collected) */
     luaD_inctop(L);
     lexstate.h = luaH_new(L);           /* create table for scanner */
     sethvalue2s(L, L->top, lexstate.h); /* anchor it */
     luaD_inctop(L);
-    funcstate.f = cl->p = luaF_newproto(L);
+    funcstate.f = cl->p = luaF_newproto(L); // 主闭包的原型
     luaC_objbarrier(L, cl, cl->p);
     funcstate.f->source = luaS_new(L, name); /* create and anchor TString */
     luaC_objbarrier(L, funcstate.f, funcstate.f->source);

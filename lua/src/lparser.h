@@ -22,8 +22,7 @@
 
 /* kinds of variables/expressions */
 typedef enum {
-    VVOID,     /* when 'expdesc' describes the last expression of a list,
-                  this kind means an empty list (so, no expression) */
+    VVOID,     /* when 'expdesc' describes the last expression of a list, this kind means an empty list (so, no expression) */
     VNIL,      /* constant nil */
     VTRUE,     /* constant true */
     VFALSE,    /* constant false */
