@@ -71,9 +71,7 @@ static void checklimit(FuncState *fs, int v, int l, const char *what) {
     if (v > l) errorlimit(fs, l, what);
 }
 
-/*
-** Test whether next token is 'c'; if so, skip it.
-*/
+/// @brief 看看一下 token 是不是 c , 如果是 , 就跳过这个 token ; Test whether next token is 'c'; if so, skip it.
 static int testnext(LexState *ls, int c) {
     if (ls->t.token == c) {
         luaX_next(ls);
@@ -87,9 +85,7 @@ static void check(LexState *ls, int c) {
     if (ls->t.token != c) error_expected(ls, c);
 }
 
-/*
-** Check that next token is 'c' and skip it.
-*/
+/// @brief Check that next token is 'c' and skip it.
 static void checknext(LexState *ls, int c) {
     check(ls, c);
     luaX_next(ls);
@@ -191,10 +187,7 @@ static int reglevel(FuncState *fs, int nvar) {
     return 0; /* no variables in registers */
 }
 
-/*
-** Return the number of variables in the register stack for the given
-** function.
-*/
+/// @brief Return the number of variables in the register stack for the given function.
 int luaY_nvarstack(FuncState *fs) { return reglevel(fs, fs->nactvar); }
 
 /*
