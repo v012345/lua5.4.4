@@ -150,7 +150,7 @@ static int registerlocalvar(LexState *ls, FuncState *fs, TString *varname) {
     return fs->ndebugvars++;
 }
 
-/// @brief Create a new local variable with the given 'name'. Return its index in the function.
+/// @brief 在当前的 LexState->Dyndata->actvar->arr 中加入变量名, 返回在数组中的索引; Create a new local variable with the given 'name'. Return its index in the function.
 static int new_localvar(LexState *ls, TString *name) {
     lua_State *L = ls->L;
     FuncState *fs = ls->fs;
@@ -166,11 +166,10 @@ static int new_localvar(LexState *ls, TString *name) {
 
 #define new_localvarliteral(ls, v) new_localvar(ls, luaX_newstring(ls, "" v, (sizeof(v) / sizeof(char)) - 1));
 
-/*
-** Return the "variable description" (Vardesc) of a given variable.
-** (Unless noted otherwise, all variables are referred to by their
-** compiler indices.)
-*/
+/// @brief 返回 Dyndata 中 arr 中 vidx(实际上是 fs->firstlocal + vidx ) 的值;
+/// Return the "variable description" (Vardesc) of a given variable.
+/// (Unless noted otherwise, all variables are referred to by their
+/// compiler indices.)
 static Vardesc *getlocalvardesc(FuncState *fs, int vidx) { return &fs->ls->dyd->actvar.arr[fs->firstlocal + vidx]; }
 
 /*
@@ -382,7 +381,7 @@ static void singlevaraux(FuncState *fs, TString *n, expdesc *var, int base) {
     }
 }
 
-/// @brief 查找变量; Find a variable with the given name 'n', handling global variables too.
+/// @brief 单一变量; Find a variable with the given name 'n', handling global variables too.
 static void singlevar(LexState *ls, expdesc *var) {
     TString *varname = str_checkname(ls);
     FuncState *fs = ls->fs;
@@ -941,7 +940,7 @@ static void funcargs(LexState *ls, expdesc *f, int line) {
 ** =======================================================================
 */
 
-/// @brief
+/// @brief 原始表达式
 static void primaryexp(LexState *ls, expdesc *v) {
     /* primaryexp -> NAME | '(' expr ')' */
     switch (ls->t.token) {
@@ -1586,7 +1585,7 @@ static void localstat(LexState *ls) {
     Vardesc *var;     /* last variable */
     int vidx, kind;   /* index and kind of last variable */
     int nvars = 0;    // local 关键后面跟的变量数
-    int nexps;
+    int nexps;        // = 后面表达式的个数
     expdesc e;
     do {
         vidx = new_localvar(ls, str_checkname(ls));
