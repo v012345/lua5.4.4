@@ -154,10 +154,7 @@ static int registerlocalvar(LexState *ls, FuncState *fs, TString *varname) {
     return fs->ndebugvars++;
 }
 
-/*
-** Create a new local variable with the given 'name'. Return its index
-** in the function.
-*/
+/// @brief Create a new local variable with the given 'name'. Return its index in the function.
 static int new_localvar(LexState *ls, TString *name) {
     lua_State *L = ls->L;
     FuncState *fs = ls->fs;
@@ -1591,6 +1588,7 @@ static void checktoclose(FuncState *fs, int level) {
     }
 }
 
+/// @brief local 变量的处理
 static void localstat(LexState *ls) {
     /* stat -> LOCAL NAME ATTRIB { ',' NAME ATTRIB } ['=' explist] */
     FuncState *fs = ls->fs;
