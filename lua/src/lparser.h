@@ -117,10 +117,10 @@ typedef struct Labellist {
 
 /* dynamic structures used by the parser */
 typedef struct Dyndata {
-    struct { /* list of all active local variables */
-        Vardesc *arr;
-        int n;
-        int size;
+    struct {          /* list of all active local variables */
+        Vardesc *arr; // 解析到的变量描述结构体的数组首地址
+        int n;        // arr数组已使用的数量
+        int size;     // arr数组申请到的数量
     } actvar;
     Labellist gt;    /* list of pending gotos */
     Labellist label; /* list of active labels */

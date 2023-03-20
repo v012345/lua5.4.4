@@ -948,7 +948,7 @@ static void funcargs(LexState *ls, expdesc *f, int line) {
 ** =======================================================================
 */
 
-/// @brief 
+/// @brief
 static void primaryexp(LexState *ls, expdesc *v) {
     /* primaryexp -> NAME | '(' expr ')' */
     switch (ls->t.token) {

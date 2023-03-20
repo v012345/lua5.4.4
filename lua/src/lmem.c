@@ -72,14 +72,14 @@ static void *firsttry(global_State *g, void *block, size_t os, size_t ns) {
 #define MINSIZEARRAY 4
 
 /// @brief 用来管理可变长数组 , 当数组空间不够时 , 扩大为原来的两倍
-/// @param L
-/// @param block
-/// @param nelems
-/// @param psize
-/// @param size_elems
-/// @param limit
-/// @param what
-/// @return
+/// @param L lua 状态机
+/// @param block 原使用内存块的首地址
+/// @param nelems 现在需要存放的元素数量
+/// @param psize 指同使用的内存块中最多可存元素的个数
+/// @param size_elems 内存块中单个元素的大小
+/// @param limit 最大可以申请多大的数组长度
+/// @param what 如果分配发生错误 , 错误的提示文字
+/// @return 新内存块的首地址
 void *luaM_growaux_(lua_State *L, void *block, int nelems, int *psize, int size_elems, int limit, const char *what) {
     void *newblock;
     int size = *psize;
