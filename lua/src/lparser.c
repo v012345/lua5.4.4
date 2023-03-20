@@ -382,7 +382,7 @@ static void singlevaraux(FuncState *fs, TString *n, expdesc *var, int base) {
     }
 }
 
-/// @brief Find a variable with the given name 'n', handling global variables too.
+/// @brief 查找变量; Find a variable with the given name 'n', handling global variables too.
 static void singlevar(LexState *ls, expdesc *var) {
     TString *varname = str_checkname(ls);
     FuncState *fs = ls->fs;
@@ -964,8 +964,6 @@ static void primaryexp(LexState *ls, expdesc *v) {
 }
 
 /// @brief 后缀的表达式 , 不知道什么意思
-/// @param ls
-/// @param v
 static void suffixedexp(LexState *ls, expdesc *v) {
     /* suffixedexp -> primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
     FuncState *fs = ls->fs;
@@ -1006,8 +1004,7 @@ static void suffixedexp(LexState *ls, expdesc *v) {
 }
 
 static void simpleexp(LexState *ls, expdesc *v) {
-    /* simpleexp -> FLT | INT | STRING | NIL | TRUE | FALSE | ... |
-                    constructor | FUNCTION body | suffixedexp */
+    /* simpleexp -> FLT | INT | STRING | NIL | TRUE | FALSE | ... | constructor | FUNCTION body | suffixedexp */
     switch (ls->t.token) {
         case TK_FLT: {
             init_exp(v, VKFLT, 0);
@@ -1588,7 +1585,7 @@ static void localstat(LexState *ls) {
     int toclose = -1; /* index of to-be-closed variable (if any) */
     Vardesc *var;     /* last variable */
     int vidx, kind;   /* index and kind of last variable */
-    int nvars = 0;
+    int nvars = 0;    // local 关键后面跟的变量数
     int nexps;
     expdesc e;
     do {
@@ -1804,7 +1801,7 @@ LClosure *luaY_parser(lua_State *L, ZIO *z, Mbuffer *buff, Dyndata *dyd, const c
     lexstate.dyd = dyd;
     dyd->actvar.n = dyd->gt.n = dyd->label.n = 0;
     luaX_setinput(L, &lexstate, z, funcstate.f->source, firstchar);
-    mainfunc(&lexstate, &funcstate);
+    mainfunc(&lexstate, &funcstate); // 主函数 就是最最外层的闭包
     lua_assert(!funcstate.prev && funcstate.nups == 1 && !lexstate.fs);
     /* all scopes should be correctly finished */
     lua_assert(dyd->actvar.n == 0 && dyd->gt.n == 0 && dyd->label.n == 0);

@@ -82,7 +82,7 @@ typedef struct expdesc {
 } expdesc;
 
 /* kinds of variables */
-#define VDKREG 0     /* regular */
+#define VDKREG 0     /* 普通变量 regular */
 #define RDKCONST 1   /* constant */
 #define RDKTOCLOSE 2 /* to-be-closed */
 #define RDKCTC 3     /* compile-time constant */
