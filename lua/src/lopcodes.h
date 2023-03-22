@@ -110,6 +110,7 @@ enum OpMode {
 ** the following macros help to manipulate instructions
 */
 
+// 拿到 i 中的低 7 位, 也就是 i 的 OpCode
 #define GET_OPCODE(i) (cast(OpCode, ((i) >> POS_OP) & MASK1(SIZE_OP, 0)))
 #define SET_OPCODE(i, o) ((i) = (((i)&MASK0(SIZE_OP, POS_OP)) | ((cast(Instruction, o) << POS_OP) & MASK1(SIZE_OP, POS_OP))))
 
