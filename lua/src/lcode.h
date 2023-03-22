@@ -56,7 +56,13 @@ typedef enum BinOpr {
 
 #define luaK_codeABC(fs, o, a, b, c) luaK_codeABCk(fs, o, a, b, c, 0)
 
-typedef enum UnOpr { OPR_MINUS, OPR_BNOT, OPR_NOT, OPR_LEN, OPR_NOUNOPR } UnOpr;
+typedef enum UnOpr {
+    OPR_MINUS,  //  - 负号
+    OPR_BNOT,   // ~ 按位反
+    OPR_NOT,    // not 逻辑非
+    OPR_LEN,    // # 取长度
+    OPR_NOUNOPR // 不是一元操作符
+} UnOpr;
 
 /* get (pointer to) instruction of given 'expdesc' */
 #define getinstruction(fs, e) ((fs)->f->code[(e)->u.info])

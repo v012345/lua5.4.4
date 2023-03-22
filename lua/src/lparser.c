@@ -150,7 +150,7 @@ static int registerlocalvar(LexState *ls, FuncState *fs, TString *varname) {
     return fs->ndebugvars++;
 }
 
-/// @brief 在当前的 LexState->Dyndata->actvar->arr 中加入变量名, 返回在数组中的索引; Create a new local variable with the given 'name'. Return its index in the function.
+/// @brief 把 FuncState 用到的变量存入到 Dyndata 的数组, 返回在数组中的**相对**索引; Create a new local variable with the given 'name'. Return its index in the function.
 static int new_localvar(LexState *ls, TString *name) {
     lua_State *L = ls->L;
     FuncState *fs = ls->fs;
@@ -285,6 +285,7 @@ static int searchupvalue(FuncState *fs, TString *name) {
     return -1; /* not found */
 }
 
+/// @brief 分配内存来存 Upvaldesc, f->upvalues 指向内存, 返回第一个元素的地址(用来存"环境变量")
 static Upvaldesc *allocupvalue(FuncState *fs) {
     Proto *f = fs->f;
     int oldsize = f->sizeupvalues;
@@ -1577,7 +1578,7 @@ static void checktoclose(FuncState *fs, int level) {
     }
 }
 
-/// @brief local 变量的处理
+/// @brief 用 local 定义的普通变量(不包括 local function ...)
 static void localstat(LexState *ls) {
     /* stat -> LOCAL NAME ATTRIB { ',' NAME ATTRIB } ['=' explist] */
     FuncState *fs = ls->fs;
@@ -1604,13 +1605,12 @@ static void localstat(LexState *ls) {
         e.k = VVOID;
         nexps = 0;
     }
-    var = getlocalvardesc(fs, vidx);       /* get last variable */
-    if (nvars == nexps &&                  /* no adjustments? */
-        var->vd.kind == RDKCONST &&        /* last variable is const? */
-        luaK_exp2const(fs, &e, &var->k)) { /* compile-time constant? */
-        var->vd.kind = RDKCTC;             /* variable is a compile-time constant */
-        adjustlocalvars(ls, nvars - 1);    /* exclude last variable */
-        fs->nactvar++;                     /* but count it */
+    var = getlocalvardesc(fs, vidx); /* get last variable */
+    /* no adjustments? && last variable is const? && compile-time constant? */
+    if (nvars == nexps && var->vd.kind == RDKCONST && luaK_exp2const(fs, &e, &var->k)) {
+        var->vd.kind = RDKCTC;          /* variable is a compile-time constant */
+        adjustlocalvars(ls, nvars - 1); /* exclude last variable */
+        fs->nactvar++;                  /* but count it */
     } else {
         adjust_assign(ls, nvars, nexps, &e);
         adjustlocalvars(ls, nvars);
@@ -1726,9 +1726,9 @@ static void statement(LexState *ls) {
         case TK_LOCAL: {                   /* stat -> localstat */
             luaX_next(ls);                 /* skip LOCAL */
             if (testnext(ls, TK_FUNCTION)) /* local function? */
-                localfunc(ls);
+                localfunc(ls);             // 如果是 local function ... 就进入这里处理
             else
-                localstat(ls);
+                localstat(ls); // 如果是 local 普通变量则进入这里
             break;
         }
         case TK_DBCOLON: { /* stat -> label */
@@ -1775,7 +1775,7 @@ static void mainfunc(LexState *ls, FuncState *fs) {
     env->instack = 1;
     env->idx = 0;
     env->kind = VDKREG;
-    env->name = ls->envn;
+    env->name = ls->envn; // 在 luaX_setinput() 中赋值的, 所以主闭包的第一个 upvalue 就是 _ENV
     luaC_objbarrier(ls->L, fs->f, env->name);
     luaX_next(ls); /* read first token */
     statlist(ls);  /* parse main body */

@@ -29,12 +29,9 @@
 
 #define luaM_checksize(L, n, e) (luaM_testsize(n, e) ? luaM_toobig(L) : cast_void(0))
 
-/*
-** Computes the minimum between 'n' and 'MAX_SIZET/sizeof(t)', so that
-** the result is not larger than 'n' and cannot overflow a 'size_t'
-** when multiplied by the size of type 't'. (Assumes that 'n' is an
-** 'int' or 'unsigned int' and that 'int' is not larger than 'size_t'.)
-*/
+/// @brief 在分配内存的时候, 根据元素的大小来限制分配元素的个数, 具体来说, 如何用户指定的数 n 小与 MAX_SIZET/元素大小, 就返回 n , 否则使用 MAX_SIZET/元素大小
+/// Computes the minimum between 'n' and 'MAX_SIZET/sizeof(t)', so that the result is not larger than 'n' and cannot overflow a 'size_t'  when multiplied by the size of type 't'. (Assumes that 'n' is
+/// an 'int' or 'unsigned int' and that 'int' is not larger than 'size_t'.)
 #define luaM_limitN(n, t) ((cast_sizet(n) <= MAX_SIZET / sizeof(t)) ? (n) : cast_uint((MAX_SIZET / sizeof(t))))
 
 /*
@@ -52,6 +49,11 @@
 
 #define luaM_newobject(L, tag, s) luaM_malloc_(L, (s), tag)
 
+/// @brief 分配一个连续的内存空间, 最小分配 MINSIZEARRAY (4) 个元素
+/// @param v 指向新分配来的空间
+/// @param nelems 现在需要存放的元素数量
+/// @param size 分配完成后, 分配来的内存可以存多少个元素
+/// @param t 要存什么类型的元素
 #define luaM_growvector(L, v, nelems, size, t, limit, e) ((v) = cast(t *, luaM_growaux_(L, v, nelems, &(size), sizeof(t), luaM_limitN(limit, t), e)))
 
 #define luaM_reallocvector(L, v, oldn, n, t) (cast(t *, luaM_realloc_(L, v, cast_sizet(oldn) * sizeof(t), cast_sizet(n) * sizeof(t))))

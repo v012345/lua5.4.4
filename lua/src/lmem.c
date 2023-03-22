@@ -71,7 +71,7 @@ static void *firsttry(global_State *g, void *block, size_t os, size_t ns) {
 */
 #define MINSIZEARRAY 4
 
-/// @brief 用来管理可变长数组 , 当数组空间不够时 , 扩大为原来的两倍
+/// @brief 用来管理可变长数组 , 当数组空间不够时 , 扩大为原来的两倍 , 最小分配 MINSIZEARRAY (4) 个元素
 /// @param L lua 状态机
 /// @param block 原使用内存块的首地址
 /// @param nelems 现在需要存放的元素数量

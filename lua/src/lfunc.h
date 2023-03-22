@@ -16,10 +16,7 @@
 /* test whether thread is in 'twups' list */
 #define isintwups(L) (L->twups != L)
 
-/*
-** maximum number of upvalues in a closure (both C and Lua). (Value
-** must fit in a VM register.)
-*/
+/// @brief maximum number of upvalues in a closure (both C and Lua). (Value must fit in a VM register.)
 #define MAXUPVAL 255
 
 #define upisopen(up) ((up)->v != &(up)->u.value)

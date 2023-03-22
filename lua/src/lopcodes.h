@@ -27,7 +27,13 @@ isJ                           sJ(25)                     |   Op(7)     |
   corresponding unsigned argument.
 ===========================================================================*/
 
-enum OpMode { iABC, iABx, iAsBx, iAx, isJ }; /* basic instruction formats */
+enum OpMode {
+    iABC,
+    iABx,
+    iAsBx,
+    iAx,
+    isJ // 这是跳转用的地址
+};      /* basic instruction formats */
 
 /*
 ** size and position of opcode arguments.
@@ -36,7 +42,7 @@ enum OpMode { iABC, iABx, iAsBx, iAx, isJ }; /* basic instruction formats */
 #define SIZE_C 8                      // 8
 #define SIZE_B 8                      // 8
 #define SIZE_Bx (SIZE_C + SIZE_B + 1) // 17
-#define SIZE_A 8                      // 8
+#define SIZE_A 8                      // 8 指令中 A 占用的 bit 数
 #define SIZE_Ax (SIZE_Bx + SIZE_A)    // 25
 #define SIZE_sJ (SIZE_Bx + SIZE_A)    // 25
 
@@ -44,7 +50,7 @@ enum OpMode { iABC, iABx, iAsBx, iAx, isJ }; /* basic instruction formats */
 
 #define POS_OP 0 // 0
 
-#define POS_A (POS_OP + SIZE_OP) // 7
+#define POS_A (POS_OP + SIZE_OP) // 7 指令中 A 的起始位置
 #define POS_k (POS_A + SIZE_A)   // 15
 #define POS_B (POS_k + 1)        // 16
 #define POS_C (POS_B + SIZE_B)   // 24
@@ -109,9 +115,11 @@ enum OpMode { iABC, iABx, iAsBx, iAx, isJ }; /* basic instruction formats */
 
 #define checkopm(i, m) (getOpMode(GET_OPCODE(i)) == m)
 
+// 通过 掩码的方式, 取出指令 i 中的数据
 #define getarg(i, pos, size) (cast_int(((i) >> (pos)) & MASK1(size, 0)))
 #define setarg(i, v, pos, size) ((i) = (((i)&MASK0(size, pos)) | ((cast(Instruction, v) << pos) & MASK1(size, pos))))
 
+// 指令 i 对应的 A 寄存器的偏移量, 就是 i 中 8 到 15 位表示的一个整数
 #define GETARG_A(i) getarg(i, POS_A, SIZE_A)
 #define SETARG_A(i, v) setarg(i, v, POS_A, SIZE_A)
 
@@ -352,6 +360,7 @@ LUAI_DDEC(const lu_byte luaP_opmodes[NUM_OPCODES];)
 #define getOpMode(m) (cast(enum OpMode, luaP_opmodes[m] & 7))
 #define testAMode(m) (luaP_opmodes[m] & (1 << 3))
 #define testTMode(m) (luaP_opmodes[m] & (1 << 4))
+// 指令 i 中低 7 位中第 5 位的值: 0 或 1
 #define testITMode(m) (luaP_opmodes[m] & (1 << 5))
 #define testOTMode(m) (luaP_opmodes[m] & (1 << 6))
 #define testMMMode(m) (luaP_opmodes[m] & (1 << 7))

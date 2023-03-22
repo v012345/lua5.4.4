@@ -32,7 +32,7 @@ typedef long l_mem;
 typedef unsigned char lu_byte;
 typedef signed char ls_byte;
 
-/* maximum value for size_t */
+/// @brief size_t 可以存的最大值, 注意, size_t 是无符号的; maximum value for size_t
 #define MAX_SIZET ((size_t)(~(size_t)0))
 
 /* maximum size visible for Lua (must be representable in a lua_Integer) */
@@ -294,8 +294,7 @@ typedef l_uint32 Instruction;
     {                                                                                                                                                                                                  \
         (void)L;                                                                                                                                                                                       \
         (m) = l_mathop(fmod)(a, b);                                                                                                                                                                    \
-        if (((m) > 0) ? (b) < 0 : ((m) < 0 && (b) > 0))                                                                                                                                                \
-            (m) += (b);                                                                                                                                                                                \
+        if (((m) > 0) ? (b) < 0 : ((m) < 0 && (b) > 0)) (m) += (b);                                                                                                                                    \
     }
 #endif
 

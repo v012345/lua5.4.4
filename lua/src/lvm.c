@@ -535,42 +535,42 @@ int luaV_equalobj(lua_State *L, const TValue *t1, const TValue *t2) {
     }
     /* values have same type and same variant */
     switch (ttypetag(t1)) {
-    case LUA_VNIL:
-    case LUA_VFALSE:
-    case LUA_VTRUE:
-        return 1;
-    case LUA_VNUMINT:
-        return (ivalue(t1) == ivalue(t2));
-    case LUA_VNUMFLT:
-        return luai_numeq(fltvalue(t1), fltvalue(t2));
-    case LUA_VLIGHTUSERDATA:
-        return pvalue(t1) == pvalue(t2);
-    case LUA_VLCF:
-        return fvalue(t1) == fvalue(t2);
-    case LUA_VSHRSTR:
-        return eqshrstr(tsvalue(t1), tsvalue(t2));
-    case LUA_VLNGSTR:
-        return luaS_eqlngstr(tsvalue(t1), tsvalue(t2));
-    case LUA_VUSERDATA: {
-        if (uvalue(t1) == uvalue(t2))
+        case LUA_VNIL:
+        case LUA_VFALSE:
+        case LUA_VTRUE:
             return 1;
-        else if (L == NULL)
-            return 0;
-        tm = fasttm(L, uvalue(t1)->metatable, TM_EQ);
-        if (tm == NULL) tm = fasttm(L, uvalue(t2)->metatable, TM_EQ);
-        break; /* will try TM */
-    }
-    case LUA_VTABLE: {
-        if (hvalue(t1) == hvalue(t2))
-            return 1;
-        else if (L == NULL)
-            return 0;
-        tm = fasttm(L, hvalue(t1)->metatable, TM_EQ);
-        if (tm == NULL) tm = fasttm(L, hvalue(t2)->metatable, TM_EQ);
-        break; /* will try TM */
-    }
-    default:
-        return gcvalue(t1) == gcvalue(t2);
+        case LUA_VNUMINT:
+            return (ivalue(t1) == ivalue(t2));
+        case LUA_VNUMFLT:
+            return luai_numeq(fltvalue(t1), fltvalue(t2));
+        case LUA_VLIGHTUSERDATA:
+            return pvalue(t1) == pvalue(t2);
+        case LUA_VLCF:
+            return fvalue(t1) == fvalue(t2);
+        case LUA_VSHRSTR:
+            return eqshrstr(tsvalue(t1), tsvalue(t2));
+        case LUA_VLNGSTR:
+            return luaS_eqlngstr(tsvalue(t1), tsvalue(t2));
+        case LUA_VUSERDATA: {
+            if (uvalue(t1) == uvalue(t2))
+                return 1;
+            else if (L == NULL)
+                return 0;
+            tm = fasttm(L, uvalue(t1)->metatable, TM_EQ);
+            if (tm == NULL) tm = fasttm(L, uvalue(t2)->metatable, TM_EQ);
+            break; /* will try TM */
+        }
+        case LUA_VTABLE: {
+            if (hvalue(t1) == hvalue(t2))
+                return 1;
+            else if (L == NULL)
+                return 0;
+            tm = fasttm(L, hvalue(t1)->metatable, TM_EQ);
+            if (tm == NULL) tm = fasttm(L, hvalue(t2)->metatable, TM_EQ);
+            break; /* will try TM */
+        }
+        default:
+            return gcvalue(t1) == gcvalue(t2);
     }
     if (tm == NULL) /* no TM? */
         return 0;   /* objects are different */
@@ -641,27 +641,27 @@ void luaV_concat(lua_State *L, int total) {
 void luaV_objlen(lua_State *L, StkId ra, const TValue *rb) {
     const TValue *tm;
     switch (ttypetag(rb)) {
-    case LUA_VTABLE: {
-        Table *h = hvalue(rb);
-        tm = fasttm(L, h->metatable, TM_LEN);
-        if (tm) break;                    /* metamethod? break switch to call it */
-        setivalue(s2v(ra), luaH_getn(h)); /* else primitive len */
-        return;
-    }
-    case LUA_VSHRSTR: {
-        setivalue(s2v(ra), tsvalue(rb)->shrlen);
-        return;
-    }
-    case LUA_VLNGSTR: {
-        setivalue(s2v(ra), tsvalue(rb)->u.lnglen);
-        return;
-    }
-    default: { /* try metamethod */
-        tm = luaT_gettmbyobj(L, rb, TM_LEN);
-        if (l_unlikely(notm(tm))) /* no metamethod? */
-            luaG_typeerror(L, rb, "get length of");
-        break;
-    }
+        case LUA_VTABLE: {
+            Table *h = hvalue(rb);
+            tm = fasttm(L, h->metatable, TM_LEN);
+            if (tm) break;                    /* metamethod? break switch to call it */
+            setivalue(s2v(ra), luaH_getn(h)); /* else primitive len */
+            return;
+        }
+        case LUA_VSHRSTR: {
+            setivalue(s2v(ra), tsvalue(rb)->shrlen);
+            return;
+        }
+        case LUA_VLNGSTR: {
+            setivalue(s2v(ra), tsvalue(rb)->u.lnglen);
+            return;
+        }
+        default: { /* try metamethod */
+            tm = luaT_gettmbyobj(L, rb, TM_LEN);
+            if (l_unlikely(notm(tm))) /* no metamethod? */
+                luaG_typeerror(L, rb, "get length of");
+            break;
+        }
     }
     luaT_callTMres(L, tm, rb, rb, ra);
 }
@@ -763,70 +763,70 @@ void luaV_finishOp(lua_State *L) {
     Instruction inst = *(ci->u.l.savedpc - 1); /* interrupted instruction */
     OpCode op = GET_OPCODE(inst);
     switch (op) { /* finish its execution */
-    case OP_MMBIN:
-    case OP_MMBINI:
-    case OP_MMBINK: {
-        setobjs2s(L, base + GETARG_A(*(ci->u.l.savedpc - 2)), --L->top);
-        break;
-    }
-    case OP_UNM:
-    case OP_BNOT:
-    case OP_LEN:
-    case OP_GETTABUP:
-    case OP_GETTABLE:
-    case OP_GETI:
-    case OP_GETFIELD:
-    case OP_SELF: {
-        setobjs2s(L, base + GETARG_A(inst), --L->top);
-        break;
-    }
-    case OP_LT:
-    case OP_LE:
-    case OP_LTI:
-    case OP_LEI:
-    case OP_GTI:
-    case OP_GEI:
-    case OP_EQ: { /* note that 'OP_EQI'/'OP_EQK' cannot yield */
-        int res = !l_isfalse(s2v(L->top - 1));
-        L->top--;
-#if defined(LUA_COMPAT_LT_LE)
-        if (ci->callstatus & CIST_LEQ) { /* "<=" using "<" instead? */
-            ci->callstatus ^= CIST_LEQ;  /* clear mark */
-            res = !res;                  /* negate result */
+        case OP_MMBIN:
+        case OP_MMBINI:
+        case OP_MMBINK: {
+            setobjs2s(L, base + GETARG_A(*(ci->u.l.savedpc - 2)), --L->top);
+            break;
         }
+        case OP_UNM:
+        case OP_BNOT:
+        case OP_LEN:
+        case OP_GETTABUP:
+        case OP_GETTABLE:
+        case OP_GETI:
+        case OP_GETFIELD:
+        case OP_SELF: {
+            setobjs2s(L, base + GETARG_A(inst), --L->top);
+            break;
+        }
+        case OP_LT:
+        case OP_LE:
+        case OP_LTI:
+        case OP_LEI:
+        case OP_GTI:
+        case OP_GEI:
+        case OP_EQ: { /* note that 'OP_EQI'/'OP_EQK' cannot yield */
+            int res = !l_isfalse(s2v(L->top - 1));
+            L->top--;
+#if defined(LUA_COMPAT_LT_LE)
+            if (ci->callstatus & CIST_LEQ) { /* "<=" using "<" instead? */
+                ci->callstatus ^= CIST_LEQ;  /* clear mark */
+                res = !res;                  /* negate result */
+            }
 #endif
-        lua_assert(GET_OPCODE(*ci->u.l.savedpc) == OP_JMP);
-        if (res != GETARG_k(inst)) /* condition failed? */
-            ci->u.l.savedpc++;     /* skip jump instruction */
-        break;
-    }
-    case OP_CONCAT: {
-        StkId top = L->top - 1;                     /* top when 'luaT_tryconcatTM' was called */
-        int a = GETARG_A(inst);                     /* first element to concatenate */
-        int total = cast_int(top - 1 - (base + a)); /* yet to concatenate */
-        setobjs2s(L, top - 2, top);                 /* put TM result in proper position */
-        L->top = top - 1;                           /* top is one after last element (at top-2) */
-        luaV_concat(L, total);                      /* concat them (may yield again) */
-        break;
-    }
-    case OP_CLOSE: {       /* yielded closing variables */
-        ci->u.l.savedpc--; /* repeat instruction to close other vars. */
-        break;
-    }
-    case OP_RETURN: { /* yielded closing variables */
-        StkId ra = base + GETARG_A(inst);
-        /* adjust top to signal correct number of returns, in case the
-           return is "up to top" ('isIT') */
-        L->top = ra + ci->u2.nres;
-        /* repeat instruction to close other vars. and complete the return */
-        ci->u.l.savedpc--;
-        break;
-    }
-    default: {
-        /* only these other opcodes can yield */
-        lua_assert(op == OP_TFORCALL || op == OP_CALL || op == OP_TAILCALL || op == OP_SETTABUP || op == OP_SETTABLE || op == OP_SETI || op == OP_SETFIELD);
-        break;
-    }
+            lua_assert(GET_OPCODE(*ci->u.l.savedpc) == OP_JMP);
+            if (res != GETARG_k(inst)) /* condition failed? */
+                ci->u.l.savedpc++;     /* skip jump instruction */
+            break;
+        }
+        case OP_CONCAT: {
+            StkId top = L->top - 1;                     /* top when 'luaT_tryconcatTM' was called */
+            int a = GETARG_A(inst);                     /* first element to concatenate */
+            int total = cast_int(top - 1 - (base + a)); /* yet to concatenate */
+            setobjs2s(L, top - 2, top);                 /* put TM result in proper position */
+            L->top = top - 1;                           /* top is one after last element (at top-2) */
+            luaV_concat(L, total);                      /* concat them (may yield again) */
+            break;
+        }
+        case OP_CLOSE: {       /* yielded closing variables */
+            ci->u.l.savedpc--; /* repeat instruction to close other vars. */
+            break;
+        }
+        case OP_RETURN: { /* yielded closing variables */
+            StkId ra = base + GETARG_A(inst);
+            /* adjust top to signal correct number of returns, in case the
+               return is "up to top" ('isIT') */
+            L->top = ra + ci->u2.nres;
+            /* repeat instruction to close other vars. and complete the return */
+            ci->u.l.savedpc--;
+            break;
+        }
+        default: {
+            /* only these other opcodes can yield */
+            lua_assert(op == OP_TFORCALL || op == OP_CALL || op == OP_TAILCALL || op == OP_SETTABUP || op == OP_SETTABLE || op == OP_SETI || op == OP_SETFIELD);
+            break;
+        }
     }
 }
 
@@ -1021,6 +1021,7 @@ void luaV_finishOp(lua_State *L) {
 ** some macros for common tasks in 'luaV_execute'
 */
 
+// 当前闭包中, 指令 i 中 A 寄存器的位置
 #define RA(i) (base + GETARG_A(i))
 #define RB(i) (base + GETARG_B(i))
 #define vRB(i) s2v(RB(i))
@@ -1103,7 +1104,7 @@ void luaV_finishOp(lua_State *L) {
         luai_threadyield(L);                                                                                                                                                                           \
     }
 
-/* fetch an instruction and prepare its execution */
+/* 从 pc 中取出指令放到 i 中, 同时, 以 base 为底, 算出 i 中 A 寄存器在栈中的位置, 放到 ra 中; fetch an instruction and prepare its execution */
 #define vmfetch()                                                                                                                                                                                      \
     {                                                                                                                                                                                                  \
         if (l_unlikely(trap)) {           /* stack reallocation or hooks? */                                                                                                                           \
@@ -1120,19 +1121,19 @@ void luaV_finishOp(lua_State *L) {
 
 void luaV_execute(lua_State *L, CallInfo *ci) {
     LClosure *cl;
-    TValue *k;
-    StkId base;
-    const Instruction *pc;
+    TValue *k;             // 常量表
+    StkId base;            // 当前闭包的栈底, 就是闭包在栈中的位置, 再向上一个位置
+    const Instruction *pc; // 指向要执行指令的指针
     int trap;
 #if LUA_USE_JUMPTABLE
 #include "ljumptab.h"
 #endif
 startfunc:
     trap = L->hookmask;
-returning: /* trap already set */
-    cl = clLvalue(s2v(ci->func));
-    k = cl->p->k;
-    pc = ci->u.l.savedpc; // 当前正在执行的指令
+returning:                        /* trap already set */
+    cl = clLvalue(s2v(ci->func)); // 根据 CallInfo 的 func 在栈中拿到 lua 闭包
+    k = cl->p->k;                 // 拿到 lua 闭包中常量表
+    pc = ci->u.l.savedpc;         // 当前 CallInfo 执行到指令
     if (l_unlikely(trap)) {
         if (pc == cl->p->code) { /* first instruction (not resuming)? */
             if (cl->p->is_vararg)
@@ -1143,14 +1144,14 @@ returning: /* trap already set */
         ci->u.l.trap = 1; /* assume trap is on, for now */
     }
     base = ci->func + 1;
-    /* main loop of interpreter */
+    /* 对应 83 条虚拟机指令; main loop of interpreter */
     for (;;) {
         Instruction i; /* instruction being executed */
         StkId ra;      /* instruction's A register */
-        vmfetch();
+        vmfetch();     // 从 pc 中取出指令放到 i 中, 同时, 以 base 为底, 算出 i 中 A 寄存器在栈中的位置, 放到 ra 中
 #if 0
-      /* low-level line tracing for debugging Lua */
-      printf("line: %d\n", luaG_getfuncline(cl->p, pcRel(pc, cl->p)));
+        /* low-level line tracing for debugging Lua */
+        printf("line: %d\n", luaG_getfuncline(cl->p, pcRel(pc, cl->p)));
 #endif
         lua_assert(base == ci->func + 1);
         lua_assert(base <= L->top && L->top < L->stack_last);

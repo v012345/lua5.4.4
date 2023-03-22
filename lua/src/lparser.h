@@ -29,31 +29,17 @@ typedef enum {
     VK,        /* constant in 'k'; info = index of constant in 'k' */
     VKFLT,     /* floating constant; nval = numerical float value */
     VKINT,     /* integer constant; ival = numerical integer value */
-    VKSTR,     /* string constant; strval = TString address;
-                  (string is fixed by the lexer) */
-    VNONRELOC, /* expression has its value in a fixed register;
-                  info = result register */
-    VLOCAL,    /* local variable; var.ridx = register index;
-                  var.vidx = relative index in 'actvar.arr'  */
+    VKSTR,     /* string constant; strval = TString address; (string is fixed by the lexer) */
+    VNONRELOC, /* expression has its value in a fixed register; info = result register */
+    VLOCAL,    /* local variable; var.ridx = register index; var.vidx = relative index in 'actvar.arr'  */
     VUPVAL,    /* upvalue variable; info = index of upvalue in 'upvalues' */
-    VCONST,    /* compile-time <const> variable;
-                  info = absolute index in 'actvar.arr'  */
-    VINDEXED,  /* indexed variable;
-                  ind.t = table register;
-                  ind.idx = key's R index */
-    VINDEXUP,  /* indexed upvalue;
-                  ind.t = table upvalue;
-                  ind.idx = key's K index */
-    VINDEXI,   /* indexed variable with constant integer;
-                    ind.t = table register;
-                    ind.idx = key's value */
-    VINDEXSTR, /* indexed variable with literal string;
-                  ind.t = table register;
-                  ind.idx = key's K index */
-    VJMP,      /* expression is a test/comparison;
-                  info = pc of corresponding jump instruction */
-    VRELOC,    /* expression can put result in any register;
-                  info = instruction pc */
+    VCONST,    /* compile-time <const> variable; info = absolute index in 'actvar.arr'  */
+    VINDEXED,  /* indexed variable; ind.t = table register; ind.idx = key's R index */
+    VINDEXUP,  /* indexed upvalue; ind.t = table upvalue; ind.idx = key's K index */
+    VINDEXI,   /* indexed variable with constant integer; ind.t = table register; ind.idx = key's value */
+    VINDEXSTR, /* indexed variable with literal string; ind.t = table register; ind.idx = key's K index */
+    VJMP,      /* expression is a test/comparison; info = pc of corresponding jump instruction */
+    VRELOC,    /* expression can put result in any register; info = instruction pc */
     VCALL,     /* expression is a function call; info = instruction pc */
     VVARARG    /* vararg expression; info = instruction pc */
 } expkind;
@@ -141,7 +127,7 @@ typedef struct FuncState {
     int nk;                 /* 当前常量的数量 number of elements in 'k' */
     int np;                 /* 被编译的代码，Proto的数量 number of elements in 'p' */
     int nabslineinfo;       /* number of elements in 'abslineinfo' */
-    int firstlocal;         /* 第一个local变量的位置 index of first local var (in Dyndata array) */
+    int firstlocal;         /* 本 FuncState 的第一个 local 在 Dyndata数组中的索引; index of first local var (in Dyndata array) */
     int firstlabel;         /* index of first label (in 'dyd->label->arr') */
     short ndebugvars;       /* number of elements in 'f->locvars' */
     lu_byte nactvar;        /* number of active local variables */
