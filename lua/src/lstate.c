@@ -181,21 +181,21 @@ static void stack_init(lua_State *L1, lua_State *L) {
     int i;
     CallInfo *ci;
     /* initialize stack array */
-    L1->stack = luaM_newvector(L, BASIC_STACK_SIZE + EXTRA_STACK, StackValue); // 分配数据栈
-    L1->tbclist = L1->stack;
+    L1->stack = luaM_newvector(L, BASIC_STACK_SIZE + EXTRA_STACK, StackValue);            // 分配数据栈 基础大小加上额外的空间
+    L1->tbclist = L1->stack;                                                              // 待关闭的列表也指向栈底
     for (i = 0; i < BASIC_STACK_SIZE + EXTRA_STACK; i++) setnilvalue(s2v(L1->stack + i)); /* 初始化分配来的栈 erase new stack */
     L1->top = L1->stack;                                                                  // top指向最后一个空闲的位置, 现在栈底就是最后一个空闲的位置
-    L1->stack_last = L1->stack + BASIC_STACK_SIZE;                                        // stack_last指向数据栈的最后一个元素
+    L1->stack_last = L1->stack + BASIC_STACK_SIZE;                                        // stack_last指向数据栈的基础部分的栈尾
     /* initialize first ci */
-    ci = &L1->base_ci; // L1->base_ci 记录的是整个Lua栈的状态
-    ci->next = ci->previous = NULL;
-    ci->callstatus = CIST_C;
-    ci->func = L1->top; // 将func指针指向栈顶,因为这个CallInfo记录的是整个Lua栈的状态,而不仅仅是当前函数调用的状态
+    ci = &L1->base_ci;              // 初始化 L1->base_ci, L1->base_ci 记录的是整个Lua栈的状态
+    ci->next = ci->previous = NULL; // 没有前驱与后续
+    ci->callstatus = CIST_C;        // base_ci 用来调用一个 c 函数
+    ci->func = L1->top;             // 将func指针指向栈顶,因为这个CallInfo记录的是整个Lua栈的状态,而不仅仅是当前函数调用的状态
     ci->u.c.k = NULL;
     ci->nresults = 0;
     setnilvalue(s2v(L1->top)); /* 'function' entry for this 'ci' */
     L1->top++;
-    ci->top = L1->top + LUA_MINSTACK; // ci->top指向栈顶指针的后面LUA_MINSTACK个元素,这些元素预留给函数调用
+    ci->top = L1->top + LUA_MINSTACK; // ci->top 指向 ci->base 上面的第 20 个元素
     L1->ci = ci;                      // 将ci设置为当前lua_State的ci字段,表示这是当前正在执行的函数调用信息
 }
 
@@ -221,10 +221,7 @@ static void init_registry(lua_State *L, global_State *g) {
     sethvalue(L, &registry->array[LUA_RIDX_GLOBALS - 1], luaH_new(L));
 }
 
-/*
-** open parts of the state that may cause memory-allocation errors.
-** 进行一些要用栈 和 串 的初始化
-*/
+// 进行一些要用栈 和 串 的初始化; open parts of the state that may cause memory-allocation errors.
 static void f_luaopen(lua_State *L, void *ud) {
     global_State *g = G(L);
     UNUSED(ud);
@@ -351,16 +348,16 @@ LUA_API lua_State *lua_newstate(lua_Alloc f, void *ud) {
     g->currentwhite = bitmask(WHITE0BIT); // 白 0 阶段
     L->marked = luaC_white(g);            // 与 g->currentwhite 的 3 与 4 位置一样
     preinit_thread(L, g);
-    g->allgc = obj2gco(L); /* by now, only object is the main thread */
+    g->allgc = obj2gco(L); /* 把主线程的 GCObject 入到链头; by now, only object is the main thread */
     L->next = NULL;
-    incnny(L); /* main thread is always non yieldable */
+    incnny(L); /* 把 nCcalls 的第 5 位置 1; main thread is always non yieldable */
     g->frealloc = f;
     g->ud = ud;
     g->warnf = NULL;
     g->ud_warn = NULL;
     g->mainthread = L;
     g->seed = luai_makeseed(L); // 启动时生成的一个随机数种子, 主要是在求字符串哈希时使用
-    g->gcstp = GCSTPGC;         /* no GC while building state */
+    g->gcstp = GCSTPGC;         /* 初始化 state 时不进行 GC; no GC while building state */
     g->strt.size = g->strt.nuse = 0;
     g->strt.hash = NULL;
     setnilvalue(&g->l_registry);

@@ -34,10 +34,7 @@ static void *firsttry(global_State *g, void *block, size_t os, size_t ns) {
         return (*g->frealloc)(g->ud, block, os, ns);
 }
 #else
-/**
- * @brief 使用 global_State 上的 内存分配器 (lua_Alloc) 管理内存
- *
- */
+// 使用 global_State 上的 内存分配器 (lua_Alloc) 管理内存
 #define firsttry(g, block, os, ns) ((*g->frealloc)(g->ud, block, os, ns))
 #endif
 
@@ -189,6 +186,9 @@ void *luaM_saferealloc_(lua_State *L, void *block, size_t osize, size_t nsize) {
     return newblock;
 }
 
+/// @param size 分配内存的实际大小
+/// @param tag 不使用, 对应 l_alloc 的 osize
+/// @return void * 分配来的内存的首地址
 void *luaM_malloc_(lua_State *L, size_t size, int tag) {
     if (size == 0)
         return NULL; /* that's all */

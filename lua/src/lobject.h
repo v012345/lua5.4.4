@@ -41,7 +41,7 @@
 /// @brief Union of all Lua values
 /// @param gc collectable objects 对应有 CommonHeader 的对象, 包括 TString, Udata, Udata0, Proto, UpVal, Closure, Table
 /// @param p light userdata 不需要 lua 来关心数据的生存期, 不被 gc 回收
-/// @param f int (*) (lua_State *L) 没有 upvalues, 就是一个普通的 c 函数, 所以不用 gc 
+/// @param f int (*) (lua_State *L) 没有 upvalues, 就是一个普通的 c 函数, 所以不用 gc
 /// @param i long long 不被 gc 回收
 /// @param n double 不被 gc 回收
 typedef union Value {
@@ -158,7 +158,7 @@ typedef StackValue *StkId;
 ** ===================================================================
 */
 
-/* Standard nil */
+// TValue 的 tt_ 为些值时, 改值表示 nil; Standard nil
 #define LUA_VNIL makevariant(LUA_TNIL, 0)
 
 /* Empty slot (which might be different from a slot containing nil) */
@@ -173,7 +173,7 @@ typedef StackValue *StkId;
 /* macro to test for a standard nil */
 #define ttisstrictnil(o) checktag((o), LUA_VNIL)
 
-/// @brief 把对象设置成nil
+// obj 要是 TValue 指针, 把 TValue 的 tt_ 设置成 LUA_VNIL (0)
 #define setnilvalue(obj) settt_(obj, LUA_VNIL)
 
 #define isabstkey(v) checktag((v), LUA_VABSTKEY)
@@ -745,8 +745,8 @@ typedef union Node {
 
 /// @brief Lua 的 表 结构
 typedef struct Table {
-    CommonHeader;      // 一个指向 GCObject 的指针,用于垃圾回收
-    lu_byte flags;     /* 1<<p means tagmethod(p) is not present  用于标识表是否有某些特殊的属性,例如是否需要调用元方法、是否为弱表等等*/
+    CommonHeader;  // 一个指向 GCObject 的指针,用于垃圾回收
+    lu_byte flags; /* 1<<p means tagmethod(p) is not present  用于标识表是否有某些特殊的属性,例如是否需要调用元方法、是否为弱表等等*/
     lu_byte lsizenode; /* log2 of size of 'node' array 哈希表的大小, 由于哈希表的大小一定为 2 的整数次幂, 所以这里表示的是幂次, 而不是实际大小 . node 数组的大小为 2^lsizenode */
     unsigned int alimit; /* "limit" of 'array' array 数组部分的大小.array[0] 至 array[alimit-1] 表示数组部分 */
     TValue *array;       /* array part */

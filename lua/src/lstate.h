@@ -237,7 +237,7 @@ typedef struct global_State {
     lu_mem lastatomic;  /* 用于垃圾回收中的原子操作计数器 see function 'genstep' in file 'lgc.c' */
     stringtable strt;   /* 全局字符串表,用于池化字符串,使得整个虚拟机中的短字符串只有一份实例 hash table for strings */
     TValue l_registry; /* 注册表,用于管理全局数据.Registry 表是一个全局的 table,用于保存那些需要在多个模块中共享的数据,比如通过 luaL_newmetatable 创建的元表 */
-    TValue nilvalue;      /* 一个 nil 值 a nil value */
+    TValue nilvalue;      /* 如果这个值真的是一个 nil 那么就说明 global_State 构建完毕; a nil value */
     unsigned int seed;    /* 启动时生成的一个随机数种子,主要用于求字符串哈希时使用 randomized seed for hashes */
     lu_byte currentwhite; // 垃圾回收中的当前白色标记
     lu_byte gcstate;      /* 垃圾回收器的状态 state of garbage collector */
@@ -344,11 +344,7 @@ union GCUnion {
     struct UpVal upv;
 };
 
-/*
-** ISO C99, 6.7.2.1 p.14:
-** "A pointer to a union object, suitably converted, points to each of
-** its members [...], and vice versa."
-*/
+// 把 o 转到一个 union GCUnion *, 总有 o 对象的开始位置都是 GCObject; ISO C99, 6.7.2.1 p.14: "A pointer to a union object, suitably converted, points to each of its members [...], and vice versa."
 #define cast_u(o) cast(union GCUnion *, (o))
 
 /* macros to convert a GCObject into a specific value */
@@ -371,10 +367,7 @@ union GCUnion {
 /// @brief gc对象转化为 Upvalue
 #define gco2upv(o) check_exp((o)->tt == LUA_VUPVAL, &((cast_u(o))->upv))
 
-/*
-** macro to convert a Lua object into a GCObject
-** (The access to 'tt' tries to ensure that 'v' is actually a Lua object.)
-*/
+// 返回对象头部 GCObject 数据的地址; macro to convert a Lua object into a GCObject (The access to 'tt' tries to ensure that 'v' is actually a Lua object.)
 #define obj2gco(v) check_exp((v)->tt >= LUA_TSTRING, &(cast_u(v)->gc))
 
 /* actual number of total bytes allocated */
