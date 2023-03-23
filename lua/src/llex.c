@@ -55,7 +55,7 @@ static void save(LexState *ls, int c) {
     b->buffer[luaZ_bufflen(b)++] = cast_char(c);
 }
 
-/// @brief 初始化词法分析要用保留字 , 直接内部化 , 并且不让 gc 回收
+/// @brief 初始化词法分析要用保留字, 直接内部化, 并且不让 gc 回收
 /// @param L
 void luaX_init(lua_State *L) {
     int i;
@@ -251,7 +251,7 @@ static size_t skip_sep(LexState *ls) {
 
 /// @brief
 /// @param ls
-/// @param seminfo SemInfo 如果 为 NULL , 那么就跳过一个长注释 , 否则就是一个多行字符串
+/// @param seminfo SemInfo 如果 为 NULL, 那么就跳过一个长注释, 否则就是一个多行字符串
 /// @param sep
 static void read_long_string(LexState *ls, SemInfo *seminfo, size_t sep) {
     int line = ls->linenumber; /* initial line (for error message) */
@@ -440,7 +440,7 @@ static void read_string(LexState *ls, int del, SemInfo *seminfo) {
 /// @brief 返回词法解析到的类型
 /// @param ls LexState
 /// @param seminfo SemInfo
-/// @return int 如果是单字 就是对应的 ASCII 码 , 如果是其他 就返回 RESERVED 枚举里的值
+/// @return int 如果是单字 就是对应的 ASCII 码, 如果是其他 就返回 RESERVED 枚举里的值
 static int llex(LexState *ls, SemInfo *seminfo) {
     luaZ_resetbuffer(ls->buff);
     for (;;) {

@@ -29,7 +29,7 @@
 
 #define luaM_checksize(L, n, e) (luaM_testsize(n, e) ? luaM_toobig(L) : cast_void(0))
 
-/// @brief 在分配内存的时候, 根据元素的大小来限制分配元素的个数, 具体来说, 如何用户指定的数 n 小与 MAX_SIZET/元素大小, 就返回 n , 否则使用 MAX_SIZET/元素大小
+/// @brief 在分配内存的时候, 根据元素的大小来限制分配元素的个数, 具体来说, 如何用户指定的数 n 小与 MAX_SIZET/元素大小, 就返回 n, 否则使用 MAX_SIZET/元素大小
 /// Computes the minimum between 'n' and 'MAX_SIZET/sizeof(t)', so that the result is not larger than 'n' and cannot overflow a 'size_t'  when multiplied by the size of type 't'. (Assumes that 'n' is
 /// an 'int' or 'unsigned int' and that 'int' is not larger than 'size_t'.)
 #define luaM_limitN(n, t) ((cast_sizet(n) <= MAX_SIZET / sizeof(t)) ? (n) : cast_uint((MAX_SIZET / sizeof(t))))

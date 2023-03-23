@@ -54,8 +54,8 @@
 #define resetbits(x, m) ((x) &= cast_byte(~(m)))
 #define setbits(x, m) ((x) |= (m))
 #define testbits(x, m) ((x) & (m))
-#define bitmask(b) (1 << (b))
-#define bit2mask(b1, b2) (bitmask(b1) | bitmask(b2))
+#define bitmask(b) (1 << (b))                        // 在 b 位置上放一个 1
+#define bit2mask(b1, b2) (bitmask(b1) | bitmask(b2)) // 在 b1 与 b2 的位置的放上 1
 #define l_setbit(x, b) setbits(x, bitmask(b))
 #define resetbit(x, b) resetbits(x, bitmask(b))
 #define testbit(x, b) testbits(x, bitmask(b))
@@ -72,7 +72,7 @@
 
 #define TESTBIT 7
 
-#define WHITEBITS bit2mask(WHITE0BIT, WHITE1BIT)
+#define WHITEBITS bit2mask(WHITE0BIT, WHITE1BIT) // 就是白(包括 白0 与 白1); 在 3 与 4 的位置上放上 1
 
 #define iswhite(x) testbits((x)->marked, WHITEBITS)
 #define isblack(x) testbit((x)->marked, BLACKBIT)

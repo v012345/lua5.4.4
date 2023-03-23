@@ -77,7 +77,7 @@ static TValue *index2value(lua_State *L, int idx) {
     }
 }
 
-/// @brief 如果 idx 是负数 , 那么就是从栈顶数 , -1 就是 top 下面那个 . 如果 idx 是正数 , 那么就从 L->ci->func 开始数 , 1 就是 L->ci->func + 1;
+/// @brief 如果 idx 是负数, 那么就是从栈顶数, -1 就是 top 下面那个 . 如果 idx 是正数, 那么就从 L->ci->func 开始数, 1 就是 L->ci->func + 1;
 /// Convert a valid actual index (not a pseudo-index) to its address.
 l_sinline StkId index2stack(lua_State *L, int idx) {
     CallInfo *ci = L->ci;
@@ -156,7 +156,7 @@ LUA_API int lua_absindex(lua_State *L, int idx) { return (idx > 0 || ispseudo(id
 LUA_API int lua_gettop(lua_State *L) { return cast_int(L->top - (L->ci->func + 1)); }
 
 /**
- * @brief 参数允许传入任何可接受的索引以及 0 . 它将把堆栈的栈顶设为这个索引. 如果新的栈顶比原来的大,超出部分的新元素将被填为 nil . 如果 index 为 0 ,把栈上所有元素移除.
+ * @brief 参数允许传入任何可接受的索引以及 0 . 它将把堆栈的栈顶设为这个索引. 如果新的栈顶比原来的大,超出部分的新元素将被填为 nil . 如果 index 为 0,把栈上所有元素移除.
  *
  * @param L
  * @param idx
@@ -209,7 +209,7 @@ l_sinline void reverse(lua_State *L, StkId from, StkId to) {
     }
 }
 
-/// @brief n 与 idx 与相反 , n 为正从栈顶向下数 , 为负则从 idx 向上数 , 把 idx 到 top 中的元素 , 以 n 数出来的位置为界 , 上层的元素去下面 , 下层的元素到上面;
+/// @brief n 与 idx 与相反, n 为正从栈顶向下数, 为负则从 idx 向上数, 把 idx 到 top 中的元素, 以 n 数出来的位置为界, 上层的元素去下面, 下层的元素到上面;
 /// Let x = AB, where A is a prefix of length 'n'. Then, rotate x n == BA. But BA == (A^r . B^r)^r.
 LUA_API void lua_rotate(lua_State *L, int idx, int n) {
     StkId p, t, m;
@@ -572,7 +572,7 @@ LUA_API const char *lua_pushfstring(lua_State *L, const char *fmt, ...) {
 LUA_API void lua_pushcclosure(lua_State *L, lua_CFunction fn, int n) {
     lua_lock(L);
     if (n == 0) {
-        setfvalue(s2v(L->top), fn); // 如果没有 upvalues , 就是一个普通的 c 函数
+        setfvalue(s2v(L->top), fn); // 如果没有 upvalues, 就是一个普通的 c 函数
         api_incr_top(L);
     } else {
         CClosure *cl;
@@ -636,7 +636,7 @@ l_sinline int auxgetstr(lua_State *L, const TValue *t, const char *k) {
     if (luaV_fastget(L, t, str, slot, luaH_getstr)) {
         // 把生成的 slot 拉到 现在的 L->top 之后
         setobj2s(L, L->top, slot);
-        // 把 L->top 向到动一下 , 指向上在的 slot
+        // 把 L->top 向到动一下, 指向上在的 slot
         api_incr_top(L);
     } else {
         setsvalue2s(L, L->top, str);
@@ -663,7 +663,7 @@ LUA_API int lua_getglobal(lua_State *L, const char *name) {
 }
 
 /**
- * @brief 首先使用栈顶的值做为 key , 在 栈[idx] 的元素中找这个 key 对应的值 , 之后把现在栈顶的 key 弹出 , 把找到的值放到栈顶
+ * @brief 首先使用栈顶的值做为 key, 在 栈[idx] 的元素中找这个 key 对应的值, 之后把现在栈顶的 key 弹出, 把找到的值放到栈顶
  *
  * @param L
  * @param idx
@@ -683,7 +683,7 @@ LUA_API int lua_gettable(lua_State *L, int idx) {
 }
 
 /**
- * @brief 主要针对表的 , L[idx] 如果是一个关联数组(php叫法) , 那么 就把 L[idx] 这个表的 k 对应的 value 表到栈顶
+ * @brief 主要针对表的, L[idx] 如果是一个关联数组(php叫法), 那么 就把 L[idx] 这个表的 k 对应的 value 表到栈顶
  *
  * @param L
  * @param idx
@@ -729,7 +729,7 @@ static Table *gettable(lua_State *L, int idx) {
 }
 
 /**
- * @brief 与 lua_gettable 一样 , 就是 lua_gettable 会触发 __index .
+ * @brief 与 lua_gettable 一样, 就是 lua_gettable 会触发 __index .
  *
  * @param L
  * @param idx
@@ -747,7 +747,7 @@ LUA_API int lua_rawget(lua_State *L, int idx) {
 }
 
 /**
- * @brief L[idx] 应该是数组 , 那么就将 L[idx][n] 置于栈顶
+ * @brief L[idx] 应该是数组, 那么就将 L[idx][n] 置于栈顶
  *
  * @param L
  * @param idx
@@ -835,7 +835,7 @@ LUA_API int lua_getiuservalue(lua_State *L, int idx, int n) {
 */
 
 /**
- * @brief t[k] = value at the top of the stack (where 'k' is a string) ,
+ * @brief t[k] = value at the top of the stack (where 'k' is a string),
  *
  * @param L
  * @param t
@@ -865,7 +865,7 @@ LUA_API void lua_setglobal(lua_State *L, const char *name) {
 }
 
 /**
- * @brief 就是把 栈顶的 第一个元素当作 value , 把第二个元素当作 key , 把 表 L[idx][key] = value 了 , 同时把第一个元素与第二个元素 pop 出了
+ * @brief 就是把 栈顶的 第一个元素当作 value, 把第二个元素当作 key, 把 表 L[idx][key] = value 了, 同时把第一个元素与第二个元素 pop 出了
  *
  * @param L
  * @param idx
@@ -886,7 +886,7 @@ LUA_API void lua_settable(lua_State *L, int idx) {
 }
 
 /**
- * @brief 把栈顶的元素 放到 表 L[idx] 的指定 key 中 , 没有这个 key 就生成这个 key , 之后把之前那个 栈顶的元素 pop 了
+ * @brief 把栈顶的元素 放到 表 L[idx] 的指定 key 中, 没有这个 key 就生成这个 key, 之后把之前那个 栈顶的元素 pop 了
  *
  * @param L
  * @param idx
@@ -943,7 +943,7 @@ LUA_API void lua_rawsetp(lua_State *L, int idx, const void *p) {
 }
 
 /**
- * @brief 把栈顶元素 v 赋值给表 L[idx][n] , 然后把 v 弹出
+ * @brief 把栈顶元素 v 赋值给表 L[idx][n], 然后把 v 弹出
  *
  * @param L
  * @param idx
@@ -1130,15 +1130,15 @@ LUA_API int lua_pcallk(lua_State *L, int nargs, int nresults, int errfunc, lua_K
     return status;
 }
 
-/// @brief 装载 lua 脚本 , 如果成功解析 , 则返回 0
+/// @brief 装载 lua 脚本, 如果成功解析, 则返回 0
 /// @param L
-/// @param reader lua 脚本的读取函数 , 一般就是 getF
-/// @param data lua 文件的数据 , 一般是一上 LoadF 结构体
+/// @param reader lua 脚本的读取函数, 一般就是 getF
+/// @param data lua 文件的数据, 一般是一上 LoadF 结构体
 /// @param chunkname lua 文件名
-/// @param mode 文件的类型 , 文本还是二进制y
+/// @param mode 文件的类型, 文本还是二进制y
 /// @return int
 LUA_API int lua_load(lua_State *L, lua_Reader reader, void *data, const char *chunkname, const char *mode) {
-    ZIO z; // 文件读取对象 , SParser 与 LexState 中的 z 都是指这个 z
+    ZIO z; // 文件读取对象, SParser 与 LexState 中的 z 都是指这个 z
     int status;
     lua_lock(L);
     if (!chunkname) chunkname = "?";
@@ -1287,7 +1287,7 @@ LUA_API int lua_error(lua_State *L) {
 }
 
 /**
- * @brief 用于遍历 table , idx 表示 table 在栈中的什么位置
+ * @brief 用于遍历 table, idx 表示 table 在栈中的什么位置
  *
  * @param L
  * @param idx

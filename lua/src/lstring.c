@@ -44,7 +44,7 @@ int luaS_eqlngstr(TString *a, TString *b) {
             (memcmp(getstr(a), getstr(b), len) == 0)); /* equal contents */
 }
 
-/// @brief 计算字符串哈希值 , 使用 djb2 算法
+/// @brief 计算字符串哈希值, 使用 djb2 算法
 /// @param str 字符串
 /// @param l 字符串长度
 /// @param seed 随机数
@@ -67,7 +67,7 @@ unsigned int luaS_hashlongstr(TString *ts) {
 
 static void tablerehash(TString **vect, int osize, int nsize) {
     int i;
-    // 如果要扩大 , 那么新申请来的空间初始化一下
+    // 如果要扩大, 那么新申请来的空间初始化一下
     for (i = osize; i < nsize; i++) /* clear new elements */
         vect[i] = NULL;
     // 把原来数据重新分发来各自的桶里
@@ -95,7 +95,7 @@ static void tablerehash(TString **vect, int osize, int nsize) {
 ** Resize the string table. If allocation fails, keep the current size.
 ** (This can degrade performance, but any non-zero size should work
 ** correctly.)
-** 调用 tablerehash , 这调用之前 , 要注意内存的分配
+** 调用 tablerehash, 这调用之前, 要注意内存的分配
 */
 void luaS_resize(lua_State *L, int nsize) {
     stringtable *tb = &G(L)->strt;
@@ -141,7 +141,7 @@ void luaS_init(lua_State *L) {
     g->memerrmsg = luaS_newliteral(L, MEMERRMSG);                          /* pre-create memory-error message */
     luaC_fix(L, obj2gco(g->memerrmsg));                                    /* it should never be collected */
     for (i = 0; i < STRCACHE_N; i++)                                       /* fill cache with valid strings */
-        for (j = 0; j < STRCACHE_M; j++) g->strcache[i][j] = g->memerrmsg; // 临时初始化一下 , 之后会改的
+        for (j = 0; j < STRCACHE_M; j++) g->strcache[i][j] = g->memerrmsg; // 临时初始化一下, 之后会改的
 }
 
 /*
@@ -175,7 +175,7 @@ void luaS_remove(lua_State *L, TString *ts) {
     tb->nuse--;
 }
 
-/// @brief 如果有空间 , 那么就把 字符串 表的大小 扩大 两倍 , 并重新排列所有字符串的位置
+/// @brief 如果有空间, 那么就把 字符串 表的大小 扩大 两倍, 并重新排列所有字符串的位置
 /// @param L
 /// @param tb
 static void growstrtab(lua_State *L, stringtable *tb) {
@@ -190,7 +190,7 @@ static void growstrtab(lua_State *L, stringtable *tb) {
 
 /*
 ** Checks whether short string exists and reuses it or creates a new one.
-** 内部化短字符串 , 先看哈希桶里有没有 str , 有直接返回 , 没有就新创建一个放到桶里
+** 内部化短字符串, 先看哈希桶里有没有 str, 有直接返回, 没有就新创建一个放到桶里
 */
 static TString *internshrstr(lua_State *L, const char *str, size_t l) {
     TString *ts;
@@ -200,7 +200,7 @@ static TString *internshrstr(lua_State *L, const char *str, size_t l) {
     TString **list = &tb->hash[lmod(h, tb->size)]; // 定位到 hash 值所在的哈希桶的地址的指针
     lua_assert(str != NULL);                       /* otherwise 'memcmp'/'memcpy' are undefined */
 
-    // 在当前桶中遍历 , 看是否已经存在 , 如果存在就返回这个 TString 的地址
+    // 在当前桶中遍历, 看是否已经存在, 如果存在就返回这个 TString 的地址
     for (ts = *list; ts != NULL; ts = ts->u.hnext) {
         if (l == ts->shrlen && (memcmp(str, getstr(ts), l * sizeof(char)) == 0)) {
             /* found! */
@@ -225,7 +225,7 @@ static TString *internshrstr(lua_State *L, const char *str, size_t l) {
     return ts;
 }
 
-/// @brief new string (with explicit length) , 当 l <= LUAI_MAXSHORTLEN , 使用内部化短字符串
+/// @brief new string (with explicit length), 当 l <= LUAI_MAXSHORTLEN, 使用内部化短字符串
 /// @param L
 /// @param str
 /// @param l 字符串长度

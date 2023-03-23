@@ -27,7 +27,7 @@
 
 /*
 ** equality for short strings, which are always internalized ;
-** 短字符串经过内部化后 , 在 g 上只有一份 , 那么只要是短字符串且地址相等那么两个字符串就是相等的
+** 短字符串经过内部化后, 在 g 上只有一份, 那么只要是短字符串且地址相等那么两个字符串就是相等的
 */
 #define eqshrstr(a, b) check_exp((a)->tt == LUA_VSHRSTR, (a) == (b))
 

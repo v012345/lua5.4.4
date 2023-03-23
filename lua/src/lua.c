@@ -98,7 +98,7 @@ static void print_usage (const char *badoption) {
   "  -W        turn warnings on\n"
   "  --        stop handling options\n"
   "  -         stop handling options and execute stdin\n"
-  ,
+ ,
   progname);
 }
 

@@ -11,7 +11,7 @@
 
 #define gnode(t, i) (&(t)->node[i])
 
-///@brief 返回 Node 的 i_val (TValue) , 就是 Node 中的值
+///@brief 返回 Node 的 i_val (TValue), 就是 Node 中的值
 #define gval(n) (&(n)->i_val)
 
 #define gnext(n) ((n)->u.next)
@@ -24,7 +24,7 @@
 #define invalidateTMcache(t) ((t)->flags &= ~maskflags)
 
 /* true when 't' is using 'dummynode' as its hash part
-如果 t 的 size 是 0 那个 lastfree 就是 NULL , 而 node 指向一个 dummynode , 只读 空 node
+如果 t 的 size 是 0 那个 lastfree 就是 NULL, 而 node 指向一个 dummynode, 只读 空 node
 */
 #define isdummy(t) ((t)->lastfree == NULL)
 

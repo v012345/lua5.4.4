@@ -36,8 +36,8 @@ LUAI_DDEF const char *const luaT_typenames_[LUA_TOTALTYPES] = {
 
 /**
  * @brief 
- * __index 可以是函数也可以是表 , 用于用键找值
- * __newindex 可以是函数也可以是表 , 用于加入新的键
+ * __index 可以是函数也可以是表, 用于用键找值
+ * __newindex 可以是函数也可以是表, 用于加入新的键
  * __add +
  * __sub -
  * __mul *
@@ -48,7 +48,7 @@ LUAI_DDEF const char *const luaT_typenames_[LUA_TOTALTYPES] = {
  * __concat ..
  * __eq ==
  * __unm - 取反
- * __call 是一个函数 , 第一个参数是表本身 , 之后是传入的参数 , 那么 这个表就可以当一个函数来用 (就是在表返回加())
+ * __call 是一个函数, 第一个参数是表本身, 之后是传入的参数, 那么 这个表就可以当一个函数来用 (就是在表返回加())
  * @param L 
  */
 void luaT_init (lua_State *L) {

@@ -77,10 +77,10 @@ static UpVal *newupval(lua_State *L, int tbc, StkId level, UpVal **prev) {
 
 /// @brief Find and reuse, or create if it does not exist, an upvalue at the given level.
 UpVal *luaF_findupval(lua_State *L, StkId level) {
-    UpVal **pp = &L->openupval; // pp 指向 L->openupval , 而 L->openupval 指向当前打开的 Upvalue 列表
+    UpVal **pp = &L->openupval; // pp 指向 L->openupval, 而 L->openupval 指向当前打开的 Upvalue 列表
     UpVal *p;
     lua_assert(isintwups(L) || L->openupval == NULL);
-    // 在 Upvalue 列表上做遍历 , 如果当前p指向的 StkId 比 level 大 , 说说明可能找到, 则进入while
+    // 在 Upvalue 列表上做遍历, 如果当前p指向的 StkId 比 level 大, 说说明可能找到, 则进入while
     while ((p = *pp) != NULL && uplevel(p) >= level) { /* search for it */
         lua_assert(!isdead(G(L), p));
         if (uplevel(p) == level) /* corresponding upvalue? */

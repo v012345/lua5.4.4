@@ -137,7 +137,7 @@ static int math_fmod (lua_State *L) {
 ** 'double'.
 */
 static int math_modf (lua_State *L) {
-  if (lua_isinteger(L ,1)) {
+  if (lua_isinteger(L,1)) {
     lua_settop(L, 1);  /* number is its own integer part */
     lua_pushnumber(L, 0);  /* no fractional part */
   }

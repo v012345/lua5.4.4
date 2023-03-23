@@ -163,7 +163,7 @@ static void correctstack(lua_State *L, StkId oldstack, StkId newstack) {
     CallInfo *ci;
     UpVal *up;
     L->top = (L->top - oldstack) + newstack;         // L->top - oldstack (L->top 与 oldstack 的相对位置) + newstack (现在 L->top 在 newstack 中的位置)
-    L->tbclist = (L->tbclist - oldstack) + newstack; // 同上 , 但是这里可以加深对 Upvalue 的理解
+    L->tbclist = (L->tbclist - oldstack) + newstack; // 同上, 但是这里可以加深对 Upvalue 的理解
     for (up = L->openupval; up != NULL; up = up->u.open.next) up->v = s2v((uplevel(up) - oldstack) + newstack);
     for (ci = L->ci; ci != NULL; ci = ci->previous) {
         ci->top = (ci->top - oldstack) + newstack;
@@ -543,7 +543,7 @@ retry:
         case LUA_VLCL: {                            /* Lua function */
             CallInfo *ci;                           // 如果函数是 Lua 函数,则构造 CallInfo 结构体,并返回该结构体；
             Proto *p = clLvalue(s2v(func))->p;      // 获取栈 func 位置上 lua 闭包中的函数原型
-            int narg = cast_int(L->top - func) - 1; /* 实际传来的参数个数 , 我不确定 self 算不算一个参数; number of real arguments */
+            int narg = cast_int(L->top - func) - 1; /* 实际传来的参数个数, 我不确定 self 算不算一个参数; number of real arguments */
             int nfixparams = p->numparams;          // lua 函数签名中指定的参数个数
             int fsize = p->maxstacksize;            /* 函数执行时最多需要多少个栈空间 frame size */
             checkstackGCp(L, fsize, func);
@@ -865,8 +865,8 @@ int luaD_pcall(lua_State *L, Pfunc func, void *u, ptrdiff_t old_top, ptrdiff_t e
     if (l_unlikely(status != LUA_OK)) { /* an error occurred? */
         L->ci = old_ci;
         L->allowhook = old_allowhooks;
-        status = luaD_closeprotected(L, old_top, status); // 进行栈的恢复 , 将当前帧以及当前帧以上的帧全部出栈,最终将栈顶指针恢复到 old_top,以便后续进行错误信息的处理
-        luaD_seterrorobj(L, status, restorestack(L, old_top)); // 将当前的错误信息设置到错误对象中 , 其中 restorestack 函数用于将错误信息对象移动到恢复后的正确位置.
+        status = luaD_closeprotected(L, old_top, status); // 进行栈的恢复, 将当前帧以及当前帧以上的帧全部出栈,最终将栈顶指针恢复到 old_top,以便后续进行错误信息的处理
+        luaD_seterrorobj(L, status, restorestack(L, old_top)); // 将当前的错误信息设置到错误对象中, 其中 restorestack 函数用于将错误信息对象移动到恢复后的正确位置.
         luaD_shrinkstack(L);                                   /* 将栈缩小到合适的大小 restore stack size in case of overflow */
     }
     L->errfunc = old_errfunc;
@@ -878,8 +878,8 @@ int luaD_pcall(lua_State *L, Pfunc func, void *u, ptrdiff_t old_top, ptrdiff_t e
 */
 struct SParser {      /* data to 'f_parser' */
     ZIO *z;           // 用于读脚本文件
-    Mbuffer buff;     /* 脚本解析过程就是一个 buff , 其他都是指向这个的指针 ; dynamic structure used by the scanner */
-    Dyndata dyd;      /* 脚本解析过程就是一个 dyd , 其他都是指向这个的指针 ; dynamic structures used by the parser */
+    Mbuffer buff;     /* 脚本解析过程就是一个 buff, 其他都是指向这个的指针 ; dynamic structure used by the scanner */
+    Dyndata dyd;      /* 脚本解析过程就是一个 dyd, 其他都是指向这个的指针 ; dynamic structures used by the parser */
     const char *mode; // 解析方式
     const char *name; // 文件名
 };
@@ -913,7 +913,7 @@ static void f_parser(lua_State *L, void *ud) {
 /// @param L 状态机
 /// @param z 脚本文件
 /// @param name 加上 @ 的脚本文件名
-/// @param mode 目前没有发现什么用处 , 可能是以什么方式解析脚本
+/// @param mode 目前没有发现什么用处, 可能是以什么方式解析脚本
 /// @return
 int luaD_protectedparser(lua_State *L, ZIO *z, const char *name, const char *mode) {
     struct SParser p;

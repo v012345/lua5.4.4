@@ -35,13 +35,13 @@
 ** bit 6: whether value is collectable
 */
 
-/* add variant bits to a type */
+/* t 是原基本类型(低 4 位), v 是扩展类型(高 4 位); add variant bits to a type */
 #define makevariant(t, v) ((t) | ((v) << 4))
 
 /// @brief Union of all Lua values
-/// @param gc collectable objects 对应有 CommonHeader 的对象 , 包括 TString , Udata , Udata0 , Proto , UpVal , Closure , Table
-/// @param p light userdata 不需要 lua 来关心数据的生存期 , 不被 gc 回收
-/// @param f int (*) (lua_State *L) 没有 upvalues , 就是一个普通的 c 函数 , 所以不用 gc 
+/// @param gc collectable objects 对应有 CommonHeader 的对象, 包括 TString, Udata, Udata0, Proto, UpVal, Closure, Table
+/// @param p light userdata 不需要 lua 来关心数据的生存期, 不被 gc 回收
+/// @param f int (*) (lua_State *L) 没有 upvalues, 就是一个普通的 c 函数, 所以不用 gc 
 /// @param i long long 不被 gc 回收
 /// @param n double 不被 gc 回收
 typedef union Value {
@@ -103,7 +103,7 @@ typedef struct TValue {
 /* set a value's tag */
 #define settt_(o, t) ((o)->tt_ = (t))
 
-/// @brief 两个 TValue 类型的对象 , 把 obj2 的 value_ 与 tt_ 都复制到 obj1 ; main macro to copy values (from 'obj2' to 'obj1')
+/// @brief 两个 TValue 类型的对象, 把 obj2 的 value_ 与 tt_ 都复制到 obj1 ; main macro to copy values (from 'obj2' to 'obj1')
 #define setobj(L, obj1, obj2)                                                                                                                                                                          \
     {                                                                                                                                                                                                  \
         TValue *io1 = (obj1);                                                                                                                                                                          \
@@ -349,7 +349,7 @@ typedef struct GCObject {
 ** ===================================================================
 */
 
-/* Variant tags for strings 这个小类型区分放在类型字节的高四位 , 所以为外部 API 所不可见 */
+/* Variant tags for strings 这个小类型区分放在类型字节的高四位, 所以为外部 API 所不可见 */
 #define LUA_VSHRSTR makevariant(LUA_TSTRING, 0) /* short strings */
 #define LUA_VLNGSTR makevariant(LUA_TSTRING, 1) /* long strings */
 
@@ -383,8 +383,8 @@ typedef struct TString {
     lu_byte shrlen;    /* length for short strings */
     unsigned int hash; /* 字符串的哈希值,用于字符串的查找和比较操作 */
     union {
-        size_t lnglen;         /* TString 是长串时 , 表示长符的长度  length for long strings */
-        struct TString *hnext; /* 短串时 , 某个桶中的中 , 当作链表使用 linked list for hash table */
+        size_t lnglen;         /* TString 是长串时, 表示长符的长度  length for long strings */
+        struct TString *hnext; /* 短串时, 某个桶中的中, 当作链表使用 linked list for hash table */
     } u;
     char contents[1]; /* 一个柔性数组 字符串的具体内容,以 null 结尾 */
 } TString;
@@ -542,7 +542,7 @@ typedef struct Proto {
     CommonHeader;             /* 通用对象头部 */
     lu_byte numparams;        /* 函数的固定参数个数 number of fixed (named) parameters */
     lu_byte is_vararg;        /* 表示该函数是否为变长参数函数 */
-    lu_byte maxstacksize;     /* 表示该函数执行时最多需要多少个栈空间(寄存器 , 对于函数来说,栈就是寄存器了) number of registers needed by this function */
+    lu_byte maxstacksize;     /* 表示该函数执行时最多需要多少个栈空间(寄存器, 对于函数来说,栈就是寄存器了) number of registers needed by this function */
     int sizeupvalues;         /* 函数中的Upvalue数量 size of 'upvalues' */
     int sizek;                /* 常量表中元素的个数 size of 'k' */
     int sizecode;             /* 指令表中元素的个数 */
@@ -694,12 +694,12 @@ typedef union Closure {
 ** of the key's fields ('key_tt' and 'key_val') not forming a proper
 ** 'TValue' allows for a smaller size for 'Node' both in 4-byte
 ** and 8-byte alignments.
-是一个联合体 , 如果是使用 i_val 那就表示 Node 是一个普通的 TValue ,
-如果使用 u , 那么这个 Node 就保护了 Key 与 Vaule , 同时啊 ,
-这个 Key 也有类型(key_tt)与值(key_val) , 值是类型(tt_)与值(value_) ,
+是一个联合体, 如果是使用 i_val 那就表示 Node 是一个普通的 TValue,
+如果使用 u, 那么这个 Node 就保护了 Key 与 Vaule, 同时啊,
+这个 Key 也有类型(key_tt)与值(key_val), 值是类型(tt_)与值(value_),
 还有一个 next 表示什么我再看看
 
-还有啊 , 因为这是一个联合体 , 所以可以使用 i_val , 拿到值 , 因为在 u , 前两个数据与TValue一致
+还有啊, 因为这是一个联合体, 所以可以使用 i_val, 拿到值, 因为在 u, 前两个数据与TValue一致
 */
 typedef union Node {
     struct NodeKey {
@@ -711,7 +711,7 @@ typedef union Node {
     TValue i_val; /* direct access to node's value as a proper 'TValue' */
 } Node;
 
-/* copy a value into a key , 把 obj 的类型给 key 的类型 , 把 obj 的值给 key 的值  */
+/* copy a value into a key, 把 obj 的类型给 key 的类型, 把 obj 的值给 key 的值  */
 #define setnodekey(L, node, obj)                                                                                                                                                                       \
     {                                                                                                                                                                                                  \
         Node *n_ = (node);                                                                                                                                                                             \
@@ -747,7 +747,7 @@ typedef union Node {
 typedef struct Table {
     CommonHeader;      // 一个指向 GCObject 的指针,用于垃圾回收
     lu_byte flags;     /* 1<<p means tagmethod(p) is not present  用于标识表是否有某些特殊的属性,例如是否需要调用元方法、是否为弱表等等*/
-    lu_byte lsizenode; /* log2 of size of 'node' array 哈希表的大小 , 由于哈希表的大小一定为 2 的整数次幂 , 所以这里表示的是幂次 , 而不是实际大小 . node 数组的大小为 2^lsizenode */
+    lu_byte lsizenode; /* log2 of size of 'node' array 哈希表的大小, 由于哈希表的大小一定为 2 的整数次幂, 所以这里表示的是幂次, 而不是实际大小 . node 数组的大小为 2^lsizenode */
     unsigned int alimit; /* "limit" of 'array' array 数组部分的大小.array[0] 至 array[alimit-1] 表示数组部分 */
     TValue *array;       /* array part */
     Node *node;          // 哈希表
@@ -788,7 +788,7 @@ typedef struct Table {
 
 /*
 ** 'module' operation for hashing (size is always a power of 2)
-** 这里由于 size 是 2 的幂次 , 所以可以使用 size - 1 与 s 做按位与来快速求余数
+** 这里由于 size 是 2 的幂次, 所以可以使用 size - 1 与 s 做按位与来快速求余数
 */
 #define lmod(s, size) (check_exp((size & (size - 1)) == 0, (cast_int((s) & ((size)-1)))))
 

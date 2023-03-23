@@ -36,7 +36,7 @@ typedef struct LX {
 } LX;
 
 /**
- * @brief Main thread combines a thread state and the global state 为了避免内存碎片 , 减少内存分配与释放的次数 , 所以把 全局状态机 与 主线程状态放到了一个结构体中
+ * @brief Main thread combines a thread state and the global state 为了避免内存碎片, 减少内存分配与释放的次数, 所以把 全局状态机 与 主线程状态放到了一个结构体中
  */
 typedef struct LG {
     LX l;
@@ -79,7 +79,7 @@ static unsigned int luai_makeseed(lua_State *L) {
     addbuff(buff, p, &h);            /* local variable */
     addbuff(buff, p, &lua_newstate); /* public function */
     lua_assert(p == sizeof(buff));
-    // 求出随机生成的 buff 字符串 相对于 当前时间的 hash , 一个 unsigned int 值 , 来作为全局状态机的随机数种子
+    // 求出随机生成的 buff 字符串 相对于 当前时间的 hash, 一个 unsigned int 值, 来作为全局状态机的随机数种子
     return luaS_hash(buff, p, h);
 }
 
@@ -184,7 +184,7 @@ static void stack_init(lua_State *L1, lua_State *L) {
     L1->stack = luaM_newvector(L, BASIC_STACK_SIZE + EXTRA_STACK, StackValue); // 分配数据栈
     L1->tbclist = L1->stack;
     for (i = 0; i < BASIC_STACK_SIZE + EXTRA_STACK; i++) setnilvalue(s2v(L1->stack + i)); /* 初始化分配来的栈 erase new stack */
-    L1->top = L1->stack;                                                                  // top指向最后一个空闲的位置 , 现在栈底就是最后一个空闲的位置
+    L1->top = L1->stack;                                                                  // top指向最后一个空闲的位置, 现在栈底就是最后一个空闲的位置
     L1->stack_last = L1->stack + BASIC_STACK_SIZE;                                        // stack_last指向数据栈的最后一个元素
     /* initialize first ci */
     ci = &L1->base_ci; // L1->base_ci 记录的是整个Lua栈的状态
@@ -235,14 +235,10 @@ static void f_luaopen(lua_State *L, void *ud) {
     luaX_init(L);                      // 初始化词法分析用的token串
     g->gcstp = 0;                      /* allow gc */
     setnilvalue(&g->nilvalue);         /* now state is complete */
-    luai_userstateopen(L);             // 宏定义的接口 , 用户去实现
+    luai_userstateopen(L);             // 宏定义的接口, 用户去实现
 }
 
-/*
-** preinitialize a thread with consistent values without allocating
-** any memory (to avoid errors)
-** 就是简单初始化 不分配内存空间 , 但是 L->l_G = g
-*/
+/// @brief 就是简单初始化 不分配内存空间, 但是 L->l_G = g; preinitialize a thread with consistent values without allocating any memory (to avoid errors)
 static void preinit_thread(lua_State *L, global_State *g) {
     G(L) = g;
     L->stack = NULL;
@@ -275,7 +271,7 @@ static void close_state(lua_State *L) {
     luaM_freearray(L, G(L)->strt.hash, G(L)->strt.size);
     freestack(L);
     lua_assert(gettotalbytes(g) == sizeof(LG));
-    // 这里要求 LG 结构体中 LX (主线程) 必须定义在结构的前面 , 否则关闭虚拟机的时候就无法正确的释放内存
+    // 这里要求 LG 结构体中 LX (主线程) 必须定义在结构的前面, 否则关闭虚拟机的时候就无法正确的释放内存
     (*g->frealloc)(g->ud, fromstate(L), sizeof(LG), 0); /* free main block */
 }
 
@@ -352,8 +348,8 @@ LUA_API lua_State *lua_newstate(lua_Alloc f, void *ud) {
     L = &l->l.l;
     g = &l->g;
     L->tt = LUA_VTHREAD;
-    g->currentwhite = bitmask(WHITE0BIT);
-    L->marked = luaC_white(g);
+    g->currentwhite = bitmask(WHITE0BIT); // 白 0 阶段
+    L->marked = luaC_white(g);            // 与 g->currentwhite 的 3 与 4 位置一样
     preinit_thread(L, g);
     g->allgc = obj2gco(L); /* by now, only object is the main thread */
     L->next = NULL;
@@ -363,7 +359,7 @@ LUA_API lua_State *lua_newstate(lua_Alloc f, void *ud) {
     g->warnf = NULL;
     g->ud_warn = NULL;
     g->mainthread = L;
-    g->seed = luai_makeseed(L); // 启动时生成的一个随机数种子 , 主要是在求字符串哈希时使用
+    g->seed = luai_makeseed(L); // 启动时生成的一个随机数种子, 主要是在求字符串哈希时使用
     g->gcstp = GCSTPGC;         /* no GC while building state */
     g->strt.size = g->strt.nuse = 0;
     g->strt.hash = NULL;

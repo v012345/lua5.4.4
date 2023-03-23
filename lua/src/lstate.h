@@ -134,11 +134,11 @@ struct lua_longjmp; /* defined in ldo.c */
 #define KGC_INC 0 /* incremental gc */
 #define KGC_GEN 1 /* generational gc */
 
-/// @brief 字符串的哈希表 , 有大小 , 元素的个数 , 与一个 TString 的二维组数(一个哈希桶)
+/// @brief 字符串的哈希表, 有大小, 元素的个数, 与一个 TString 的二维组数(一个哈希桶)
 typedef struct stringtable {
     TString **hash; // 字符串的哈希表的哈希桶
     int nuse;       /* 表中已存储的短串的数量  number of elements */
-    int size;       // 哈希桶的大小 , 就是预定容量, luaS_init 时给出 初始化大小 MINSTRTABSIZE ( 2^7 = 128 ), 之后可以调整大小 , 注意 size 是 2 的幂次
+    int size;       // 哈希桶的大小, 就是预定容量, luaS_init 时给出 初始化大小 MINSTRTABSIZE ( 2^7 = 128 ), 之后可以调整大小, 注意 size 是 2 的幂次
 } stringtable;
 
 /*

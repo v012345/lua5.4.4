@@ -267,10 +267,10 @@ typedef enum {
     OP_TEST,    /* A k if (not R[A] == k) then pc++   */
     OP_TESTSET, /* A B k if (not R[B] == k) then pc++ else R[A] := R[B] (*) */
 
-    OP_CALL,     /* A B C R[A], ... ,R[A+C-2] := R[A](R[A+1], ... ,R[A+B-1]) */
-    OP_TAILCALL, /* A B C k return R[A](R[A+1], ... ,R[A+B-1])  */
+    OP_CALL,     /* A B C R[A], ...,R[A+C-2] := R[A](R[A+1], ...,R[A+B-1]) */
+    OP_TAILCALL, /* A B C k return R[A](R[A+1], ...,R[A+B-1])  */
 
-    OP_RETURN,  /* A B C k return R[A], ... ,R[A+B-2] (see note) */
+    OP_RETURN,  /* A B C k return R[A], ...,R[A+B-2] (see note) */
     OP_RETURN0, /*  return      */
     OP_RETURN1, /* A return R[A]     */
 
@@ -278,7 +278,7 @@ typedef enum {
     OP_FORPREP, /* A Bx <check values and prepare counters>; if not to run then pc+=Bx+1;   */
 
     OP_TFORPREP, /* A Bx create upvalue for R[A + 3]; pc+=Bx  */
-    OP_TFORCALL, /* A C R[A+4], ... ,R[A+3+C] := R[A](R[A+1], R[A+2]); */
+    OP_TFORCALL, /* A C R[A+4], ...,R[A+3+C] := R[A](R[A+1], R[A+2]); */
     OP_TFORLOOP, /* A Bx if R[A+2] ~= nil then { R[A]=R[A+2]; pc -= Bx } */
 
     OP_SETLIST, /* A B C k R[A][C+i] := R[A+i], 1 <= i <= B  */

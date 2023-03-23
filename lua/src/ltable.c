@@ -140,7 +140,7 @@ static int l_hashfloat(lua_Number n) {
 /*
 ** returns the 'main' position of an element in a table (that is,
 ** the index of its hash value).
-对应不同类型的 key 算出hash之后 , 映射到 table 的 node 数组上
+对应不同类型的 key 算出hash之后, 映射到 table 的 node 数组上
 */
 static Node *mainpositionTV(const Table *t, const TValue *key) {
     switch (ttypetag(key)) {
@@ -180,7 +180,7 @@ static Node *mainpositionTV(const Table *t, const TValue *key) {
 }
 
 /**
- * @brief 如果 nd 要放到 table 中 , 那么 nd 会在 table 中的 main position
+ * @brief 如果 nd 要放到 table 中, 那么 nd 会在 table 中的 main position
  *
  * @param t
  * @param nd
@@ -663,7 +663,7 @@ void luaH_newkey(lua_State *L, Table *t, const TValue *key, TValue *value) {
             return;
         }
         lua_assert(!isdummy(t));
-        // 因为 next 链的存在 , mp 中的 key 可能与 传进来的 key 不一样!
+        // 因为 next 链的存在, mp 中的 key 可能与 传进来的 key 不一样!
         othern = mainpositionfromnode(t, mp);
         if (othern != mp) { /* is colliding node out of its main position? */
             /* yes; move colliding node into free position */

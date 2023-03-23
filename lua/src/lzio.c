@@ -18,7 +18,7 @@
 #include "lstate.h"
 #include "lzio.h"
 
-/// @brief 从 LoadF 读一块 , 把读到的第一个字符放到 z->p , 所以 z->n = size - 1;
+/// @brief 从 LoadF 读一块, 把读到的第一个字符放到 z->p, 所以 z->n = size - 1;
 /// @param z
 /// @return
 int luaZ_fill(ZIO *z) {

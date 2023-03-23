@@ -71,7 +71,7 @@ static void checklimit(FuncState *fs, int v, int l, const char *what) {
     if (v > l) errorlimit(fs, l, what);
 }
 
-/// @brief 看看一下 token 是不是 c , 如果是 , 就跳过这个 token ; Test whether next token is 'c'; if so, skip it.
+/// @brief 看看一下 token 是不是 c, 如果是, 就跳过这个 token ; Test whether next token is 'c'; if so, skip it.
 static int testnext(LexState *ls, int c) {
     if (ls->t.token == c) {
         luaX_next(ls);
@@ -111,7 +111,7 @@ static void check_match(LexState *ls, int what, int who, int where) {
     }
 }
 
-/// @brief 检查当前 token 是不是 TK_NAME , 然后取下一个 token , 把被检查的 token 的字符串返回
+/// @brief 检查当前 token 是不是 TK_NAME, 然后取下一个 token, 把被检查的 token 的字符串返回
 static TString *str_checkname(LexState *ls) {
     TString *ts;
     check(ls, TK_NAME);
@@ -295,13 +295,13 @@ static Upvaldesc *allocupvalue(FuncState *fs) {
     return &f->upvalues[fs->nups++];
 }
 
-/// @brief 当解析出来的表达式类型是 local 或 upvalue 时 , 要为当时函数生成新的 Upvaldesc
+/// @brief 当解析出来的表达式类型是 local 或 upvalue 时, 要为当时函数生成新的 Upvaldesc
 static int newupvalue(FuncState *fs, TString *name, expdesc *v) {
     Upvaldesc *up = allocupvalue(fs);
     FuncState *prev = fs->prev;
     if (v->k == VLOCAL) {
         up->instack = 1;         // local 变量在栈里
-        up->idx = v->u.var.ridx; // 在寄存器(数据栈)的位置 , 我不确定是不是相对于 func 的位置
+        up->idx = v->u.var.ridx; // 在寄存器(数据栈)的位置, 我不确定是不是相对于 func 的位置
         up->kind = getlocalvardesc(prev, v->u.var.vidx)->vd.kind;
         lua_assert(eqstr(name, getlocalvardesc(prev, v->u.var.vidx)->vd.name));
     } else {
@@ -963,7 +963,7 @@ static void primaryexp(LexState *ls, expdesc *v) {
     }
 }
 
-/// @brief 后缀的表达式 , 不知道什么意思
+/// @brief 后缀的表达式, 不知道什么意思
 static void suffixedexp(LexState *ls, expdesc *v) {
     /* suffixedexp -> primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
     FuncState *fs = ls->fs;
@@ -1769,7 +1769,7 @@ static void statement(LexState *ls) {
 static void mainfunc(LexState *ls, FuncState *fs) {
     BlockCnt bl;
     Upvaldesc *env;
-    open_func(ls, fs, &bl); // 如果从这里入 open_func , 那么 ls->fs 为 NULL
+    open_func(ls, fs, &bl); // 如果从这里入 open_func, 那么 ls->fs 为 NULL
     setvararg(fs, 0);       /* main function is always declared vararg */
     env = allocupvalue(fs); /* ...set environment upvalue */
     env->instack = 1;

@@ -634,7 +634,7 @@ typedef struct LoadF {
     char buff[BUFSIZ]; /* area for reading file */
 } LoadF;
 
-/// @brief 用于从文件中读取 Lua 脚本的读取器函数 , 就是 lua_Reader 的实现
+/// @brief 用于从文件中读取 Lua 脚本的读取器函数, 就是 lua_Reader 的实现
 /// @param L
 /// @param ud
 /// @param size
@@ -685,7 +685,7 @@ static int skipBOM(LoadF *lf) {
 ** a first-line comment).
 */
 static int skipcomment(LoadF *lf, int *cp) {
-    int c = *cp = skipBOM(lf); // 就是简单看看第一个是字符是不是 BOM , 如果是 ,就是返回下一个字符 , 不是就返回第一个字符
+    int c = *cp = skipBOM(lf); // 就是简单看看第一个是字符是不是 BOM, 如果是,就是返回下一个字符, 不是就返回第一个字符
     if (c == '#') {            /* first line is a comment (Unix exec. file)? */
         do {                   /* skip first line */
             c = getc(lf->f);
@@ -709,7 +709,7 @@ LUALIB_API int luaL_loadfilex(lua_State *L, const char *filename, const char *mo
         lf.f = fopen(filename, "r");
         if (lf.f == NULL) return errfile(L, "open", fnameindex);
     }
-    if (skipcomment(&lf, &c))                 /* 跳过 BOM 与 Unix 开头(如果有) , 把第一个有用字符入到 c 中 ; read initial portion */
+    if (skipcomment(&lf, &c))                 /* 跳过 BOM 与 Unix 开头(如果有), 把第一个有用字符入到 c 中 ; read initial portion */
         lf.buff[lf.n++] = '\n';               /* add line to correct line numbers */
     if (c == LUA_SIGNATURE[0] && filename) {  /* binary file? */
         lf.f = freopen(filename, "rb", lf.f); /* reopen in binary mode */
@@ -826,7 +826,7 @@ LUALIB_API const char *luaL_tolstring(lua_State *L, int idx, size_t *len) {
 ** set functions from list 'l' into table at top - 'nup'; each
 ** function gets the 'nup' elements at the top as upvalues.
 ** Returns with only the table at the stack.
-** 把 l 中的函数加到栈顶的表中 , 不会改变栈顶
+** 把 l 中的函数加到栈顶的表中, 不会改变栈顶
 */
 LUALIB_API void luaL_setfuncs(lua_State *L, const luaL_Reg *l, int nup) {
     luaL_checkstack(L, nup, "too many upvalues");
@@ -910,7 +910,7 @@ LUALIB_API const char *luaL_gsub(lua_State *L, const char *s, const char *p, con
  * @param ud void* 可以接收任何类型指针 不用
  * @param ptr
  * @param osize 内存块的原始大小 这里为不使用
- * @param nsize 内存块新的大小 如果 nsize 为 0 , 释放 ptr
+ * @param nsize 内存块新的大小 如果 nsize 为 0, 释放 ptr
  * @return void*
  */
 static void *l_alloc(void *ud, void *ptr, size_t osize, size_t nsize) {

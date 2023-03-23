@@ -736,7 +736,7 @@ lua_Integer luaV_shiftl(lua_Integer x, lua_Integer y) {
 /// @param L Lua 状态机
 /// @param p 函数原型指针
 /// @param encup 一个指向父函数的 upvalue 数组的指针
-/// @param base 当前函数的基址 , 就是 func + 1
+/// @param base 当前函数的基址, 就是 func + 1
 /// @param ra 返回地址的位置
 static void pushclosure(lua_State *L, Proto *p, UpVal **encup, StkId base, StkId ra) {
     int nup = p->sizeupvalues;   // 取函数原型的 upvalue 数量
