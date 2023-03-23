@@ -942,10 +942,10 @@ static void warnfoff(void *ud, const char *message, int tocont);
 static void warnfon(void *ud, const char *message, int tocont);
 static void warnfcont(void *ud, const char *message, int tocont);
 
-/*
-** Check whether message is a control message. If so, execute the
-** control or ignore it if unknown.
-*/
+/// @brief Check whether message is a control message. If so, execute the control or ignore it if unknown.
+/// @param message 要警告的消息
+/// @param tocont 为 0, 直接返回, 为 1 时, 如果 message 的第一个字符不是 '@', 还是直接返回
+/// @return
 static int checkcontrol(lua_State *L, const char *message, int tocont) {
     if (tocont || *(message++) != '@') /* not a control message? */
         return 0;
@@ -958,12 +958,16 @@ static int checkcontrol(lua_State *L, const char *message, int tocont) {
     }
 }
 
+/// @brief
+/// @param ud
+/// @param message
+/// @param tocont
 static void warnfoff(void *ud, const char *message, int tocont) { checkcontrol((lua_State *)ud, message, tocont); }
 
-/*
-** Writes the message and handle 'tocont', finishing the message
-** if needed and setting the next warn function.
-*/
+/// @brief Writes the message and handle 'tocont', finishing the message if needed and setting the next warn function.
+/// @param ud 
+/// @param message 
+/// @param tocont 
 static void warnfcont(void *ud, const char *message, int tocont) {
     lua_State *L = (lua_State *)ud;
     lua_writestringerror("%s", message);  /* write message */
@@ -975,6 +979,10 @@ static void warnfcont(void *ud, const char *message, int tocont) {
     }
 }
 
+/// @brief 如果 tocont 为 1, 且 message 的第一个字符不是 '@',
+/// @param ud lua_State
+/// @param message 要警告的消息
+/// @param tocont 为 0, 直接返回, 为 1 时, 如果 message 的第一个字符不是 '@', 还是直接返回
 static void warnfon(void *ud, const char *message, int tocont) {
     if (checkcontrol((lua_State *)ud, message, tocont)) /* control message? */
         return;                                         /* nothing else to be done */

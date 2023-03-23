@@ -564,11 +564,9 @@ LUA_API const char *lua_pushfstring(lua_State *L, const char *fmt, ...) {
     return ret;
 }
 
-/// @brief 新的C闭包
-/// @param L
+/// @brief 如果 n 为 0, 就一个 light C function, 否则是一个 c 闭包, 且栈顶的 n 个元素就是闭包的 upvalue, 最后这些 upvalues 要出栈, 栈顶是新生成的闭包
 /// @param fn a C function that will be the underlying implementation of the closure
 /// @param n the number of upvalues for the closure
-/// @return
 LUA_API void lua_pushcclosure(lua_State *L, lua_CFunction fn, int n) {
     lua_lock(L);
     if (n == 0) {
@@ -582,7 +580,7 @@ LUA_API void lua_pushcclosure(lua_State *L, lua_CFunction fn, int n) {
         cl->f = fn;
         L->top -= n;
         while (n--) {
-            setobj2n(L, &cl->upvalue[n], s2v(L->top + n));
+            setobj2n(L, &cl->upvalue[n], s2v(L->top + n)); // 这里是 c 参数的顺序
             /* does not need barrier because closure is white */
             lua_assert(iswhite(cl));
         }
@@ -1360,6 +1358,9 @@ LUA_API void lua_setallocf(lua_State *L, lua_Alloc f, void *ud) {
     lua_unlock(L);
 }
 
+/// @brief 设置 global_State 的 warnf , 用于 lua_warning 调用时, 来调用 f
+/// @param f 警告函数
+/// @param ud 警告函数用来的辅助类型, 这就是 L 本身
 void lua_setwarnf(lua_State *L, lua_WarnFunction f, void *ud) {
     lua_lock(L);
     G(L)->ud_warn = ud;
@@ -1367,6 +1368,10 @@ void lua_setwarnf(lua_State *L, lua_WarnFunction f, void *ud) {
     lua_unlock(L);
 }
 
+/// @brief
+/// @param L
+/// @param msg
+/// @param tocont
 void lua_warning(lua_State *L, const char *msg, int tocont) {
     lua_lock(L);
     luaE_warning(L, msg, tocont);

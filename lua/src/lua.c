@@ -93,10 +93,9 @@ static void print_usage(const char *badoption) {
                          progname);
 }
 
-/*
-** Prints an error message, adding the program name in front of it
-** (if present)
-*/
+/// @brief Prints an error message, adding the program name in front of it (if present)
+/// @param pname 程序的名字
+/// @param msg 错误的信息
 static void l_message(const char *pname, const char *msg) {
     if (pname) lua_writestringerror("%s: ", pname);
     lua_writestringerror("%s\n", msg);

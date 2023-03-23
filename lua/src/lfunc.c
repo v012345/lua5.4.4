@@ -22,6 +22,9 @@
 #include "lobject.h"
 #include "lstate.h"
 
+/// @brief 生成一个 c 闭包, 由 GC 管理(分配所需的内存空间)
+/// @param nupvals 闭包使用 upvalue 的个数
+/// @return CClosure *
 CClosure *luaF_newCclosure(lua_State *L, int nupvals) {
     GCObject *o = luaC_newobj(L, LUA_VCCL, sizeCclosure(nupvals));
     CClosure *c = gco2ccl(o);
