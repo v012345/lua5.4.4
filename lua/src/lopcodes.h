@@ -71,12 +71,12 @@ enum OpMode {
 #define L_INTHASBITS(b) ((UINT_MAX >> ((b)-1)) >= 1)
 
 #if L_INTHASBITS(SIZE_Bx)
-#define MAXARG_Bx ((1 << SIZE_Bx) - 1)
+#define MAXARG_Bx ((1 << SIZE_Bx) - 1) // 17 位 1
 #else
 #define MAXARG_Bx MAX_INT
 #endif
 
-#define OFFSET_sBx (MAXARG_Bx >> 1) /* 'sBx' is signed */
+#define OFFSET_sBx (MAXARG_Bx >> 1) /* 16 位 1; 'sBx' is signed */
 
 #if L_INTHASBITS(SIZE_Ax)
 #define MAXARG_Ax ((1 << SIZE_Ax) - 1)
@@ -114,6 +114,7 @@ enum OpMode {
 #define GET_OPCODE(i) (cast(OpCode, ((i) >> POS_OP) & MASK1(SIZE_OP, 0)))
 #define SET_OPCODE(i, o) ((i) = (((i)&MASK0(SIZE_OP, POS_OP)) | ((cast(Instruction, o) << POS_OP) & MASK1(SIZE_OP, POS_OP))))
 
+// 检查指令 i 的低 3 位是否与 m 一致
 #define checkopm(i, m) (getOpMode(GET_OPCODE(i)) == m)
 
 // 通过 掩码的方式, 取出指令 i 中的数据
@@ -358,6 +359,7 @@ typedef enum {
 
 LUAI_DDEC(const lu_byte luaP_opmodes[NUM_OPCODES];)
 
+// 通过 OpCode 拿到对应指令之后, 取指令的低 3 位(就是 OpMode)
 #define getOpMode(m) (cast(enum OpMode, luaP_opmodes[m] & 7))
 #define testAMode(m) (luaP_opmodes[m] & (1 << 3))
 #define testTMode(m) (luaP_opmodes[m] & (1 << 4))
@@ -369,7 +371,7 @@ LUAI_DDEC(const lu_byte luaP_opmodes[NUM_OPCODES];)
 /* "out top" (set top for next instruction) */
 #define isOT(i) ((testOTMode(GET_OPCODE(i)) && GETARG_C(i) == 0) || GET_OPCODE(i) == OP_TAILCALL)
 
-/* "in top" (uses top from previous instruction) */
+/* 测试指令 i 中低 7 位中第 5 位的值 与 i 的 B 位置为 0; "in top" (uses top from previous instruction) */
 #define isIT(i) (testITMode(GET_OPCODE(i)) && GETARG_B(i) == 0)
 
 #define opmode(mm, ot, it, t, a, m) (((mm) << 7) | ((ot) << 6) | ((it) << 5) | ((t) << 4) | ((a) << 3) | (m))

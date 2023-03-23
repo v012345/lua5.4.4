@@ -10,7 +10,7 @@
 
 #include "lopcodes.h"
 
-/* ORDER OP */
+/* 与 OpCode 枚举是一一对应的; ORDER OP */
 LUAI_DDEF const lu_byte luaP_opmodes[NUM_OPCODES] = {
     /*     MM OT IT T  A  mode       opcode  */
     opmode(0, 0, 0, 0, 1, iABC),  /* OP_MOVE */
