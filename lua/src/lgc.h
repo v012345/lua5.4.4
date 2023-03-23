@@ -26,15 +26,15 @@
 /*
 ** Possible states of the Garbage Collector
 */
-#define GCSpropagate 0
-#define GCSenteratomic 1
-#define GCSatomic 2
-#define GCSswpallgc 3
-#define GCSswpfinobj 4
-#define GCSswptobefnz 5
-#define GCSswpend 6
-#define GCScallfin 7
-#define GCSpause 8
+#define GCSpropagate 0   // 标记阶段, 遍历所有可达对象并标记为不可回收
+#define GCSenteratomic 1 // 进入原子阶段,暂停所有 Lua 线程并开始处理原子操作
+#define GCSatomic 2      // 原子阶段, 执行原子操作
+#define GCSswpallgc 3    // 扫描阶段, 遍历所有对象并将未被标记为不可回收的对象从内存中移除
+#define GCSswpfinobj 4   // 扫描阶段, 处理一些特殊的对象(比如 userdata), 并将未被标记为不可回收的对象从内存中移除
+#define GCSswptobefnz 5  // 扫描阶段, 将待终结的对象移动到一个链表中
+#define GCSswpend 6      // 扫描阶段, 结束阶段,清空待终结链表
+#define GCScallfin 7     // 调用终结器阶段,调用所有待终结对象的终结器函数
+#define GCSpause 8       // 暂停状态, 等待下一次垃圾回收
 
 #define issweepphase(g) (GCSswpallgc <= (g)->gcstate && (g)->gcstate <= GCSswpend)
 
@@ -53,12 +53,12 @@
 */
 #define resetbits(x, m) ((x) &= cast_byte(~(m)))
 #define setbits(x, m) ((x) |= (m))
-#define testbits(x, m) ((x) & (m))
+#define testbits(x, m) ((x) & (m))                   // x 与 m 按位与
 #define bitmask(b) (1 << (b))                        // 在 b 位置上放一个 1
 #define bit2mask(b1, b2) (bitmask(b1) | bitmask(b2)) // 在 b1 与 b2 的位置的放上 1
 #define l_setbit(x, b) setbits(x, bitmask(b))
 #define resetbit(x, b) resetbits(x, bitmask(b))
-#define testbit(x, b) testbits(x, bitmask(b))
+#define testbit(x, b) testbits(x, bitmask(b)) // x 的 b 位的比特值
 
 /*
 ** Layout for bit use in 'marked' field. First three bits are
@@ -74,8 +74,8 @@
 
 #define WHITEBITS bit2mask(WHITE0BIT, WHITE1BIT) // 就是白(包括 白0 与 白1); 在 3 与 4 的位置上放上 1
 
-#define iswhite(x) testbits((x)->marked, WHITEBITS)
-#define isblack(x) testbit((x)->marked, BLACKBIT)
+#define iswhite(x) testbits((x)->marked, WHITEBITS) // 对象的 marked 的第 3 和第 4 位的比特值
+#define isblack(x) testbit((x)->marked, BLACKBIT)   // 对象的 marked 的第 BLACKBIT(5) 位的比特值
 #define isgray(x) /* neither white nor black */ (!testbits((x)->marked, WHITEBITS | bitmask(BLACKBIT)))
 
 #define tofinalize(x) testbit((x)->marked, FINALIZEDBIT)
@@ -163,6 +163,7 @@
 
 #define luaC_barrierback(L, p, v) ((iscollectable(v) && isblack(p) && iswhite(gcvalue(v))) ? luaC_barrierback_(L, p) : cast_void(0))
 
+// 如何 p 是黑的, o 是白的, 那么
 #define luaC_objbarrier(L, p, o) ((isblack(p) && iswhite(o)) ? luaC_barrier_(L, obj2gco(p), obj2gco(o)) : cast_void(0))
 
 LUAI_FUNC void luaC_fix(lua_State *L, GCObject *o);

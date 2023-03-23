@@ -226,6 +226,7 @@ typedef struct luaL_Stream {
 
 /* print an error message */
 #if !defined(lua_writestringerror)
+// 把错误信息写到控制台, 而且是立即输出
 #define lua_writestringerror(s, p) (fprintf(stderr, (s), (p)), fflush(stderr))
 #endif
 

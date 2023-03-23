@@ -924,6 +924,7 @@ static void *l_alloc(void *ud, void *ptr, size_t osize, size_t nsize) {
         return realloc(ptr, nsize);
 }
 
+/// @brief 发生致命错误时调用, 在控制台立即输出错误
 static int panic(lua_State *L) {
     const char *msg = lua_tostring(L, -1);
     if (msg == NULL) msg = "error object is not a string";

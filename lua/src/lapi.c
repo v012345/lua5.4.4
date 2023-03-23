@@ -2,7 +2,6 @@
 ** $Id: lapi.c $
 ** Lua API
 ** See Copyright Notice in lua.h
-** C 语言接口
 */
 
 #define lapi_c
@@ -127,6 +126,7 @@ LUA_API void lua_xmove(lua_State *from, lua_State *to, int n) {
     lua_unlock(to);
 }
 
+/// @brief action on panic, 当 lua 发生致命错误时调用 panicf
 LUA_API lua_CFunction lua_atpanic(lua_State *L, lua_CFunction panicf) {
     lua_CFunction old;
     lua_lock(L);
