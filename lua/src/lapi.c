@@ -45,13 +45,12 @@ const char lua_ident[] = "$LuaVersion: " LUA_COPYRIGHT " $"
 /* test for upvalue */
 #define isupvalue(i) ((i) < LUA_REGISTRYINDEX)
 
-/*
-** Convert an acceptable index to a pointer to its respective value.
-** Non-valid indices return the special nil value 'G(L)->nilvalue'.
-*/
+/// @brief Convert an acceptable index to a pointer to its respective value. Non-valid indices return the special nil value 'G(L)->nilvalue'.
+/// @param idx
+/// @return TValue *
 static TValue *index2value(lua_State *L, int idx) {
-    CallInfo *ci = L->ci;
-    if (idx > 0) {
+    CallInfo *ci = L->ci; // 取到当前的 CallInfo
+    if (idx > 0) {        // 从当前 CallInfo 对应栈的栈底向上数
         StkId o = ci->func + idx;
         api_check(L, idx <= L->ci->top - (ci->func + 1), "unacceptable index");
         if (o >= L->top)
@@ -1063,12 +1062,8 @@ struct CallS { /* data to 'f_call' */
     int nresults;
 };
 
-/**
- * @brief 通过调用 luaD_callnoyield 来执行 Lua 函数或 C 函数
- *
- * @param L
- * @param ud
- */
+/// @brief 通过调用 luaD_callnoyield 来执行 Lua 函数或 C 函数
+/// @param ud
 static void f_call(lua_State *L, void *ud) {
     struct CallS *c = cast(struct CallS *, ud);
     luaD_callnoyield(L, c->func, c->nresults);
