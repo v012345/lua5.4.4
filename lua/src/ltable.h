@@ -9,6 +9,7 @@
 
 #include "lobject.h"
 
+// 拿到表 node 数组中的 i 索引的元素的地址
 #define gnode(t, i) (&(t)->node[i])
 
 ///@brief 返回 Node 的 i_val (TValue), 就是 Node 中的值

@@ -618,7 +618,6 @@ l_sinline int auxgetstr(lua_State *L, const TValue *t, const char *k) {
     if (luaV_fastget(L, t, str, slot, luaH_getstr)) {
         // 把生成的 slot 拉到 现在的 L->top 之后
         setobj2s(L, L->top, slot);
-        // 把 L->top 向到动一下, 指向上在的 slot
         api_incr_top(L);
     } else {
         setsvalue2s(L, L->top, str);

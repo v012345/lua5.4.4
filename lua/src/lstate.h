@@ -358,7 +358,7 @@ union GCUnion {
 #define gco2ccl(o) check_exp((o)->tt == LUA_VCCL, &((cast_u(o))->cl.c))
 /// @brief gc对象转化为闭包
 #define gco2cl(o) check_exp(novariant((o)->tt) == LUA_TFUNCTION, &((cast_u(o))->cl))
-/// @brief gc对象转化为表
+// gc对象转化为表
 #define gco2t(o) check_exp((o)->tt == LUA_VTABLE, &((cast_u(o))->h))
 /// @brief gc对象转化为函数原型
 #define gco2p(o) check_exp((o)->tt == LUA_VPROTO, &((cast_u(o))->p))

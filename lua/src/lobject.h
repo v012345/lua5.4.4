@@ -783,13 +783,11 @@ typedef struct Table {
 
 /* }================================================================== */
 
-/*
-** 'module' operation for hashing (size is always a power of 2)
-** 这里由于 size 是 2 的幂次, 所以可以使用 size - 1 与 s 做按位与来快速求余数
-*/
+// s 对 size 的余数, 这里由于 size 是 2 的幂次, 所以可以使用 size - 1 与 s 做按位与来快速求余数; 'module' operation for hashing (size is always a power of 2)
 #define lmod(s, size) (check_exp((size & (size - 1)) == 0, (cast_int((s) & ((size)-1)))))
-
+// 生成一个 2 的 x 幂的数
 #define twoto(x) (1 << (x))
+// 一个表的 hash 部分的大小( 2 的 lsizenode 次)
 #define sizenode(t) (twoto((t)->lsizenode))
 
 /* size of buffer for 'luaO_utf8esc' function */
