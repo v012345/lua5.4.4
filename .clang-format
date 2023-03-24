@@ -8,12 +8,24 @@ ColumnLimit: 200
 UseTab: Never
 # 大括号是否单独一行
 BraceWrapping:
+  AfterStruct: false
   AfterClass: false
+  AfterEnum: false
   AfterFunction: false
+  AfterControlStatement: false
+  AfterNamespace: false
+  AfterUnion: false
   SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+  AfterLambda: false
 # 括号内的空格
 SpaceInParentheses: false
 # while 或 if 后面只有一条语句时，将这条语句与 while 或 if 在同一行显示
 AllowShortIfStatementsOnASingleLine: true
 AllowShortLoopsOnASingleLine: true
 IndentCaseLabels: true
+; BreakBeforeBraces: Stroustrup
+
+
+ContinuationIndentWidth: 8

@@ -27,6 +27,7 @@ typedef struct luaL_Buffer luaL_Buffer;
 /* key, in the registry, for table of preloaded loaders */
 #define LUA_PRELOAD_TABLE "_PRELOAD"
 
+/// @brief 注册 lua 库时, 使用的元素,
 typedef struct luaL_Reg {
     const char *name;
     lua_CFunction func;
