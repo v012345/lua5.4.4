@@ -844,10 +844,10 @@ LUALIB_API void luaL_setfuncs(lua_State *L, const luaL_Reg *l, int nup) {
     lua_pop(L, nup); /* remove upvalues */
 }
 
-/*
-** ensure that stack[idx][fname] has a table and push that table
-** into the stack
-*/
+/// @brief ensure that stack[idx][fname] has a table and push that table into the stack
+/// @param idx
+/// @param fname
+/// @return int
 LUALIB_API int luaL_getsubtable(lua_State *L, int idx, const char *fname) {
     if (lua_getfield(L, idx, fname) == LUA_TTABLE)
         return 1; /* table already there */
@@ -965,9 +965,9 @@ static int checkcontrol(lua_State *L, const char *message, int tocont) {
 static void warnfoff(void *ud, const char *message, int tocont) { checkcontrol((lua_State *)ud, message, tocont); }
 
 /// @brief Writes the message and handle 'tocont', finishing the message if needed and setting the next warn function.
-/// @param ud 
-/// @param message 
-/// @param tocont 
+/// @param ud
+/// @param message
+/// @param tocont
 static void warnfcont(void *ud, const char *message, int tocont) {
     lua_State *L = (lua_State *)ud;
     lua_writestringerror("%s", message);  /* write message */

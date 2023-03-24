@@ -671,10 +671,7 @@ typedef union Closure {
 
 #define ttistable(o) checktag((o), ctb(LUA_VTABLE))
 
-/**
- * @brief 简单理解就是把 TValue 中的 value 地址拿出来 当做一个 Table 的指针
- *
- */
+// 简单理解就是把 TValue 中的 value 地址拿出来 当做一个 Table 的指针
 #define hvalue(o) check_exp(ttistable(o), gco2t(val_(o).gc))
 
 #define sethvalue(L, obj, x)                                                                                                                                                                           \

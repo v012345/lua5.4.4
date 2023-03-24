@@ -46,7 +46,7 @@ const char lua_ident[] = "$LuaVersion: " LUA_COPYRIGHT " $"
 #define isupvalue(i) ((i) < LUA_REGISTRYINDEX)
 
 /// @brief Convert an acceptable index to a pointer to its respective value. Non-valid indices return the special nil value 'G(L)->nilvalue'.
-/// @param idx
+/// @param idx 基于当前 CallInfo 的 func 为底的 idx
 /// @return TValue *
 static TValue *index2value(lua_State *L, int idx) {
     CallInfo *ci = L->ci; // 取到当前的 CallInfo
@@ -619,14 +619,8 @@ LUA_API int lua_pushthread(lua_State *L) {
 ** get functions (Lua -> stack)
 */
 
-/**
- * @brief 把在 表 t 中找到的值放到栈顶
- *
- * @param L 状态机
- * @param t 表
- * @param k key
- * @return l_sinline
- */
+/// @brief 把在 表 t 中找到的值放到栈顶
+/// @return 数据的类型
 l_sinline int auxgetstr(lua_State *L, const TValue *t, const char *k) {
     const TValue *slot;
     TString *str = luaS_new(L, k);
@@ -679,14 +673,11 @@ LUA_API int lua_gettable(lua_State *L, int idx) {
     return ttype(s2v(L->top - 1));
 }
 
-/**
- * @brief 主要针对表的, L[idx] 如果是一个关联数组(php叫法), 那么 就把 L[idx] 这个表的 k 对应的 value 表到栈顶
- *
- * @param L
- * @param idx
- * @param k
- * @return LUA_API
- */
+/// @brief 主要针对表的, L[idx] 如果是一个关联数组(php叫法), 那么 就把 L[idx] 这个表的 k 对应的 value 表到栈顶
+/// @param L
+/// @param idx
+/// @param k
+/// @return LUA_API
 LUA_API int lua_getfield(lua_State *L, int idx, const char *k) {
     lua_lock(L);
     return auxgetstr(L, index2value(L, idx), k);
