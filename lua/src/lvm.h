@@ -57,37 +57,32 @@ typedef enum {
 
 #define luaV_rawequalobj(t1, t2) luaV_equalobj(NULL, t1, t2)
 
-/*
-** fast track for 'gettable': if 't' is a table and 't[k]' is present,
-** return 1 with 'slot' pointing to 't[k]' (position of final result).
-** Otherwise, return 0 (meaning it will have to check metamethod)
-** with 'slot' pointing to an empty 't[k]' (if 't' is a table) or NULL
-** (otherwise). 'f' is the raw get function to use.
-** 先检查 参数 t 是不是一个表 如果不是表,  slot 就是一上 空, 同时逗号表达式返回 0 .
-** 如果 t 是一个表, 那么 slot 为传进来的函数调用的返回值, 之后返回 slot 是否不空
-** 这个 f 基本上就是去 表 t 中拿到 k 对应的 value .
-*/
-#define luaV_fastget(L, t, k, slot, f)                                                                                                                                             \
-    (!ttistable(t) ? (slot = NULL, 0)         /* not a table; 'slot' is NULL and result is 0 */                                                                                    \
-                   : (slot = f(hvalue(t), k), /* else, do raw access */                                                                                                            \
+/// @brief fast track for 'gettable': if 't' is a table and 't[k]' is present,
+/// return 1 with 'slot' pointing to 't[k]' (position of final result).
+/// Otherwise, return 0 (meaning it will have to check metamethod)
+/// with 'slot' pointing to an empty 't[k]' (if 't' is a table) or NULL
+/// (otherwise). 'f' is the raw get function to use.
+#define luaV_fastget(L, t, k, slot, f)                                                                                                                                                                 \
+    (!ttistable(t) ? (slot = NULL, 0)         /* not a table; 'slot' is NULL and result is 0 */                                                                                                        \
+                   : (slot = f(hvalue(t), k), /* else, do raw access */                                                                                                                                \
                       !isempty(slot)))        /* result not empty? */
 
 /*
 ** Special case of 'luaV_fastget' for integers, inlining the fast case
 ** of 'luaH_getint'.
 */
-#define luaV_fastgeti(L, t, k, slot)                                                                                                                                               \
-    (!ttistable(t) ? (slot = NULL, 0) /* not a table; 'slot' is NULL and result is 0 */                                                                                            \
+#define luaV_fastgeti(L, t, k, slot)                                                                                                                                                                   \
+    (!ttistable(t) ? (slot = NULL, 0)                                                                                                         /* not a table; 'slot' is NULL and result is 0 */        \
                    : (slot = (l_castS2U(k) - 1u < hvalue(t)->alimit) ? &hvalue(t)->array[k - 1] : luaH_getint(hvalue(t), k), !isempty(slot))) /* result not empty? */
 
 /*
 ** Finish a fast set operation (when fast get succeeds). In that case,
 ** 'slot' points to the place to put the value.
 */
-#define luaV_finishfastset(L, t, slot, v)                                                                                                                                          \
-    {                                                                                                                                                                              \
-        setobj2t(L, cast(TValue *, slot), v);                                                                                                                                      \
-        luaC_barrierback(L, gcvalue(t), v);                                                                                                                                        \
+#define luaV_finishfastset(L, t, slot, v)                                                                                                                                                              \
+    {                                                                                                                                                                                                  \
+        setobj2t(L, cast(TValue *, slot), v);                                                                                                                                                          \
+        luaC_barrierback(L, gcvalue(t), v);                                                                                                                                                            \
     }
 
 LUAI_FUNC int luaV_equalobj(lua_State *L, const TValue *t1, const TValue *t2);

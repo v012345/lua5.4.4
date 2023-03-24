@@ -145,20 +145,11 @@ static void *tryagain(lua_State *L, void *block, size_t osize, size_t nsize) {
         return NULL; /* cannot free any memory without a full state */
 }
 
-/**
- * @brief Generic allocation routine. 分配新内存, 释放不用的内存, 扩展不够用的内存
- *
- * @param L
- * @param block
- * @param osize
- * @param nsize
- * @return void*
- */
+/// @brief Generic allocation routine.
 void *luaM_realloc_(lua_State *L, void *block, size_t osize, size_t nsize) {
     void *newblock;
     global_State *g = G(L);
     lua_assert((osize == 0) == (block == NULL));
-    // 使用 global_State 上的 frealloc (内存分配器, 就是 luaL_newstate 时传入的官方默认函数) 管理内存
     newblock = firsttry(g, block, osize, nsize);
     if (l_unlikely(newblock == NULL && nsize > 0)) {
         newblock = tryagain(L, block, osize, nsize);

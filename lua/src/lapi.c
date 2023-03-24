@@ -75,8 +75,7 @@ static TValue *index2value(lua_State *L, int idx) {
     }
 }
 
-/// @brief 如果 idx 是负数, 那么就是从栈顶数, -1 就是 top 下面那个 . 如果 idx 是正数, 那么就从 L->ci->func 开始数, 1 就是 L->ci->func + 1;
-/// Convert a valid actual index (not a pseudo-index) to its address.
+/// @brief Convert a valid actual index (not a pseudo-index) to its address.
 l_sinline StkId index2stack(lua_State *L, int idx) {
     CallInfo *ci = L->ci;
     if (idx > 0) {
@@ -90,6 +89,7 @@ l_sinline StkId index2stack(lua_State *L, int idx) {
     }
 }
 
+/// @brief 检查栈还有没有 n 个空间, 如果没有, 看能不能再扩展 n 个空间
 LUA_API int lua_checkstack(lua_State *L, int n) {
     int res;
     CallInfo *ci;
@@ -110,6 +110,7 @@ LUA_API int lua_checkstack(lua_State *L, int n) {
     return res;
 }
 
+/// @brief 剪切走
 LUA_API void lua_xmove(lua_State *from, lua_State *to, int n) {
     int i;
     if (from == to) return;
@@ -144,23 +145,13 @@ LUA_API lua_Number lua_version(lua_State *L) {
 ** basic stack manipulation
 */
 
-/*
-** convert an acceptable stack index into an absolute index
-*/
+/// @brief convert an acceptable stack index into an absolute index
 LUA_API int lua_absindex(lua_State *L, int idx) { return (idx > 0 || ispseudo(idx)) ? idx : cast_int(L->top - L->ci->func) + idx; }
 
-/// @brief 返回参数的个数
-/// @param L
-/// @return int
+/// @brief 返回当前 CallInfo 的栈顶 idx
 LUA_API int lua_gettop(lua_State *L) { return cast_int(L->top - (L->ci->func + 1)); }
 
-/**
- * @brief 参数允许传入任何可接受的索引以及 0 . 它将把堆栈的栈顶设为这个索引. 如果新的栈顶比原来的大,超出部分的新元素将被填为 nil . 如果 index 为 0,把栈上所有元素移除.
- *
- * @param L
- * @param idx
- * @return LUA_API
- */
+/// @brief 参数允许传入任何可接受的索引以及 0 . 它将把堆栈的栈顶设为这个索引. 如果新的栈顶比原来的大,超出部分的新元素将被填为 nil . 如果 index 为 0,把栈上所有元素移除.
 LUA_API void lua_settop(lua_State *L, int idx) {
     CallInfo *ci;
     StkId func, newtop;
@@ -822,13 +813,7 @@ LUA_API int lua_getiuservalue(lua_State *L, int idx, int n) {
 ** set functions (stack -> Lua)
 */
 
-/**
- * @brief t[k] = value at the top of the stack (where 'k' is a string),
- *
- * @param L
- * @param t
- * @param k
- */
+/// @brief t[k] = value at the top of the stack (where 'k' is a string),
 static void auxsetstr(lua_State *L, const TValue *t, const char *k) {
     const TValue *slot;
     TString *str = luaS_new(L, k);

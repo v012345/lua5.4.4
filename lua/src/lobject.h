@@ -574,9 +574,9 @@ typedef struct Proto {
 #define LUA_VUPVAL makevariant(LUA_TUPVAL, 0)
 
 /* Variant tags for functions */
-#define LUA_VLCL makevariant(LUA_TFUNCTION, 0) /* Lua closure */
-#define LUA_VLCF makevariant(LUA_TFUNCTION, 1) /* light C function */
-#define LUA_VCCL makevariant(LUA_TFUNCTION, 2) /* C closure */
+#define LUA_VLCL makevariant(LUA_TFUNCTION, 0) /* 0000 1010; Lua closure */
+#define LUA_VLCF makevariant(LUA_TFUNCTION, 1) /* 0001 1010; light C function */
+#define LUA_VCCL makevariant(LUA_TFUNCTION, 2) /* 0010 1010; C closure */
 
 #define ttisfunction(o) checktype(o, LUA_TFUNCTION)
 #define ttisLclosure(o) checktag((o), ctb(LUA_VLCL))
