@@ -84,8 +84,8 @@ typedef struct LexState {
     int current;          /* 当前字符（以字符整数的形式存储） current character (charint) */
     int linenumber;       /* 输入行数计数器 input line counter */
     int lastline;         /* 上一个标记的行数 line of last token 'consumed' */
-    Token t;              /* 当前标记 current token */
-    Token lookahead;      /* 向前看的标记 look ahead token */
+    Token t;              /* current token */
+    Token lookahead;      /* look ahead token */
     struct FuncState *fs; /* 当前函数（解析器） current function (parser) */
     struct lua_State *L;  // Lua 状态机
     ZIO *z;               /* 输入流, 指向 SParser 中的 z ; input stream */

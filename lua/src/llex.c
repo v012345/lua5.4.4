@@ -42,8 +42,6 @@ static const char *const luaX_tokens[] = {
 static l_noret lexerror(LexState *ls, const char *msg, int token);
 
 /// @brief 把 c 存放到 ls->buff 中 ; 会自动维护 ls->buff 的大小
-/// @param ls LexState
-/// @param c 一个字符
 static void save(LexState *ls, int c) {
     Mbuffer *b = ls->buff;
     if (luaZ_bufflen(b) + 1 > luaZ_sizebuffer(b)) {
@@ -56,7 +54,6 @@ static void save(LexState *ls, int c) {
 }
 
 /// @brief 初始化词法分析要用保留字, 直接内部化, 并且不让 gc 回收
-/// @param L
 void luaX_init(lua_State *L) {
     int i;
     TString *e = luaS_newliteral(L, LUA_ENV); /* create env name */
@@ -68,6 +65,7 @@ void luaX_init(lua_State *L) {
     }
 }
 
+/// @brief 返回 token 对应的字符串, 为什么要改变栈顶?
 const char *luaX_token2str(LexState *ls, int token) {
     if (token < FIRST_RESERVED) { /* single-byte symbols? */
         if (lisprint(token))
@@ -83,6 +81,7 @@ const char *luaX_token2str(LexState *ls, int token) {
     }
 }
 
+/// @brief 发生错误时使用
 static const char *txtToken(LexState *ls, int token) {
     switch (token) {
         case TK_NAME:
@@ -141,11 +140,6 @@ static void inclinenumber(LexState *ls) {
 }
 
 /// @brief 词法分析器（LexState结构体）的各个字段进行初始化
-/// @param L
-/// @param ls
-/// @param z
-/// @param source
-/// @param firstchar
 void luaX_setinput(lua_State *L, LexState *ls, ZIO *z, TString *source, int firstchar) {
     ls->t.token = 0;
     ls->L = L;
@@ -438,8 +432,6 @@ static void read_string(LexState *ls, int del, SemInfo *seminfo) {
 }
 
 /// @brief 返回词法解析到的类型
-/// @param ls LexState
-/// @param seminfo SemInfo
 /// @return int 如果是单字 就是对应的 ASCII 码, 如果是其他 就返回 RESERVED 枚举里的值
 static int llex(LexState *ls, SemInfo *seminfo) {
     luaZ_resetbuffer(ls->buff);

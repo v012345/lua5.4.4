@@ -40,6 +40,7 @@ typedef struct Mbuffer {
 #define luaZ_bufflen(buff) ((buff)->n)
 
 #define luaZ_buffremove(buff, i) ((buff)->n -= (i))
+// 把 buff 中已存的字符清空
 #define luaZ_resetbuffer(buff) ((buff)->n = 0)
 
 #define luaZ_resizebuffer(L, buff, size) ((buff)->buffer = luaM_reallocvchar(L, (buff)->buffer, (buff)->buffsize, size), (buff)->buffsize = size)
