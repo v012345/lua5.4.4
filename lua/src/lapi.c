@@ -664,10 +664,6 @@ LUA_API int lua_gettable(lua_State *L, int idx) {
 }
 
 /// @brief 主要针对表的, L[idx] 如果是一个关联数组(php叫法), 那么 就把 L[idx] 这个表的 k 对应的 value 表到栈顶
-/// @param L
-/// @param idx
-/// @param k
-/// @return LUA_API
 LUA_API int lua_getfield(lua_State *L, int idx, const char *k) {
     lua_lock(L);
     return auxgetstr(L, index2value(L, idx), k);
@@ -749,10 +745,8 @@ LUA_API int lua_rawgetp(lua_State *L, int idx, const void *p) {
 }
 
 /// @brief 创建一个新的 table 对象并将其压入 Lua 栈中
-/// @param L Lua 状态机
 /// @param narray 表示预分配数组部分的元素数量
 /// @param nrec 表示预分配哈希部分的元素数量
-/// @return
 LUA_API void lua_createtable(lua_State *L, int narray, int nrec) {
     Table *t;
     lua_lock(L);
@@ -857,14 +851,7 @@ LUA_API void lua_settable(lua_State *L, int idx) {
     lua_unlock(L);
 }
 
-/**
- * @brief 把栈顶的元素 放到 表 L[idx] 的指定 key 中, 没有这个 key 就生成这个 key, 之后把之前那个 栈顶的元素 pop 了
- *
- * @param L
- * @param idx
- * @param k
- * @return LUA_API
- */
+/// @brief 把栈顶的元素 放到 表 L[idx] 的指定 key 中, 没有这个 key 就生成这个 key, 之后把之前那个 栈顶的元素 pop 了
 LUA_API void lua_setfield(lua_State *L, int idx, const char *k) {
     lua_lock(L); /* unlock done in 'auxsetstr' */
     auxsetstr(L, index2value(L, idx), k);

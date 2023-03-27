@@ -28,4 +28,4 @@ IndentCaseLabels: true
 ; BreakBeforeBraces: Stroustrup
 
 
-ContinuationIndentWidth: 8
+ContinuationIndentWidth: 4

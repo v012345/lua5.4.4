@@ -149,7 +149,8 @@
         "corecrt.h": "c",
         "vcruntime.h": "c",
         "limits.h": "c",
-        "stddef.h": "c"
+        "stddef.h": "c",
+        "lauxlib.h": "c"
     },
     "Lua.diagnostics.globals": [
         "argv",

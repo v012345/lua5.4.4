@@ -826,7 +826,6 @@ LUALIB_API const char *luaL_tolstring(lua_State *L, int idx, size_t *len) {
 ** set functions from list 'l' into table at top - 'nup'; each
 ** function gets the 'nup' elements at the top as upvalues.
 ** Returns with only the table at the stack.
-** 把 l 中的函数加到栈顶的表中, 不会改变栈顶
 */
 LUALIB_API void luaL_setfuncs(lua_State *L, const luaL_Reg *l, int nup) {
     luaL_checkstack(L, nup, "too many upvalues");
@@ -845,8 +844,6 @@ LUALIB_API void luaL_setfuncs(lua_State *L, const luaL_Reg *l, int nup) {
 }
 
 /// @brief ensure that stack[idx][fname] has a table and push that table into the stack
-/// @param idx
-/// @param fname
 /// @return int
 LUALIB_API int luaL_getsubtable(lua_State *L, int idx, const char *fname) {
     if (lua_getfield(L, idx, fname) == LUA_TTABLE)
