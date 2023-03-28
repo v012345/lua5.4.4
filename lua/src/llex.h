@@ -57,7 +57,7 @@ enum RESERVED {
     TK_NE,      // 不等于运算符 ~=
     TK_SHL,     // 位左移运算符 <<
     TK_SHR,     // 位右移运算符 >>
-    TK_DBCOLON, // 命名空间的分隔符 ::
+    TK_DBCOLON, // 双冒号 ::
     TK_EOS,     // 输入流结束标志
     TK_FLT,     // 浮点数类型
     TK_INT,     // 整数类型
