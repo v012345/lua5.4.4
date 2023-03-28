@@ -33,8 +33,7 @@
 
 #define hasmultret(k) ((k) == VCALL || (k) == VVARARG)
 
-/* because all strings are unified by the scanner, the parser
-   can use pointer equality for string equality */
+// because all strings are unified by the scanner, the parser can use pointer equality for string equality
 #define eqstr(a, b) ((a) == (b))
 
 /*
@@ -109,7 +108,8 @@ static void check_match(LexState* ls, int what, int who, int where) {
     }
 }
 
-/// @brief 检查当前 token 是不是 TK_NAME, 然后取下一个 token, 把被检查的 token 的字符串返回
+/// @brief 检查当前 token 是不是 TK_NAME, 然后取下一个 token
+/// @return TString* 被检查的 token 的变量名称
 static TString* str_checkname(LexState* ls) {
     TString* ts;
     check(ls, TK_NAME);
@@ -119,6 +119,9 @@ static TString* str_checkname(LexState* ls) {
 }
 
 /// @brief 初始化一个表达式描述结构
+/// @param e 表达式描述结构
+/// @param k 表达式的类型
+/// @param i 额外信息, 可能是在 Dyndata 的 local 数组中的索引
 static void init_exp(expdesc* e, expkind k, int i) {
     e->f = e->t = NO_JUMP;
     e->k = k;
@@ -201,9 +204,10 @@ static LocVar* localdebuginfo(FuncState* fs, int vidx) {
     }
 }
 
-/*
-** Create an expression representing variable 'vidx'
-*/
+/// @brief Create an expression representing variable 'vidx'
+/// @param fs 
+/// @param e 
+/// @param vidx 
 static void init_var(FuncState* fs, expdesc* e, int vidx) {
     e->f = e->t = NO_JUMP;
     e->k = VLOCAL;
@@ -353,11 +357,14 @@ static void marktobeclosed(FuncState* fs) {
     fs->needclose = 1;
 }
 
-/*
-** Find a variable with the given name 'n'. If it is an upvalue, add
-** this upvalue into all intermediate functions. If it is a global, set
-** 'var' as 'void' as a flag.
-*/
+/// @brief
+/// Find a variable with the given name 'n'. If it is an upvalue, add
+/// this upvalue into all intermediate functions. If it is a global, set
+/// 'var' as 'void' as a flag.
+/// @param fs
+/// @param n 变量的名称
+/// @param var
+/// @param base
 static void singlevaraux(FuncState* fs, TString* n, expdesc* var, int base) {
     if (fs == NULL) /* no more levels? */
         init_exp(var, VVOID, 0); /* default is global */
@@ -991,6 +998,7 @@ static void suffixedexp(LexState* ls, expdesc* v) {
     }
 }
 
+/// @brief 安排明白 expdesc 后, 取下一个 token
 static void simpleexp(LexState* ls, expdesc* v) {
     /* simpleexp -> FLT | INT | STRING | NIL | TRUE | FALSE | ... | constructor | FUNCTION body | suffixedexp */
     switch (ls->t.token) {
@@ -1041,6 +1049,7 @@ static void simpleexp(LexState* ls, expdesc* v) {
     luaX_next(ls);
 }
 
+/// @brief 返回当前 token 对应的一元操作符的枚举
 static UnOpr getunopr(int op) {
     switch (op) {
         case TK_NOT: return OPR_NOT;

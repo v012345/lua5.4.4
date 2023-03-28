@@ -884,8 +884,7 @@ static void checkmode(lua_State* L, const char* mode, const char* x) {
 }
 
 /// @brief 把 lua 脚本编译成 lua 字节码
-/// @param L
-/// @param ud SParser 一个编译时存东西的结构器
+/// @param ud 指向 SParser 的指针
 static void f_parser(lua_State* L, void* ud) {
     LClosure* cl;
     struct SParser* p = cast(struct SParser*, ud);

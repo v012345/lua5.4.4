@@ -1080,7 +1080,6 @@ LUA_API int lua_pcallk(lua_State *L, int nargs, int nresults, int errfunc, lua_K
 }
 
 /// @brief 装载 lua 脚本, 如果成功解析, 则返回 0
-/// @param L
 /// @param reader lua 脚本的读取函数, 一般就是 getF
 /// @param data lua 文件的数据, 一般是一上 LoadF 结构体
 /// @param chunkname lua 文件名

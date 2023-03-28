@@ -33,27 +33,27 @@ enum OpMode {
     iAsBx,
     iAx,
     isJ // 这是跳转用的地址
-};      /* basic instruction formats */
+}; /* basic instruction formats */
 
 /*
 ** size and position of opcode arguments.
 */
 
-#define SIZE_C 8                      // 8
-#define SIZE_B 8                      // 8
+#define SIZE_C 8 // 8
+#define SIZE_B 8 // 8
 #define SIZE_Bx (SIZE_C + SIZE_B + 1) // 17
-#define SIZE_A 8                      // 8 指令中 A 占用的 bit 数
-#define SIZE_Ax (SIZE_Bx + SIZE_A)    // 25
-#define SIZE_sJ (SIZE_Bx + SIZE_A)    // 25
+#define SIZE_A 8 // 8 指令中 A 占用的 bit 数
+#define SIZE_Ax (SIZE_Bx + SIZE_A) // 25
+#define SIZE_sJ (SIZE_Bx + SIZE_A) // 25
 
 #define SIZE_OP 7 // 7
 
 #define POS_OP 0 // 0
 
 #define POS_A (POS_OP + SIZE_OP) // 7 指令中 A 的起始位置
-#define POS_k (POS_A + SIZE_A)   // 15
-#define POS_B (POS_k + 1)        // 16
-#define POS_C (POS_B + SIZE_B)   // 24
+#define POS_k (POS_A + SIZE_A) // 15
+#define POS_B (POS_k + 1) // 16
+#define POS_C (POS_B + SIZE_B) // 24
 
 #define POS_Bx POS_k // 15
 
@@ -182,26 +182,26 @@ typedef enum {
     /*----------------------------------------------------------------------
       name  args description
     ------------------------------------------------------------------------*/
-    OP_MOVE,       /* A B R[A] := R[B]     */
-    OP_LOADI,      /* A sBx R[A] := sBx     */
-    OP_LOADF,      /* A sBx R[A] := (lua_Number)sBx    */
-    OP_LOADK,      /* A Bx R[A] := K[Bx]     */
-    OP_LOADKX,     /* A R[A] := K[extra arg]    */
-    OP_LOADFALSE,  /* A R[A] := false     */
+    OP_MOVE, /* A B R[A] := R[B]     */
+    OP_LOADI, /* A sBx R[A] := sBx     */
+    OP_LOADF, /* A sBx R[A] := (lua_Number)sBx    */
+    OP_LOADK, /* A Bx R[A] := K[Bx]     */
+    OP_LOADKX, /* A R[A] := K[extra arg]    */
+    OP_LOADFALSE, /* A R[A] := false     */
     OP_LFALSESKIP, /*A R[A] := false; pc++ (*)   */
-    OP_LOADTRUE,   /* A R[A] := true     */
-    OP_LOADNIL,    /* A B R[A], R[A+1], ..., R[A+B] := nil  */
-    OP_GETUPVAL,   /* A B R[A] := UpValue[B]    */
-    OP_SETUPVAL,   /* A B UpValue[B] := R[A]    */
+    OP_LOADTRUE, /* A R[A] := true     */
+    OP_LOADNIL, /* A B R[A], R[A+1], ..., R[A+B] := nil  */
+    OP_GETUPVAL, /* A B R[A] := UpValue[B]    */
+    OP_SETUPVAL, /* A B UpValue[B] := R[A]    */
 
     OP_GETTABUP, /* A B C R[A] := UpValue[B][K[C]:string]   */
     OP_GETTABLE, /* A B C R[A] := R[B][R[C]]    */
-    OP_GETI,     /* A B C R[A] := R[B][C]     */
+    OP_GETI, /* A B C R[A] := R[B][C]     */
     OP_GETFIELD, /* A B C R[A] := R[B][K[C]:string]   */
 
     OP_SETTABUP, /* A B C UpValue[A][K[B]:string] := RK(C)  */
     OP_SETTABLE, /* A B C R[A][R[B]] := RK(C)    */
-    OP_SETI,     /* A B C R[A][B] := RK(C)    */
+    OP_SETI, /* A B C R[A][B] := RK(C)    */
     OP_SETFIELD, /* A B C R[A][K[B]:string] := RK(C)   */
 
     OP_NEWTABLE, /* A B C k R[A] := {}     */
@@ -210,52 +210,52 @@ typedef enum {
 
     OP_ADDI, /* A B sC R[A] := R[B] + sC    */
 
-    OP_ADDK,  /* A B C R[A] := R[B] + K[C]:number   */
-    OP_SUBK,  /* A B C R[A] := R[B] - K[C]:number   */
-    OP_MULK,  /* A B C R[A] := R[B] * K[C]:number   */
-    OP_MODK,  /* A B C R[A] := R[B] % K[C]:number   */
-    OP_POWK,  /* A B C R[A] := R[B] ^ K[C]:number   */
-    OP_DIVK,  /* A B C R[A] := R[B] / K[C]:number   */
+    OP_ADDK, /* A B C R[A] := R[B] + K[C]:number   */
+    OP_SUBK, /* A B C R[A] := R[B] - K[C]:number   */
+    OP_MULK, /* A B C R[A] := R[B] * K[C]:number   */
+    OP_MODK, /* A B C R[A] := R[B] % K[C]:number   */
+    OP_POWK, /* A B C R[A] := R[B] ^ K[C]:number   */
+    OP_DIVK, /* A B C R[A] := R[B] / K[C]:number   */
     OP_IDIVK, /* A B C R[A] := R[B] // K[C]:number   */
 
     OP_BANDK, /* A B C R[A] := R[B] & K[C]:integer   */
-    OP_BORK,  /* A B C R[A] := R[B] | K[C]:integer   */
+    OP_BORK, /* A B C R[A] := R[B] | K[C]:integer   */
     OP_BXORK, /* A B C R[A] := R[B] ~ K[C]:integer   */
 
     OP_SHRI, /* A B sC R[A] := R[B] >> sC    */
     OP_SHLI, /* A B sC R[A] := sC << R[B]    */
 
-    OP_ADD,  /* A B C R[A] := R[B] + R[C]    */
-    OP_SUB,  /* A B C R[A] := R[B] - R[C]    */
-    OP_MUL,  /* A B C R[A] := R[B] * R[C]    */
-    OP_MOD,  /* A B C R[A] := R[B] % R[C]    */
-    OP_POW,  /* A B C R[A] := R[B] ^ R[C]    */
-    OP_DIV,  /* A B C R[A] := R[B] / R[C]    */
+    OP_ADD, /* A B C R[A] := R[B] + R[C]    */
+    OP_SUB, /* A B C R[A] := R[B] - R[C]    */
+    OP_MUL, /* A B C R[A] := R[B] * R[C]    */
+    OP_MOD, /* A B C R[A] := R[B] % R[C]    */
+    OP_POW, /* A B C R[A] := R[B] ^ R[C]    */
+    OP_DIV, /* A B C R[A] := R[B] / R[C]    */
     OP_IDIV, /* A B C R[A] := R[B] // R[C]    */
 
     OP_BAND, /* A B C R[A] := R[B] & R[C]    */
-    OP_BOR,  /* A B C R[A] := R[B] | R[C]    */
+    OP_BOR, /* A B C R[A] := R[B] | R[C]    */
     OP_BXOR, /* A B C R[A] := R[B] ~ R[C]    */
-    OP_SHL,  /* A B C R[A] := R[B] << R[C]    */
-    OP_SHR,  /* A B C R[A] := R[B] >> R[C]    */
+    OP_SHL, /* A B C R[A] := R[B] << R[C]    */
+    OP_SHR, /* A B C R[A] := R[B] >> R[C]    */
 
-    OP_MMBIN,  /* A B C call C metamethod over R[A] and R[B] (*) */
+    OP_MMBIN, /* A B C call C metamethod over R[A] and R[B] (*) */
     OP_MMBINI, /* A sB C k call C metamethod over R[A] and sB */
     OP_MMBINK, /* A B C k  call C metamethod over R[A] and K[B] */
 
-    OP_UNM,  /* A B R[A] := -R[B]     */
+    OP_UNM, /* A B R[A] := -R[B]     */
     OP_BNOT, /* A B R[A] := ~R[B]     */
-    OP_NOT,  /* A B R[A] := not R[B]    */
-    OP_LEN,  /* A B R[A] := #R[B] (length operator)   */
+    OP_NOT, /* A B R[A] := not R[B]    */
+    OP_LEN, /* A B R[A] := #R[B] (length operator)   */
 
     OP_CONCAT, /* A B R[A] := R[A].. ... ..R[A + B - 1]  */
 
     OP_CLOSE, /* A close all upvalues >= R[A]   */
-    OP_TBC,   /* A mark variable A "to be closed"   */
-    OP_JMP,   /* sJ pc += sJ     */
-    OP_EQ,    /* A B k if ((R[A] == R[B]) ~= k) then pc++  */
-    OP_LT,    /* A B k if ((R[A] <  R[B]) ~= k) then pc++  */
-    OP_LE,    /* A B k if ((R[A] <= R[B]) ~= k) then pc++  */
+    OP_TBC, /* A mark variable A "to be closed"   */
+    OP_JMP, /* sJ pc += sJ     */
+    OP_EQ, /* A B k if ((R[A] == R[B]) ~= k) then pc++  */
+    OP_LT, /* A B k if ((R[A] <  R[B]) ~= k) then pc++  */
+    OP_LE, /* A B k if ((R[A] <= R[B]) ~= k) then pc++  */
 
     OP_EQK, /* A B k if ((R[A] == K[B]) ~= k) then pc++  */
     OP_EQI, /* A sB k if ((R[A] == sB) ~= k) then pc++  */
@@ -264,13 +264,13 @@ typedef enum {
     OP_GTI, /* A sB k if ((R[A] > sB) ~= k) then pc++   */
     OP_GEI, /* A sB k if ((R[A] >= sB) ~= k) then pc++  */
 
-    OP_TEST,    /* A k if (not R[A] == k) then pc++   */
+    OP_TEST, /* A k if (not R[A] == k) then pc++   */
     OP_TESTSET, /* A B k if (not R[B] == k) then pc++ else R[A] := R[B] (*) */
 
-    OP_CALL,     /* A B C R[A], ...,R[A+C-2] := R[A](R[A+1], ...,R[A+B-1]) */
+    OP_CALL, /* A B C R[A], ...,R[A+C-2] := R[A](R[A+1], ...,R[A+B-1]) */
     OP_TAILCALL, /* A B C k return R[A](R[A+1], ...,R[A+B-1])  */
 
-    OP_RETURN,  /* A B C k return R[A], ...,R[A+B-2] (see note) */
+    OP_RETURN, /* A B C k return R[A], ...,R[A+B-2] (see note) */
     OP_RETURN0, /*  return      */
     OP_RETURN1, /* A return R[A]     */
 

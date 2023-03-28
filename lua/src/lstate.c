@@ -350,7 +350,7 @@ LUA_API lua_State *lua_newstate(lua_Alloc f, void *ud) {
     preinit_thread(L, g);
     g->allgc = obj2gco(L); /* 把主线程的 GCObject 入到链头; by now, only object is the main thread */
     L->next = NULL;
-    incnny(L); /* 把 nCcalls 的第 5 位置 1; main thread is always non yieldable */
+    incnny(L); /* 把 nCcalls 的第 17 位置 1; main thread is always non yieldable */
     g->frealloc = f;
     g->ud = ud;
     g->warnf = NULL;
