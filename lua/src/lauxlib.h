@@ -157,12 +157,12 @@ LUALIB_API void(luaL_requiref)(lua_State* L, const char* modname, lua_CFunction 
 */
 
 struct luaL_Buffer {
-    char* b;     /* buffer address */
+    char* b; /* buffer address */
     size_t size; /* buffer size */
-    size_t n;    /* number of characters in buffer */
+    size_t n; /* number of characters in buffer */
     lua_State* L;
     union {
-        LUAI_MAXALIGN;           /* ensure maximum alignment for buffer */
+        LUAI_MAXALIGN; /* ensure maximum alignment for buffer */
         char b[LUAL_BUFFERSIZE]; /* initial buffer */
     } init;
 };
@@ -204,7 +204,7 @@ LUALIB_API char*(luaL_buffinitsize)(lua_State* L, luaL_Buffer* B, size_t sz);
 #define LUA_FILEHANDLE "FILE*"
 
 typedef struct luaL_Stream {
-    FILE* f;              /* stream (NULL for incompletely created streams) */
+    FILE* f; /* stream (NULL for incompletely created streams) */
     lua_CFunction closef; /* to close stream (NULL for closed streams) */
 } luaL_Stream;
 

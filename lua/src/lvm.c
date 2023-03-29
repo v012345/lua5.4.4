@@ -253,8 +253,12 @@ static int floatforloop(StkId ra) {
         return 0; /* finish the loop */
 }
 
-/// @brief
+/// @brief 
 /// Finish the table access 'val = t[key]'. if 'slot' is NULL, 't' is not a table; otherwise, 'slot' points to t[k] entry (which must be empty).
+/// @param t 
+/// @param key 
+/// @param val 
+/// @param slot 
 void luaV_finishget(lua_State* L, const TValue* t, TValue* key, StkId val, const TValue* slot) {
     int loop; /* counter to avoid infinite loops */
     const TValue* tm; /* metamethod */

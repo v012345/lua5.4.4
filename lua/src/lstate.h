@@ -274,8 +274,8 @@ typedef struct global_State {
     struct lua_State* mainthread; /* 指向主线程的指针,即创建 Lua 虚拟机时所创建的 lua_State 结构体 主lua_State.在一个独立的lua虚拟机里, global_State是一个全局的结构,
                                      而lua_State可以有多个. lua_newstate会创建出一个lua_State, 绑在 lua_State *mainthread.可以说是主线程、主执行栈. */
     TString* memerrmsg; /* 用于存储内存分配错误信息的字符串对象 message for memory-allocation errors */
-    TString* tmname[TM_N]; /* 预定义了元方法名字的数组 array with tag-method names */
-    struct Table* mt[LUA_NUMTAGS]; /* 存储基础类型的元表信息的数组.Lua 中的每种基本数据类型都有对应的元表 metatables for basic types */
+    TString* tmname[TM_N]; /* array with tag-method names */
+    struct Table* mt[LUA_NUMTAGS]; /* metatables for basic types */
     TString* strcache[STRCACHE_N][STRCACHE_M]; /* 用于缓存 API 中的字符串对象 cache for strings in API */
     lua_WarnFunction warnf; /* 指向一个回调函数,用于输出警告信息 warning function */
     void* ud_warn; /* 辅助数据,用于回调函数 'warnf' ; auxiliary data to 'warnf' */

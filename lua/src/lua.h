@@ -333,7 +333,7 @@ LUA_API void(lua_closeslot)(lua_State *L, int idx);
 /// @brief 从栈顶弹出 n 个元素
 #define lua_pop(L, n) lua_settop(L, -(n)-1)
 
-///@brief 直接调用 lua_createtable 生成 表
+// 创建表, 并压入栈顶
 #define lua_newtable(L) lua_createtable(L, 0, 0)
 
 #define lua_register(L, n, f) (lua_pushcfunction(L, (f)), lua_setglobal(L, (n)))
