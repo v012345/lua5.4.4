@@ -503,7 +503,7 @@ typedef struct Udata0 {
 /// @brief Description of an upvalue for function prototypes
 /// @param name 表示 Upvalue 的名称, 主要用于调试信息
 /// @param instack Upvalue 是否存在于函数的栈空间（即寄存器）中.如果存在,则为 1,否则为 0.
-/// @param idx Upvalue 在栈空间或外部函数的 Upvalue 列表中的索引.如果上值存在于栈空间中,则为其在栈中的索引；否则为其在外部函数的上值列表中的索引.
+/// @param idx Upvalue 在栈空间或外部函数的 Upvalue 列表中的索引.如果上值存在于栈空间中,则为其在栈中的索引;否则为其在外部函数的上值列表中的索引.
 /// @param kind  0 表示全局变量, 1 表示局部变量, 2 表示 Upvalue, 3 表示表字段
 typedef struct Upvaldesc {
     TString* name; /* upvalue name (for debug information) */
@@ -625,7 +625,7 @@ typedef struct Proto {
 typedef struct UpVal {
     CommonHeader; /* 通用的 GCObject 结构体头部 */
     lu_byte tbc; /* true 表示该 Upvalue 是一个 to-be-closed 变量,即需要执行清理动作 true if it represents a to-be-closed variable */
-    TValue* v; /* 如果该 Upvalue 关联的局部变量仍在栈上,则指向该局部变量的位置；否则,指向该 Upvalue 的值 points to stack or to its own value */
+    TValue* v; /* 如果该 Upvalue 关联的局部变量仍在栈上,则指向该局部变量的位置;否则,指向该 Upvalue 的值 points to stack or to its own value */
     union {
         struct { /* (when open) */
             struct UpVal* next; /* linked list */

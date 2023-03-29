@@ -490,7 +490,7 @@ static const luaL_Reg base_funcs[] = {
     /* placeholders */
     {LUA_GNAME, NULL},
     {"_VERSION", NULL},
-    {NULL, NULL} // 结束标志
+    {NULL, NULL},
 };
 
 LUAMOD_API int luaopen_base(lua_State* L) {

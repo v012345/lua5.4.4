@@ -700,14 +700,7 @@ LUA_API int lua_rawget(lua_State* L, int idx) {
     return finishrawget(L, val);
 }
 
-/**
- * @brief L[idx] 应该是数组, 那么就将 L[idx][n] 置于栈顶
- *
- * @param L
- * @param idx
- * @param n
- * @return LUA_API
- */
+/// @brief 表数组部分 t[n] 置于栈顶
 LUA_API int lua_rawgeti(lua_State* L, int idx, lua_Integer n) {
     Table* t;
     lua_lock(L);
@@ -825,7 +818,7 @@ LUA_API void lua_settable(lua_State* L, int idx) {
     lua_unlock(L);
 }
 
-/// @brief 把栈顶的元素 放到 表 L[idx] 的指定 key 中, 没有这个 key 就生成这个 key, 之后把之前那个 栈顶的元素 pop 了
+/// @brief t[k] = s2v(L->top - 1); L->top--;
 LUA_API void lua_setfield(lua_State* L, int idx, const char* k) {
     lua_lock(L); /* unlock done in 'auxsetstr' */
     auxsetstr(L, index2value(L, idx), k);
@@ -965,7 +958,7 @@ LUA_API int lua_setiuservalue(lua_State* L, int idx, int n) {
 
 #define checkresults(L, na, nr) api_check(L, (nr) == LUA_MULTRET || (L->ci->top - L->top >= (nr) - (na)), "results from function overflow current stack size")
 
-/// @brief 调用Lua函数
+/// @brief 调用闭包
 /// @param L Lua状态机指针
 /// @param nargs 传递给Lua函数的参数个数
 /// @param nresults 期望从Lua函数中返回的结果个数
@@ -979,7 +972,7 @@ LUA_API void lua_callk(lua_State* L, int nargs, int nresults, lua_KContext ctx, 
     api_checknelems(L, nargs + 1);
     api_check(L, L->status == LUA_OK, "cannot do calls on non-normal thread");
     checkresults(L, nargs, nresults);
-    func = L->top - (nargs + 1);
+    func = L->top - (nargs + 1); // 通过参数个数反推出闭包在栈中的位置
     if (k != NULL && yieldable(L)) { /* need to prepare continuation? */
         L->ci->u.c.k = k; /* save continuation */
         L->ci->u.c.ctx = ctx; /* save context */

@@ -857,7 +857,7 @@ LUALIB_API int luaL_getsubtable(lua_State* L, int idx, const char* fname) {
 ** Leaves resulting module on the top.
 */
 LUALIB_API void luaL_requiref(lua_State* L, const char* modname, lua_CFunction openf, int glb) {
-    luaL_getsubtable(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE); // 在 l_registry 中找 _LOADED 对应的表
+    luaL_getsubtable(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE); // 在 l_registry 中找 _LOADED 对应的表, 没有就生成新的
     lua_getfield(L, -1, modname); /* LOADED[modname] */
     if (!lua_toboolean(L, -1)) { /* package not already loaded? */
         lua_pop(L, 1); /* remove field */

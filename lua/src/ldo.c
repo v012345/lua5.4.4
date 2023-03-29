@@ -374,17 +374,20 @@ StkId luaD_tryfuncTM(lua_State* L, StkId func) {
     return func;
 }
 
-/*
-** Given 'nres' results at 'firstResult', move 'wanted' of them to 'res'.
-** Handle most typical cases (zero results for commands, one result for
-** expressions, multiple results for tail calls/single parameters)
-** separated.
-*/
+/// @brief
+/// Given 'nres' results at 'firstResult', move 'wanted' of them to 'res'.
+/// Handle most typical cases (zero results for commands, one result for
+/// expressions, multiple results for tail calls/single parameters) separated.
+/// @param res 实际函数在栈中的位置
+/// @param nres 调用实际函数返回的参数个数
+/// @param wanted lua_call 中想到函数返回的参数个数
 l_sinline void moveresults(lua_State* L, StkId res, int nres, int wanted) {
     StkId firstresult;
     int i;
     switch (wanted) { /* handle typical cases separately */
-        case 0: /* no values needed */ L->top = res; return;
+        case 0: /* no values needed */
+            L->top = res; // 不想要返回值, 直接把函数一起出栈
+            return;
         case 1: /* one value needed */
             if (nres == 0) /* no results? */
                 setnilvalue(s2v(res)); /* adjust with nil */
@@ -425,11 +428,9 @@ l_sinline void moveresults(lua_State* L, StkId res, int nres, int wanted) {
 /// Finishes a function call: calls hook if necessary, moves current
 /// number of results to proper place, and returns to previous call info.
 /// If function has to close variables, hook must be called after that.
-/// @param L
-/// @param ci
-/// @param nres
+/// @param nres ci 实际返回参数的个数
 void luaD_poscall(lua_State* L, CallInfo* ci, int nres) {
-    int wanted = ci->nresults;
+    int wanted = ci->nresults; // 调用 lua_call 时的第三个参数
     if (l_unlikely(L->hookmask && !hastocloseCfunc(wanted))) rethook(L, ci, nres);
     /* move results to proper place */
     moveresults(L, ci->func, nres, wanted);
@@ -441,7 +442,6 @@ void luaD_poscall(lua_State* L, CallInfo* ci, int nres) {
 #define next_ci(L) (L->ci->next ? L->ci->next : luaE_extendCI(L))
 
 /// @brief 准备一个 CallInfo
-/// @param L
 /// @param func 闭包在数据上的位置
 /// @param nret 函数返回值个数
 /// @param mask
@@ -449,10 +449,10 @@ void luaD_poscall(lua_State* L, CallInfo* ci, int nres) {
 /// @return CallInfo*
 l_sinline CallInfo* prepCallInfo(lua_State* L, StkId func, int nret, int mask, StkId top) {
     CallInfo* ci = L->ci = next_ci(L); /* new frame */
-    ci->func = func;
+    ci->func = func; // CallInfo 的最底
     ci->nresults = nret;
     ci->callstatus = mask;
-    ci->top = top;
+    ci->top = top; // L->top + 20
     return ci;
 }
 
@@ -527,13 +527,13 @@ CallInfo* luaD_precall(lua_State* L, StkId func, int nresults) {
 retry:
     switch (ttypetag(s2v(func))) {
         case LUA_VCCL: /* C closure */
-            precallC(L, func, nresults, clCvalue(s2v(func))->f); // 函数执行 C 函数调用,并返回 NULL；
+            precallC(L, func, nresults, clCvalue(s2v(func))->f); // 函数执行 C 函数调用,并返回 NULL;
             return NULL;
         case LUA_VLCF: /* light C function */
-            precallC(L, func, nresults, fvalue(s2v(func))); // 函数执行 C 函数调用,并返回 NULL；
+            precallC(L, func, nresults, fvalue(s2v(func))); // 函数执行 C 函数调用,并返回 NULL;
             return NULL;
         case LUA_VLCL: { /* Lua function */
-            CallInfo* ci; // 如果函数是 Lua 函数,则构造 CallInfo 结构体,并返回该结构体；
+            CallInfo* ci; // 如果函数是 Lua 函数,则构造 CallInfo 结构体,并返回该结构体;
             Proto* p = clLvalue(s2v(func))->p; // 获取栈 func 位置上 lua 闭包中的函数原型
             int narg = cast_int(L->top - func) - 1; /* 实际传来的参数个数, 我不确定 self 算不算一个参数; number of real arguments */
             int nfixparams = p->numparams; // lua 函数签名中指定的参数个数
