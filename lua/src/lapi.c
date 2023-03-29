@@ -240,13 +240,7 @@ LUA_API void lua_pushvalue(lua_State* L, int idx) {
 ** access functions (stack -> C)
 */
 
-/**
- * @brief 返回 L[idx] 的类型
- *
- * @param L
- * @param idx
- * @return LUA_API
- */
+/// @brief ttype(stack[idx])
 LUA_API int lua_type(lua_State* L, int idx) {
     const TValue* o = index2value(L, idx);
     return (isvalid(L, o) ? ttype(o) : LUA_TNONE);

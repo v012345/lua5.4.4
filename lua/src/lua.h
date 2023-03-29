@@ -64,7 +64,7 @@ typedef struct lua_State lua_State;
 #define LUA_TNUMBER 3
 #define LUA_TSTRING 4
 #define LUA_TTABLE 5
-#define LUA_TFUNCTION 6
+#define LUA_TFUNCTION 6 // LUA_VLCL LUA_VLCF LUA_VCCL
 #define LUA_TUSERDATA 7
 #define LUA_TTHREAD 8
 

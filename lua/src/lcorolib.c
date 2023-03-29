@@ -86,7 +86,7 @@ static int luaB_auxwrap(lua_State* L) {
 
 static int luaB_cocreate(lua_State* L) {
     lua_State* NL;
-    luaL_checktype(L, 1, LUA_TFUNCTION);
+    luaL_checktype(L, 1, LUA_TFUNCTION); // 栈底是不是
     NL = lua_newthread(L);
     lua_pushvalue(L, 1); /* move function to top */
     lua_xmove(L, NL, 1); /* move function from L to NL */
