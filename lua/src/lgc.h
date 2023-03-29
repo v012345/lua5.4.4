@@ -26,15 +26,15 @@
 /*
 ** Possible states of the Garbage Collector
 */
-#define GCSpropagate 0   // 标记阶段, 遍历所有可达对象并标记为不可回收
+#define GCSpropagate 0 // 标记阶段, 遍历所有可达对象并标记为不可回收
 #define GCSenteratomic 1 // 进入原子阶段,暂停所有 Lua 线程并开始处理原子操作
-#define GCSatomic 2      // 原子阶段, 执行原子操作
-#define GCSswpallgc 3    // 扫描阶段, 遍历所有对象并将未被标记为不可回收的对象从内存中移除
-#define GCSswpfinobj 4   // 扫描阶段, 处理一些特殊的对象(比如 userdata), 并将未被标记为不可回收的对象从内存中移除
-#define GCSswptobefnz 5  // 扫描阶段, 将待终结的对象移动到一个链表中
-#define GCSswpend 6      // 扫描阶段, 结束阶段,清空待终结链表
-#define GCScallfin 7     // 调用终结器阶段,调用所有待终结对象的终结器函数
-#define GCSpause 8       // 暂停状态, 等待下一次垃圾回收
+#define GCSatomic 2 // 原子阶段, 执行原子操作
+#define GCSswpallgc 3 // 扫描阶段, 遍历所有对象并将未被标记为不可回收的对象从内存中移除
+#define GCSswpfinobj 4 // 扫描阶段, 处理一些特殊的对象(比如 userdata), 并将未被标记为不可回收的对象从内存中移除
+#define GCSswptobefnz 5 // 扫描阶段, 将待终结的对象移动到一个链表中
+#define GCSswpend 6 // 扫描阶段, 结束阶段,清空待终结链表
+#define GCScallfin 7 // 调用终结器阶段,调用所有待终结对象的终结器函数
+#define GCSpause 8 // 暂停状态, 等待下一次垃圾回收
 
 #define issweepphase(g) (GCSswpallgc <= (g)->gcstate && (g)->gcstate <= GCSswpend)
 
@@ -53,8 +53,8 @@
 */
 #define resetbits(x, m) ((x) &= cast_byte(~(m)))
 #define setbits(x, m) ((x) |= (m))
-#define testbits(x, m) ((x) & (m))                   // x 与 m 按位与
-#define bitmask(b) (1 << (b))                        // 在 b 位置上放一个 1
+#define testbits(x, m) ((x) & (m)) // x 与 m 按位与
+#define bitmask(b) (1 << (b)) // 在 b 位置上放一个 1
 #define bit2mask(b1, b2) (bitmask(b1) | bitmask(b2)) // 在 b1 与 b2 的位置的放上 1
 #define l_setbit(x, b) setbits(x, bitmask(b))
 #define resetbit(x, b) resetbits(x, bitmask(b))
@@ -65,9 +65,9 @@
 ** used for object "age" in generational mode. Last bit is used
 ** by tests.
 */
-#define WHITE0BIT 3    /* object is white (type 0) */
-#define WHITE1BIT 4    /* object is white (type 1) */
-#define BLACKBIT 5     /* object is black */
+#define WHITE0BIT 3 /* object is white (type 0) */
+#define WHITE1BIT 4 /* object is white (type 1) */
+#define BLACKBIT 5 /* object is black */
 #define FINALIZEDBIT 6 /* object has been marked for finalization */
 
 #define TESTBIT 7
@@ -75,7 +75,7 @@
 #define WHITEBITS bit2mask(WHITE0BIT, WHITE1BIT) // 就是白(包括 白0 与 白1); 在 3 与 4 的位置上放上 1
 
 #define iswhite(x) testbits((x)->marked, WHITEBITS) // 对象的 marked 的第 3 和第 4 位的比特值
-#define isblack(x) testbit((x)->marked, BLACKBIT)   // 对象的 marked 的第 BLACKBIT(5) 位的比特值
+#define isblack(x) testbit((x)->marked, BLACKBIT) // 对象的 marked 的第 BLACKBIT(5) 位的比特值
 #define isgray(x) /* neither white nor black */ (!testbits((x)->marked, WHITEBITS | bitmask(BLACKBIT)))
 
 #define tofinalize(x) testbit((x)->marked, FINALIZEDBIT)
@@ -87,14 +87,14 @@
 #define changewhite(x) ((x)->marked ^= WHITEBITS)
 #define nw2black(x) check_exp(!iswhite(x), l_setbit((x)->marked, BLACKBIT))
 
-#define luaC_white(g) cast_byte((g)->currentwhite &WHITEBITS)
+#define luaC_white(g) cast_byte((g)->currentwhite& WHITEBITS)
 
 /* object age in generational mode */
-#define G_NEW 0      /* created in current cycle */
+#define G_NEW 0 /* created in current cycle */
 #define G_SURVIVAL 1 /* created in previous cycle */
-#define G_OLD0 2     /* marked old by frw. barrier in this cycle */
-#define G_OLD1 3     /* first full cycle as old */
-#define G_OLD 4      /* really old object (not to be visited) */
+#define G_OLD0 2 /* marked old by frw. barrier in this cycle */
+#define G_OLD1 3 /* first full cycle as old */
+#define G_OLD 4 /* really old object (not to be visited) */
 #define G_TOUCHED1 5 /* old object touched this cycle */
 #define G_TOUCHED2 6 /* old object touched in previous cycle */
 
@@ -136,7 +136,7 @@
 ** Control when GC is running:
 */
 #define GCSTPUSR 1 /* bit true when GC stopped by user */
-#define GCSTPGC 2  /* bit true when GC stopped by itself */
+#define GCSTPGC 2 /* bit true when GC stopped by itself */
 #define GCSTPCLS 4 /* bit true when closing Lua state */
 #define gcrunning(g) ((g)->gcstp == 0)
 
@@ -166,15 +166,15 @@
 // 如何 p 是黑的, o 是白的, 那么
 #define luaC_objbarrier(L, p, o) ((isblack(p) && iswhite(o)) ? luaC_barrier_(L, obj2gco(p), obj2gco(o)) : cast_void(0))
 
-LUAI_FUNC void luaC_fix(lua_State *L, GCObject *o);
-LUAI_FUNC void luaC_freeallobjects(lua_State *L);
-LUAI_FUNC void luaC_step(lua_State *L);
-LUAI_FUNC void luaC_runtilstate(lua_State *L, int statesmask);
-LUAI_FUNC void luaC_fullgc(lua_State *L, int isemergency);
-LUAI_FUNC GCObject *luaC_newobj(lua_State *L, int tt, size_t sz);
-LUAI_FUNC void luaC_barrier_(lua_State *L, GCObject *o, GCObject *v);
-LUAI_FUNC void luaC_barrierback_(lua_State *L, GCObject *o);
-LUAI_FUNC void luaC_checkfinalizer(lua_State *L, GCObject *o, Table *mt);
-LUAI_FUNC void luaC_changemode(lua_State *L, int newmode);
+LUAI_FUNC void luaC_fix(lua_State* L, GCObject* o);
+LUAI_FUNC void luaC_freeallobjects(lua_State* L);
+LUAI_FUNC void luaC_step(lua_State* L);
+LUAI_FUNC void luaC_runtilstate(lua_State* L, int statesmask);
+LUAI_FUNC void luaC_fullgc(lua_State* L, int isemergency);
+LUAI_FUNC GCObject* luaC_newobj(lua_State* L, int tt, size_t sz);
+LUAI_FUNC void luaC_barrier_(lua_State* L, GCObject* o, GCObject* v);
+LUAI_FUNC void luaC_barrierback_(lua_State* L, GCObject* o);
+LUAI_FUNC void luaC_checkfinalizer(lua_State* L, GCObject* o, Table* mt);
+LUAI_FUNC void luaC_changemode(lua_State* L, int newmode);
 
 #endif
