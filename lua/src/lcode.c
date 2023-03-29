@@ -416,9 +416,8 @@ void luaK_checkstack(FuncState* fs, int n) {
     }
 }
 
-/*
-** Reserve 'n' registers in register stack
-*/
+/// @brief Reserve 'n' registers in register stack
+/// @param n fs->freereg 增加 n
 void luaK_reserveregs(FuncState* fs, int n) {
     luaK_checkstack(fs, n);
     fs->freereg += n;

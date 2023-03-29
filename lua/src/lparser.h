@@ -77,7 +77,7 @@ typedef struct expdesc {
 typedef union Vardesc {
     struct {
         TValuefields; /* constant value (if it is a compile-time constant) */
-        lu_byte kind;
+        lu_byte kind; // 变量的类型 VDKREG RDKCONST RDKTOCLOSE RDKCTC
         lu_byte ridx; /* register holding the variable */
         short pidx; /* index of the variable in the Proto's 'locvars' array */
         TString* name; /* variable name */
