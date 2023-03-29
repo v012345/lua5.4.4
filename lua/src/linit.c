@@ -47,7 +47,8 @@ static const luaL_Reg loadedlibs[] = {
     {LUA_MATHLIBNAME, luaopen_math},
     {LUA_UTF8LIBNAME, luaopen_utf8},
     {LUA_DBLIBNAME, luaopen_debug},
-    {NULL, NULL}};
+    {NULL, NULL},
+};
 
 LUALIB_API void luaL_openlibs(lua_State* L) {
     const luaL_Reg* lib;
