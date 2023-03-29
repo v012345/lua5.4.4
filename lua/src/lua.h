@@ -364,6 +364,7 @@ LUA_API void(lua_closeslot)(lua_State* L, int idx);
 
 #define lua_insert(L, idx) lua_rotate(L, (idx), 1)
 
+// 移除 stack[idx], 用三次转置实际
 #define lua_remove(L, idx) (lua_rotate(L, (idx), -1), lua_pop(L, 1))
 
 #define lua_replace(L, idx) (lua_copy(L, -1, (idx)), lua_pop(L, 1))
