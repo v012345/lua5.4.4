@@ -272,6 +272,7 @@ static void close_state(lua_State* L) {
     (*g->frealloc)(g->ud, fromstate(L), sizeof(LG), 0); /* free main block */
 }
 
+/// @brief 生成一个新的 lua_State, 放到 L 的栈顶, LUA_EXTRASPACE 中的内容是相同的
 LUA_API lua_State* lua_newthread(lua_State* L) {
     global_State* g;
     lua_State* L1;
