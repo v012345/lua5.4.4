@@ -790,6 +790,7 @@ static void auxsetstr(lua_State* L, const TValue* t, const char* k) {
     lua_unlock(L); /* lock done by caller */
 }
 
+/// @brief _G[name] = stack[top-1]
 LUA_API void lua_setglobal(lua_State* L, const char* name) {
     const TValue* G;
     lua_lock(L); /* unlock done in 'auxsetstr' */
@@ -818,7 +819,7 @@ LUA_API void lua_settable(lua_State* L, int idx) {
     lua_unlock(L);
 }
 
-/// @brief t[k] = s2v(L->top - 1); L->top--;
+/// @brief t = stack[idx]; t[k] = s2v(L->top - 1); L->top--;
 LUA_API void lua_setfield(lua_State* L, int idx, const char* k) {
     lua_lock(L); /* unlock done in 'auxsetstr' */
     auxsetstr(L, index2value(L, idx), k);

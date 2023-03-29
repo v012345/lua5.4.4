@@ -237,7 +237,7 @@ typedef struct global_State {
     lu_mem GCestimate; /* 当前被使用的非垃圾内存的估计值 an estimate of the non-garbage memory in use */
     lu_mem lastatomic; /* 用于垃圾回收中的原子操作计数器 see function 'genstep' in file 'lgc.c' */
     stringtable strt; /* 全局字符串表,用于池化字符串,使得整个虚拟机中的短字符串只有一份实例 hash table for strings */
-    TValue l_registry; /* 是一个表(t), t[0] = L, t[1] = 全局表 */
+    TValue l_registry; /* 是一个表(t), t[0] = L, t[1] = _G */
     TValue nilvalue; /* 如果这个值真的是一个 nil 那么就说明 global_State 构建完毕; a nil value */
     unsigned int seed; /* 启动时生成的一个随机数种子,主要用于求字符串哈希时使用 randomized seed for hashes */
     lu_byte currentwhite; // 垃圾回收中的当前白色标记

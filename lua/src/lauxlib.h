@@ -106,6 +106,7 @@ LUALIB_API void(luaL_requiref)(lua_State* L, const char* modname, lua_CFunction 
 // 在栈顶生成一个表, 数组部分为 0, hash 部分为 l 中元素个数少 1
 #define luaL_newlibtable(L, l) lua_createtable(L, 0, sizeof(l) / sizeof((l)[0]) - 1)
 
+// t = newtable(); t[l->name] = closure(l->func)
 #define luaL_newlib(L, l) (luaL_checkversion(L), luaL_newlibtable(L, l), luaL_setfuncs(L, l, 0))
 
 #define luaL_argcheck(L, cond, arg, extramsg) ((void)(luai_likely(cond) || luaL_argerror(L, (arg), (extramsg))))

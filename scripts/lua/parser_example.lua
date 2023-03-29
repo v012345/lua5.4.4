@@ -1,4 +1,3 @@
-local a = true
-if a then
-    a = false
+for key, value in pairs(_G) do
+    print(key)
 end

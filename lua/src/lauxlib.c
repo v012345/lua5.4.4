@@ -814,11 +814,10 @@ LUALIB_API const char* luaL_tolstring(lua_State* L, int idx, size_t* len) {
     return lua_tolstring(L, -1, len);
 }
 
-/*
-** set functions from list 'l' into table at top - 'nup'; each
-** function gets the 'nup' elements at the top as upvalues.
-** Returns with only the table at the stack.
-*/
+/// @brief t = stack[top-1]; t[l->name] = closure(l->func) \r
+/// set functions from list 'l' into table at top - 'nup'; each
+/// function gets the 'nup' elements at the top as upvalues.
+/// Returns with only the table at the stack.
 LUALIB_API void luaL_setfuncs(lua_State* L, const luaL_Reg* l, int nup) {
     luaL_checkstack(L, nup, "too many upvalues");
     for (; l->name != NULL; l++) { /* fill the table with given functions */
