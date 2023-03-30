@@ -361,6 +361,7 @@ typedef struct GCObject {
 
 #define tsvalue(o) check_exp(ttisstring(o), gco2ts(val_(o).gc))
 
+// obj 指向 x 指向的内存
 #define setsvalue(L, obj, x)                                                                                                                                                                           \
     {                                                                                                                                                                                                  \
         TValue* io = (obj);                                                                                                                                                                            \
@@ -394,13 +395,13 @@ typedef struct TString {
 */
 #define getstr(ts) ((ts)->contents) // 拿到 TString 里 C 字符串指针 contents
 
-/* get the actual string (array of bytes) from a Lua value */
+/* 拿到 TString 里 C 字符串指针 contents; get the actual string (array of bytes) from a Lua value */
 #define svalue(o) getstr(tsvalue(o))
 
 /* get string length from 'TString *s' */
 #define tsslen(s) ((s)->tt == LUA_VSHRSTR ? (s)->shrlen : (s)->u.lnglen)
 
-/* get string length from 'TValue *o' */
+/* TValue 中字符串的长度; get string length from 'TValue *o' */
 #define vslen(o) tsslen(tsvalue(o))
 
 /* }================================================================== */

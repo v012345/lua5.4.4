@@ -1,7 +1,7 @@
 {
     "cmake.generator": "Visual Studio 17 2022",
     "cmake.debugConfig": {
-        // "console": "integratedTerminal",
+        "console": "integratedTerminal",
         "args": [
             // "${fileWorkspaceFolder}${pathSeparator}scripts${pathSeparator}lua${pathSeparator}src${pathSeparator}gui${pathSeparator}main.lua", // only effect in debug mode
             // "${fileWorkspaceFolder}${pathSeparator}scripts${pathSeparator}lua${pathSeparator}src${pathSeparator}main.lua", // only effect in debug mode

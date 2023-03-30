@@ -12,6 +12,7 @@
 #include "ltm.h"
 
 #if !defined(LUA_NOCVTN2S)
+// 看看是不是数字类型
 #define cvt2str(o) ttisnumber(o)
 #else
 #define cvt2str(o) 0 /* no conversion from numbers to strings */

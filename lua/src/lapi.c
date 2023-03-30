@@ -352,6 +352,8 @@ LUA_API int lua_toboolean(lua_State* L, int idx) {
     return !l_isfalse(o);
 }
 
+/// @brief 返回 stack[idx] 中的字符串, 如果是数字, 把 stack[idx] 转成字符符, 其他情况返回 NULL
+/// @param len 保存读到的字符长度
 LUA_API const char* lua_tolstring(lua_State* L, int idx, size_t* len) {
     TValue* o;
     lua_lock(L);

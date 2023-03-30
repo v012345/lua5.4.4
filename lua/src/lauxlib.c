@@ -361,6 +361,8 @@ LUALIB_API void luaL_checkany(lua_State* L, int arg) {
     if (l_unlikely(lua_type(L, arg) == LUA_TNONE)) luaL_argerror(L, arg, "value expected");
 }
 
+/// @brief 返回 stack[idx] 中的字符串, 如果是数字, 把 stack[idx] 转成字符符, 其他情况返回报错
+/// @param len 保存读到的字符长度
 LUALIB_API const char* luaL_checklstring(lua_State* L, int arg, size_t* len) {
     const char* s = lua_tolstring(L, arg, len);
     if (l_unlikely(!s)) tag_error(L, arg, LUA_TSTRING);
@@ -433,10 +435,12 @@ static int boxgc(lua_State* L) {
     return 0;
 }
 
-static const luaL_Reg boxmt[] = {/* box metamethods */
-                                 {"__gc", boxgc},
-                                 {"__close", boxgc},
-                                 {NULL, NULL}};
+static const luaL_Reg boxmt[] = {
+    /* box metamethods */
+    {"__gc", boxgc},
+    {"__close", boxgc},
+    {NULL, NULL},
+};
 
 static void newbox(lua_State* L) {
     UBox* box = (UBox*)lua_newuserdatauv(L, sizeof(UBox), 0);
