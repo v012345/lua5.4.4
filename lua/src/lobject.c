@@ -134,6 +134,7 @@ int luaO_hexavalue(int c) {
         return (ltolower(c) - 'a') + 10;
 }
 
+/// @brief 如果当前位是 '-', 返回 1, 否则返回 0, 如果当前位是 '-' 或 '+', 指针后移
 static int isneg(const char** s) {
     if (**s == '-') {
         (*s)++;
@@ -266,6 +267,10 @@ static const char* l_str2d(const char* s, lua_Number* result) {
 #define MAXBY10 cast(lua_Unsigned, LUA_MAXINTEGER / 10)
 #define MAXLASTD cast_int(LUA_MAXINTEGER % 10)
 
+/// @brief
+/// @param s
+/// @param result
+/// @return
 static const char* l_str2int(const char* s, lua_Integer* result) {
     lua_Unsigned a = 0;
     int empty = 1;

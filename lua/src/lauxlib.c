@@ -400,7 +400,11 @@ LUALIB_API lua_Integer luaL_checkinteger(lua_State* L, int arg) {
     return d;
 }
 
-LUALIB_API lua_Integer luaL_optinteger(lua_State* L, int arg, lua_Integer def) { return luaL_opt(L, luaL_checkinteger, arg, def); }
+/// @brief 如果 stack[arg] 为空, 直接返回 def. 否则, 
+LUALIB_API lua_Integer luaL_optinteger(lua_State* L, int arg, lua_Integer def) {
+    //
+    return luaL_opt(L, luaL_checkinteger, arg, def);
+}
 
 /* }====================================================== */
 

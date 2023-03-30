@@ -113,6 +113,7 @@ LUALIB_API void(luaL_requiref)(lua_State* L, const char* modname, lua_CFunction 
 
 #define luaL_argexpected(L, cond, arg, tname) ((void)(luai_likely(cond) || luaL_typeerror(L, (arg), (tname))))
 
+// 返回 stack[n] 中的字符串, 如果是数字, 把 stack[n] 转成字符符, 其他情况返回报错
 #define luaL_checkstring(L, n) (luaL_checklstring(L, (n), NULL))
 #define luaL_optstring(L, n, d) (luaL_optlstring(L, (n), (d), NULL))
 
