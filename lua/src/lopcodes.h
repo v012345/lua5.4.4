@@ -71,7 +71,8 @@ enum OpMode {
 #define L_INTHASBITS(b) ((UINT_MAX >> ((b)-1)) >= 1)
 
 #if L_INTHASBITS(SIZE_Bx)
-#define MAXARG_Bx ((1 << SIZE_Bx) - 1) // 17 位 1
+// 17 位 1
+#define MAXARG_Bx ((1 << SIZE_Bx) - 1)
 #else
 #define MAXARG_Bx MAX_INT
 #endif
@@ -125,6 +126,7 @@ enum OpMode {
 #define GETARG_A(i) getarg(i, POS_A, SIZE_A)
 #define SETARG_A(i, v) setarg(i, v, POS_A, SIZE_A)
 
+// 指令 i 对应的 B 寄存器的偏移量, 就是 i 中 17 到 24 位表示的一个整数
 #define GETARG_B(i) check_exp(checkopm(i, iABC), getarg(i, POS_B, SIZE_B))
 #define GETARG_sB(i) sC2int(GETARG_B(i))
 #define SETARG_B(i, v) setarg(i, v, POS_B, SIZE_B)

@@ -1014,6 +1014,7 @@ void luaV_finishOp(lua_State* L) {
 
 // 当前闭包中, 指令 i 中 A 寄存器的位置
 #define RA(i) (base + GETARG_A(i))
+// 当前闭包中, 指令 i 中 B 寄存器的位置
 #define RB(i) (base + GETARG_B(i))
 #define vRB(i) s2v(RB(i))
 #define KB(i) (k + GETARG_B(i))
@@ -1150,7 +1151,7 @@ returning: /* trap already set */
         lua_assert(isIT(i) || (cast_void(L->top = base), 1));
         vmdispatch(GET_OPCODE(i)) {
             vmcase(OP_MOVE) {
-                setobjs2s(L, ra, RB(i));
+                setobjs2s(L, ra, RB(i)); // R[A] := R[B]
                 vmbreak;
             }
             vmcase(OP_LOADI) {
