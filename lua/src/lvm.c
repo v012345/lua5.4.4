@@ -253,12 +253,12 @@ static int floatforloop(StkId ra) {
         return 0; /* finish the loop */
 }
 
-/// @brief 
+/// @brief
 /// Finish the table access 'val = t[key]'. if 'slot' is NULL, 't' is not a table; otherwise, 'slot' points to t[k] entry (which must be empty).
-/// @param t 
-/// @param key 
-/// @param val 
-/// @param slot 
+/// @param t
+/// @param key
+/// @param val
+/// @param slot
 void luaV_finishget(lua_State* L, const TValue* t, TValue* key, StkId val, const TValue* slot) {
     int loop; /* counter to avoid infinite loops */
     const TValue* tm; /* metamethod */
@@ -1176,25 +1176,25 @@ returning: /* trap already set */
                 setobj2s(L, ra, rb);
                 vmbreak;
             }
-            vmcase(OP_LOADFALSE) {
+            vmcase(OP_LOADFALSE) { // A R[A] := false
                 setbfvalue(s2v(ra));
                 vmbreak;
             }
-            vmcase(OP_LFALSESKIP) {
+            vmcase(OP_LFALSESKIP) { // A R[A] := false; pc++ (*)
                 setbfvalue(s2v(ra));
                 pc++; /* skip next instruction */
                 vmbreak;
             }
             vmcase(OP_LOADTRUE) {
-                setbtvalue(s2v(ra));
+                setbtvalue(s2v(ra)); // A R[A] := true
                 vmbreak;
             }
-            vmcase(OP_LOADNIL) {
+            vmcase(OP_LOADNIL) { // A B R[A], R[A+1], ..., R[A+B] := nil
                 int b = GETARG_B(i);
                 do { setnilvalue(s2v(ra++)); } while (b--);
                 vmbreak;
             }
-            vmcase(OP_GETUPVAL) {
+            vmcase(OP_GETUPVAL) { // A B R[A] := UpValue[B]
                 int b = GETARG_B(i);
                 setobj2s(L, ra, cl->upvals[b]->v);
                 vmbreak;

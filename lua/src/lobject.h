@@ -213,7 +213,9 @@ typedef StackValue* StkId;
 
 #define l_isfalse(o) (ttisfalse(o) || ttisnil(o))
 
+// obj->tt_ = false
 #define setbfvalue(obj) settt_(obj, LUA_VFALSE)
+// obj->tt_ = true
 #define setbtvalue(obj) settt_(obj, LUA_VTRUE)
 
 /* }================================================================== */
