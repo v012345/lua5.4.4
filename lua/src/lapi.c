@@ -637,10 +637,8 @@ LUA_API int lua_gettable(lua_State* L, int idx) {
     return ttype(s2v(L->top - 1));
 }
 
-/// @brief 把表键 k 对应的 value 放到栈顶
-/// @param idx 表在栈中的索引
-/// @param k 键值
-/// @return ttype(value)
+/// @brief stack[idx][k] 放到栈顶
+/// @return type(stack[idx][k])
 LUA_API int lua_getfield(lua_State* L, int idx, const char* k) {
     lua_lock(L);
     return auxgetstr(L, index2value(L, idx), k);

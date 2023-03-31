@@ -279,10 +279,8 @@ static int db_upvaluejoin(lua_State* L) {
     return 0;
 }
 
-/*
-** Call hook function registered at hook table for the current
-** thread (if there is one)
-*/
+/// @brief 钩子调用时, 执行之前函数设置的 lua 函数 \r
+/// Call hook function registered at hook table for the current thread (if there is one)
 static void hookf(lua_State* L, lua_Debug* ar) {
     static const char* const hooknames[] = {"call", "return", "line", "count", "tail call"};
     lua_getfield(L, LUA_REGISTRYINDEX, HOOKKEY);
