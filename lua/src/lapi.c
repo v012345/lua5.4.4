@@ -482,6 +482,7 @@ LUA_API const char* lua_pushlstring(lua_State* L, const char* s, size_t len) {
     return getstr(ts);
 }
 
+/// @brief 把字符串置于栈顶
 LUA_API const char* lua_pushstring(lua_State* L, const char* s) {
     lua_lock(L);
     if (s == NULL)
@@ -662,6 +663,7 @@ LUA_API int lua_geti(lua_State* L, int idx, lua_Integer n) {
     return ttype(s2v(L->top - 1));
 }
 
+/// @brief 把 val 放到栈顶, 返回 val 的类型
 l_sinline int finishrawget(lua_State* L, const TValue* val) {
     if (isempty(val)) /* avoid copying empty items to the stack */
         setnilvalue(s2v(L->top));
@@ -672,19 +674,14 @@ l_sinline int finishrawget(lua_State* L, const TValue* val) {
     return ttype(s2v(L->top - 1));
 }
 
+/// @brief 返回 (Table*)(stack[idx])
 static Table* gettable(lua_State* L, int idx) {
     TValue* t = index2value(L, idx);
     api_check(L, ttistable(t), "table expected");
     return hvalue(t);
 }
 
-/**
- * @brief 与 lua_gettable 一样, 就是 lua_gettable 会触发 __index .
- *
- * @param L
- * @param idx
- * @return LUA_API
- */
+/// @brief t = stack[idx]; value = t[top - 1]; top--; top = value; top++; 返回 value 的类型
 LUA_API int lua_rawget(lua_State* L, int idx) {
     Table* t;
     const TValue* val;
@@ -727,6 +724,8 @@ LUA_API void lua_createtable(lua_State* L, int narray, int nrec) {
     lua_unlock(L);
 }
 
+/// @brief 如果 stack[objindex] 有 metatable, 把 metatable 表放到栈顶, 返回 1, 否则返回 0 \r
+/// 只有 table 与 userdata 用自己的 metatable, 其他类型都用 global_State 中的 mt 中的表
 LUA_API int lua_getmetatable(lua_State* L, int objindex) {
     const TValue* obj;
     Table* mt;
@@ -883,14 +882,7 @@ LUA_API void lua_rawseti(lua_State* L, int idx, lua_Integer n) {
     L->top--;
     lua_unlock(L);
 }
-
-/**
- * @brief 把 栈顶元素 设置成 L[objindex] 的 metatable
- *
- * @param L
- * @param objindex
- * @return LUA_API
- */
+/// @brief stack[objindex]->metatable = table(top-1); top--
 LUA_API int lua_setmetatable(lua_State* L, int objindex) {
     TValue* obj;
     Table* mt;

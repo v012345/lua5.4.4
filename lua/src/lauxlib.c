@@ -353,6 +353,7 @@ LUALIB_API void luaL_checkstack(lua_State* L, int space, const char* msg) {
     }
 }
 
+/// @brief 如果 type(stack[arg]) != t 就报错
 LUALIB_API void luaL_checktype(lua_State* L, int arg, int t) {
     if (l_unlikely(lua_type(L, arg) != t)) tag_error(L, arg, t);
 }
@@ -760,6 +761,7 @@ LUALIB_API int luaL_loadstring(lua_State* L, const char* s) { return luaL_loadbu
 
 /* }====================================================== */
 
+/// @brief 返回 stack[idx] 的 metatable 类型, 如果 metatable[event] 存在, 将其置于栈顶
 LUALIB_API int luaL_getmetafield(lua_State* L, int obj, const char* event) {
     if (!lua_getmetatable(L, obj)) /* no metatable? */
         return LUA_TNIL;
@@ -843,7 +845,7 @@ LUALIB_API void luaL_setfuncs(lua_State* L, const luaL_Reg* l, int nup) {
 }
 
 /// @brief ensure that stack[idx][fname] has a table and push that table into the stack
-/// @return int
+/// @return 已存在返回 1, 否则生成一个新的, 返回 0
 LUALIB_API int luaL_getsubtable(lua_State* L, int idx, const char* fname) {
     if (lua_getfield(L, idx, fname) == LUA_TTABLE)
         return 1; /* table already there */

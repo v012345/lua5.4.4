@@ -728,13 +728,7 @@ const TValue* luaH_getstr(Table* t, TString* key) {
     }
 }
 
-/**
- * @brief main search function 在 表 t 中 拿到 key 对应的 value
- *
- * @param t
- * @param key
- * @return const TValue*
- */
+/// @brief 返回 t[key]; main search function
 const TValue* luaH_get(Table* t, const TValue* key) {
     switch (ttypetag(key)) {
         case LUA_VSHRSTR: return luaH_getshortstr(t, tsvalue(key));

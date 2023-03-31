@@ -117,22 +117,24 @@ static int luaB_error(lua_State* L) {
 
 static int luaB_getmetatable(lua_State* L) {
     luaL_checkany(L, 1);
+    // 如果有元表, 将其置于栈顶
     if (!lua_getmetatable(L, 1)) {
-        lua_pushnil(L);
+        lua_pushnil(L); // 没有元表, 返一个 nil 回去
         return 1; /* no metatable */
     }
-    luaL_getmetafield(L, 1, "__metatable");
+    luaL_getmetafield(L, 1, "__metatable"); // 如果元表的 field 存在 __metatable, 返回 t->metatable[__metatable], 隐藏真实的元表
     return 1; /* returns either __metatable field (if present) or metatable */
 }
 
 static int luaB_setmetatable(lua_State* L) {
-    int t = lua_type(L, 2);
-    luaL_checktype(L, 1, LUA_TTABLE);
-    luaL_argexpected(L, t == LUA_TNIL || t == LUA_TTABLE, 2, "nil or table");
-    if (l_unlikely(luaL_getmetafield(L, 1, "__metatable") != LUA_TNIL)) return luaL_error(L, "cannot change a protected metatable");
-    lua_settop(L, 2);
-    lua_setmetatable(L, 1);
-    return 1;
+    int t = lua_type(L, 2); // 看看第二个参数的类型
+    luaL_checktype(L, 1, LUA_TTABLE); // 第一个参数必须是表
+    luaL_argexpected(L, t == LUA_TNIL || t == LUA_TTABLE, 2, "nil or table"); // 第二个参数必须是 nil 或 table
+    if (l_unlikely(luaL_getmetafield(L, 1, "__metatable") != LUA_TNIL)) // 如果 stack[1] 的 metatable 有 __metatable 字段, 说不可以改其 metatable, 报错
+        return luaL_error(L, "cannot change a protected metatable");
+    lua_settop(L, 2); // 除移上步 if 对栈顶的影响
+    lua_setmetatable(L, 1); // 把第二个参数置为的第一个参数的元表
+    return 1; // 返回第一个参数
 }
 
 static int luaB_rawequal(lua_State* L) {

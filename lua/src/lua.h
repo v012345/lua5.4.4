@@ -355,6 +355,7 @@ LUA_API void(lua_closeslot)(lua_State* L, int idx);
 #define lua_isnone(L, n) (lua_type(L, (n)) == LUA_TNONE)
 #define lua_isnoneornil(L, n) (lua_type(L, (n)) <= 0)
 
+// 把字符串 s 压到栈顶
 #define lua_pushliteral(L, s) lua_pushstring(L, "" s)
 
 // 把全局表把置于栈顶
