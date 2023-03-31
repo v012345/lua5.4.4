@@ -456,9 +456,7 @@ l_sinline CallInfo* prepCallInfo(lua_State* L, StkId func, int nret, int mask, S
     return ci;
 }
 
-/*
-** precall for C functions
-*/
+/// @brief 如果 L->hookmask 有设置 LUA_MASKCALL, ; precall for C functions
 l_sinline int precallC(lua_State* L, StkId func, int nresults, lua_CFunction f) {
     int n; /* number of returns */
     CallInfo* ci;

@@ -845,7 +845,7 @@ LUALIB_API void luaL_setfuncs(lua_State* L, const luaL_Reg* l, int nup) {
 }
 
 /// @brief ensure that stack[idx][fname] has a table and push that table into the stack
-/// @return 已存在返回 1, 否则生成一个新的, 返回 0
+/// @return stack[idx][fname] 已存在返回 1, 否则生成一个新的, 返回 0
 LUALIB_API int luaL_getsubtable(lua_State* L, int idx, const char* fname) {
     if (lua_getfield(L, idx, fname) == LUA_TTABLE)
         return 1; /* table already there */
