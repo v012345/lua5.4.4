@@ -340,7 +340,6 @@ LUA_API lua_State* lua_newstate(lua_Alloc f, void* ud) {
     int i;
     lua_State* L;
     global_State* g;
-    /* 把 lua_Alloc f 返回的内存空间的 void* 强转为 LG* */
     LG* l = cast(LG*, (*f)(ud, NULL, LUA_TTHREAD, sizeof(LG)));
     if (l == NULL) return NULL;
     L = &l->l.l;

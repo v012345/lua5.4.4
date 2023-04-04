@@ -102,7 +102,7 @@ typedef LUAI_UACINT l_uacInt;
 #define UNUSED(x) ((void)(x))
 #endif
 
-// 把 exp 强转成 t 类型; type casts (a macro highlights casts in the code)
+// type casts (a macro highlights casts in the code)
 #define cast(t, exp) ((t)(exp))
 
 #define cast_void(i) cast(void, (i))

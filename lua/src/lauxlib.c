@@ -401,7 +401,7 @@ LUALIB_API lua_Integer luaL_checkinteger(lua_State* L, int arg) {
     return d;
 }
 
-/// @brief 如果 stack[arg] 为空, 直接返回 def. 否则, 
+/// @brief 如果 stack[arg] 为空, 直接返回 def. 否则,
 LUALIB_API lua_Integer luaL_optinteger(lua_State* L, int arg, lua_Integer def) {
     //
     return luaL_opt(L, luaL_checkinteger, arg, def);
@@ -902,15 +902,8 @@ LUALIB_API const char* luaL_gsub(lua_State* L, const char* s, const char* p, con
     return lua_tostring(L, -1);
 }
 
-/**
- * @brief 官方提供的内存管理函数
- *
- * @param ud void* 可以接收任何类型指针 不用
- * @param ptr
- * @param osize 内存块的原始大小 这里为不使用
- * @param nsize 内存块新的大小 如果 nsize 为 0, 释放 ptr
- * @return void*
- */
+/// @param ptr 指向原来内存块的指针
+/// @param nsize 内存块新的大小 如果 nsize 为 0, 释放 ptr
 static void* l_alloc(void* ud, void* ptr, size_t osize, size_t nsize) {
     /* It works around some compiler warnings. Some compilers will warn if you don't use a function parameter. */
     (void)ud;

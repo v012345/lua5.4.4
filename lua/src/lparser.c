@@ -128,6 +128,7 @@ static void init_exp(expdesc* e, expkind k, int i) {
     e->u.info = i;
 }
 
+/// @brief
 static void codestring(expdesc* e, TString* s) {
     e->f = e->t = NO_JUMP;
     e->k = VKSTR;
@@ -167,10 +168,9 @@ static int new_localvar(LexState* ls, TString* name) {
 
 #define new_localvarliteral(ls, v) new_localvar(ls, luaX_newstring(ls, "" v, (sizeof(v) / sizeof(char)) - 1));
 
-/// @brief 返回 Dyndata 中 arr 中 vidx(实际上是 fs->firstlocal + vidx ) 的值;
+/// @brief 返回 Dyndata 中 arr 中 vidx(实际上是 fs->firstlocal + vidx ) 的值; \r
 /// Return the "variable description" (Vardesc) of a given variable.
-/// (Unless noted otherwise, all variables are referred to by their
-/// compiler indices.)
+/// (Unless noted otherwise, all variables are referred to by their compiler indices.)
 static Vardesc* getlocalvardesc(FuncState* fs, int vidx) { return &fs->ls->dyd->actvar.arr[fs->firstlocal + vidx]; }
 
 /*
@@ -205,9 +205,9 @@ static LocVar* localdebuginfo(FuncState* fs, int vidx) {
 }
 
 /// @brief Create an expression representing variable 'vidx'
-/// @param fs 
-/// @param e 
-/// @param vidx 
+/// @param fs
+/// @param e
+/// @param vidx
 static void init_var(FuncState* fs, expdesc* e, int vidx) {
     e->f = e->t = NO_JUMP;
     e->k = VLOCAL;
