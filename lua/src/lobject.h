@@ -68,21 +68,23 @@ typedef struct TValue {
 #define val_(o) ((o)->value_)
 #define valraw(o) (val_(o))
 
-/* raw type tag of a TValue */
+// o 的细分类型(tt_); raw type tag of a TValue
 #define rawtt(o) ((o)->tt_)
 
-/* tag with no variants (bits 0-3) */
+// 细分类型(tag)的低 4 位, 细分类型的大类; tag with no variants (bits 0-3)
 #define novariant(t) ((t)&0x0F)
 
 /* type tag of a TValue (bits 0-3 for tags + variant bits 4-5) */
 #define withvariant(t) ((t)&0x3F)
 #define ttypetag(o) withvariant(rawtt(o))
 
-/* type of a TValue */
+// o 属于的大类型; type of a TValue
 #define ttype(o) (novariant(rawtt(o)))
 
 /* Macros to test type */
+// o 是不是 t 这种细分类型(tag)
 #define checktag(o, t) (rawtt(o) == (t))
+// o 是不是 t 这种类型(type)
 #define checktype(o, t) (ttype(o) == (t))
 
 /* Macros for internal tests */

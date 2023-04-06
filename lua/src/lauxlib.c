@@ -358,6 +358,7 @@ LUALIB_API void luaL_checktype(lua_State* L, int arg, int t) {
     if (l_unlikely(lua_type(L, arg) != t)) tag_error(L, arg, t);
 }
 
+/// @brief 只要 stack[idx] != G->nilvalue 就行
 LUALIB_API void luaL_checkany(lua_State* L, int arg) {
     if (l_unlikely(lua_type(L, arg) == LUA_TNONE)) luaL_argerror(L, arg, "value expected");
 }
