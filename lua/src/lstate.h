@@ -168,7 +168,7 @@ typedef struct CallInfo {
         } l; // 只对 Lua 函数有效,保存了当前 Lua 函数执行的一些信息,比如指令指针、附加的参数个数、当前状态的 trap 等
         struct { /* only for C functions */
             lua_KFunction k; /* continuation in case of yields */
-            ptrdiff_t old_errfunc;
+            ptrdiff_t old_errfunc; // 进入本 ci 时, 保存上一个 ci 的 errfunc
             lua_KContext ctx; /* context info. in case of yields */
         } c; // 只对 C 函数有效,保存了当前 C 函数执行的一些信息,比如 continuation、旧的 error function 等
     } u;
