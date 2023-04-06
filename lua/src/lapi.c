@@ -198,8 +198,7 @@ l_sinline void reverse(lua_State* L, StkId from, StkId to) {
     }
 }
 
-/// @brief n 与 idx 与相反, n 为正从栈顶向下数, 为负则从 idx 向上数, 把 idx 到 top 中的元素, 以 n 数出来的位置为界, 上层的元素去下面, 下层的元素到上面;
-/// Let x = AB, where A is a prefix of length 'n'. Then, rotate x n == BA. But BA == (A^r . B^r)^r.
+/// @brief Let x = AB, where A is a prefix of length 'n'. Then, rotate x n == BA. But BA == (A^r . B^r)^r.
 LUA_API void lua_rotate(lua_State* L, int idx, int n) {
     StkId p, t, m;
     lua_lock(L);
@@ -554,6 +553,8 @@ LUA_API void lua_pushcclosure(lua_State* L, lua_CFunction fn, int n) {
     lua_unlock(L);
 }
 
+/// @brief 把一个布尔值置于栈顶
+/// @param b  布尔值, 1 为真, 0 为假
 LUA_API void lua_pushboolean(lua_State* L, int b) {
     lua_lock(L);
     if (b)
@@ -990,7 +991,6 @@ static void f_call(lua_State* L, void* ud) {
 /// @param errfunc 错误处理函数在栈中的位置
 /// @param ctx 自定义的上下文变量
 /// @param k 一个可选的 continuation 函数
-/// @return int
 LUA_API int lua_pcallk(lua_State* L, int nargs, int nresults, int errfunc, lua_KContext ctx, lua_KFunction k) {
     struct CallS c; // 保存调用信息
     int status; // 返回值
@@ -1003,7 +1003,7 @@ LUA_API int lua_pcallk(lua_State* L, int nargs, int nresults, int errfunc, lua_K
     if (errfunc == 0)
         func = 0;
     else {
-        StkId o = index2stack(L, errfunc);
+        StkId o = index2stack(L, errfunc); // 错误处理函数
         api_check(L, ttisfunction(s2v(o)), "error handler must be a function");
         func = savestack(L, o);
     }
