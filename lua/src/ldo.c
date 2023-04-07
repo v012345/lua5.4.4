@@ -550,11 +550,10 @@ retry:
     }
 }
 
-/*
-** Call a function (C or Lua) through C. 'inc' can be 1 (increment
-** number of recursive invocations in the C stack) or nyci (the same
-** plus increment number of non-yieldable calls).
-*/
+/// @brief lua 与 c 函数的最终调用地, lua 走虚拟机, c 直接调用 \r
+/// Call a function (C or Lua) through C. 'inc' can be 1 (increment
+/// number of recursive invocations in the C stack) or nyci (the same
+/// plus increment number of non-yieldable calls).
 l_sinline void ccall(lua_State* L, StkId func, int nResults, int inc) {
     CallInfo* ci;
     L->nCcalls += inc; // 当前的 C 调用深度

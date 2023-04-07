@@ -1120,7 +1120,7 @@ void luaV_execute(lua_State* L, CallInfo* ci) {
 #if LUA_USE_JUMPTABLE
 #include "ljumptab.h"
 #endif
-startfunc:
+startfunc: // 开始执行 lua 函数
     trap = L->hookmask;
 returning: /* trap already set */
     cl = clLvalue(s2v(ci->func)); // 根据 CallInfo 的 func 在栈中拿到 lua 闭包

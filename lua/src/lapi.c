@@ -979,13 +979,13 @@ struct CallS { /* data to 'f_call' */
 };
 
 /// @brief 通过调用 luaD_callnoyield 来执行 Lua 函数或 C 函数
-/// @param ud
+/// @param ud CallS, 存都调用闭包在栈中的位置, 与调用都期望返回参数个数
 static void f_call(lua_State* L, void* ud) {
     struct CallS* c = cast(struct CallS*, ud);
     luaD_callnoyield(L, c->func, c->nresults);
 }
 
-/// @brief
+/// @brief 被调用的函数在 (top - 1) - nargs
 /// @param nargs 传递给函数的参数个数
 /// @param nresults 期望返回值的个数
 /// @param errfunc 错误处理函数在栈中的位置
