@@ -837,7 +837,6 @@ int luaD_closeprotected(lua_State* L, ptrdiff_t level, int status) {
 
 /// @brief 用于在保护模式下调用一个 C 函数,并在出现错误时恢复堆栈信息,处理错误
 /// Call the C function 'func' in protected mode, restoring basic thread information ('allowhook', etc.) and in particular its stack level in case of errors.
-/// @param L
 /// @param func 要调用的 C 函数
 /// @param u 一个指向用户数据的指针
 /// @param old_top 旧栈顶

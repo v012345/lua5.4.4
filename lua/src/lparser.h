@@ -41,7 +41,7 @@ typedef enum {
     VJMP, /* expression is a test/comparison; info = pc of corresponding jump instruction */
     VRELOC, /* expression can put result in any register; info = instruction pc */
     VCALL, /* expression is a function call; info = instruction pc */
-    VVARARG /* vararg expression; info = instruction pc */
+    VVARARG, /* vararg expression; info = instruction pc */
 } expkind;
 
 #define vkisvar(k) (VLOCAL <= (k) && (k) <= VINDEXSTR)
@@ -68,7 +68,7 @@ typedef struct expdesc {
 } expdesc;
 
 /* kinds of variables */
-#define VDKREG 0 /* 普通变量 regular */
+#define VDKREG 0 /* regular */
 #define RDKCONST 1 /* constant */
 #define RDKTOCLOSE 2 /* to-be-closed */
 #define RDKCTC 3 /* compile-time constant */

@@ -66,6 +66,7 @@ static l_noret errorlimit(FuncState* fs, int limit, const char* what) {
     luaX_syntaxerror(fs->ls, msg);
 }
 
+/// @brief v <= l, 否则报错
 static void checklimit(FuncState* fs, int v, int l, const char* what) {
     if (v > l) errorlimit(fs, l, what);
 }
@@ -119,8 +120,6 @@ static TString* str_checkname(LexState* ls) {
 }
 
 /// @brief 初始化一个表达式描述结构
-/// @param e 表达式描述结构
-/// @param k 表达式的类型
 /// @param i 额外信息, 可能是在 Dyndata 的 local 数组中的索引
 static void init_exp(expdesc* e, expkind k, int i) {
     e->f = e->t = NO_JUMP;
@@ -151,7 +150,8 @@ static int registerlocalvar(LexState* ls, FuncState* fs, TString* varname) {
     return fs->ndebugvars++;
 }
 
-/// @brief 把 FuncState 用到的变量存入到 Dyndata 的数组, 返回在数组中的**相对**索引; Create a new local variable with the given 'name'. Return its index in the function.
+/// @brief 把 FuncState 用到的局部变量存入到 Dyndata 的数组, 返回在数组中的**相对**索引; \r
+/// Create a new local variable with the given 'name'. Return its index in the function.
 static int new_localvar(LexState* ls, TString* name) {
     lua_State* L = ls->L;
     FuncState* fs = ls->fs;
@@ -172,11 +172,10 @@ static int new_localvar(LexState* ls, TString* name) {
 /// (Unless noted otherwise, all variables are referred to by their compiler indices.)
 static Vardesc* getlocalvardesc(FuncState* fs, int vidx) { return &fs->ls->dyd->actvar.arr[fs->firstlocal + vidx]; }
 
-/*
-** Convert 'nvar', a compiler index level, to its corresponding
-** register. For that, search for the highest variable below that level
-** that is in a register and uses its register index ('ridx') plus one.
-*/
+/// @brief 返回一个可用的寄存器索引 \r
+/// Convert 'nvar', a compiler index level, to its corresponding
+/// register. For that, search for the highest variable below that level
+/// that is in a register and uses its register index ('ridx') plus one.
 static int reglevel(FuncState* fs, int nvar) {
     while (nvar-- > 0) {
         Vardesc* vd = getlocalvardesc(fs, nvar); /* get previous variable */
@@ -186,7 +185,8 @@ static int reglevel(FuncState* fs, int nvar) {
     return 0; /* no variables in registers */
 }
 
-/// @brief Return the number of variables in the register stack for the given function.
+/// @brief 当前函数使用的寄存器个数 \r
+/// Return the number of variables in the register stack for the given function.
 int luaY_nvarstack(FuncState* fs) { return reglevel(fs, fs->nactvar); }
 
 /*
@@ -701,7 +701,7 @@ static void fieldsel(LexState* ls, expdesc* v) {
     expdesc key;
     luaK_exp2anyregup(fs, v);
     luaX_next(ls); /* skip the dot or colon */
-    codename(ls, &key);
+    codename(ls, &key); // 解析字段名，并将其存储在 key 中
     luaK_indexed(fs, v, &key);
 }
 
@@ -938,7 +938,7 @@ static void funcargs(LexState* ls, expdesc* f, int line) {
 ** =======================================================================
 */
 
-/// @brief 原始表达式
+/// @brief 基本表达式, 缀表达式的核心部分
 static void primaryexp(LexState* ls, expdesc* v) {
     /* primaryexp -> NAME | '(' expr ')' */
     switch (ls->t.token) {
@@ -960,7 +960,7 @@ static void primaryexp(LexState* ls, expdesc* v) {
     }
 }
 
-/// @brief 后缀的表达式, 不知道什么意思
+/// @brief 后缀的表达式, 基本表达式{+后续}, 基本表达示可以理解成一个变量, 后缀的表达式可以为 ( . [ : {
 static void suffixedexp(LexState* ls, expdesc* v) {
     /* suffixedexp -> primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
     FuncState* fs = ls->fs;
@@ -1141,6 +1141,7 @@ static BinOpr subexpr(LexState* ls, expdesc* v, int limit) {
     return op; /* return first untreated operator */
 }
 
+/// @brief 解析一个表达式
 static void expr(LexState* ls, expdesc* v) { subexpr(ls, v, 0); }
 
 /* }==================================================================== */
@@ -1160,10 +1161,7 @@ static void block(LexState* ls) {
     leaveblock(fs);
 }
 
-/*
-** structure to chain all variables in the left-hand side of an
-** assignment
-*/
+// structure to chain all variables in the left-hand side of an assignment
 struct LHS_assign {
     struct LHS_assign* prev;
     expdesc v; /* variable (global, local, upvalue, or indexed) */
