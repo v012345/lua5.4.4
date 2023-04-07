@@ -55,8 +55,10 @@ typedef struct BlockCnt {
 static void statement(LexState* ls);
 static void expr(LexState* ls, expdesc* v);
 
-static l_noret error_expected(LexState* ls, int token) { luaX_syntaxerror(ls, luaO_pushfstring(ls->L, "%s expected", luaX_token2str(ls, token))); }
-
+static l_noret error_expected(LexState* ls, int token) { 
+    luaX_syntaxerror(ls, luaO_pushfstring(ls->L, "%s expected", luaX_token2str(ls, token))); 
+}
+ 
 static l_noret errorlimit(FuncState* fs, int limit, const char* what) {
     lua_State* L = fs->ls->L;
     const char* msg;
@@ -135,11 +137,12 @@ static void codestring(expdesc* e, TString* s) {
     e->u.strval = s;
 }
 
-static void codename(LexState* ls, expdesc* e) { codestring(e, str_checkname(ls)); }
+static void codename(LexState* ls, expdesc* e) { 
+    codestring(e, str_checkname(ls));
+}
 
 /*
-** Register a new local variable in the active 'Proto' (for debug
-** information).
+** Register a new local variable in the active 'Proto' (for debug information).
 */
 static int registerlocalvar(LexState* ls, FuncState* fs, TString* varname) {
     Proto* f = fs->f;
