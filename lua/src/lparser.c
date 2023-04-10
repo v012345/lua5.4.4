@@ -71,7 +71,8 @@ static void checklimit(FuncState* fs, int v, int l, const char* what) {
     if (v > l) errorlimit(fs, l, what);
 }
 
-/// @brief 看看一下 token 是不是 c, 如果是, 就跳过这个 token ; Test whether next token is 'c'; if so, skip it.
+/// @brief 看看一下 token 是不是 c, 如果是, 就跳过这个 token \r
+/// Test whether next token is 'c'; if so, skip it.
 static int testnext(LexState* ls, int c) {
     if (ls->t.token == c) {
         luaX_next(ls);
@@ -96,11 +97,10 @@ static void checknext(LexState* ls, int c) {
         if (!(c)) luaX_syntaxerror(ls, msg);                                                                                                                                                           \
     }
 
-/*
-** Check that next token is 'what' and skip it. In case of error,
-** raise an error that the expected 'what' should match a 'who'
-** in line 'where' (if that is not the current line).
-*/
+/// @brief 看看一下 token 是不是 what, 如果是, 就跳过这个 token, 不是就报错 \r
+/// Check that next token is 'what' and skip it. In case of error,
+/// raise an error that the expected 'what' should match a 'who'
+/// in line 'where' (if that is not the current line).
 static void check_match(LexState* ls, int what, int who, int where) {
     if (l_unlikely(!testnext(ls, what))) {
         if (where == ls->linenumber) /* all in the same line? */
@@ -150,8 +150,9 @@ static int registerlocalvar(LexState* ls, FuncState* fs, TString* varname) {
     return fs->ndebugvars++;
 }
 
-/// @brief 把 FuncState 用到的局部变量存入到 Dyndata 的数组, 返回在数组中的**相对**索引; \r
+/// @brief 把 FuncState 用到的局部变量存入到 Vardesc 数组中\r
 /// Create a new local variable with the given 'name'. Return its index in the function.
+/// @return 在数组中的**相对**索引
 static int new_localvar(LexState* ls, TString* name) {
     lua_State* L = ls->L;
     FuncState* fs = ls->fs;
@@ -167,10 +168,13 @@ static int new_localvar(LexState* ls, TString* name) {
 
 #define new_localvarliteral(ls, v) new_localvar(ls, luaX_newstring(ls, "" v, (sizeof(v) / sizeof(char)) - 1));
 
-/// @brief 返回 Dyndata 中 arr 中 vidx(实际上是 fs->firstlocal + vidx ) 的值; \r
+/// @brief 拿到局部变量的描述(Vardesc 数组中了)\r
 /// Return the "variable description" (Vardesc) of a given variable.
 /// (Unless noted otherwise, all variables are referred to by their compiler indices.)
-static Vardesc* getlocalvardesc(FuncState* fs, int vidx) { return &fs->ls->dyd->actvar.arr[fs->firstlocal + vidx]; }
+static Vardesc* getlocalvardesc(FuncState* fs, int vidx) {
+    // 返回 Dyndata 中 arr 中 vidx(实际上是 fs->firstlocal + vidx ) 的值;
+    return &fs->ls->dyd->actvar.arr[fs->firstlocal + vidx];
+}
 
 /// @brief 返回一个可用的寄存器索引 \r
 /// Convert 'nvar', a compiler index level, to its corresponding
@@ -203,15 +207,13 @@ static LocVar* localdebuginfo(FuncState* fs, int vidx) {
     }
 }
 
-/// @brief Create an expression representing variable 'vidx'
-/// @param fs
-/// @param e
-/// @param vidx
+/// @brief 初始化一个表示局部变量的 expdesc \r
+/// Create an expression representing variable 'vidx'
 static void init_var(FuncState* fs, expdesc* e, int vidx) {
     e->f = e->t = NO_JUMP;
     e->k = VLOCAL;
-    e->u.var.vidx = vidx;
-    e->u.var.ridx = getlocalvardesc(fs, vidx)->vd.ridx;
+    e->u.var.vidx = vidx; // actvar.arr 索引
+    e->u.var.ridx = getlocalvardesc(fs, vidx)->vd.ridx; // 寄存器索引
 }
 
 /*
@@ -315,11 +317,11 @@ static int newupvalue(FuncState* fs, TString* name, expdesc* v) {
     return fs->nups - 1;
 }
 
-/*
-** Look for an active local variable with the name 'n' in the
-** function 'fs'. If found, initialize 'var' with it and return
-** its expression kind; otherwise return -1.
-*/
+/// @brief 遍历当前的 FuncState 的局部变量, 通过变量名来找对应变量 \r
+/// Look for an active local variable with the name 'n' in the
+/// function 'fs'. If found, initialize 'var' with it and return
+/// its expression kind; otherwise return -1.
+/// @return 如果找到就返回变量类型(一般为 VLOCAL), 否则返回 -1
 static int searchvar(FuncState* fs, TString* n, expdesc* var) {
     int i;
     for (i = cast_int(fs->nactvar) - 1; i >= 0; i--) {
@@ -356,21 +358,21 @@ static void marktobeclosed(FuncState* fs) {
     fs->needclose = 1;
 }
 
-/// @brief
+/// @brief singlevar 的辅助函数 \r
 /// Find a variable with the given name 'n'. If it is an upvalue, add
 /// this upvalue into all intermediate functions. If it is a global, set
 /// 'var' as 'void' as a flag.
-/// @param fs
 /// @param n 变量的名称
-/// @param var
-/// @param base
+/// @param var 要被填充的 expdesc
+/// @param base 是不是当前的作用域, 1 为当前作用域, 0 为父级作用域
 static void singlevaraux(FuncState* fs, TString* n, expdesc* var, int base) {
     if (fs == NULL) /* no more levels? */
         init_exp(var, VVOID, 0); /* default is global */
     else {
         int v = searchvar(fs, n, var); /* look up locals at current level */
         if (v >= 0) { /* found? */
-            if (v == VLOCAL && !base) markupval(fs, var->u.var.vidx); /* local will be used as an upval */
+            if (v == VLOCAL && !base) /* local will be used as an upval */
+                markupval(fs, var->u.var.vidx);
         } else { /* not found as local at current level; try upvalues */
             int idx = searchupvalue(fs, n); /* try existing upvalues */
             if (idx < 0) { /* not found? */
@@ -385,7 +387,8 @@ static void singlevaraux(FuncState* fs, TString* n, expdesc* var, int base) {
     }
 }
 
-/// @brief 单一变量; Find a variable with the given name 'n', handling global variables too.
+/// @brief 单一变量;
+/// Find a variable with the given name 'n', handling global variables too.
 static void singlevar(LexState* ls, expdesc* var) {
     TString* varname = str_checkname(ls);
     FuncState* fs = ls->fs;
@@ -684,6 +687,7 @@ static int block_follow(LexState* ls, int withuntil) {
     }
 }
 
+/// @brief 解析语句组
 static void statlist(LexState* ls) {
     /* statlist -> { stat [';'] } */
     while (!block_follow(ls, 1)) {
@@ -1468,7 +1472,7 @@ static void test_then_block(LexState* ls, int* escapelist) {
     int jf; /* instruction to skip 'then' code (if condition is false) */
     luaX_next(ls); /* skip IF or ELSEIF */
     expr(ls, &v); /* read condition */
-    checknext(ls, TK_THEN);
+    checknext(ls, TK_THEN); // 条件表达式后面需要一个 then
     if (ls->t.token == TK_BREAK) { /* 'if x then break' ? */
         int line = ls->linenumber;
         luaK_goiffalse(ls->fs, &v); /* will jump if condition is true */
@@ -1601,16 +1605,18 @@ static void funcstat(LexState* ls, int line) {
     luaK_fixline(ls->fs, line); /* definition "happens" in the first line */
 }
 
-/// @brief 处理一个表达式语句
+/// @brief 处理函数调用或赋值操作
 static void exprstat(LexState* ls) {
     /* stat -> func | assignment */
     FuncState* fs = ls->fs;
     struct LHS_assign v;
-    suffixedexp(ls, &v.v);
-    if (ls->t.token == '=' || ls->t.token == ',') { /* stat -> assignment ? */
-        v.prev = NULL;
+    suffixedexp(ls, &v.v); // 处理第一个 token
+    if (ls->t.token == '=' || ls->t.token == ',') {
+        /* stat -> assignment ? */
+        v.prev = NULL; // 链头的 prev 为 NULL
         restassign(ls, &v, 1);
-    } else { /* stat -> func */
+    } else {
+        /* stat -> func */
         Instruction* inst;
         check_condition(ls, v.v.k == VCALL, "syntax error");
         inst = &getinstruction(fs, &v.v);
@@ -1652,27 +1658,45 @@ static void statement(LexState* ls) {
     int line = ls->linenumber; /* may be needed for error messages */
     enterlevel(ls);
     switch (ls->t.token) {
-        case ';': { /* stat -> ';' (empty statement) */
+        case ';': {
+            /* stat -> ';' (empty statement) */
             luaX_next(ls); /* skip ';' */
             break;
         }
-        case TK_IF: { /* stat -> ifstat */ ifstat(ls, line); break;
+        case TK_IF: {
+            /* stat -> ifstat */
+            ifstat(ls, line);
+            break;
         }
-        case TK_WHILE: { /* stat -> whilestat */ whilestat(ls, line); break;
+        case TK_WHILE: {
+            /* stat -> whilestat */
+            whilestat(ls, line);
+            break;
         }
-        case TK_DO: { /* stat -> DO block END */
+        case TK_DO: {
+            /* stat -> DO block END */
             luaX_next(ls); /* skip DO */
             block(ls);
             check_match(ls, TK_END, TK_DO, line);
             break;
         }
-        case TK_FOR: { /* stat -> forstat */ forstat(ls, line); break;
+        case TK_FOR: {
+            /* stat -> forstat */
+            forstat(ls, line);
+            break;
         }
-        case TK_REPEAT: { /* stat -> repeatstat */ repeatstat(ls, line); break;
+        case TK_REPEAT: {
+            /* stat -> repeatstat */
+            repeatstat(ls, line);
+            break;
         }
-        case TK_FUNCTION: { /* stat -> funcstat */ funcstat(ls, line); break;
+        case TK_FUNCTION: {
+            /* stat -> funcstat */
+            funcstat(ls, line);
+            break;
         }
-        case TK_LOCAL: { /* stat -> localstat */
+        case TK_LOCAL: {
+            /* stat -> localstat */
             luaX_next(ls); /* skip LOCAL */
             if (testnext(ls, TK_FUNCTION)) /* local function? */
                 localfunc(ls); // 如果是 local function ... 就进入这里处理
@@ -1680,24 +1704,33 @@ static void statement(LexState* ls) {
                 localstat(ls); // 如果是 local 普通变量则进入这里
             break;
         }
-        case TK_DBCOLON: { /* stat -> label */
+        case TK_DBCOLON: {
+            /* stat -> label */
             luaX_next(ls); /* skip double colon */
             labelstat(ls, str_checkname(ls), line);
             break;
         }
-        case TK_RETURN: { /* stat -> retstat */
+        case TK_RETURN: {
+            /* stat -> retstat */
             luaX_next(ls); /* skip RETURN */
             retstat(ls);
             break;
         }
-        case TK_BREAK: { /* stat -> breakstat */ breakstat(ls); break;
+        case TK_BREAK: {
+            /* stat -> breakstat */
+            breakstat(ls);
+            break;
         }
-        case TK_GOTO: { /* stat -> 'goto' NAME */
+        case TK_GOTO: {
+            /* stat -> 'goto' NAME */
             luaX_next(ls); /* skip 'goto' */
             gotostat(ls);
             break;
         }
-        default: { /* stat -> func | assignment */ exprstat(ls); break;
+        default: {
+            /* stat -> func | assignment */
+            exprstat(ls);
+            break;
         }
     }
     lua_assert(ls->fs->f->maxstacksize >= ls->fs->freereg && ls->fs->freereg >= luaY_nvarstack(ls->fs));

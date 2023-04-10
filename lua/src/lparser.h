@@ -121,7 +121,7 @@ typedef struct FuncState {
     struct FuncState* prev; /* enclosing function */
     struct LexState* ls; /* lexical state */
     struct BlockCnt* bl; /* chain of current blocks */
-    int pc; /* 下一个指令，应当存放在Proto结构中的code列表的位置 next position to code (equivalent to 'ncode') */
+    int pc; /* next position to code (equivalent to 'ncode') */
     int lasttarget; /* 'label' of last 'jump label' */
     int previousline; /* last line that was saved in 'lineinfo' */
     int nk; /* 当前常量的数量 number of elements in 'k' */

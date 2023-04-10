@@ -66,12 +66,12 @@ static TValue* const2val(FuncState* fs, const expdesc* e) {
     return &fs->ls->dyd->actvar.arr[e->u.info].k;
 }
 
-/// @brief 
+/// @brief
 /// If expression is a constant, fills 'v' with its value and returns 1. Otherwise, returns 0.
-/// @param fs 
-/// @param e 
-/// @param v 
-/// @return 
+/// @param fs
+/// @param e
+/// @param v
+/// @return
 int luaK_exp2const(FuncState* fs, const expdesc* e, TValue* v) {
     if (hasjumps(e)) return 0; /* not a constant */
     switch (e->k) {
@@ -288,7 +288,7 @@ void luaK_patchtohere(FuncState* fs, int list) {
 ** Otherwise, store the difference from last line in 'lineinfo'.
 */
 static void savelineinfo(FuncState* fs, Proto* f, int line) {
-    int linedif = line - fs->previousline;
+    int linedif = line - fs->previousline; // 行数的差值
     int pc = fs->pc - 1; /* last instruction coded */
     if (abs(linedif) >= LIMLINEDIFF || fs->iwthabs++ >= MAXIWTHABS) {
         luaM_growvector(fs->ls->L, f->abslineinfo, fs->nabslineinfo, f->sizeabslineinfo, AbsLineInfo, MAX_INT, "lines");
@@ -330,10 +330,9 @@ static void removelastinstruction(FuncState* fs) {
     fs->pc--;
 }
 
-/*
-** Emit instruction 'i', checking for array sizes and saving also its
-** line information. Return 'i' position.
-*/
+/// @brief 把指令 i 放到函数原型的 code 数组的 pc 位置, 同时 pc++
+/// Emit instruction 'i', checking for array sizes and saving also its line information. Return 'i' position.
+/// @return 指令 i 在 code 中的位置
 int luaK_code(FuncState* fs, Instruction i) {
     Proto* f = fs->f;
     /* put new instruction in code array */

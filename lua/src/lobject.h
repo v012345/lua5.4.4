@@ -550,7 +550,7 @@ typedef struct Proto {
     lu_byte maxstacksize; /* 表示该函数执行时最多需要多少个栈空间(寄存器, 对于函数来说,栈就是寄存器了) number of registers needed by this function */
     int sizeupvalues; /* 函数中的Upvalue数量 size of 'upvalues' */
     int sizek; /* 常量表中元素的个数 size of 'k' */
-    int sizecode; /* 指令表中元素的个数 */
+    int sizecode; /* code 数组的大小 */
     int sizelineinfo; /* 行号信息表中元素的个数 */
     int sizep; /* 函数原型表中元素的个数（用于表示内嵌函数） size of 'p' */
     int sizelocvars; /* 局部变量表中元素的个数 */
