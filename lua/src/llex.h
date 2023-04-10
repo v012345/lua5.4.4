@@ -94,7 +94,7 @@ typedef struct LexState {
     Table* h; /* 用于避免收集/重用字符串 to avoid collection/reuse strings */
     struct Dyndata* dyd; /* 解析器使用的动态结构, 指向 SParser 中的 dyd ; dynamic structures used by the parser */
     TString* source; /* 当前源名称 current source name */
-    TString* envn; /* 环境变量名称 environment variable name */
+    TString* envn; /* environment variable name */
 } LexState;
 
 LUAI_FUNC void luaX_init(lua_State* L);

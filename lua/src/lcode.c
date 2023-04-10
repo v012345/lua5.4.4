@@ -330,7 +330,7 @@ static void removelastinstruction(FuncState* fs) {
     fs->pc--;
 }
 
-/// @brief 把指令 i 放到函数原型的 code 数组的 pc 位置, 同时 pc++
+/// @brief 把指令 i 放到函数原型的 code 数组的 pc 位置, 同时 pc++ \r
 /// Emit instruction 'i', checking for array sizes and saving also its line information. Return 'i' position.
 /// @return 指令 i 在 code 中的位置
 int luaK_code(FuncState* fs, Instruction i) {

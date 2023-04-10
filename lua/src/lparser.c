@@ -127,14 +127,18 @@ static void init_exp(expdesc* e, expkind k, int i) {
     e->u.info = i;
 }
 
-/// @brief
+/// @brief 初始化一个字符串常量 expdesc; 类型为 VKSTR , strval 为 TString 的地址
 static void codestring(expdesc* e, TString* s) {
     e->f = e->t = NO_JUMP;
     e->k = VKSTR;
     e->u.strval = s;
 }
 
-static void codename(LexState* ls, expdesc* e) { codestring(e, str_checkname(ls)); }
+/// @brief e->k = VKSTR; e->u.strval = str_checkname(ls);
+static void codename(LexState* ls, expdesc* e) {
+    //
+    codestring(e, str_checkname(ls));
+}
 
 /*
 ** Register a new local variable in the active 'Proto' (for debug information).
@@ -387,7 +391,7 @@ static void singlevaraux(FuncState* fs, TString* n, expdesc* var, int base) {
     }
 }
 
-/// @brief 单一变量;
+/// @brief 通过解析到的变量名来找变量, 如果没找到, 变当作全局变量\r
 /// Find a variable with the given name 'n', handling global variables too.
 static void singlevar(LexState* ls, expdesc* var) {
     TString* varname = str_checkname(ls);
@@ -709,6 +713,7 @@ static void fieldsel(LexState* ls, expdesc* v) {
     luaK_indexed(fs, v, &key);
 }
 
+/// @brief 表的记录字段的键的解析
 static void yindex(LexState* ls, expdesc* v) {
     /* index -> '[' expr ']' */
     luaX_next(ls); /* skip the '[' */
@@ -738,14 +743,14 @@ static void recfield(LexState* ls, ConsControl* cc) {
     expdesc tab, key, val;
     if (ls->t.token == TK_NAME) {
         checklimit(fs, cc->nh, MAX_INT, "items in a constructor");
-        codename(ls, &key);
+        codename(ls, &key); // 设置键的名
     } else /* ls->t.token == '[' */
         yindex(ls, &key);
     cc->nh++;
     checknext(ls, '=');
     tab = *cc->t;
     luaK_indexed(fs, &tab, &key);
-    expr(ls, &val);
+    expr(ls, &val); // 值是一个表达式
     luaK_storevar(fs, &tab, &val);
     fs->freereg = reg; /* free registers */
 }
@@ -1146,7 +1151,10 @@ static BinOpr subexpr(LexState* ls, expdesc* v, int limit) {
 }
 
 /// @brief 解析一个表达式
-static void expr(LexState* ls, expdesc* v) { subexpr(ls, v, 0); }
+static void expr(LexState* ls, expdesc* v) {
+    //
+    subexpr(ls, v, 0);
+}
 
 /* }==================================================================== */
 
@@ -1223,7 +1231,8 @@ static void restassign(LexState* ls, struct LHS_assign* lh, int nvars) {
     expdesc e;
     check_condition(ls, vkisvar(lh->v.k), "syntax error");
     check_readonly(ls, &lh->v);
-    if (testnext(ls, ',')) { /* restassign -> ',' suffixedexp restassign */
+    if (testnext(ls, ',')) {
+        /* restassign -> ',' suffixedexp restassign */
         struct LHS_assign nv;
         nv.prev = lh;
         suffixedexp(ls, &nv.v);
@@ -1231,7 +1240,8 @@ static void restassign(LexState* ls, struct LHS_assign* lh, int nvars) {
         enterlevel(ls); /* control recursion depth */
         restassign(ls, &nv, nvars + 1);
         leavelevel(ls);
-    } else { /* restassign -> '=' explist */
+    } else {
+        /* restassign -> '=' explist */
         int nexps;
         checknext(ls, '=');
         nexps = explist(ls, &e);
