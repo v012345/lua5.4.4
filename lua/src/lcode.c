@@ -42,10 +42,9 @@ l_noret luaK_semerror(LexState* ls, const char* msg) {
     luaX_syntaxerror(ls, msg);
 }
 
-/*
-** If expression is a numeric constant, fills 'v' with its value
-** and returns 1. Otherwise, returns 0.
-*/
+/// @brief 把 e 中的数字放到 v 中 \r
+/// If expression is a numeric constant, fills 'v' with its value and returns 1. Otherwise, returns 0.
+/// @return e 是数字返回 1, 否则返回 0
 static int tonumeral(const expdesc* e, TValue* v) {
     if (hasjumps(e)) return 0; /* not a numeral */
     switch (e->k) {
@@ -67,10 +66,12 @@ static TValue* const2val(FuncState* fs, const expdesc* e) {
     return &fs->ls->dyd->actvar.arr[e->u.info].k;
 }
 
-/*
-** If expression is a constant, fills 'v' with its value
-** and returns 1. Otherwise, returns 0.
-*/
+/// @brief 
+/// If expression is a constant, fills 'v' with its value and returns 1. Otherwise, returns 0.
+/// @param fs 
+/// @param e 
+/// @param v 
+/// @return 
 int luaK_exp2const(FuncState* fs, const expdesc* e, TValue* v) {
     if (hasjumps(e)) return 0; /* not a constant */
     switch (e->k) {
