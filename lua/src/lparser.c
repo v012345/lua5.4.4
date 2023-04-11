@@ -135,8 +135,7 @@ static void codestring(expdesc* e, TString* s) {
 }
 
 /// @brief e->k = VKSTR; e->u.strval = str_checkname(ls);
-static void codename(LexState* ls, expdesc* e) {
-    //
+static void codename(LexState* ls, expdesc* e) { //
     codestring(e, str_checkname(ls));
 }
 
@@ -265,10 +264,9 @@ static void adjustlocalvars(LexState* ls, int nvars) {
     }
 }
 
-/*
-** Close the scope for all variables up to level 'tolevel'.
-** (debug info.)
-*/
+/// @brief 移除活动变量
+/// Close the scope for all variables up to level 'tolevel'. (debug info.)
+/// @param tolevel 要移除的变量的数量
 static void removevars(FuncState* fs, int tolevel) {
     fs->ls->dyd->actvar.n -= (fs->nactvar - tolevel);
     while (fs->nactvar > tolevel) {
@@ -459,9 +457,7 @@ static void solvegoto(LexState* ls, int g, Labeldesc* label) {
     gl->n--;
 }
 
-/*
-** Search for an active label with the given name.
-*/
+/// @brief Search for an active label with the given name.
 static Labeldesc* findlabel(LexState* ls, TString* name) {
     int i;
     Dyndata* dyd = ls->dyd;
@@ -474,14 +470,11 @@ static Labeldesc* findlabel(LexState* ls, TString* name) {
     return NULL; /* label not found */
 }
 
-/// @brief
-/// Adds a new label/goto in the corresponding list.
-/// @param ls
-/// @param l
-/// @param name
-/// @param line
-/// @param pc
-/// @return
+/// @brief Adds a new label/goto in the corresponding list.
+/// @param name label identifier
+/// @param line line where it appeared
+/// @param pc position in code
+/// @return number of entries in use
 static int newlabelentry(LexState* ls, Labellist* l, TString* name, int line, int pc) {
     int n = l->n;
     luaM_growvector(ls->L, l->arr, n, l->size, Labeldesc, SHRT_MAX, "labels/gotos");
@@ -494,8 +487,7 @@ static int newlabelentry(LexState* ls, Labellist* l, TString* name, int line, in
     return n;
 }
 
-static int newgotoentry(LexState* ls, TString* name, int line, int pc) {
-    //
+static int newgotoentry(LexState* ls, TString* name, int line, int pc) { //
     return newlabelentry(ls, &ls->dyd->gt, name, line, pc);
 }
 
@@ -1306,9 +1298,7 @@ static void breakstat(LexState* ls) {
     newgotoentry(ls, luaS_newliteral(ls->L, "break"), line, luaK_jump(ls->fs));
 }
 
-/*
-** Check whether there is already a label with the given 'name'.
-*/
+/// @brief Check whether there is already a label with the given 'name'.
 static void checkrepeated(LexState* ls, TString* name) {
     Labeldesc* lb = findlabel(ls, name);
     if (l_unlikely(lb != NULL)) { /* already defined? */
@@ -1318,6 +1308,7 @@ static void checkrepeated(LexState* ls, TString* name) {
     }
 }
 
+/// @param name 标签名
 static void labelstat(LexState* ls, TString* name, int line) {
     /* label -> '::' NAME '::' */
     checknext(ls, TK_DBCOLON); /* skip double colon */

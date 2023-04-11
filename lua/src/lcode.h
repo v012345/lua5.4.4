@@ -54,10 +54,12 @@ typedef enum BinOpr {
 /* true if operation is foldable (that is, it is arithmetic or bitwise) */
 #define foldbinop(op) ((op) <= OPR_SHR)
 
+/// @brief 把指令放到函数原型的 code 数组的 pc 位置, 同时 pc++
 /// @param o OpCode 操作码
 /// @param a RA 的索引
 /// @param b RB 的索引
 /// @param c RC 的索引
+/// @return 指令在 code 中的位置
 #define luaK_codeABC(fs, o, a, b, c) luaK_codeABCk(fs, o, a, b, c, 0)
 
 typedef enum UnOpr {

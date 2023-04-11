@@ -568,12 +568,16 @@ l_sinline void ccall(lua_State* L, StkId func, int nResults, int inc) {
 /*
 ** External interface for 'ccall'
 */
-void luaD_call(lua_State* L, StkId func, int nResults) { ccall(L, func, nResults, 1); }
+void luaD_call(lua_State* L, StkId func, int nResults) { //
+    ccall(L, func, nResults, 1);
+}
 
 /*
 ** Similar to 'luaD_call', but does not allow yields during the call.
 */
-void luaD_callnoyield(lua_State* L, StkId func, int nResults) { ccall(L, func, nResults, nyci); }
+void luaD_callnoyield(lua_State* L, StkId func, int nResults) { //
+    ccall(L, func, nResults, nyci);
+}
 
 /*
 ** Finish the job of 'lua_pcallk' after it was interrupted by an yield.

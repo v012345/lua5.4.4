@@ -179,6 +179,8 @@ int luaK_jump(FuncState* fs) {
 }
 
 /// @brief Code a 'return' instruction
+/// @param first 第一个返回值在寄存器中的索引
+/// @param nret 函数返回值的数量
 void luaK_ret(FuncState* fs, int first, int nret) {
     OpCode op;
     switch (nret) {
@@ -198,10 +200,10 @@ static int condjump(FuncState* fs, OpCode op, int A, int B, int C, int k) {
     return luaK_jump(fs);
 }
 
-/*
-** returns current 'pc' and marks it as a jump target (to avoid wrong
-** optimizations with consecutive instructions not in the same basic block).
-*/
+/// @brief fs->lasttarget = fs->pc \r
+/// returns current 'pc' and marks it as a jump target (to avoid wrong
+/// optimizations with consecutive instructions not in the same basic block).
+/// @return fs->pc
 int luaK_getlabel(FuncState* fs) {
     fs->lasttarget = fs->pc;
     return fs->pc;
@@ -343,10 +345,9 @@ int luaK_code(FuncState* fs, Instruction i) {
     return fs->pc - 1; /* index of new instruction */
 }
 
-/*
-** Format and emit an 'iABC' instruction. (Assertions check consistency
-** of parameters versus opcode.)
-*/
+/// @brief 把指令放到函数原型的 code 数组的 pc 位置, 同时 pc++ \r
+/// Format and emit an 'iABC' instruction. (Assertions check consistency of parameters versus opcode.)
+/// @return 指令在 code 中的位置
 int luaK_codeABCk(FuncState* fs, OpCode o, int a, int b, int c, int k) {
     lua_assert(getOpMode(o) == iABC);
     lua_assert(a <= MAXARG_A && b <= MAXARG_B && c <= MAXARG_C && (k & ~1) == 0);

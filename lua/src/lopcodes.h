@@ -93,9 +93,9 @@ enum OpMode {
 
 #define OFFSET_sJ (MAXARG_sJ >> 1)
 
-#define MAXARG_A ((1 << SIZE_A) - 1)
-#define MAXARG_B ((1 << SIZE_B) - 1)
-#define MAXARG_C ((1 << SIZE_C) - 1)
+#define MAXARG_A ((1 << SIZE_A) - 1) // 255
+#define MAXARG_B ((1 << SIZE_B) - 1) // 255
+#define MAXARG_C ((1 << SIZE_C) - 1) // 255
 #define OFFSET_sC (MAXARG_C >> 1)
 
 #define int2sC(i) ((i) + OFFSET_sC)
