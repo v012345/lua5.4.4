@@ -173,11 +173,12 @@ void luaK_concat(FuncState* fs, int* l1, int l2) {
 ** Create a jump instruction and return its position, so its destination
 ** can be fixed later (with 'fixjump').
 */
-int luaK_jump(FuncState* fs) { return codesJ(fs, OP_JMP, NO_JUMP, 0); }
+int luaK_jump(FuncState* fs) {
+    //
+    return codesJ(fs, OP_JMP, NO_JUMP, 0);
+}
 
-/*
-** Code a 'return' instruction
-*/
+/// @brief Code a 'return' instruction
 void luaK_ret(FuncState* fs, int first, int nret) {
     OpCode op;
     switch (nret) {

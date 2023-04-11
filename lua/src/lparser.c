@@ -291,7 +291,7 @@ static int searchupvalue(FuncState* fs, TString* name) {
     return -1; /* not found */
 }
 
-/// @brief 分配内存来存 Upvaldesc, f->upvalues 指向内存, 返回第一个元素的地址(用来存"环境变量")
+/// @brief 分配内存来存 Upvaldesc, fs->f->upvalues 指向内存, 返回下一个可用内存的地址
 static Upvaldesc* allocupvalue(FuncState* fs) {
     Proto* f = fs->f;
     int oldsize = f->sizeupvalues;
@@ -474,9 +474,14 @@ static Labeldesc* findlabel(LexState* ls, TString* name) {
     return NULL; /* label not found */
 }
 
-/*
-** Adds a new label/goto in the corresponding list.
-*/
+/// @brief
+/// Adds a new label/goto in the corresponding list.
+/// @param ls
+/// @param l
+/// @param name
+/// @param line
+/// @param pc
+/// @return
 static int newlabelentry(LexState* ls, Labellist* l, TString* name, int line, int pc) {
     int n = l->n;
     luaM_growvector(ls->L, l->arr, n, l->size, Labeldesc, SHRT_MAX, "labels/gotos");
@@ -489,7 +494,10 @@ static int newlabelentry(LexState* ls, Labellist* l, TString* name, int line, in
     return n;
 }
 
-static int newgotoentry(LexState* ls, TString* name, int line, int pc) { return newlabelentry(ls, &ls->dyd->gt, name, line, pc); }
+static int newgotoentry(LexState* ls, TString* name, int line, int pc) {
+    //
+    return newlabelentry(ls, &ls->dyd->gt, name, line, pc);
+}
 
 /*
 ** Solves forward jumps. Check whether new label 'lb' matches any
@@ -547,15 +555,18 @@ static void movegotosout(FuncState* fs, BlockCnt* bl) {
     }
 }
 
+/// @brief 进入一个 block
+/// @param bl 指向要进入的 block
+/// @param isloop 1 为循环体, 0 为非循环体
 static void enterblock(FuncState* fs, BlockCnt* bl, lu_byte isloop) {
     bl->isloop = isloop;
-    bl->nactvar = fs->nactvar;
+    bl->nactvar = fs->nactvar; // 一进入就确定了, 之后不会变了
     bl->firstlabel = fs->ls->dyd->label.n;
     bl->firstgoto = fs->ls->dyd->gt.n;
     bl->upval = 0;
     bl->insidetbc = (fs->bl != NULL && fs->bl->insidetbc);
-    bl->previous = fs->bl;
-    fs->bl = bl;
+    bl->previous = fs->bl; // 把 block 接到链上
+    fs->bl = bl; // 更新函数状态机上的块状态机
     lua_assert(fs->freereg == luaY_nvarstack(fs));
 }
 
@@ -630,7 +641,7 @@ static void open_func(LexState* ls, FuncState* fs, BlockCnt* bl) {
     Proto* f = fs->f;
     fs->prev = ls->fs; /* linked list of funcstates */
     fs->ls = ls;
-    ls->fs = fs;
+    ls->fs = fs; // 理新词法状态机上的函数状态机
     fs->pc = 0;
     fs->previousline = f->linedefined;
     fs->iwthabs = 0;
@@ -645,7 +656,7 @@ static void open_func(LexState* ls, FuncState* fs, BlockCnt* bl) {
     fs->needclose = 0;
     fs->firstlocal = ls->dyd->actvar.n;
     fs->firstlabel = ls->dyd->label.n;
-    fs->bl = NULL;
+    fs->bl = NULL; // 函数状态机初始化时, block 是 NULL
     f->source = ls->source;
     luaC_objbarrier(ls->L, f, f->source);
     f->maxstacksize = 2; /* registers 0/1 are always valid */
@@ -833,6 +844,8 @@ static void constructor(LexState* ls, expdesc* t) {
 
 /* }====================================================================== */
 
+/// @brief 把 fs 设置成可接受可变长参数
+/// @param nparams 数接受的固定参数的数量
 static void setvararg(FuncState* fs, int nparams) {
     fs->f->is_vararg = 1;
     luaK_codeABC(fs, OP_VARARGPREP, nparams, 0, 0);
@@ -1757,7 +1770,7 @@ static void statement(LexState* ls) {
 static void mainfunc(LexState* ls, FuncState* fs) {
     BlockCnt bl;
     Upvaldesc* env;
-    open_func(ls, fs, &bl); // 如果从这里入 open_func, 那么 ls->fs 为 NULL
+    open_func(ls, fs, &bl); // 主函数的 prev 为 NULL
     setvararg(fs, 0); /* main function is always declared vararg */
     env = allocupvalue(fs); /* ...set environment upvalue */
     env->instack = 1;

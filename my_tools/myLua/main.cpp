@@ -8,7 +8,7 @@ int main(int argc, char const *argv[])
 {
 
     lua_State *L = luaL_newstate();
-    // luaL_openlibs(L);
+    luaL_openlibs(L);
     if (std::filesystem::exists(LUA_ARGV_SCRIPT))
     {
         luaL_dofile(L, LUA_ARGV_SCRIPT);

@@ -1,11 +1,15 @@
-Matrix = { "123", "lk", "ji" }
-function Matrix:new()
-    do
-        return nil
-        local x = 2
+local i = 1
+
+while i <= 5 do
+    if i % 2 == 0 then
+        print("Even number: " .. i)
+        goto loop_start
     end
-    local a = 3
-    return nil
+
+    print("Odd number: " .. i)
+
+    ::loop_start::
+    i = i + 1
 end
 
-local a = 1
+print("end")

@@ -127,11 +127,11 @@ typedef struct FuncState {
     int nk; /* 当前常量的数量 number of elements in 'k' */
     int np; /* 被编译的代码，Proto的数量 number of elements in 'p' */
     int nabslineinfo; /* number of elements in 'abslineinfo' */
-    int firstlocal; /* 本 FuncState 的第一个 local 在 Dyndata数组中的索引; index of first local var (in Dyndata array) */
+    int firstlocal; /* index of first local var (in Dyndata array) */
     int firstlabel; /* index of first label (in 'dyd->label->arr') */
     short ndebugvars; /* number of elements in 'f->locvars' */
     lu_byte nactvar; /* 当前函数解析出的 local 变量的数量; number of active local variables */
-    lu_byte nups; /* 当前upvalue的数量 number of upvalues */
+    lu_byte nups; /* number of upvalues */
     lu_byte freereg; /* 下一个可被使用的，空闲寄存器的位置 first free register */
     lu_byte iwthabs; /* instructions issued since last absolute line info */
     lu_byte needclose; /* function needs to close upvalues when returning */
