@@ -173,8 +173,7 @@ void luaK_concat(FuncState* fs, int* l1, int l2) {
 ** Create a jump instruction and return its position, so its destination
 ** can be fixed later (with 'fixjump').
 */
-int luaK_jump(FuncState* fs) {
-    //
+int luaK_jump(FuncState* fs) { //
     return codesJ(fs, OP_JMP, NO_JUMP, 0);
 }
 
@@ -1201,11 +1200,16 @@ static int validop(int op, TValue* v1, TValue* v2) {
         case LUA_OPBXOR:
         case LUA_OPSHL:
         case LUA_OPSHR:
-        case LUA_OPBNOT: { /* conversion errors */ lua_Integer i; return (luaV_tointegerns(v1, &i, LUA_FLOORN2I) && luaV_tointegerns(v2, &i, LUA_FLOORN2I));
+        case LUA_OPBNOT: {
+            /* conversion errors */
+            lua_Integer i;
+            return (luaV_tointegerns(v1, &i, LUA_FLOORN2I) && luaV_tointegerns(v2, &i, LUA_FLOORN2I));
         }
         case LUA_OPDIV:
         case LUA_OPIDIV:
-        case LUA_OPMOD: /* division by 0 */ return (nvalue(v2) != 0);
+        case LUA_OPMOD:
+            /* division by 0 */
+            return (nvalue(v2) != 0);
         default: return 1; /* everything else is valid */
     }
 }
@@ -1216,7 +1220,8 @@ static int validop(int op, TValue* v1, TValue* v2) {
 */
 static int constfolding(FuncState* fs, int op, expdesc* e1, const expdesc* e2) {
     TValue v1, v2, res;
-    if (!tonumeral(e1, &v1) || !tonumeral(e2, &v2) || !validop(op, &v1, &v2)) return 0; /* non-numeric operands or not safe to fold */
+    if (!tonumeral(e1, &v1) || !tonumeral(e2, &v2) || !validop(op, &v1, &v2)) //
+        return 0; /* non-numeric operands or not safe to fold */
     luaO_rawarith(fs->ls->L, op, &v1, &v2, &res); /* does operation */
     if (ttisinteger(&res)) {
         e1->k = VKINT;

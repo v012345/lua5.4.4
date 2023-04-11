@@ -98,7 +98,9 @@ static l_noret lexerror(LexState* ls, const char* msg, int token) {
     luaD_throw(ls->L, LUA_ERRSYNTAX);
 }
 
-l_noret luaX_syntaxerror(LexState* ls, const char* msg) { lexerror(ls, msg, ls->t.token); }
+l_noret luaX_syntaxerror(LexState* ls, const char* msg) { //
+    lexerror(ls, msg, ls->t.token);
+}
 
 /*
 ** Creates a new string and anchors it in scanner's table so that it

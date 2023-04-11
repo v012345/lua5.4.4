@@ -557,13 +557,13 @@ typedef struct Proto {
     int sizeabslineinfo; /* 绝对行号信息表中元素的个数 size of 'abslineinfo' */
     int linedefined; /* 函数定义在源代码中的第一行行号 debug information  */
     int lastlinedefined; /* 函数定义在源代码中的最后一行行号 debug information  */
-    TValue* k; /* 常量表,用于存放函数中用到的常量(就是字面量,只能是数字,布尔值,字符串,和nil这些基本类型) constants used by the function */
+    TValue* k; /* constants used by the function */
     Instruction* code; /* 指令表,存放函数中的指令 opcodes */
     struct Proto** p; /* 使用**,是因为一个函数里可以写多个函数,是一个树结构 functions defined inside the function */
     Upvaldesc* upvalues; /* 存储函数中用到的Upvalue信息 upvalue information */
     ls_byte* lineinfo; /* 行号信息表,存储每个指令对应的源代码行号 information about source lines (debug information) */
     AbsLineInfo* abslineinfo; /* 绝对行号信息表,存储每个指令对应的源代码绝对行号 idem */
-    LocVar* locvars; /* 局部变量表,存储函数中局部变量的信息(固定参数,可变参数,和本地变量) information about local variables (debug information) */
+    LocVar* locvars; /* information about local variables (debug information) */
     TString* source; /* 指向源代码文件名的指针 used for debug information */
     GCObject* gclist; /* GC链表节点 */
 } Proto;

@@ -194,7 +194,9 @@ static int reglevel(FuncState* fs, int nvar) {
 
 /// @brief 当前函数使用的寄存器个数 \r
 /// Return the number of variables in the register stack for the given function.
-int luaY_nvarstack(FuncState* fs) { return reglevel(fs, fs->nactvar); }
+int luaY_nvarstack(FuncState* fs) { //
+    return reglevel(fs, fs->nactvar);
+}
 
 /*
 ** Get the debug-information entry for current variable 'vidx'.
@@ -264,7 +266,7 @@ static void adjustlocalvars(LexState* ls, int nvars) {
     }
 }
 
-/// @brief 移除活动变量
+/// @brief 从尾部移除 actvar.arr 中活动变量
 /// Close the scope for all variables up to level 'tolevel'. (debug info.)
 /// @param tolevel 要移除的变量的数量
 static void removevars(FuncState* fs, int tolevel) {
@@ -389,7 +391,7 @@ static void singlevaraux(FuncState* fs, TString* n, expdesc* var, int base) {
     }
 }
 
-/// @brief 通过解析到的变量名来找变量, 如果没找到, 变当作全局变量\r
+/// @brief 通过解析到的变量名来找变量, 如果没找到, 变当作全局变量 \r
 /// Find a variable with the given name 'n', handling global variables too.
 static void singlevar(LexState* ls, expdesc* var) {
     TString* varname = str_checkname(ls);
@@ -554,7 +556,7 @@ static void enterblock(FuncState* fs, BlockCnt* bl, lu_byte isloop) {
     bl->isloop = isloop;
     bl->nactvar = fs->nactvar; // 一进入就确定了, 之后不会变了
     bl->firstlabel = fs->ls->dyd->label.n;
-    bl->firstgoto = fs->ls->dyd->gt.n;
+    bl->firstgoto = fs->ls->dyd->gt.n; // 一进入就确定了, 之后不会变了
     bl->upval = 0;
     bl->insidetbc = (fs->bl != NULL && fs->bl->insidetbc);
     bl->previous = fs->bl; // 把 block 接到链上
@@ -562,9 +564,7 @@ static void enterblock(FuncState* fs, BlockCnt* bl, lu_byte isloop) {
     lua_assert(fs->freereg == luaY_nvarstack(fs));
 }
 
-/*
-** generates an error for an undefined 'goto'.
-*/
+/// @brief generates an error for an undefined 'goto'.
 static l_noret undefgoto(LexState* ls, Labeldesc* gt) {
     const char* msg;
     if (eqstr(gt->name, luaS_newliteral(ls->L, "break"))) {
@@ -1156,8 +1156,7 @@ static BinOpr subexpr(LexState* ls, expdesc* v, int limit) {
 }
 
 /// @brief 解析一个表达式
-static void expr(LexState* ls, expdesc* v) {
-    //
+static void expr(LexState* ls, expdesc* v) { //
     subexpr(ls, v, 0);
 }
 
