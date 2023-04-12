@@ -405,14 +405,13 @@ static int luaK_codek(FuncState* fs, int reg, int k) {
     }
 }
 
-/*
-** Check register-stack level, keeping track of its maximum size
-** in field 'maxstacksize'
-*/
+/// @brief 如果使用的寄存器比 fs->f->maxstacksize 多, 更新 fs->f->maxstacksize \r
+/// Check register-stack level, keeping track of its maximum size in field 'maxstacksize'
 void luaK_checkstack(FuncState* fs, int n) {
     int newstack = fs->freereg + n;
     if (newstack > fs->f->maxstacksize) {
-        if (newstack >= MAXREGS) luaX_syntaxerror(fs->ls, "function or expression needs too many registers");
+        if (newstack >= MAXREGS) //
+            luaX_syntaxerror(fs->ls, "function or expression needs too many registers");
         fs->f->maxstacksize = cast_byte(newstack);
     }
 }

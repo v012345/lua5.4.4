@@ -27,7 +27,8 @@
         if ((nres) <= LUA_MULTRET && L->ci->top < L->top) L->ci->top = L->top;                                                                                                                         \
     }
 
-/* Ensure the stack has at least 'n' elements */
+// 基于当前 CallInfo 的 func + 1 为底 , 保证栈上至少有 n 的元素 \r
+// Ensure the stack has at least 'n' elements
 #define api_checknelems(L, n) api_check(L, (n) < (L->top - L->ci->func), "not enough elements in the stack")
 
 /*

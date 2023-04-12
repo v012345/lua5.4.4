@@ -943,6 +943,9 @@ LUA_API int lua_setiuservalue(lua_State* L, int idx, int n) {
 ** 'load' and 'call' functions (run Lua code)
 */
 
+/// ci->top - top >= nr - na 才可
+/// @param na 参数个数
+/// @param nr 返回值个数, 如果 nr 为 -1, 则不做检查
 #define checkresults(L, na, nr) api_check(L, (nr) == LUA_MULTRET || (L->ci->top - L->top >= (nr) - (na)), "results from function overflow current stack size")
 
 /// @brief 调用闭包

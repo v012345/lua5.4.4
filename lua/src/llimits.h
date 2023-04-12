@@ -20,13 +20,13 @@
 #if defined(LUAI_MEM) /* { external definitions? */
 typedef LUAI_UMEM lu_mem;
 typedef LUAI_MEM l_mem;
-#elif LUAI_IS32INT      /* }{ */
+#elif LUAI_IS32INT /* }{ */
 typedef size_t lu_mem;
 typedef ptrdiff_t l_mem;
 #else /* 16-bit ints */ /* }{ */
 typedef unsigned long lu_mem;
 typedef long l_mem;
-#endif                  /* } */
+#endif /* } */
 
 /* chars used as small naturals (so that 'char' is reserved for characters) */
 typedef unsigned char lu_byte;
@@ -95,6 +95,7 @@ typedef LUAI_UACINT l_uacInt;
 #define luai_apicheck(l, e) ((void)l, lua_assert(e))
 #endif
 
+// e 为 true 则通过检查
 #define api_check(l, e, msg) luai_apicheck(l, (e) && msg)
 
 /* macro to avoid warnings about unused variables */
@@ -106,14 +107,14 @@ typedef LUAI_UACINT l_uacInt;
 #define cast(t, exp) ((t)(exp))
 
 #define cast_void(i) cast(void, (i))
-#define cast_voidp(i) cast(void *, (i))
+#define cast_voidp(i) cast(void*, (i))
 #define cast_num(i) cast(lua_Number, (i))
 #define cast_int(i) cast(int, (i))
 #define cast_uint(i) cast(unsigned int, (i))
 #define cast_byte(i) cast(lu_byte, (i))
 #define cast_uchar(i) cast(unsigned char, (i))
 #define cast_char(i) cast(char, (i))
-#define cast_charp(i) cast(char *, (i))
+#define cast_charp(i) cast(char*, (i))
 #define cast_sizet(i) cast(size_t, (i))
 
 /* cast a signed lua_Integer to lua_Unsigned */
