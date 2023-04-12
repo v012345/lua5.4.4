@@ -48,7 +48,7 @@
 #endif
 
 #if defined(LUA_USE_WINDOWS)
-#define LUA_DL_DLL  /* enable support for DLL */
+#define LUA_DL_DLL /* enable support for DLL */
 #define LUA_USE_C89 /* broadly, Windows is C89 */
 #endif
 
@@ -62,7 +62,8 @@
 #define LUA_USE_DLOPEN /* MacOS does not need -ldl */
 #endif
 
-/// @brief lua 的整数是不是至少有 32 位; @@ LUAI_IS32INT is true iff 'int' has (at least) 32 bits.
+// lua 的整数是不是至少有 32 位 \r
+// @@ LUAI_IS32INT is true iff 'int' has (at least) 32 bits.
 #define LUAI_IS32INT ((UINT_MAX >> 30) >= 3)
 
 /* }================================================================== */
@@ -487,7 +488,7 @@
 #elif LUA_INT_TYPE == LUA_INT_LONGLONG /* }{ long long */
 
 /* use presence of macro LLONG_MAX as proxy for C99 compliance */
-#if defined(LLONG_MAX)                 /* { */
+#if defined(LLONG_MAX) /* { */
 /* use ISO C99 stuff */
 
 #define LUA_INTEGER long long
@@ -682,7 +683,7 @@
 ** a Lua state with very fast access.
 ** CHANGE it if you need a different size.
 */
-#define LUA_EXTRASPACE (sizeof(void *))
+#define LUA_EXTRASPACE (sizeof(void*))
 
 /*
 @@ LUA_IDSIZE gives the maximum size for the description of the source
@@ -694,7 +695,7 @@
 /*
 @@ LUAL_BUFFERSIZE is the buffer size used by the lauxlib buffer system.
 */
-#define LUAL_BUFFERSIZE ((int)(16 * sizeof(void *) * sizeof(lua_Number)))
+#define LUAL_BUFFERSIZE ((int)(16 * sizeof(void*) * sizeof(lua_Number)))
 
 /*
 @@ LUAI_MAXALIGN defines fields that, when used in a union, ensure
@@ -703,7 +704,7 @@
 #define LUAI_MAXALIGN                                                                                                                                                                                  \
     lua_Number n;                                                                                                                                                                                      \
     double u;                                                                                                                                                                                          \
-    void *s;                                                                                                                                                                                           \
+    void* s;                                                                                                                                                                                           \
     lua_Integer i;                                                                                                                                                                                     \
     long l
 
