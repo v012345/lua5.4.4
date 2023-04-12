@@ -134,10 +134,9 @@ struct lua_longjmp; /* defined in ldo.c */
 #define KGC_INC 0 /* incremental gc */
 #define KGC_GEN 1 /* generational gc */
 
-/// @brief 字符串的哈希表, 有大小, 元素的个数, 与一个 TString 的二维组数(一个哈希桶)
 typedef struct stringtable {
     TString** hash; // 字符串的哈希表的哈希桶
-    int nuse; /* 表中已存储的短串的数量  number of elements */
+    int nuse; /* number of elements */
     int size; // 哈希桶的大小, 就是预定容量, luaS_init 时给出 初始化大小 MINSTRTABSIZE ( 2^7 = 128 ), 之后可以调整大小, 注意 size 是 2 的幂次
 } stringtable;
 
@@ -236,7 +235,7 @@ typedef struct global_State {
     l_mem GCdebt; /* 当前已经分配但还未被 GC 回收的内存字节数,也称为内部感知的内存大小 bytes allocated not yet compensated by the collector */
     lu_mem GCestimate; /* 当前被使用的非垃圾内存的估计值 an estimate of the non-garbage memory in use */
     lu_mem lastatomic; /* 用于垃圾回收中的原子操作计数器 see function 'genstep' in file 'lgc.c' */
-    stringtable strt; /* 全局字符串表,用于池化字符串,使得整个虚拟机中的短字符串只有一份实例 hash table for strings */
+    stringtable strt; /* hash table for strings */
     TValue l_registry; /* 是一个表(t), t[0] = L, t[1] = _G */
     TValue nilvalue; /* 如果这个值真的是一个 nil 那么就说明 global_State 构建完毕; a nil value */
     unsigned int seed; /* 启动时生成的一个随机数种子,主要用于求字符串哈希时使用 randomized seed for hashes */

@@ -388,16 +388,14 @@ typedef struct TString {
     lu_byte shrlen; /* length for short strings */
     unsigned int hash; /* 字符串的哈希值,用于字符串的查找和比较操作 */
     union {
-        size_t lnglen; /* TString 是长串时, 表示长符的长度  length for long strings */
-        struct TString* hnext; /* 短串时, 某个桶中的中, 当作链表使用 linked list for hash table */
+        size_t lnglen; /* length for long strings */
+        struct TString* hnext; /* linked list for hash table */
     } u;
     char contents[1]; /* 一个柔性数组 字符串的具体内容,以 null 结尾 */
 } TString;
 
-/*
-** Get the actual string (array of bytes) from a 'TString'.
-*/
-#define getstr(ts) ((ts)->contents) // 拿到 TString 里 C 字符串指针 contents
+// Get the actual string (array of bytes) from a 'TString'.
+#define getstr(ts) ((ts)->contents)
 
 /* 拿到 TString 里 C 字符串指针 contents; get the actual string (array of bytes) from a Lua value */
 #define svalue(o) getstr(tsvalue(o))

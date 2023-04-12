@@ -2,7 +2,6 @@
 ** $Id: lstring.c $
 ** String table (keeps all strings handled by Lua)
 ** See Copyright Notice in lua.h
-** 字符串池
 */
 
 #define lstring_c
@@ -21,21 +20,11 @@
 #include "lstate.h"
 #include "lstring.h"
 
-/*
-** Maximum size for string table.
-*/
+// Maximum size for string table.
 #define MAXSTRTB cast_int(luaM_limitN(MAX_INT, TString*))
 
-/**
- * @brief equality for long strings
- * 长字符串比较
- * 1.比是不是同一个串
- * 2.长度等不等
- * 3.内容比较
- * @param a
- * @param b
- * @return int
- */
+/// @brief 比较长字符串是否相等 \r
+/// equality for long strings
 int luaS_eqlngstr(TString* a, TString* b) {
     size_t len = a->u.lnglen;
     lua_assert(a->tt == LUA_VLNGSTR && b->tt == LUA_VLNGSTR);
@@ -44,21 +33,19 @@ int luaS_eqlngstr(TString* a, TString* b) {
             (memcmp(getstr(a), getstr(b), len) == 0)); /* equal contents */
 }
 
-/// @brief 计算字符串哈希值, 使用 djb2 算法
-/// @param str 字符串
-/// @param l 字符串长度
-/// @param seed 随机数
-/// @return unsigned int
+/// @brief 计算字符串哈希值
 unsigned int luaS_hash(const char* str, size_t l, unsigned int seed) {
     unsigned int h = seed ^ cast_uint(l);
     for (; l > 0; l--) h ^= ((h << 5) + (h >> 2) + cast_byte(str[l - 1]));
     return h;
 }
 
+/// @brief 获取长字符串的 hash
 unsigned int luaS_hashlongstr(TString* ts) {
     lua_assert(ts->tt == LUA_VLNGSTR);
     if (ts->extra == 0) { /* no hash? */
         size_t len = ts->u.lnglen;
+        // 在 TString 初始化时, hash 会被赋值为 g->seed
         ts->hash = luaS_hash(getstr(ts), len, ts->hash);
         ts->extra = 1; /* now it has its hash */
     }
@@ -91,12 +78,10 @@ static void tablerehash(TString** vect, int osize, int nsize) {
     }
 }
 
-/*
-** Resize the string table. If allocation fails, keep the current size.
-** (This can degrade performance, but any non-zero size should work
-** correctly.)
-** 调用 tablerehash, 这调用之前, 要注意内存的分配
-*/
+/// @brief
+/// Resize the string table. If allocation fails, keep the current size.
+/// (This can degrade performance, but any non-zero size should work correctly.)
+/// @param nsize 哈希桶的大小
 void luaS_resize(lua_State* L, int nsize) {
     stringtable* tb = &G(L)->strt;
     int osize = tb->size;
