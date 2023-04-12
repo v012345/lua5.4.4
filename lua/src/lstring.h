@@ -11,18 +11,18 @@
 #include "lobject.h"
 #include "lstate.h"
 
-/*
-** Memory-allocation error message must be preallocated (it cannot
-** be created after memory is exhausted)
-*/
+// Memory-allocation error message must be preallocated (it cannot be created after memory is exhausted)
 #define MEMERRMSG "not enough memory"
 
-/// @brief Size of a TString: Size of the header plus space for the string itself (including final '\0').
+// 长度为 l 的 lua 字符串所需的内存空间大小 \r
+// Size of a TString: Size of the header plus space for the string itself (including final '\0').
 #define sizelstring(l) (offsetof(TString, contents) + ((l) + 1) * sizeof(char))
 
+// 用字面量(字符串常量) s 生成一个 TString, 最后的 -1 是为了去除 '\0' 的影响
 #define luaS_newliteral(L, s) (luaS_newlstr(L, "" s, (sizeof(s) / sizeof(char)) - 1))
 
-/// @brief 判断一个串是不是保留字 test whether a string is a reserved word
+// 判断一个串是不是保留字 \r
+// test whether a string is a reserved word
 #define isreserved(s) ((s)->tt == LUA_VSHRSTR && (s)->extra > 0)
 
 // 短字符串只有一份, 所以地址相等, 两个字符串就相等 \r

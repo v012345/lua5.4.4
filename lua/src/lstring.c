@@ -225,7 +225,9 @@ static TString* internshrstr(lua_State* L, const char* str, size_t l) {
     return ts;
 }
 
-/// @brief 生成 TString; new string (with explicit length)
+/// @brief 生成 TString \r
+/// new string (with explicit length)
+/// @param l str 的长度
 TString* luaS_newlstr(lua_State* L, const char* str, size_t l) {
     if (l <= LUAI_MAXSHORTLEN) /* short string? */
         return internshrstr(L, str, l);
