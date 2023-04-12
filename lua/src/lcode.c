@@ -465,15 +465,14 @@ static void freeexps(FuncState* fs, expdesc* e1, expdesc* e2) {
     freeregs(fs, r1, r2);
 }
 
-/*
-** Add constant 'v' to prototype's list of constants (field 'k').
-** Use scanner's table to cache position of constants in constant list
-** and try to reuse constants. Because some values should not be used
-** as keys (nil cannot be a key, integer keys can collapse with float
-** keys), the caller must provide a useful 'key' for indexing the cache.
-** Note that all functions share the same table, so entering or exiting
-** a function can make some indices wrong.
-*/
+/// @brief \r
+/// Add constant 'v' to prototype's list of constants (field 'k').
+/// Use scanner's table to cache position of constants in constant list
+/// and try to reuse constants. Because some values should not be used
+/// as keys (nil cannot be a key, integer keys can collapse with float
+/// keys), the caller must provide a useful 'key' for indexing the cache.
+/// Note that all functions share the same table, so entering or exiting
+/// a function can make some indices wrong.
 static int addk(FuncState* fs, TValue* key, TValue* v) {
     TValue val;
     lua_State* L = fs->ls->L;
@@ -483,7 +482,8 @@ static int addk(FuncState* fs, TValue* key, TValue* v) {
     if (ttisinteger(idx)) { /* is there an index there? */
         k = cast_int(ivalue(idx));
         /* correct value? (warning: must distinguish floats from integers!) */
-        if (k < fs->nk && ttypetag(&f->k[k]) == ttypetag(v) && luaV_rawequalobj(&f->k[k], v)) return k; /* reuse index */
+        if (k < fs->nk && ttypetag(&f->k[k]) == ttypetag(v) && luaV_rawequalobj(&f->k[k], v)) //
+            return k; /* reuse index */
     }
     /* constant not found; create a new entry */
     oldsize = f->sizek;
@@ -583,10 +583,11 @@ static int nilK(FuncState* fs) {
 */
 static int fitsC(lua_Integer i) { return (l_castS2U(i) + OFFSET_sC <= cast_uint(MAXARG_C)); }
 
-/*
-** Check whether 'i' can be stored in an 'sBx' operand.
-*/
-static int fitsBx(lua_Integer i) { return (-OFFSET_sBx <= i && i <= MAXARG_Bx - OFFSET_sBx); }
+/// @brief i 是否在 [-65535, 65536] 之间 \r
+/// Check whether 'i' can be stored in an 'sBx' operand.
+static int fitsBx(lua_Integer i) { //
+    return (-OFFSET_sBx <= i && i <= MAXARG_Bx - OFFSET_sBx);
+}
 
 void luaK_int(FuncState* fs, int reg, lua_Integer i) {
     if (fitsBx(i))
@@ -809,13 +810,10 @@ static int need_value(FuncState* fs, int list) {
     return 0; /* not found */
 }
 
-/*
-** Ensures final expression result (which includes results from its
-** jump lists) is in register 'reg'.
-** If expression has jumps, need to patch these jumps either to
-** its final position or to "load" instructions (for those tests
-** that do not produce values).
-*/
+/// @brief \r
+/// Ensures final expression result (which includes results from its jump lists) is in register 'reg'.
+/// If expression has jumps, need to patch these jumps either to its final position or to "load" instructions (for those tests that do not produce values).
+/// @param reg 使用的寄存索引
 static void exp2reg(FuncState* fs, expdesc* e, int reg) {
     discharge2reg(fs, e, reg);
     if (e->k == VJMP) /* expression itself is a test? */

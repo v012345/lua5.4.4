@@ -124,7 +124,7 @@ typedef struct FuncState {
     int pc; /* next position to code (equivalent to 'ncode') */
     int lasttarget; /* 'label' of last 'jump label' */
     int previousline; /* last line that was saved in 'lineinfo' */
-    int nk; /* 当前常量的数量 number of elements in 'k' */
+    int nk; /* number of elements in 'k' */
     int np; /* 被编译的代码，Proto的数量 number of elements in 'p' */
     int nabslineinfo; /* number of elements in 'abslineinfo' */
     int firstlocal; /* index of first local var (in Dyndata array) */

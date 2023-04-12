@@ -71,16 +71,17 @@ enum OpMode {
 #define L_INTHASBITS(b) ((UINT_MAX >> ((b)-1)) >= 1)
 
 #if L_INTHASBITS(SIZE_Bx)
-// 17 位 1
+// 131071
 #define MAXARG_Bx ((1 << SIZE_Bx) - 1)
 #else
 #define MAXARG_Bx MAX_INT
 #endif
 
-#define OFFSET_sBx (MAXARG_Bx >> 1) /* 16 位 1; 'sBx' is signed */
+#define OFFSET_sBx (MAXARG_Bx >> 1) /* 65535; 'sBx' is signed */
 
 #if L_INTHASBITS(SIZE_Ax)
-#define MAXARG_Ax ((1 << SIZE_Ax) - 1)
+// 2^25 - 1
+#define MAXARG_Ax ((1 << SIZE_Ax) - 1) 
 #else
 #define MAXARG_Ax MAX_INT
 #endif
@@ -154,6 +155,7 @@ enum OpMode {
 #define CREATE_ABCk(o, a, b, c, k)                                                                                                                                                                     \
     ((cast(Instruction, o) << POS_OP) | (cast(Instruction, a) << POS_A) | (cast(Instruction, b) << POS_B) | (cast(Instruction, c) << POS_C) | (cast(Instruction, k) << POS_k))
 
+// 生成一个 ABx 格式的指令
 #define CREATE_ABx(o, a, bc) ((cast(Instruction, o) << POS_OP) | (cast(Instruction, a) << POS_A) | (cast(Instruction, bc) << POS_Bx))
 
 #define CREATE_Ax(o, a) ((cast(Instruction, o) << POS_OP) | (cast(Instruction, a) << POS_Ax))

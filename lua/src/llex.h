@@ -91,7 +91,7 @@ typedef struct LexState {
     struct lua_State* L; // Lua 状态机
     ZIO* z; /* 输入流, 指向 SParser 中的 z ; input stream */
     Mbuffer* buff; /* 用于标记的缓冲区, 指向 SParser 中的 buff ; buffer for tokens */
-    Table* h; /* 用于避免收集/重用字符串 to avoid collection/reuse strings */
+    Table* h; /* to avoid collection/reuse strings */
     struct Dyndata* dyd; /* dynamic structures used by the parser */
     TString* source; /* 当前源名称 current source name */
     TString* envn; /* environment variable name */

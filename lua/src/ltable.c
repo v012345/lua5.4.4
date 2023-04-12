@@ -728,7 +728,8 @@ const TValue* luaH_getstr(Table* t, TString* key) {
     }
 }
 
-/// @brief 返回 t[key]; main search function
+/// @brief 返回 t[key] \r
+/// main search function
 const TValue* luaH_get(Table* t, const TValue* key) {
     switch (ttypetag(key)) {
         case LUA_VSHRSTR: return luaH_getshortstr(t, tsvalue(key));

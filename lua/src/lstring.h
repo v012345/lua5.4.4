@@ -25,22 +25,20 @@
 /// @brief 判断一个串是不是保留字 test whether a string is a reserved word
 #define isreserved(s) ((s)->tt == LUA_VSHRSTR && (s)->extra > 0)
 
-/*
-** equality for short strings, which are always internalized ;
-** 短字符串经过内部化后, 在 g 上只有一份, 那么只要是短字符串且地址相等那么两个字符串就是相等的
-*/
+// 短字符串只有一份, 所以地址相等, 两个字符串就相等 \r
+// equality for short strings, which are always internalized
 #define eqshrstr(a, b) check_exp((a)->tt == LUA_VSHRSTR, (a) == (b))
 
-LUAI_FUNC unsigned int luaS_hash(const char *str, size_t l, unsigned int seed);
-LUAI_FUNC unsigned int luaS_hashlongstr(TString *ts);
-LUAI_FUNC int luaS_eqlngstr(TString *a, TString *b);
-LUAI_FUNC void luaS_resize(lua_State *L, int newsize);
-LUAI_FUNC void luaS_clearcache(global_State *g);
-LUAI_FUNC void luaS_init(lua_State *L);
-LUAI_FUNC void luaS_remove(lua_State *L, TString *ts);
-LUAI_FUNC Udata *luaS_newudata(lua_State *L, size_t s, int nuvalue);
-LUAI_FUNC TString *luaS_newlstr(lua_State *L, const char *str, size_t l);
-LUAI_FUNC TString *luaS_new(lua_State *L, const char *str);
-LUAI_FUNC TString *luaS_createlngstrobj(lua_State *L, size_t l);
+LUAI_FUNC unsigned int luaS_hash(const char* str, size_t l, unsigned int seed);
+LUAI_FUNC unsigned int luaS_hashlongstr(TString* ts);
+LUAI_FUNC int luaS_eqlngstr(TString* a, TString* b);
+LUAI_FUNC void luaS_resize(lua_State* L, int newsize);
+LUAI_FUNC void luaS_clearcache(global_State* g);
+LUAI_FUNC void luaS_init(lua_State* L);
+LUAI_FUNC void luaS_remove(lua_State* L, TString* ts);
+LUAI_FUNC Udata* luaS_newudata(lua_State* L, size_t s, int nuvalue);
+LUAI_FUNC TString* luaS_newlstr(lua_State* L, const char* str, size_t l);
+LUAI_FUNC TString* luaS_new(lua_State* L, const char* str);
+LUAI_FUNC TString* luaS_createlngstrobj(lua_State* L, size_t l);
 
 #endif

@@ -131,18 +131,17 @@ l_noret luaD_throw(lua_State* L, int errcode) {
 }
 
 /// @brief 这段代码的作用是运行一个C函数指针,这个C函数指针指向的函数可能会发生异常
-/// @param L
 /// @param f 函数指针,表示要运行的C函数
-/// @param ud
+/// @param ud 透传给 f 作为第二个参数使用的数据
 /// @return int
 int luaD_rawrunprotected(lua_State* L, Pfunc f, void* ud) {
     l_uint32 oldnCcalls = L->nCcalls; // 保存调用栈层数
-    struct lua_longjmp lj; // 定义一个lua_longjmp类型的结构体变量lj
+    struct lua_longjmp lj; // 用来保存调用上下文
     lj.status = LUA_OK; // 初始化结构体成员status为LUA_OK
-    lj.previous = L->errorJmp; // 将当前的long jump链表头连接到结构体变量的previous指针域上 /* chain new error handler */
-    L->errorJmp = &lj; // 将当前结构体变量连接到lua_State结构体上的long jump链表头
-    LUAI_TRY(L, &lj, (*f)(L, ud);); // 这里是一个宏定义,用于跨平台地处理异常 执行函数指针f指向的函数,参数为L和ud
-    L->errorJmp = lj.previous; // 恢复lua_State结构体上的long jump链表头 /* restore old error handler */
+    lj.previous = L->errorJmp; /* chain new error handler */
+    L->errorJmp = &lj; // 更新当前的 errorJmp
+    LUAI_TRY(L, &lj, (*f)(L, ud);); // 保存执行点
+    L->errorJmp = lj.previous; /* restore old error handler */
     L->nCcalls = oldnCcalls; // 恢复调用栈层数
     return lj.status; // 返回结构体成员status
 }
@@ -839,7 +838,7 @@ int luaD_closeprotected(lua_State* L, ptrdiff_t level, int status) {
     }
 }
 
-/// @brief 用于在保护模式下调用一个 C 函数,并在出现错误时恢复堆栈信息,处理错误
+/// @brief 用于在保护模式下调用一个 C 函数,并在出现错误时恢复堆栈信息,处理错误 \r
 /// Call the C function 'func' in protected mode, restoring basic thread information ('allowhook', etc.) and in particular its stack level in case of errors.
 /// @param func 要调用的 C 函数
 /// @param u 一个指向用户数据的指针
@@ -848,7 +847,7 @@ int luaD_closeprotected(lua_State* L, ptrdiff_t level, int status) {
 /// @return int
 int luaD_pcall(lua_State* L, Pfunc func, void* u, ptrdiff_t old_top, ptrdiff_t ef) {
     int status;
-    CallInfo* old_ci = L->ci; // 当前调用信息
+    CallInfo* old_ci = L->ci; // 保存上一个 CallInfo
     lu_byte old_allowhooks = L->allowhook; // 否允许钩子
     ptrdiff_t old_errfunc = L->errfunc; // 当前错误处理函数在栈中的索引
     L->errfunc = ef; // 将传入的错误处理函数在栈中的索引 ef 赋值给 L->errfunc
@@ -856,9 +855,9 @@ int luaD_pcall(lua_State* L, Pfunc func, void* u, ptrdiff_t old_top, ptrdiff_t e
     if (l_unlikely(status != LUA_OK)) { /* an error occurred? */
         L->ci = old_ci;
         L->allowhook = old_allowhooks;
-        status = luaD_closeprotected(L, old_top, status); // 进行栈的恢复, 将当前帧以及当前帧以上的帧全部出栈,最终将栈顶指针恢复到 old_top,以便后续进行错误信息的处理
-        luaD_seterrorobj(L, status, restorestack(L, old_top)); // 将当前的错误信息设置到错误对象中, 其中 restorestack 函数用于将错误信息对象移动到恢复后的正确位置.
-        luaD_shrinkstack(L); /* 将栈缩小到合适的大小 restore stack size in case of overflow */
+        status = luaD_closeprotected(L, old_top, status);
+        luaD_seterrorobj(L, status, restorestack(L, old_top));
+        luaD_shrinkstack(L); /* restore stack size in case of overflow */
     }
     L->errfunc = old_errfunc;
     return status;

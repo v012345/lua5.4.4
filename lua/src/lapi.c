@@ -988,7 +988,7 @@ static void f_call(lua_State* L, void* ud) {
     luaD_callnoyield(L, c->func, c->nresults);
 }
 
-/// @brief 被调用的函数在 (top - 1) - nargs
+/// @brief 检查栈大小, 确定参数与返回值个数
 /// @param nargs 传递给函数的参数个数
 /// @param nresults 期望返回值的个数
 /// @param errfunc 错误处理函数在栈中的位置
@@ -996,7 +996,7 @@ static void f_call(lua_State* L, void* ud) {
 /// @param k 一个可选的 continuation 函数
 LUA_API int lua_pcallk(lua_State* L, int nargs, int nresults, int errfunc, lua_KContext ctx, lua_KFunction k) {
     struct CallS c; // 保存调用信息
-    int status; // 返回值
+    int status; // 执行完成后的状态
     ptrdiff_t func; // 错误处理函数的索引或者 0
     lua_lock(L);
     api_check(L, k == NULL || !isLua(L->ci), "cannot use continuations inside hooks");
