@@ -135,9 +135,9 @@ struct lua_longjmp; /* defined in ldo.c */
 #define KGC_GEN 1 /* generational gc */
 
 typedef struct stringtable {
-    TString** hash; // 字符串的哈希表的哈希桶
+    TString** hash;
     int nuse; /* number of elements */
-    int size; // 哈希桶的大小, 就是预定容量, luaS_init 时给出 初始化大小 MINSTRTABSIZE ( 2^7 = 128 ), 之后可以调整大小, 注意 size 是 2 的幂次
+    int size; // hash 的大小
 } stringtable;
 
 /*
@@ -229,55 +229,54 @@ typedef struct CallInfo {
 ** 'global state', shared by all threads of this state
 */
 typedef struct global_State {
-    lua_Alloc frealloc; /* 内存重分配函数指针,用于动态调整内存大小 function to reallocate memory */
-    void* ud; /* frealloc 函数的辅助数据指针 auxiliary data to 'frealloc' */
-    l_mem totalbytes; /* 当前已经分配的内存字节数,包括 GCdebt ; number of bytes currently allocated - GCdebt */
-    l_mem GCdebt; /* 当前已经分配但还未被 GC 回收的内存字节数,也称为内部感知的内存大小 bytes allocated not yet compensated by the collector */
-    lu_mem GCestimate; /* 当前被使用的非垃圾内存的估计值 an estimate of the non-garbage memory in use */
-    lu_mem lastatomic; /* 用于垃圾回收中的原子操作计数器 see function 'genstep' in file 'lgc.c' */
+    lua_Alloc frealloc; /* function to reallocate memory */
+    void* ud; /* auxiliary data to 'frealloc' */
+    l_mem totalbytes; /* number of bytes currently allocated - GCdebt */
+    l_mem GCdebt; /* bytes allocated not yet compensated by the collector */
+    lu_mem GCestimate; /* an estimate of the non-garbage memory in use */
+    lu_mem lastatomic; /* see function 'genstep' in file 'lgc.c' */
     stringtable strt; /* hash table for strings */
-    TValue l_registry; /* 是一个表(t), t[0] = L, t[1] = _G */
-    TValue nilvalue; /* 如果这个值真的是一个 nil 那么就说明 global_State 构建完毕; a nil value */
-    unsigned int seed; /* 启动时生成的一个随机数种子,主要用于求字符串哈希时使用 randomized seed for hashes */
-    lu_byte currentwhite; // 垃圾回收中的当前白色标记
-    lu_byte gcstate; /* 垃圾回收器的状态 state of garbage collector */
-    lu_byte gckind; /* 垃圾回收器运行的类型 kind of GC running */
-    lu_byte gcstopem; /* 是否停止紧急垃圾回收 stops emergency collections */
-    lu_byte genminormul; /* 控制小型分代回收的参数 control for minor generational collections */
-    lu_byte genmajormul; /* 控制大型分代回收的参数 control for major generational collections */
-    lu_byte gcstp; /* 控制是否运行垃圾回收器 control whether GC is running */
-    lu_byte gcemergency; /* 是否处于紧急垃圾回收状态 true if this is an emergency collection */
-    lu_byte gcpause; /* 垃圾回收器连续两次执行之间的暂停时间 size of pause between successive GCs */
-    lu_byte gcstepmul; /* 垃圾回收器运行速度的控制参数 GC "speed" */
-    lu_byte gcstepsize; /* 垃圾回收器粒度的控制参数,即每个循环中扫描的内存块大小 (log2 of) GC granularity */
-    GCObject* allgc; /* 所有可回收对象的链表 list of all collectable objects */
-    GCObject** sweepgc; /* 当前扫描位置的链表指针 current position of sweep in list */
-    GCObject* finobj; /* 带有 finalizer 的可回收对象的链表 list of collectable objects with finalizers */
-    GCObject* gray; /* 灰色对象链表 list of gray objects */
-    GCObject* grayagain; /* 需要重新扫描的灰色对象链表 list of objects to be traversed atomically */
-    GCObject* weak; /* 带有弱值的表对象链表 list of tables with weak values */
-    GCObject* ephemeron; /* 带有弱键的表对象链表 list of ephemeron tables (weak keys) */
-    GCObject* allweak; /* 所有带有弱引用的表对象链表 list of all-weak tables */
-    GCObject* tobefnz; /* 待回收的 userdata 对象链表 list of userdata to be GC */
-    GCObject* fixedgc; /* 不可回收的对象链表 list of objects not to be collected */
+    TValue l_registry;
+    TValue nilvalue; /* a nil value */
+    unsigned int seed; /* randomized seed for hashes */
+    lu_byte currentwhite;
+    lu_byte gcstate; /* state of garbage collector */
+    lu_byte gckind; /* kind of GC running */
+    lu_byte gcstopem; /* stops emergency collections */
+    lu_byte genminormul; /* control for minor generational collections */
+    lu_byte genmajormul; /* control for major generational collections */
+    lu_byte gcstp; /* control whether GC is running */
+    lu_byte gcemergency; /* true if this is an emergency collection */
+    lu_byte gcpause; /* size of pause between successive GCs */
+    lu_byte gcstepmul; /* GC "speed" */
+    lu_byte gcstepsize; /* (log2 of) GC granularity */
+    GCObject* allgc; /* list of all collectable objects */
+    GCObject** sweepgc; /* current position of sweep in list */
+    GCObject* finobj; /* list of collectable objects with finalizers */
+    GCObject* gray; /* list of gray objects */
+    GCObject* grayagain; /* list of objects to be traversed atomically */
+    GCObject* weak; /* list of tables with weak values */
+    GCObject* ephemeron; /* list of ephemeron tables (weak keys) */
+    GCObject* allweak; /* list of all-weak tables */
+    GCObject* tobefnz; /* list of userdata to be GC */
+    GCObject* fixedgc; /* list of objects not to be collected */
     /* fields for generational collector */
-    GCObject* survival; /* 上一次 GC 后幸存下来的对象链表 start of objects that survived one GC cycle */
-    GCObject* old1; /* 一代老对象链表 start of old1 objects */
-    GCObject* reallyold; /* 超过一定周期的老对象链表 objects more than one cycle old ("really old") */
-    GCObject* firstold1; /* 一代老对象链表中第一个 OLD1 对象 first OLD1 object in the list (if any) */
-    GCObject* finobjsur; /* 存储带有 finalizer 的生存对象（即未被标记为垃圾的对象）,以链表形式连接起来 list of survival objects with finalizers */
-    GCObject* finobjold1; /* 存储带有 finalizer 的一代老对象链表中的对象,以链表形式连接起来 list of old1 objects with finalizers */
-    GCObject* finobjrold; /* 存储带有 finalizer 的真正老的对象链表中的对象,以链表形式连接起来 list of really old objects with finalizers */
-    struct lua_State* twups; /* 存储有开放 Upvalue 的线程链表,以链表形式连接起来 list of threads with open upvalues */
-    lua_CFunction panic; /* 指向一个回调函数,当出现未被保护的错误（unprotected error）时会被调用 to be called in unprotected errors */
-    struct lua_State* mainthread; /* 指向主线程的指针,即创建 Lua 虚拟机时所创建的 lua_State 结构体 主lua_State.在一个独立的lua虚拟机里, global_State是一个全局的结构,
-                                     而lua_State可以有多个. lua_newstate会创建出一个lua_State, 绑在 lua_State *mainthread.可以说是主线程、主执行栈. */
-    TString* memerrmsg; /* 用于存储内存分配错误信息的字符串对象 message for memory-allocation errors */
+    GCObject* survival; /* start of objects that survived one GC cycle */
+    GCObject* old1; /* start of old1 objects */
+    GCObject* reallyold; /* objects more than one cycle old ("really old") */
+    GCObject* firstold1; /* first OLD1 object in the list (if any) */
+    GCObject* finobjsur; /* list of survival objects with finalizers */
+    GCObject* finobjold1; /* list of old1 objects with finalizers */
+    GCObject* finobjrold; /* list of really old objects with finalizers */
+    struct lua_State* twups; /* list of threads with open upvalues */
+    lua_CFunction panic; /* to be called in unprotected errors */
+    struct lua_State* mainthread;
+    TString* memerrmsg; /* message for memory-allocation errors */
     TString* tmname[TM_N]; /* array with tag-method names */
     struct Table* mt[LUA_NUMTAGS]; /* metatables for basic types */
-    TString* strcache[STRCACHE_N][STRCACHE_M]; /* 用于缓存 API 中的字符串对象 cache for strings in API */
-    lua_WarnFunction warnf; /* 指向一个回调函数,用于输出警告信息 warning function */
-    void* ud_warn; /* 辅助数据,用于回调函数 'warnf' ; auxiliary data to 'warnf' */
+    TString* strcache[STRCACHE_N][STRCACHE_M]; /* cache for strings in API */
+    lua_WarnFunction warnf; /* warning function */
+    void* ud_warn; /* auxiliary data to 'warnf' */
 } global_State;
 
 /*
@@ -298,7 +297,7 @@ struct lua_State {
     StkId tbclist; /* 待关闭的 Upvalue 列表 list of to-be-closed variables */
     GCObject* gclist; // 待 GC 的对象列表
     struct lua_State* twups; /* 当前线程的 open upvalue 列表 list of threads with open upvalues */
-    struct lua_longjmp* errorJmp; /* 当前错误恢复点,用于处理 Lua 错误 current error recover point */
+    struct lua_longjmp* errorJmp; /* current error recover point */
     CallInfo base_ci; /* CallInfo for first level (C calling Lua) */
     volatile lua_Hook hook; // 当前调试钩子函数
     ptrdiff_t errfunc; /* 当前错误处理函数的栈索引 current error handling function (stack index) */

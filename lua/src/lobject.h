@@ -71,7 +71,7 @@ typedef struct TValue {
 // o 的细分类型(tt_); raw type tag of a TValue
 #define rawtt(o) ((o)->tt_)
 
-// 细分类型(tag)的低 4 位, 细分类型的大类; tag with no variants (bits 0-3)
+// tag with no variants (bits 0-3)
 #define novariant(t) ((t)&0x0F)
 
 /* type tag of a TValue (bits 0-3 for tags + variant bits 4-5) */
@@ -786,7 +786,7 @@ typedef struct Table {
 
 /* }================================================================== */
 
-// s 对 size 的余数, 这里由于 size 是 2 的幂次, 所以可以使用 size - 1 与 s 做按位与来快速求余数; 'module' operation for hashing (size is always a power of 2)
+// 'module' operation for hashing (size is always a power of 2)
 #define lmod(s, size) (check_exp((size & (size - 1)) == 0, (cast_int((s) & ((size)-1)))))
 // 生成一个 2 的 x 幂的数
 #define twoto(x) (1 << (x))

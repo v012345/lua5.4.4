@@ -12,6 +12,7 @@
 #include "llimits.h"
 #include "lua.h"
 
+// 抛出内存分配错误
 #define luaM_error(L) luaD_throw(L, LUA_ERRMEM)
 
 /*
@@ -44,19 +45,24 @@
 #define luaM_freearray(L, b, n) luaM_free_(L, (b), (n) * sizeof(*(b)))
 
 #define luaM_new(L, t) cast(t*, luaM_malloc_(L, sizeof(t), 0))
-// 把分配来的内存首地址转成 t 指针 , 内存大小的 t 的大小 * n
+// 分配 sizeof(t) * n 大小的内存
 #define luaM_newvector(L, n, t) cast(t*, luaM_malloc_(L, (n) * sizeof(t), 0))
 #define luaM_newvectorchecked(L, n, t) (luaM_checksize(L, n, sizeof(t)), luaM_newvector(L, n, t))
 
 #define luaM_newobject(L, tag, s) luaM_malloc_(L, (s), tag)
 
 /// @brief 分配一个连续的内存空间, 最小分配 MINSIZEARRAY (4) 个元素
-/// @param v 指向新分配来的空间
+/// @param v 原内存地址
 /// @param nelems 现在需要存放的元素数量
 /// @param size 分配完成后, 分配来的内存可以存多少个元素
 /// @param t 要存什么类型的元素
 #define luaM_growvector(L, v, nelems, size, t, limit, e) ((v) = cast(t*, luaM_growaux_(L, v, nelems, &(size), sizeof(t), luaM_limitN(limit, t), e)))
 
+/// @brief 对现有内存空间进行调整
+/// @param v 原内存地址
+/// @param oldn 原内存可放的元素数量
+/// @param n 分配完成后, 分配来的内存可以存多少个元素
+/// @param t 要存元素的类型
 #define luaM_reallocvector(L, v, oldn, n, t) (cast(t*, luaM_realloc_(L, v, cast_sizet(oldn) * sizeof(t), cast_sizet(n) * sizeof(t))))
 
 #define luaM_shrinkvector(L, v, size, fs, t) ((v) = cast(t*, luaM_shrinkvector_(L, v, &(size), fs, sizeof(t))))

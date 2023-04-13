@@ -110,6 +110,7 @@ void luaD_seterrorobj(lua_State* L, int errcode, StkId oldtop) {
     L->top = oldtop + 1;
 }
 
+/// @brief L->errorJmp ? 跳过去 : 退出;
 l_noret luaD_throw(lua_State* L, int errcode) {
     if (L->errorJmp) { /* thread has an error handler? */
         L->errorJmp->status = errcode; /* set status */

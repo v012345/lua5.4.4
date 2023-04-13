@@ -52,36 +52,29 @@ unsigned int luaS_hashlongstr(TString* ts) {
     return ts->hash;
 }
 
+/// @brief 重新排列 vect 表
+/// @param osize 原始大小
+/// @param nsize 新大小
 static void tablerehash(TString** vect, int osize, int nsize) {
     int i;
-    // 如果要扩大, 那么新申请来的空间初始化一下
     for (i = osize; i < nsize; i++) /* clear new elements */
         vect[i] = NULL;
-    // 把原来数据重新分发来各自的桶里
     for (i = 0; i < osize; i++) { /* rehash old part of the array */
-        TString* p = vect[i]; // 用 p 指向各个桶
-        // 把当前桶清空
+        TString* p = vect[i];
         vect[i] = NULL;
-        // 遍历这个桶
         while (p) { /* for each string in the list */
-            // 保存 p 的后继指针
             TString* hnext = p->u.hnext; /* save next */
-            // 计算出新的桶的位置
             unsigned int h = lmod(p->hash, nsize); /* new position */
-            // 把新桶也连到 p 后面
             p->u.hnext = vect[h]; /* chain it into array  */
-            // 使用新桶的第一个元素为 p
             vect[h] = p;
-            // 下一个元素开始
             p = hnext;
         }
     }
 }
 
-/// @brief
+/// @brief 调整字符哈希表的大小 \r
 /// Resize the string table. If allocation fails, keep the current size.
 /// (This can degrade performance, but any non-zero size should work correctly.)
-/// @param nsize 哈希桶的大小
 void luaS_resize(lua_State* L, int nsize) {
     stringtable* tb = &G(L)->strt;
     int osize = tb->size;
@@ -100,10 +93,7 @@ void luaS_resize(lua_State* L, int nsize) {
     }
 }
 
-/*
-** Clear API string cache. (Entries cannot be empty, so fill them with
-** a non-collectable string.)
-*/
+/// @brief Clear API string cache. (Entries cannot be empty, so fill them with a non-collectable string.)
 void luaS_clearcache(global_State* g) {
     int i, j;
     for (i = 0; i < STRCACHE_N; i++)
@@ -113,25 +103,25 @@ void luaS_clearcache(global_State* g) {
         }
 }
 
-/*
-** Initialize the string table and the string cache
-*/
+/// @brief Initialize the string table and the string cache
 void luaS_init(lua_State* L) {
     global_State* g = G(L);
     int i, j;
     stringtable* tb = &G(L)->strt;
-    tb->hash = luaM_newvector(L, MINSTRTABSIZE, TString*); // 初始化哈希桶大小为 MINSTRTABSIZE = 128
-    tablerehash(tb->hash, 0, MINSTRTABSIZE); /* 把上一步申请来内存置NULL ; clear array */
+    tb->hash = luaM_newvector(L, MINSTRTABSIZE, TString*);
+    tablerehash(tb->hash, 0, MINSTRTABSIZE); /* clear array */
     tb->size = MINSTRTABSIZE; // 显式指出哈希桶的大小
     g->memerrmsg = luaS_newliteral(L, MEMERRMSG); /* pre-create memory-error message */
     luaC_fix(L, obj2gco(g->memerrmsg)); /* it should never be collected */
     for (i = 0; i < STRCACHE_N; i++) /* fill cache with valid strings */
-        for (j = 0; j < STRCACHE_M; j++) g->strcache[i][j] = g->memerrmsg; // 临时初始化一下, 之后会改的
+        for (j = 0; j < STRCACHE_M; j++) g->strcache[i][j] = g->memerrmsg;
 }
 
-/*
-** creates a new string object
-*/
+/// @brief 生成一个 TString 对象, 没有内容
+/// creates a new string object
+/// @param l 字符串长度
+/// @param tag 子类型, 长还是短
+/// @param h 哈希值
 static TString* createstrobj(lua_State* L, size_t l, int tag, unsigned int h) {
     TString* ts;
     GCObject* o;
@@ -145,12 +135,14 @@ static TString* createstrobj(lua_State* L, size_t l, int tag, unsigned int h) {
     return ts;
 }
 
+/// @brief 生成一个长字符串 TString
 TString* luaS_createlngstrobj(lua_State* L, size_t l) {
     TString* ts = createstrobj(L, l, LUA_VLNGSTR, G(L)->seed);
     ts->u.lnglen = l;
     return ts;
 }
 
+/// @brief 从字符串哈希表中移除 ts
 void luaS_remove(lua_State* L, TString* ts) {
     stringtable* tb = &G(L)->strt;
     TString** p = &tb->hash[lmod(ts->hash, tb->size)];
@@ -160,9 +152,7 @@ void luaS_remove(lua_State* L, TString* ts) {
     tb->nuse--;
 }
 
-/// @brief 如果有空间, 那么就把 字符串 表的大小 扩大 两倍, 并重新排列所有字符串的位置
-/// @param L
-/// @param tb
+/// @brief 如果 tb 的大小小于 MAXSTRTB, tb 扩大两倍, 并重新排列
 static void growstrtab(lua_State* L, stringtable* tb) {
     if (l_unlikely(tb->nuse == MAX_INT)) { /* too many strings? */
         luaC_fullgc(L, 1); /* try to free some... */
@@ -173,31 +163,24 @@ static void growstrtab(lua_State* L, stringtable* tb) {
         luaS_resize(L, tb->size * 2);
 }
 
-/*
-** Checks whether short string exists and reuses it or creates a new one.
-** 内部化短字符串, 先看哈希桶里有没有 str, 有直接返回, 没有就新创建一个放到桶里
-*/
+/// @brief Checks whether short string exists and reuses it or creates a new one.
 static TString* internshrstr(lua_State* L, const char* str, size_t l) {
     TString* ts;
     global_State* g = G(L);
-    stringtable* tb = &g->strt; // 全局字符串 hash 表
-    unsigned int h = luaS_hash(str, l, g->seed); // 算出短串的 hash 值
-    TString** list = &tb->hash[lmod(h, tb->size)]; // 定位到 hash 值所在的哈希桶的地址的指针
+    stringtable* tb = &g->strt; // 字符串 hash 表
+    unsigned int h = luaS_hash(str, l, g->seed);
+    TString** list = &tb->hash[lmod(h, tb->size)];
     lua_assert(str != NULL); /* otherwise 'memcmp'/'memcpy' are undefined */
-
-    // 在当前桶中遍历, 看是否已经存在, 如果存在就返回这个 TString 的地址
     for (ts = *list; ts != NULL; ts = ts->u.hnext) {
-        if (l == ts->shrlen && (memcmp(str, getstr(ts), l * sizeof(char)) == 0)) {
-            /* found! */
+        if (l == ts->shrlen && (memcmp(str, getstr(ts), l * sizeof(char)) == 0)) { /* found! */
             if (isdead(g, ts)) /* dead (but not collected yet)? */
                 changewhite(ts); /* resurrect it */
             return ts;
         }
     }
-    // 到这里说明没有找到
-
     /* else must create a new string */
     if (tb->nuse >= tb->size) { /* need to grow string table? */
+        // 如果已经不能扩大了, 就不扩大了, 就将就着用吧, 但是如果实在是存了大多了, 会报错的
         growstrtab(L, tb);
         list = &tb->hash[lmod(h, tb->size)]; /* rehash with new size */
     }
@@ -210,7 +193,7 @@ static TString* internshrstr(lua_State* L, const char* str, size_t l) {
     return ts;
 }
 
-/// @brief 生成 TString \r
+/// @brief 生成 TString 对象 \r
 /// new string (with explicit length)
 /// @param l str 的长度
 TString* luaS_newlstr(lua_State* L, const char* str, size_t l) {
@@ -225,12 +208,11 @@ TString* luaS_newlstr(lua_State* L, const char* str, size_t l) {
     }
 }
 
-/*
-** Create or reuse a zero-terminated string, first checking in the
-** cache (using the string address as a key). The cache can contain
-** only zero-terminated strings, so it is safe to use 'strcmp' to
-** check hits.
-*/
+/// @brief 相当于全部 TString 对象的二缓 \r
+/// Create or reuse a zero-terminated string, first checking in the
+/// cache (using the string address as a key). The cache can contain
+/// only zero-terminated strings, so it is safe to use 'strcmp' to
+/// check hits.
 TString* luaS_new(lua_State* L, const char* str) {
     unsigned int i = point2uint(str) % STRCACHE_N; /* hash */
     int j;
@@ -247,10 +229,8 @@ TString* luaS_new(lua_State* L, const char* str) {
 }
 
 /// @brief Userdata 的构造函数
-/// @param L
 /// @param s
 /// @param nuvalue
-/// @return
 Udata* luaS_newudata(lua_State* L, size_t s, int nuvalue) {
     Udata* u;
     int i;

@@ -178,7 +178,7 @@ void* luaM_saferealloc_(lua_State* L, void* block, size_t osize, size_t nsize) {
 }
 
 /// @param size 分配内存的实际大小
-/// @param tag 不使用, 对应 l_alloc 的 osize
+/// @param tag lua 数据对象的主类型
 /// @return void * 分配来的内存的首地址
 void* luaM_malloc_(lua_State* L, size_t size, int tag) {
     if (size == 0)
