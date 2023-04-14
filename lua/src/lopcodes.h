@@ -32,7 +32,7 @@ enum OpMode {
     iABx,
     iAsBx,
     iAx,
-    isJ // 这是跳转用的地址
+    isJ, // 这是跳转用的地址
 }; /* basic instruction formats */
 
 /*
@@ -41,8 +41,8 @@ enum OpMode {
 
 #define SIZE_C 8 // 8
 #define SIZE_B 8 // 8
-#define SIZE_Bx (SIZE_C + SIZE_B + 1) // 17
-#define SIZE_A 8 // 8 指令中 A 占用的 bit 数
+#define SIZE_Bx (SIZE_C + SIZE_B + 1) // 17, B + C + k
+#define SIZE_A 8 // 8
 #define SIZE_Ax (SIZE_Bx + SIZE_A) // 25
 #define SIZE_sJ (SIZE_Bx + SIZE_A) // 25
 
@@ -50,7 +50,7 @@ enum OpMode {
 
 #define POS_OP 0 // 0
 
-#define POS_A (POS_OP + SIZE_OP) // 7 指令中 A 的起始位置
+#define POS_A (POS_OP + SIZE_OP) // 7
 #define POS_k (POS_A + SIZE_A) // 15
 #define POS_B (POS_k + 1) // 16
 #define POS_C (POS_B + SIZE_B) // 24
@@ -77,11 +77,10 @@ enum OpMode {
 #define MAXARG_Bx MAX_INT
 #endif
 
-#define OFFSET_sBx (MAXARG_Bx >> 1) /* 65535; 'sBx' is signed */
+#define OFFSET_sBx (MAXARG_Bx >> 1) /* 'sBx' is signed */
 
 #if L_INTHASBITS(SIZE_Ax)
-// 2^25 - 1
-#define MAXARG_Ax ((1 << SIZE_Ax) - 1) 
+#define MAXARG_Ax ((1 << SIZE_Ax) - 1)
 #else
 #define MAXARG_Ax MAX_INT
 #endif
@@ -112,22 +111,22 @@ enum OpMode {
 ** the following macros help to manipulate instructions
 */
 
-// 拿到 i 中的低 7 位, 也就是 i 的 OpCode
 #define GET_OPCODE(i) (cast(OpCode, ((i) >> POS_OP) & MASK1(SIZE_OP, 0)))
 #define SET_OPCODE(i, o) ((i) = (((i)&MASK0(SIZE_OP, POS_OP)) | ((cast(Instruction, o) << POS_OP) & MASK1(SIZE_OP, POS_OP))))
 
-// 检查指令 i 的低 3 位是否与 m 一致
+// 检查 i 是不是 m 类型
 #define checkopm(i, m) (getOpMode(GET_OPCODE(i)) == m)
 
-// 通过 掩码的方式, 取出指令 i 中的数据
+// 获取 i 中从 pos 开始, 长度为 size 的数据
 #define getarg(i, pos, size) (cast_int(((i) >> (pos)) & MASK1(size, 0)))
+// 把 v 放到 i 中 pos 处
 #define setarg(i, v, pos, size) ((i) = (((i)&MASK0(size, pos)) | ((cast(Instruction, v) << pos) & MASK1(size, pos))))
 
-// 指令 i 对应的 A 寄存器的偏移量, 就是 i 中 8 到 15 位表示的一个整数
+// 指令 i 的 A 部分的数据
 #define GETARG_A(i) getarg(i, POS_A, SIZE_A)
 #define SETARG_A(i, v) setarg(i, v, POS_A, SIZE_A)
 
-// 指令 i 对应的 B 寄存器的偏移量, 就是 i 中 17 到 24 位表示的一个整数
+// 指令 i 的 B 部分的数据
 #define GETARG_B(i) check_exp(checkopm(i, iABC), getarg(i, POS_B, SIZE_B))
 #define GETARG_sB(i) sC2int(GETARG_B(i))
 #define SETARG_B(i, v) setarg(i, v, POS_B, SIZE_B)
@@ -136,6 +135,7 @@ enum OpMode {
 #define GETARG_sC(i) sC2int(GETARG_C(i))
 #define SETARG_C(i, v) setarg(i, v, POS_C, SIZE_C)
 
+// 指令 i 的 k 部分是真是假
 #define TESTARG_k(i) check_exp(checkopm(i, iABC), (cast_int(((i) & (1u << POS_k)))))
 #define GETARG_k(i) check_exp(checkopm(i, iABC), getarg(i, POS_k, 1))
 #define SETARG_k(i, v) setarg(i, v, POS_k, 1)
@@ -363,7 +363,7 @@ typedef enum {
 
 LUAI_DDEC(const lu_byte luaP_opmodes[NUM_OPCODES];)
 
-// 通过 OpCode 拿到对应指令之后, 取指令的低 3 位(就是 OpMode)
+// 指令的对应的操作模式, 取操作模式的低 3 位(就是指令对应的格式)
 #define getOpMode(m) (cast(enum OpMode, luaP_opmodes[m] & 7))
 #define testAMode(m) (luaP_opmodes[m] & (1 << 3))
 #define testTMode(m) (luaP_opmodes[m] & (1 << 4))

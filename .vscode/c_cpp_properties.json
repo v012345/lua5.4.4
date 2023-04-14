@@ -1,0 +1,15 @@
+{
+    "configurations": [
+        {
+            "name": "Your Configuration Name",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "getOpMode=${workspaceFolder}/lua/src/lopcodes.h"
+            ],
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}

@@ -694,12 +694,6 @@ typedef union Closure {
 ** of the key's fields ('key_tt' and 'key_val') not forming a proper
 ** 'TValue' allows for a smaller size for 'Node' both in 4-byte
 ** and 8-byte alignments.
-是一个联合体, 如果是使用 i_val 那就表示 Node 是一个普通的 TValue,
-如果使用 u, 那么这个 Node 就保护了 Key 与 Vaule, 同时啊,
-这个 Key 也有类型(key_tt)与值(key_val), 值是类型(tt_)与值(value_),
-还有一个 next 表示什么我再看看
-
-还有啊, 因为这是一个联合体, 所以可以使用 i_val, 拿到值, 因为在 u, 前两个数据与TValue一致
 */
 typedef union Node {
     struct NodeKey {
@@ -743,9 +737,8 @@ typedef union Node {
 #define setrealasize(t) ((t)->flags &= cast_byte(~BITRAS))
 #define setnorealasize(t) ((t)->flags |= BITRAS)
 
-/// @brief Lua 的 表 结构
 typedef struct Table {
-    CommonHeader; // 一个指向 GCObject 的指针,用于垃圾回收
+    CommonHeader;
     lu_byte flags; /* 1<<p means tagmethod(p) is not present  用于标识表是否有某些特殊的属性,例如是否需要调用元方法、是否为弱表等等*/
     lu_byte lsizenode; /* log2 of size of 'node' array 哈希表的大小, 由于哈希表的大小一定为 2 的整数次幂, 所以这里表示的是幂次, 而不是实际大小 . node 数组的大小为 2^lsizenode */
     unsigned int alimit; /* "limit" of 'array' array 数组部分的大小.array[0] 至 array[alimit-1] 表示数组部分 */

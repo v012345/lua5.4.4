@@ -2,7 +2,6 @@
 ** $Id: ltable.c $
 ** Lua tables (hash)
 ** See Copyright Notice in lua.h
-** LuaH_* H是hash的意思
 */
 
 #define ltable_c
@@ -38,10 +37,7 @@
 #include "ltable.h"
 #include "lvm.h"
 
-/*
-** MAXABITS is the largest integer such that MAXASIZE fits in an
-** unsigned int.
-*/
+// MAXABITS is the largest integer such that MAXASIZE fits in an unsigned int.
 #define MAXABITS cast_int(sizeof(int) * CHAR_BIT - 1)
 
 /*
@@ -84,11 +80,13 @@
 
 /// @brief 一个不可改写的空哈希表
 static const Node dummynode_ = {
-    {{NULL},
-     LUA_VEMPTY, /* value's value and type */
-     LUA_VNIL,
-     0,
-     {NULL}} /* key type, next, and key value */
+    {
+        {NULL},
+        LUA_VEMPTY, /* value's value and type */
+        LUA_VNIL,
+        0,
+        {NULL},
+    } /* key type, next, and key value */
 };
 
 static const TValue absentkey = {ABSTKEYCONSTANT};
