@@ -63,10 +63,7 @@
 // When the original hash value is good, hashing by a power of 2 avoids the cost of '%'.
 #define hashpow2(t, n) (gnode(t, lmod((n), sizenode(t))))
 
-/*
-** for other types, it is better to avoid modulo by power of 2, as
-** they can have many 2 factors.
-*/
+// for other types, it is better to avoid modulo by power of 2, as they can have many 2 factors.
 #define hashmod(t, n) (gnode(t, ((n) % ((sizenode(t) - 1) | 1))))
 
 // 返回字符串 hash 在表中的主位置的 Node 的地址
@@ -133,11 +130,7 @@ static int l_hashfloat(lua_Number n) {
 }
 #endif
 
-/*
-** returns the 'main' position of an element in a table (that is,
-** the index of its hash value).
-对应不同类型的 key 算出hash之后, 映射到 table 的 node 数组上
-*/
+/// @brief returns the 'main' position of an element in a table (that is, the index of its hash value).
 static Node* mainpositionTV(const Table* t, const TValue* key) {
     switch (ttypetag(key)) {
         case LUA_VNUMINT: {
@@ -156,8 +149,10 @@ static Node* mainpositionTV(const Table* t, const TValue* key) {
             TString* ts = tsvalue(key);
             return hashpow2(t, luaS_hashlongstr(ts));
         }
-        case LUA_VFALSE: return hashboolean(t, 0);
-        case LUA_VTRUE: return hashboolean(t, 1);
+        case LUA_VFALSE: //
+            return hashboolean(t, 0);
+        case LUA_VTRUE: //
+            return hashboolean(t, 1);
         case LUA_VLIGHTUSERDATA: {
             void* p = pvalue(key);
             return hashpointer(t, p);
@@ -230,9 +225,7 @@ static int equalkey(const TValue* k1, const Node* n2, int deadok) {
 */
 #define limitequalsasize(t) (isrealasize(t) || ispow2((t)->alimit))
 
-/*
-** Returns the real size of the 'array' array
-*/
+// Returns the real size of the 'array' array
 LUAI_FUNC unsigned int luaH_realasize(const Table* t) {
     if (limitequalsasize(t))
         return t->alimit; /* this is the size */
@@ -260,6 +253,7 @@ LUAI_FUNC unsigned int luaH_realasize(const Table* t) {
 */
 static int ispow2realasize(const Table* t) { return (!isrealasize(t) || ispow2(t->alimit)); }
 
+/// @brief 更新 alimit 为真实 array 部分真实大小
 static unsigned int setlimittosize(Table* t) {
     t->alimit = luaH_realasize(t);
     setrealasize(t);
@@ -578,6 +572,7 @@ static void rehash(lua_State* L, Table* t, const TValue* ek) {
 ** }=============================================================
 */
 
+/// @brief 生成一个 Table
 Table* luaH_new(lua_State* L) {
     GCObject* o = luaC_newobj(L, LUA_VTABLE, sizeof(Table));
     Table* t = gco2t(o);
@@ -605,19 +600,18 @@ static Node* getfreepos(Table* t) {
     return NULL; /* could not find a free place */
 }
 
-/*
-** inserts a new key into a hash table; first, check whether key's main
-** position is free. If not, check whether colliding node is in its main
-** position or not: if it is not, move colliding node to an empty place and
-** put new key in its main position; otherwise (colliding node is in its main
-** position), new key goes to an empty position.
-*/
+/// @brief \r
+/// inserts a new key into a hash table; first, check whether key's main
+/// position is free. If not, check whether colliding node is in its main
+/// position or not: if it is not, move colliding node to an empty place and
+/// put new key in its main position; otherwise (colliding node is in its main
+/// position), new key goes to an empty position.
 void luaH_newkey(lua_State* L, Table* t, const TValue* key, TValue* value) {
     Node* mp;
     TValue aux;
-    if (l_unlikely(ttisnil(key))) // 如果 key 是 nil 直接报错
+    if (l_unlikely(ttisnil(key)))
         luaG_runerror(L, "table index is nil");
-    else if (ttisfloat(key)) { // 这里 float 是包括 integer 的
+    else if (ttisfloat(key)) {
         lua_Number f = fltvalue(key);
         lua_Integer k;
         if (luaV_flttointeger(f, &k, F2Ieq)) { /* does key fit in an integer? */
@@ -626,7 +620,8 @@ void luaH_newkey(lua_State* L, Table* t, const TValue* key, TValue* value) {
         } else if (l_unlikely(luai_numisnan(f)))
             luaG_runerror(L, "table index is NaN");
     }
-    if (ttisnil(value)) return; /* do not insert nil values */
+    if (ttisnil(value)) /* do not insert nil values */
+        return;
     mp = mainpositionTV(t, key);
     if (!isempty(gval(mp)) || isdummy(t)) { /* main position is taken? */
         Node* othern;

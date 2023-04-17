@@ -51,9 +51,7 @@ typedef signed char ls_byte;
 */
 #define log2maxs(t) (sizeof(t) * 8 - 2)
 
-/*
-** test whether an unsigned value is a power of 2 (or zero)
-*/
+// test whether an unsigned value is a power of 2 (or zero)
 #define ispow2(x) (((x) & ((x)-1)) == 0)
 
 /* number of chars of a literal string without the ending \0 */

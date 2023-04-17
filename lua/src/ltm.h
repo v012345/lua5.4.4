@@ -42,12 +42,10 @@ typedef enum {
     TM_N /* number of elements in the enum */
 } TMS;
 
-/*
-** Mask with 1 in all fast-access methods. A 1 in any of these bits
-** in the flag of a (meta)table means the metatable does not have the
-** corresponding metamethod field. (Bit 7 of the flag is used for
-** 'isrealasize'.)
-*/
+// 6 个 1 \r
+// Mask with 1 in all fast-access methods. A 1 in any of these bits
+// in the flag of a (meta)table means the metatable does not have the
+// corresponding metamethod field. (Bit 7 of the flag is used for 'isrealasize'.)
 #define maskflags (~(~0u << (TM_EQ + 1)))
 
 /*

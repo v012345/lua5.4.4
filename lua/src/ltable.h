@@ -9,7 +9,6 @@
 
 #include "lobject.h"
 
-// 拿到表 node 数组中的 i 索引的元素的地址
 #define gnode(t, i) (&(t)->node[i])
 
 ///@brief 返回 Node 的 i_val (TValue), 就是 Node 中的值
@@ -24,9 +23,7 @@
 */
 #define invalidateTMcache(t) ((t)->flags &= ~maskflags)
 
-/* true when 't' is using 'dummynode' as its hash part
-如果 t 的 size 是 0 那个 lastfree 就是 NULL, 而 node 指向一个 dummynode, 只读 空 node
-*/
+// true when 't' is using 'dummynode' as its hash part
 #define isdummy(t) ((t)->lastfree == NULL)
 
 /* allocated size for hash nodes */

@@ -238,7 +238,7 @@ void luaC_fix(lua_State* L, GCObject* o) {
     g->fixedgc = o;
 }
 
-/// @brief 生成一个新的 需要进行垃圾回收的对象, 把它链到 allgc 上 \r
+/// @brief 生成一个新的需要进行垃圾回收的对象, 链到 g->allgc 的链头 \r
 /// create a new collectable object (with given type and size) and link it to 'allgc' list.
 /// @param tt 生成对象的细分类型
 GCObject* luaC_newobj(lua_State* L, int tt, size_t sz) {

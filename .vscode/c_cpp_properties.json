@@ -6,7 +6,9 @@
                 "${workspaceFolder}/**"
             ],
             "defines": [
-                "getOpMode=${workspaceFolder}/lua/src/lopcodes.h"
+                "getOpMode=${workspaceFolder}/lua/src/lopcodes.h",
+                "l_floor=${workspaceFolder}/lua/src/luaconf.h",
+                "l_mathop=${workspaceFolder}/lua/src/luaconf.h"
             ],
             "intelliSenseMode": "gcc-x64"
         }

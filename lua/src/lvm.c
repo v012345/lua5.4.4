@@ -105,9 +105,7 @@ int luaV_tonumber_(const TValue* obj, lua_Number* n) {
         return 0; /* conversion failed */
 }
 
-/*
-** try to convert a float to an integer, rounding according to 'mode'.
-*/
+/// @brief try to convert a float to an integer, rounding according to 'mode'.
 int luaV_flttointeger(lua_Number n, lua_Integer* p, F2Imod mode) {
     lua_Number f = l_floor(n);
     if (n != f) { /* not an integral value? */

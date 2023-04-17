@@ -739,14 +739,14 @@ typedef union Node {
 
 typedef struct Table {
     CommonHeader;
-    lu_byte flags; /* 1<<p means tagmethod(p) is not present  用于标识表是否有某些特殊的属性,例如是否需要调用元方法、是否为弱表等等*/
-    lu_byte lsizenode; /* log2 of size of 'node' array 哈希表的大小, 由于哈希表的大小一定为 2 的整数次幂, 所以这里表示的是幂次, 而不是实际大小 . node 数组的大小为 2^lsizenode */
-    unsigned int alimit; /* "limit" of 'array' array 数组部分的大小.array[0] 至 array[alimit-1] 表示数组部分 */
+    lu_byte flags; /* 1<<p means tagmethod(p) is not present */
+    lu_byte lsizenode; /* log2 of size of 'node' array */
+    unsigned int alimit; /* "limit" of 'array' array */
     TValue* array; /* array part */
-    Node* node; // 哈希表
-    Node* lastfree; /* any free position is before this position  指向 Node 数组中的一个空闲位置,用于快速分配新的节点*/
+    Node* node;
+    Node* lastfree; /* any free position is before this position */
     struct Table* metatable;
-    GCObject* gclist; // 用于垃圾回收,指向下一个需要回收的对象
+    GCObject* gclist;
 } Table;
 
 /*
