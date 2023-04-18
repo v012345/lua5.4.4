@@ -105,7 +105,7 @@ typedef struct TValue {
 /* set a value's tag */
 #define settt_(o, t) ((o)->tt_ = (t))
 
-/// @brief 两个 TValue 类型的对象, 把 obj2 的 value_ 与 tt_ 都复制到 obj1 ; main macro to copy values (from 'obj2' to 'obj1')
+// main macro to copy values (from 'obj2' to 'obj1')
 #define setobj(L, obj1, obj2)                                                                                                                                                                          \
     {                                                                                                                                                                                                  \
         TValue* io1 = (obj1);                                                                                                                                                                          \

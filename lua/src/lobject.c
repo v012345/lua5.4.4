@@ -27,7 +27,8 @@
 #include "lstring.h"
 #include "lvm.h"
 
-/// @brief Computes ceil(log2(x))
+/// @brief 就是 x 占用的比特位个数 \r
+/// Computes ceil(log2(x))
 int luaO_ceillog2(unsigned int x) {
     static const lu_byte log_2[256] = {
         /* log_2[i] = ceil(log2(i - 1)) */

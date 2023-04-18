@@ -218,14 +218,13 @@ static int equalkey(const TValue* k1, const Node* n2, int deadok) {
     }
 }
 
-/*
-** True if value of 'alimit' is equal to the real size of the array
-** part of table 't'. (Otherwise, the array part must be larger than
-** 'alimit'.)
-*/
+// alimit 是为数组部分大小, alimit 一定小于等于数组部分大小 \r
+// True if value of 'alimit' is equal to the real size of the array part of table 't'.
+// (Otherwise, the array part must be larger than 'alimit'.)
 #define limitequalsasize(t) (isrealasize(t) || ispow2((t)->alimit))
 
-// Returns the real size of the 'array' array
+/// @brief 数组部分的真实大小 \r
+/// Returns the real size of the 'array' array
 LUAI_FUNC unsigned int luaH_realasize(const Table* t) {
     if (limitequalsasize(t))
         return t->alimit; /* this is the size */
@@ -247,13 +246,17 @@ LUAI_FUNC unsigned int luaH_realasize(const Table* t) {
 }
 
 /*
-** Check whether real size of the array is a power of 2.
-** (If it is not, 'alimit' cannot be changed to any other value
-** without changing the real size.)
-*/
-static int ispow2realasize(const Table* t) { return (!isrealasize(t) || ispow2(t->alimit)); }
 
-/// @brief 更新 alimit 为真实 array 部分真实大小
+*/
+
+/// @brief \r
+/// Check whether real size of the array is a power of 2.
+/// (If it is not, 'alimit' cannot be changed to any other value without changing the real size.)
+static int ispow2realasize(const Table* t) { //
+    return (!isrealasize(t) || ispow2(t->alimit));
+}
+
+/// @brief 更新 alimit 为数组部分的真实大小, 更新标志位, 返回真实大小
 static unsigned int setlimittosize(Table* t) {
     t->alimit = luaH_realasize(t);
     setrealasize(t);
@@ -280,10 +283,8 @@ static const TValue* getgeneric(Table* t, const TValue* key, int deadok) {
     }
 }
 
-/*
-** returns the index for 'k' if 'k' is an appropriate key to live in
-** the array part of a table, 0 otherwise.
-*/
+/// @brief k 是否可以作为数组部分的索引, k 在 [1, MAXASIZE], 返回 k, 否则返回 0 \r
+/// returns the index for 'k' if 'k' is an appropriate key to live in the array part of a table, 0 otherwise.
 static unsigned int arrayindex(lua_Integer k) {
     if (l_castS2U(k) - 1u < MAXASIZE) /* 'k' in [1, MAXASIZE]? */
         return cast_uint(k); /* 'key' is an appropriate array index */
@@ -377,6 +378,7 @@ static unsigned int computesizes(unsigned int nums[], unsigned int* pna) {
     return optimal;
 }
 
+/// @brief 如果 key 可以作为数组部分的索引, 增加 nums 计数器
 static int countint(lua_Integer key, unsigned int* nums) {
     unsigned int k = arrayindex(key);
     if (k != 0) { /* is 'key' an appropriate array index? */
@@ -422,7 +424,8 @@ static int numusehash(const Table* t, unsigned int* nums, unsigned int* pna) {
     while (i--) {
         Node* n = &t->node[i];
         if (!isempty(gval(n))) {
-            if (keyisinteger(n)) ause += countint(keyival(n), nums);
+            if (keyisinteger(n)) //
+                ause += countint(keyival(n), nums);
             totaluse++;
         }
     }
@@ -430,13 +433,10 @@ static int numusehash(const Table* t, unsigned int* nums, unsigned int* pna) {
     return totaluse;
 }
 
-/*
-** Creates an array for the hash part of a table with the given
-** size, or reuses the dummy node if size is zero.
-** The computation for size overflow is in two steps: the first
-** comparison ensures that the shift in the second one does not
-** overflow.
-*/
+/// @brief 分配全新的 hash 部分 \r
+/// Creates an array for the hash part of a table with the given size, or reuses the dummy node if size is zero.
+/// The computation for size overflow is in two steps:
+/// the first comparison ensures that the shift in the second one does not overflow.
 static void setnodevector(lua_State* L, Table* t, unsigned int size) {
     if (size == 0) { /* no elements to hash part? */
         t->node = cast(Node*, dummynode); /* use common 'dummynode' */
@@ -445,8 +445,9 @@ static void setnodevector(lua_State* L, Table* t, unsigned int size) {
     } else {
         int i;
         int lsize = luaO_ceillog2(size);
-        if (lsize > MAXHBITS || (1u << lsize) > MAXHSIZE) luaG_runerror(L, "table overflow");
-        size = twoto(lsize);
+        if (lsize > MAXHBITS || (1u << lsize) > MAXHSIZE) //
+            luaG_runerror(L, "table overflow");
+        size = twoto(lsize); // size 为大于等于 lsize 最小的 2^n
         t->node = luaM_newvector(L, size, Node);
         for (i = 0; i < (int)size; i++) {
             Node* n = gnode(t, i);
@@ -477,9 +478,7 @@ static void reinsert(lua_State* L, Table* ot, Table* t) {
     }
 }
 
-/*
-** Exchange the hash part of 't1' and 't2'.
-*/
+/// @brief Exchange the hash part of 't1' and 't2'.
 static void exchangehashpart(Table* t1, Table* t2) {
     lu_byte lsizenode = t1->lsizenode;
     Node* node = t1->node;
@@ -492,24 +491,24 @@ static void exchangehashpart(Table* t1, Table* t2) {
     t2->lastfree = lastfree;
 }
 
-/// @brief
+/// @brief \r
 /// Resize table 't' for the new given sizes. Both allocations (for
 /// the hash part and for the array part) can fail, which creates some
 /// subtleties. If the first allocation, for the hash part, fails, an
 /// error is raised and that is it. Otherwise, it copies the elements from
 /// the shrinking part of the array (if it is shrinking) into the new
-/// hash. Then it reallocates the array part.  If that fails, the table
+/// hash. Then it reallocates the array part. If that fails, the table
 /// is in its original state; the function frees the new hash part and then
 /// raises the allocation error. Otherwise, it sets the new hash part
 /// into the table, initializes the new part of the array (if any) with
 /// nils and reinserts the elements of the old hash back into the new
 /// parts of the table.
-/// @param newasize
-/// @param nhsize
+/// @param newasize array 部分的大小
+/// @param nhsize hash 部分的大小
 void luaH_resize(lua_State* L, Table* t, unsigned int newasize, unsigned int nhsize) {
     unsigned int i;
     Table newt; /* to keep the new hash part */
-    unsigned int oldasize = setlimittosize(t);
+    unsigned int oldasize = setlimittosize(t); //
     TValue* newarray;
     /* create new hash part with appropriate size into 'newt' */
     setnodevector(L, &newt, nhsize);
@@ -518,7 +517,8 @@ void luaH_resize(lua_State* L, Table* t, unsigned int newasize, unsigned int nhs
         exchangehashpart(t, &newt); /* and new hash */
         /* re-insert into the new hash the elements from vanishing slice */
         for (i = newasize; i < oldasize; i++) {
-            if (!isempty(&t->array[i])) luaH_setint(L, t, i + 1, &t->array[i]);
+            if (!isempty(&t->array[i])) //
+                luaH_setint(L, t, i + 1, &t->array[i]);
         }
         t->alimit = oldasize; /* restore current size... */
         exchangehashpart(t, &newt); /* and hash (in case of errors) */
@@ -545,9 +545,7 @@ void luaH_resizearray(lua_State* L, Table* t, unsigned int nasize) {
     luaH_resize(L, t, nasize, nsize);
 }
 
-/*
-** nums[i] = number of keys 'k' where 2^(i - 1) < k <= 2^i
-*/
+/// @brief nums[i] = number of keys 'k' where 2^(i - 1) < k <= 2^i
 static void rehash(lua_State* L, Table* t, const TValue* ek) {
     unsigned int asize; /* optimal size for array part */
     unsigned int na; /* number of keys in the array part */
@@ -555,7 +553,7 @@ static void rehash(lua_State* L, Table* t, const TValue* ek) {
     int i;
     int totaluse;
     for (i = 0; i <= MAXABITS; i++) nums[i] = 0; /* reset counts */
-    setlimittosize(t);
+    setlimittosize(t); // 执行 numusearray 前, 更正 alimit
     na = numusearray(t, nums); /* count keys in array part */
     totaluse = na; /* all those keys are integer keys */
     totaluse += numusehash(t, nums, &na); /* count keys in hash part */
@@ -662,20 +660,16 @@ void luaH_newkey(lua_State* L, Table* t, const TValue* key, TValue* value) {
     setobj2t(L, gval(mp), value);
 }
 
-/*
-** Search function for integers. If integer is inside 'alimit', get it
-** directly from the array part. Otherwise, if 'alimit' is not equal to
-** the real size of the array, key still can be in the array part. In
-** this case, try to avoid a call to 'luaH_realasize' when key is just
-** one more than the limit (so that it can be incremented without
-** changing the real size of the array).
-*/
+/// @brief 如果 k 在数组的有效范围内, 从数组部分取数据, 否则从 hash 部分取数据 \r
+/// Search function for integers. If integer is inside 'alimit', get it directly from the array part.
+/// Otherwise, if 'alimit' is not equal to the real size of the array, key still can be in the array part.
+/// In this case, try to avoid a call to 'luaH_realasize' when key is just one more than the limit
+/// (so that it can be incremented without changing the real size of the array).
 const TValue* luaH_getint(Table* t, lua_Integer key) {
     if (l_castS2U(key) - 1u < t->alimit) /* 'key' in [1, t->alimit]? */
         return &t->array[key - 1];
-    else if (
-        !limitequalsasize(t) && /* key still may be in the array part? */
-        (l_castS2U(key) == t->alimit + 1 || l_castS2U(key) - 1u < luaH_realasize(t))) {
+    else if (!limitequalsasize(t) && (l_castS2U(key) == t->alimit + 1 || l_castS2U(key) - 1u < luaH_realasize(t))) {
+        /* key still may be in the array part? */
         t->alimit = cast_uint(key); /* probably '#t' is here now */
         return &t->array[key - 1];
     } else {
@@ -725,16 +719,20 @@ const TValue* luaH_getstr(Table* t, TString* key) {
 /// main search function
 const TValue* luaH_get(Table* t, const TValue* key) {
     switch (ttypetag(key)) {
-        case LUA_VSHRSTR: return luaH_getshortstr(t, tsvalue(key));
-        case LUA_VNUMINT: return luaH_getint(t, ivalue(key));
-        case LUA_VNIL: return &absentkey;
+        case LUA_VSHRSTR: //
+            return luaH_getshortstr(t, tsvalue(key));
+        case LUA_VNUMINT: //
+            return luaH_getint(t, ivalue(key));
+        case LUA_VNIL: //
+            return &absentkey;
         case LUA_VNUMFLT: {
             lua_Integer k;
             if (luaV_flttointeger(fltvalue(key), &k, F2Ieq)) /* integral index? */
                 return luaH_getint(t, k); /* use specialized version */
             /* else... */
         } /* FALLTHROUGH */
-        default: return getgeneric(t, key, 0);
+        default: //
+            return getgeneric(t, key, 0);
     }
 }
 
@@ -760,6 +758,7 @@ void luaH_set(lua_State* L, Table* t, const TValue* key, TValue* value) {
     luaH_finishset(L, t, key, slot, value);
 }
 
+/// @brief
 void luaH_setint(lua_State* L, Table* t, lua_Integer key, TValue* value) {
     const TValue* p = luaH_getint(t, key);
     if (isabstkey(p)) {

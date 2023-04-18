@@ -1,6 +1,8 @@
-local a = -65534
-local b = -65536
-print(a + b)
 local c = {}
-c[2.3] = 5
-print(c[2.3])
+c[6] = 1
+c[1] = 1
+c[2] = 1
+c[3] = 1
+c[4] = 1
+
+print(#c)
