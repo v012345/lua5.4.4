@@ -532,7 +532,7 @@ retry:
         case LUA_VLCL: { /* Lua function */
             CallInfo* ci; // 如果函数是 Lua 函数,则构造 CallInfo 结构体,并返回该结构体;
             Proto* p = clLvalue(s2v(func))->p; // 获取栈 func 位置上 lua 闭包中的函数原型
-            int narg = cast_int(L->top - func) - 1; /* 实际传来的参数个数, 我不确定 self 算不算一个参数; number of real arguments */
+            int narg = cast_int(L->top - func) - 1; /* number of real arguments */
             int nfixparams = p->numparams; // lua 函数签名中指定的参数个数
             int fsize = p->maxstacksize; /* 函数执行时最多需要多少个栈空间 frame size */
             checkstackGCp(L, fsize, func);
@@ -557,7 +557,8 @@ retry:
 l_sinline void ccall(lua_State* L, StkId func, int nResults, int inc) {
     CallInfo* ci;
     L->nCcalls += inc; // 当前的 C 调用深度
-    if (l_unlikely(getCcalls(L) >= LUAI_MAXCCALLS)) luaE_checkcstack(L); // 检查 Lua 栈是否有足够的空间存储函数调用所需的参数和返回值
+    if (l_unlikely(getCcalls(L) >= LUAI_MAXCCALLS)) //
+        luaE_checkcstack(L); // 检查 Lua 栈是否有足够的空间存储函数调用所需的参数和返回值
     if ((ci = luaD_precall(L, func, nResults)) != NULL) { /* Lua function? */
         ci->callstatus = CIST_FRESH; /* mark that it is a "fresh" execute */
         luaV_execute(L, ci); /* call it */

@@ -58,16 +58,12 @@ typedef enum {
 
 #define luaV_rawequalobj(t1, t2) luaV_equalobj(NULL, t1, t2)
 
-/// @brief fast track for 'gettable': if 't' is a table and 't[k]' is present,
+/// @brief t 是一个表, slot 向指向 t[k], 否则 slot = NULL \r
+/// fast track for 'gettable': if 't' is a table and 't[k]' is present,
 /// return 1 with 'slot' pointing to 't[k]' (position of final result).
 /// Otherwise, return 0 (meaning it will have to check metamethod)
 /// with 'slot' pointing to an empty 't[k]' (if 't' is a table) or NULL
 /// (otherwise). 'f' is the raw get function to use.
-/// @param t 如果 t 不是表, 那么把 slot 置 NULL, 返回 0
-/// @param k 如果 t 是表, k 作为 f 的第二个参数
-/// @param slot 如果 t 是表, 那么 solt 为 f 的返回值
-/// @param f 第一个参数是 hvalue(t) , 第二个参数是 k
-/// @return 只有当 slot 为有效值时, 对返回真
 #define luaV_fastget(L, t, k, slot, f)                                                                                                                                                                 \
     (!ttistable(t) ? (slot = NULL, 0) /* not a table; 'slot' is NULL and result is 0 */                                                                                                                \
                    : (slot = f(hvalue(t), k), /* else, do raw access */                                                                                                                                \

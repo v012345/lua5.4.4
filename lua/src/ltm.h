@@ -54,8 +54,11 @@ typedef enum {
 */
 #define notm(tm) ttisnil(tm)
 
+// 如果 et 的 flags 的 e 的位置为 1, 说明还没有元表; 为 0, 说明有 e 元方法
 #define gfasttm(g, et, e) ((et) == NULL ? NULL : ((et)->flags & (1u << (e))) ? NULL : luaT_gettm(et, e, (g)->tmname[e]))
 
+/// @param et 为元表
+/// @param e 元表名的索引
 #define fasttm(l, et, e) gfasttm(G(l), et, e)
 
 #define ttypename(x) luaT_typenames_[(x) + 1]

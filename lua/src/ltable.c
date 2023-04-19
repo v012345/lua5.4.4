@@ -679,7 +679,6 @@ const TValue* luaH_getint(Table* t, lua_Integer key) {
 }
 
 /// @brief search function for short strings
-/// @return const TValue*
 const TValue* luaH_getshortstr(Table* t, TString* key) {
     Node* n = hashstr(t, key);
     lua_assert(key->tt == LUA_VSHRSTR);

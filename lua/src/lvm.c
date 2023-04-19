@@ -252,12 +252,9 @@ static int floatforloop(StkId ra) {
         return 0; /* finish the loop */
 }
 
-/// @brief
-/// Finish the table access 'val = t[key]'. if 'slot' is NULL, 't' is not a table; otherwise, 'slot' points to t[k] entry (which must be empty).
-/// @param t
-/// @param key
-/// @param val
-/// @param slot
+/// @brief slot == NULL 那么 t 不是表, 否则 slot 指向 t[key] \r
+/// Finish the table access 'val = t[key]'.
+/// If 'slot' is NULL, 't' is not a table; otherwise, 'slot' points to t[k] entry (which must be empty).
 void luaV_finishget(lua_State* L, const TValue* t, TValue* key, StkId val, const TValue* slot) {
     int loop; /* counter to avoid infinite loops */
     const TValue* tm; /* metamethod */
@@ -265,7 +262,8 @@ void luaV_finishget(lua_State* L, const TValue* t, TValue* key, StkId val, const
         if (slot == NULL) { /* 't' is not a table? */
             lua_assert(!ttistable(t));
             tm = luaT_gettmbyobj(L, t, TM_INDEX);
-            if (l_unlikely(notm(tm))) luaG_typeerror(L, t, "index"); /* no metamethod */
+            if (l_unlikely(notm(tm))) //
+                luaG_typeerror(L, t, "index"); /* no metamethod */
             /* else will try the metamethod */
         } else { /* 't' is a table */
             lua_assert(isempty(slot));

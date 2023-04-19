@@ -29,6 +29,7 @@ LUAI_DDEF const char* const luaT_typenames_[LUA_TOTALTYPES] = {
     "no value", "nil", "boolean", udatatypename, "number", "string", "table", "function", udatatypename, "thread", "upvalue", "proto" /* these last cases are used for tests only */
 };
 
+/// @brief 始初元表用到的字段名, 之后可以使用枚举获取
 void luaT_init(lua_State* L) {
     static const char* const luaT_eventname[] = {
         /* ORDER TM */
@@ -43,9 +44,10 @@ void luaT_init(lua_State* L) {
 }
 
 /*
-** function to be used with macro "fasttm": optimized for absence of
-** tag methods
+** function to be used with macro "fasttm": optimized for absence of tag methods
 */
+
+/// @brief 如果 events 有元方法 ename 返回 ename 对应的值, 否则, 更正 events 的 flags, 返回 NULL
 const TValue* luaT_gettm(Table* events, TMS event, TString* ename) {
     const TValue* tm = luaH_getshortstr(events, ename);
     lua_assert(event <= TM_EQ);
@@ -56,11 +58,7 @@ const TValue* luaT_gettm(Table* events, TMS event, TString* ename) {
         return tm;
 }
 
-/// @brief
-/// @param L
-/// @param o
-/// @param event
-/// @return
+/// @brief 返回对象 o 的元表的的指定数据
 const TValue* luaT_gettmbyobj(lua_State* L, const TValue* o, TMS event) {
     Table* mt;
     switch (ttype(o)) {
@@ -99,8 +97,14 @@ void luaT_callTM(lua_State* L, const TValue* f, const TValue* p1, const TValue* 
         luaD_callnoyield(L, func, 0);
 }
 
+/// @brief
+/// @param L
+/// @param f
+/// @param p1
+/// @param p2
+/// @param res
 void luaT_callTMres(lua_State* L, const TValue* f, const TValue* p1, const TValue* p2, StkId res) {
-    ptrdiff_t result = savestack(L, res);
+    ptrdiff_t result = savestack(L, res); // 保存 res 的位置, 用来存返回的结果
     StkId func = L->top;
     setobj2s(L, func, f); /* push function (assume EXTRA_STACK) */
     setobj2s(L, func + 1, p1); /* 1st argument */
