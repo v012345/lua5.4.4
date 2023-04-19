@@ -88,12 +88,10 @@ static const Node dummynode_ = {
 
 static const TValue absentkey = {ABSTKEYCONSTANT};
 
-/*
-** Hash for integers. To allow a good hash, use the remainder operator
-** ('%'). If integer fits as a non-negative int, compute an int
-** remainder, which is faster. Otherwise, use an unsigned-integer
-** remainder, which uses all bits and ensures a non-negative result.
-*/
+/// @brief 返回一个整数 i 对应 hash 部分的主位置 \r
+/// Hash for integers. To allow a good hash, use the remainder operator ('%').
+/// If integer fits as a non-negative int, compute an int remainder,which is faster.
+/// Otherwise, use an unsigned-integer remainder, which uses all bits and ensures a non-negative result.
 static Node* hashint(const Table* t, lua_Integer i) {
     lua_Unsigned ui = l_castS2U(i);
     if (ui <= (unsigned int)INT_MAX)
@@ -168,13 +166,7 @@ static Node* mainpositionTV(const Table* t, const TValue* key) {
     }
 }
 
-/**
- * @brief 如果 nd 要放到 table 中, 那么 nd 会在 table 中的 main position
- *
- * @param t
- * @param nd
- * @return Node*
- */
+/// @brief 如果 nd 要放到 table 中, 那么 nd 会在 table 中的 main position
 l_sinline Node* mainpositionfromnode(const Table* t, Node* nd) {
     TValue key;
     getnodekey(cast(lua_State*, NULL), &key, nd);
@@ -245,10 +237,6 @@ LUAI_FUNC unsigned int luaH_realasize(const Table* t) {
     }
 }
 
-/*
-
-*/
-
 /// @brief \r
 /// Check whether real size of the array is a power of 2.
 /// (If it is not, 'alimit' cannot be changed to any other value without changing the real size.)
@@ -259,7 +247,7 @@ static int ispow2realasize(const Table* t) { //
 /// @brief 更新 alimit 为数组部分的真实大小, 更新标志位, 返回真实大小
 static unsigned int setlimittosize(Table* t) {
     t->alimit = luaH_realasize(t);
-    setrealasize(t);
+    setrealasize(t); // 现在 t->alimit 是真实大小了
     return t->alimit;
 }
 
@@ -342,7 +330,8 @@ int luaH_next(lua_State* L, Table* t, StkId key) {
 }
 
 static void freehash(lua_State* L, Table* t) {
-    if (!isdummy(t)) luaM_freearray(L, t->node, cast_sizet(sizenode(t)));
+    if (!isdummy(t)) //
+        luaM_freearray(L, t->node, cast_sizet(sizenode(t)));
 }
 
 /*
@@ -433,7 +422,7 @@ static int numusehash(const Table* t, unsigned int* nums, unsigned int* pna) {
     return totaluse;
 }
 
-/// @brief 分配全新的 hash 部分 \r
+/// @brief size != 0 分配全新的 hash 部分, 否则 t->node 指向傀儡结点 \r
 /// Creates an array for the hash part of a table with the given size, or reuses the dummy node if size is zero.
 /// The computation for size overflow is in two steps:
 /// the first comparison ensures that the shift in the second one does not overflow.
@@ -577,17 +566,19 @@ Table* luaH_new(lua_State* L) {
     t->metatable = NULL;
     t->flags = cast_byte(maskflags); /* table has no metamethod fields */
     t->array = NULL;
-    t->alimit = 0;
+    t->alimit = 0; // 现在 alimit 是 array 的实际大小
     setnodevector(L, t, 0);
     return t;
 }
 
+/// @brief 释放表对象
 void luaH_free(lua_State* L, Table* t) {
     freehash(L, t);
     luaM_freearray(L, t->array, luaH_realasize(t));
     luaM_free(L, t);
 }
 
+/// @brief 从链 node 数组的尾部向前找可用的结点
 static Node* getfreepos(Table* t) {
     if (!isdummy(t)) {
         while (t->lastfree > t->node) {
@@ -758,10 +749,10 @@ void luaH_set(lua_State* L, Table* t, const TValue* key, TValue* value) {
     luaH_finishset(L, t, key, slot, value);
 }
 
-/// @brief
+/// @brief 如果 1<= key <= sizeof(array), 则使用数组部分, 否则使用 hash 部分
 void luaH_setint(lua_State* L, Table* t, lua_Integer key, TValue* value) {
     const TValue* p = luaH_getint(t, key);
-    if (isabstkey(p)) {
+    if (isabstkey(p)) { // key 不在数组部分, 且 hash 部分也没有对应的键
         TValue k;
         setivalue(&k, key);
         luaH_newkey(L, t, &k, value);
