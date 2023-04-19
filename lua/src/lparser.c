@@ -54,7 +54,9 @@ typedef struct BlockCnt {
 static void statement(LexState* ls);
 static void expr(LexState* ls, expdesc* v);
 
-static l_noret error_expected(LexState* ls, int token) { luaX_syntaxerror(ls, luaO_pushfstring(ls->L, "%s expected", luaX_token2str(ls, token))); }
+static l_noret error_expected(LexState* ls, int token) { //
+    luaX_syntaxerror(ls, luaO_pushfstring(ls->L, "%s expected", luaX_token2str(ls, token)));
+}
 
 static l_noret errorlimit(FuncState* fs, int limit, const char* what) {
     lua_State* L = fs->ls->L;
@@ -80,7 +82,7 @@ static int testnext(LexState* ls, int c) {
         return 0;
 }
 
-/// @brief 检查 LexState 上的 token 是不是 c 类型 ; Check that next token is 'c'.
+/// @brief Check that next token is 'c'.
 static void check(LexState* ls, int c) {
     if (ls->t.token != c) error_expected(ls, c);
 }
@@ -96,7 +98,7 @@ static void checknext(LexState* ls, int c) {
         if (!(c)) luaX_syntaxerror(ls, msg);                                                                                                                                                           \
     }
 
-/// @brief 看看一下 token 是不是 what, 如果是, 就跳过这个 token, 不是就报错 \r
+/// @brief 看下一个 token 是不是 what, 如果是, 就跳过这个 token, 不是就报错 \r
 /// Check that next token is 'what' and skip it. In case of error,
 /// raise an error that the expected 'what' should match a 'who'
 /// in line 'where' (if that is not the current line).
@@ -108,8 +110,7 @@ static void check_match(LexState* ls, int what, int who, int where) {
     }
 }
 
-/// @brief 检查当前 token 是不是 TK_NAME, 然后取下一个 token
-/// @return TString* 被检查的 token 的变量名称
+/// @brief 检查当前 token 是不是 TK_NAME, 然后取下一个 token, 返回 TK_NAME 的变量名
 static TString* str_checkname(LexState* ls) {
     TString* ts;
     check(ls, TK_NAME);
@@ -138,21 +139,20 @@ static void codename(LexState* ls, expdesc* e) { //
     codestring(e, str_checkname(ls));
 }
 
-/*
-** Register a new local variable in the active 'Proto' (for debug information).
-*/
+/// @brief Register a new local variable in the active 'Proto' (for debug information).
 static int registerlocalvar(LexState* ls, FuncState* fs, TString* varname) {
     Proto* f = fs->f;
     int oldsize = f->sizelocvars;
     luaM_growvector(ls->L, f->locvars, fs->ndebugvars, f->sizelocvars, LocVar, SHRT_MAX, "local variables");
-    while (oldsize < f->sizelocvars) f->locvars[oldsize++].varname = NULL;
+    while (oldsize < f->sizelocvars) //
+        f->locvars[oldsize++].varname = NULL;
     f->locvars[fs->ndebugvars].varname = varname;
     f->locvars[fs->ndebugvars].startpc = fs->pc;
     luaC_objbarrier(ls->L, f, varname);
     return fs->ndebugvars++;
 }
 
-/// @brief 把 FuncState 用到的局部变量存入到 Vardesc 数组中\r
+/// @brief 把 FuncState 用到的局部变量存入到 Vardesc 数组中 \r
 /// Create a new local variable with the given 'name'. Return its index in the function.
 /// @return 在数组中的**相对**索引
 static int new_localvar(LexState* ls, TString* name) {
@@ -170,7 +170,7 @@ static int new_localvar(LexState* ls, TString* name) {
 
 #define new_localvarliteral(ls, v) new_localvar(ls, luaX_newstring(ls, "" v, (sizeof(v) / sizeof(char)) - 1));
 
-/// @brief 拿到局部变量的描述(Vardesc 数组中了)\r
+/// @brief 拿到局部变量的描述(Vardesc 数组中了) \r
 /// Return the "variable description" (Vardesc) of a given variable.
 /// (Unless noted otherwise, all variables are referred to by their compiler indices.)
 static Vardesc* getlocalvardesc(FuncState* fs, int vidx) {
@@ -645,7 +645,7 @@ static void open_func(LexState* ls, FuncState* fs, BlockCnt* bl) {
     fs->ndebugvars = 0;
     fs->nactvar = 0;
     fs->needclose = 0;
-    fs->firstlocal = ls->dyd->actvar.n;
+    fs->firstlocal = ls->dyd->actvar.n; // 当前函数的第一个局部变量在 actvar.aar 中的位置
     fs->firstlabel = ls->dyd->label.n;
     fs->bl = NULL; // 函数状态机初始化时, block 是 NULL
     f->source = ls->source;
