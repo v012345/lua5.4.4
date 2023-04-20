@@ -245,7 +245,8 @@ static int patchtestreg(FuncState* fs, int node, int reg) {
 ** Traverse a list of tests ensuring no one produces a value
 */
 static void removevalues(FuncState* fs, int list) {
-    for (; list != NO_JUMP; list = getjump(fs, list)) patchtestreg(fs, list, NO_REG);
+    for (; list != NO_JUMP; list = getjump(fs, list)) //
+        patchtestreg(fs, list, NO_REG);
 }
 
 /*
@@ -423,11 +424,8 @@ void luaK_reserveregs(FuncState* fs, int n) {
     fs->freereg += n;
 }
 
-/*
-** Free register 'reg', if it is neither a constant index nor
-** a local variable.
-)
-*/
+/// @brief
+/// Free register 'reg', if it is neither a constant index nor a local variable.
 static void freereg(FuncState* fs, int reg) {
     if (reg >= luaY_nvarstack(fs)) {
         fs->freereg--;
@@ -452,7 +450,8 @@ static void freeregs(FuncState* fs, int r1, int r2) {
 ** Free register used by expression 'e' (if any)
 */
 static void freeexp(FuncState* fs, expdesc* e) {
-    if (e->k == VNONRELOC) freereg(fs, e->u.info);
+    if (e->k == VNONRELOC) //
+        freereg(fs, e->u.info);
 }
 
 /*
@@ -676,10 +675,8 @@ void luaK_setoneret(FuncState* fs, expdesc* e) {
     }
 }
 
-/*
-** Ensure that expression 'e' is not a variable (nor a <const>).
-** (Expression still may have jump lists.)
-*/
+/// @brief VFALSE 不处理 \r
+/// Ensure that expression 'e' is not a variable (nor a <const>). (Expression still may have jump lists.)
 void luaK_dischargevars(FuncState* fs, expdesc* e) {
     switch (e->k) {
         case VCONST: {
@@ -1424,7 +1421,7 @@ static void codeeq(FuncState* fs, BinOpr opr, expdesc* e1, expdesc* e2) {
 */
 void luaK_prefix(FuncState* fs, UnOpr op, expdesc* e, int line) {
     static const expdesc ef = {VKINT, {0}, NO_JUMP, NO_JUMP};
-    luaK_dischargevars(fs, e);
+    luaK_dischargevars(fs, e); // VKINT 不作处理
     switch (op) {
         case OPR_MINUS:
         case OPR_BNOT: /* use 'ef' as fake 2nd operand */

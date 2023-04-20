@@ -120,7 +120,9 @@ static TString* str_checkname(LexState* ls) {
 }
 
 /// @brief 初始化一个表达式描述结构
-/// @param i 额外信息, 可能是在 Dyndata 的 local 数组中的索引
+/// @param i 额外信息
+/// VVARARG => i 存 OP_VARARG 指令
+/// VFALSE | VTRUE | VNIL | VKFLT | VKINT | VKSTR => 不使用 i
 static void init_exp(expdesc* e, expkind k, int i) {
     e->f = e->t = NO_JUMP;
     e->k = k;
@@ -1010,7 +1012,7 @@ static void suffixedexp(LexState* ls, expdesc* v) {
     }
 }
 
-/// @brief 安排明白 expdesc 后, 取下一个 token
+/// @brief 分析当前表达式, 同时取下一个 token
 static void simpleexp(LexState* ls, expdesc* v) {
     /* simpleexp -> FLT | INT | STRING | NIL | TRUE | FALSE | ... | constructor | FUNCTION body | suffixedexp */
     switch (ls->t.token) {
@@ -1121,15 +1123,14 @@ static const struct {
 
 #define UNARY_PRIORITY 12 /* priority for unary operators */
 
-/*
-** subexpr -> (simpleexp | unop subexpr) { binop subexpr }
-** where 'binop' is any binary operator with a priority higher than 'limit'
-*/
+/// @brief 在递归调用 \r
+/// subexpr -> (simpleexp | unop subexpr) { binop subexpr }
+/// where 'binop' is any binary operator with a priority higher than 'limit'
 static BinOpr subexpr(LexState* ls, expdesc* v, int limit) {
-    BinOpr op;
-    UnOpr uop;
-    enterlevel(ls);
-    uop = getunopr(ls->t.token);
+    BinOpr op; // 两元操作符
+    UnOpr uop; // 一元操作符
+    enterlevel(ls); // 递归层数标记, 防止进入太多层
+    uop = getunopr(ls->t.token); // 看看操作符是不是一元操作符
     if (uop != OPR_NOUNOPR) { /* prefix (unary) operator? */
         int line = ls->linenumber;
         luaX_next(ls); /* skip operator */
@@ -1146,7 +1147,7 @@ static BinOpr subexpr(LexState* ls, expdesc* v, int limit) {
         luaX_next(ls); /* skip operator */
         luaK_infix(ls->fs, op, v);
         /* read sub-expression with higher priority */
-        nextop = subexpr(ls, &v2, priority[op].right);
+        nextop = subexpr(ls, &v2, priority[op].right); // 只有这里在乎 subexpr 的返回值
         luaK_posfix(ls->fs, op, v, &v2, line);
         op = nextop;
     }
@@ -1478,9 +1479,9 @@ static void forstat(LexState* ls, int line) {
 
 static void test_then_block(LexState* ls, int* escapelist) {
     /* test_then_block -> [IF | ELSEIF] cond THEN block */
-    BlockCnt bl;
+    BlockCnt bl; // 生成一个 block
     FuncState* fs = ls->fs;
-    expdesc v;
+    expdesc v; // 表达式描述
     int jf; /* instruction to skip 'then' code (if condition is false) */
     luaX_next(ls); /* skip IF or ELSEIF */
     expr(ls, &v); /* read condition */
@@ -1514,7 +1515,8 @@ static void ifstat(LexState* ls, int line) {
     FuncState* fs = ls->fs;
     int escapelist = NO_JUMP; /* exit list for finished parts */
     test_then_block(ls, &escapelist); /* IF cond THEN block */
-    while (ls->t.token == TK_ELSEIF) test_then_block(ls, &escapelist); /* ELSEIF cond THEN block */
+    while (ls->t.token == TK_ELSEIF) // 如果有 elseif 再进入 test_then_block
+        test_then_block(ls, &escapelist); /* ELSEIF cond THEN block */
     if (testnext(ls, TK_ELSE)) block(ls); /* 'else' part */
     check_match(ls, TK_END, TK_IF, line);
     luaK_patchtohere(fs, escapelist); /* patch escape list to 'if' end */
@@ -1773,10 +1775,12 @@ static void mainfunc(LexState* ls, FuncState* fs) {
     close_func(ls);
 }
 
+/// @brief 把 lua 文件解析成一个 lua 闭包
 LClosure* luaY_parser(lua_State* L, ZIO* z, Mbuffer* buff, Dyndata* dyd, const char* name, int firstchar) {
     LexState lexstate;
     FuncState funcstate;
-    LClosure* cl = luaF_newLclosure(L, 1); /* 主闭包 create main closure */
+    // 主闭包只有一个 upvalue, 那就是 _ENV
+    LClosure* cl = luaF_newLclosure(L, 1); /* create main closure */
     setclLvalue2s(L, L->top, cl); /* anchor it (to avoid being collected) */
     luaD_inctop(L);
     lexstate.h = luaH_new(L); /* create table for scanner */
