@@ -141,12 +141,14 @@ enum OpMode {
 #define GETARG_k(i) check_exp(checkopm(i, iABC), getarg(i, POS_k, 1))
 #define SETARG_k(i, v) setarg(i, v, POS_k, 1)
 
+// 指令 i 的 Bx 部分的数值
 #define GETARG_Bx(i) check_exp(checkopm(i, iABx), getarg(i, POS_Bx, SIZE_Bx))
 #define SETARG_Bx(i, v) setarg(i, v, POS_Bx, SIZE_Bx)
 
 #define GETARG_Ax(i) check_exp(checkopm(i, iAx), getarg(i, POS_Ax, SIZE_Ax))
 #define SETARG_Ax(i, v) setarg(i, v, POS_Ax, SIZE_Ax)
 
+// 指令 i 的 sBx 的部分, 通过 OFFSET_sBx, 还原为真实的数值
 #define GETARG_sBx(i) check_exp(checkopm(i, iAsBx), getarg(i, POS_Bx, SIZE_Bx) - OFFSET_sBx)
 #define SETARG_sBx(i, b) SETARG_Bx((i), cast_uint((b) + OFFSET_sBx))
 

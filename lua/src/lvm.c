@@ -252,7 +252,7 @@ static int floatforloop(StkId ra) {
         return 0; /* finish the loop */
 }
 
-/// @brief slot == NULL 那么 t 不是表, 否则 slot 指向 t[key] \r
+/// @brief 只要就是看看元表, val 为最后返回的值 \r
 /// Finish the table access 'val = t[key]'.
 /// If 'slot' is NULL, 't' is not a table; otherwise, 'slot' points to t[k] entry (which must be empty).
 void luaV_finishget(lua_State* L, const TValue* t, TValue* key, StkId val, const TValue* slot) {
@@ -288,13 +288,12 @@ void luaV_finishget(lua_State* L, const TValue* t, TValue* key, StkId val, const
     luaG_runerror(L, "'__index' chain too long; possible loop");
 }
 
-/*
-** Finish a table assignment 't[key] = val'.
-** If 'slot' is NULL, 't' is not a table.  Otherwise, 'slot' points
-** to the entry 't[key]', or to a value with an absent key if there
-** is no such entry.  (The value at 'slot' must be empty, otherwise
-** 'luaV_fastget' would have done the job.)
-*/
+/// @brief 会触发元方法, 如果有的话. \r
+/// Finish a table assignment 't[key] = val'.
+/// If 'slot' is NULL, 't' is not a table.  Otherwise, 'slot' points
+/// to the entry 't[key]', or to a value with an absent key if there
+/// is no such entry.  (The value at 'slot' must be empty, otherwise
+/// 'luaV_fastget' would have done the job.)
 void luaV_finishset(lua_State* L, const TValue* t, TValue* key, TValue* val, const TValue* slot) {
     int loop; /* counter to avoid infinite loops */
     for (loop = 0; loop < MAXTAGLOOP; loop++) {
@@ -1009,13 +1008,15 @@ void luaV_finishOp(lua_State* L) {
 ** some macros for common tasks in 'luaV_execute'
 */
 
-// 当前闭包中, 指令 i 中 A 寄存器的位置
+// 当前闭包中, 指令 i 中 A 寄存器的位置, 类型为 StkId
 #define RA(i) (base + GETARG_A(i))
-// 当前闭包中, 指令 i 中 B 寄存器的位置
+// 当前闭包中, 指令 i 中 B 寄存器的位置, 类型为 StkId
 #define RB(i) (base + GETARG_B(i))
+// 取指令 i 的 B 段指向的的寄存器中的值
 #define vRB(i) s2v(RB(i))
 #define KB(i) (k + GETARG_B(i))
 #define RC(i) (base + GETARG_C(i))
+// 取指令 i 的 C 段指向的的寄存器中的值
 #define vRC(i) s2v(RC(i))
 #define KC(i) (k + GETARG_C(i))
 #define RKC(i) ((TESTARG_k(i)) ? k + GETARG_C(i) : s2v(base + GETARG_C(i)))
@@ -1093,7 +1094,7 @@ void luaV_finishOp(lua_State* L) {
         luai_threadyield(L);                                                                                                                                                                           \
     }
 
-/* 从 pc 中取出指令放到 i 中, 同时, 以 base 为底, 算出 i 中 A 寄存器在栈中的位置, 放到 ra 中; fetch an instruction and prepare its execution */
+// fetch an instruction and prepare its execution
 #define vmfetch()                                                                                                                                                                                      \
     {                                                                                                                                                                                                  \
         if (l_unlikely(trap)) { /* stack reallocation or hooks? */                                                                                                                                     \
@@ -1109,9 +1110,9 @@ void luaV_finishOp(lua_State* L) {
 #define vmbreak break
 
 void luaV_execute(lua_State* L, CallInfo* ci) {
-    LClosure* cl;
-    TValue* k; // 常量表
-    StkId base; // 当前闭包的栈底, 就是闭包在栈中的位置, 再向上一个位置
+    LClosuupvaluere* cl;
+    TValue* k; // 函数的常量表, 编译过程生成
+    StkId base; // 当前函数的栈底
     const Instruction* pc; // 指向要执行指令的指针
     int trap;
 #if LUA_USE_JUMPTABLE
@@ -1137,7 +1138,9 @@ returning: /* trap already set */
     for (;;) {
         Instruction i; /* instruction being executed */
         StkId ra; /* instruction's A register */
-        vmfetch(); // 从 pc 中取出指令放到 i 中, 同时, 以 base 为底, 算出 i 中 A 寄存器在栈中的位置, 放到 ra 中
+        // i 的 A 段就是指向函数的寄存器
+        vmfetch(); // 取指令, ra 为 i 的 A 段, 同时 pc 指向下一个指令
+        // ra 现在已经指向正确的寄存器啦
 #if 0
         /* low-level line tracing for debugging Lua */
         printf("line: %d\n", luaG_getfuncline(cl->p, pcRel(pc, cl->p)));
@@ -1154,63 +1157,68 @@ returning: /* trap already set */
             }
             vmcase(OP_LOADI) {
                 lua_Integer b = GETARG_sBx(i);
-                setivalue(s2v(ra), b);
+                setivalue(s2v(ra), b); // R[A] := sBx
                 vmbreak;
             }
-            vmcase(OP_LOADF) {
-                int b = GETARG_sBx(i);
-                setfltvalue(s2v(ra), cast_num(b));
+            vmcase(OP_LOADF) { // 当浮点数与整数可以恒等转换时, 使用些指令
+                int b = GETARG_sBx(i); // 当浮点数放到 sBx 中, 取出之后, 再转为浮点数
+                setfltvalue(s2v(ra), cast_num(b)); // R[A] := (lua_Number)sBx
                 vmbreak;
             }
-            vmcase(OP_LOADK) {
-                TValue* rb = k + GETARG_Bx(i);
-                setobj2s(L, ra, rb);
+            vmcase(OP_LOADK) { // 常量表中的值放到 A 寄存器中
+                TValue* rb = k + GETARG_Bx(i); // Bx 存放着常量表的索引
+                setobj2s(L, ra, rb); // R[A] := K[Bx]
                 vmbreak;
             }
-            vmcase(OP_LOADKX) {
+            vmcase(OP_LOADKX) { // 下一条指令中的 Ax 是常量表的索引
                 TValue* rb;
-                rb = k + GETARG_Ax(*pc);
-                pc++;
-                setobj2s(L, ra, rb);
+                rb = k + GETARG_Ax(*pc); // pc 现在是额外指令
+                pc++; // 取下一条指令
+                setobj2s(L, ra, rb); // R[A] := K[extra arg]
                 vmbreak;
             }
-            vmcase(OP_LOADFALSE) { // A R[A] := false
-                setbfvalue(s2v(ra));
+            vmcase(OP_LOADFALSE) {
+                setbfvalue(s2v(ra)); // R[A] := false
                 vmbreak;
             }
-            vmcase(OP_LFALSESKIP) { // A R[A] := false; pc++ (*)
-                setbfvalue(s2v(ra));
+            vmcase(OP_LFALSESKIP) { // 要跳过下一条指令
+                setbfvalue(s2v(ra)); // R[A] := false
                 pc++; /* skip next instruction */
                 vmbreak;
             }
             vmcase(OP_LOADTRUE) {
-                setbtvalue(s2v(ra)); // A R[A] := true
+                setbtvalue(s2v(ra)); // R[A] := true
                 vmbreak;
             }
-            vmcase(OP_LOADNIL) { // A B R[A], R[A+1], ..., R[A+B] := nil
-                int b = GETARG_B(i);
-                do { setnilvalue(s2v(ra++)); } while (b--);
+            vmcase(OP_LOADNIL) { // 从 ra 开始, 之后的 b 个寄存器置 nil
+                int b = GETARG_B(i); // b 为指令 i 的 B 段(无符号)
+                do { // R[A], R[A+1], ..., R[A+B] := nil
+                    setnilvalue(s2v(ra++));
+                } while (b--);
                 vmbreak;
             }
-            vmcase(OP_GETUPVAL) { // A B R[A] := UpValue[B]
-                int b = GETARG_B(i);
-                setobj2s(L, ra, cl->upvals[b]->v);
+            vmcase(OP_GETUPVAL) { // 从 upvalue 中取值
+                int b = GETARG_B(i); // b 为指令 i 的 B 段(无符号), upvalue 的索引
+                setobj2s(L, ra, cl->upvals[b]->v); // R[A] := UpValue[B]
                 vmbreak;
             }
-            vmcase(OP_SETUPVAL) {
+            vmcase(OP_SETUPVAL) { // 设置 upvalue 的值
                 UpVal* uv = cl->upvals[GETARG_B(i)];
-                setobj(L, uv->v, s2v(ra));
+                setobj(L, uv->v, s2v(ra)); // 把 ra 指向的值赋值给 upvalue
                 luaC_barrier(L, uv, s2v(ra));
                 vmbreak;
             }
-            vmcase(OP_GETTABUP) {
+            vmcase(OP_GETTABUP) { // R[A] := UpValue[B][K[C]:string]
                 const TValue* slot;
-                TValue* upval = cl->upvals[GETARG_B(i)]->v;
-                TValue* rc = KC(i);
+                // B 为 upvalue 的索引
+                TValue* upval = cl->upvals[GETARG_B(i)]->v; // 一个表
+                TValue* rc = KC(i); // C 为常量表的索引
                 TString* key = tsvalue(rc); /* key must be a string */
                 if (luaV_fastget(L, upval, key, slot, luaH_getshortstr)) {
+                    // 如果如表 upval 的 key 的值不为空, 把值赋给 ra
                     setobj2s(L, ra, slot);
                 } else
+                    // 看看可不可以通过元表来设置 ra
                     Protect(luaV_finishget(L, upval, rc, ra, slot));
                 vmbreak;
             }
@@ -1219,6 +1227,7 @@ returning: /* trap already set */
                 TValue* rb = vRB(i);
                 TValue* rc = vRC(i);
                 lua_Unsigned n;
+                // 如果 rc 是个整数
                 if (ttisinteger(rc) /* fast track for integers? */
                         ? (cast_void(n = ivalue(rc)), luaV_fastgeti(L, rb, n, slot))
                         : luaV_fastget(L, rb, rc, slot, luaH_get)) {

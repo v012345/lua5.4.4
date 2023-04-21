@@ -58,7 +58,7 @@ typedef enum {
 
 #define luaV_rawequalobj(t1, t2) luaV_equalobj(NULL, t1, t2)
 
-/// @brief t 是一个表, slot 向指向 t[k], 否则 slot = NULL \r
+/// @brief t 是一个表, slot 向指向 t[k], 否则 slot = NULL, 返回 slot 的有效性 \r
 /// fast track for 'gettable': if 't' is a table and 't[k]' is present,
 /// return 1 with 'slot' pointing to 't[k]' (position of final result).
 /// Otherwise, return 0 (meaning it will have to check metamethod)

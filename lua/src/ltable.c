@@ -253,13 +253,12 @@ static unsigned int setlimittosize(Table* t) {
 
 #define limitasasize(t) check_exp(isrealasize(t), t->alimit)
 
-/*
-** "Generic" get version. (Not that generic: not valid for integers,
-** which may be in array part, nor for floats with integral values.)
-** See explanation about 'deadok' in function 'equalkey'.
-*/
+/// @brief 除了整数(包括好整数值相等的浮点数)与短串, 都走这里 \r
+/// "Generic" get version. (Not that generic: not valid for integers,
+/// which may be in array part, nor for floats with integral values.)
+/// See explanation about 'deadok' in function 'equalkey'.
 static const TValue* getgeneric(Table* t, const TValue* key, int deadok) {
-    Node* n = mainpositionTV(t, key);
+    Node* n = mainpositionTV(t, key); // 获取键的主位置
     for (;;) { /* check whether 'key' is somewhere in the chain */
         if (equalkey(key, n, deadok))
             return gval(n); /* that's it */
