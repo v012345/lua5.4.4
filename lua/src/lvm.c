@@ -1110,7 +1110,7 @@ void luaV_finishOp(lua_State* L) {
 #define vmbreak break
 
 void luaV_execute(lua_State* L, CallInfo* ci) {
-    LClosuupvaluere* cl;
+    LClosure* cl;
     TValue* k; // 函数的常量表, 编译过程生成
     StkId base; // 当前函数的栈底
     const Instruction* pc; // 指向要执行指令的指针
