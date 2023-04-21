@@ -1512,7 +1512,8 @@ static void codeconcat(FuncState* fs, expdesc* e1, expdesc* e2, int line) {
 */
 void luaK_posfix(FuncState* fs, BinOpr opr, expdesc* e1, expdesc* e2, int line) {
     luaK_dischargevars(fs, e2);
-    if (foldbinop(opr) && constfolding(fs, opr + LUA_OPADD, e1, e2)) return; /* done by folding */
+    if (foldbinop(opr) && constfolding(fs, opr + LUA_OPADD, e1, e2)) //
+        return; /* done by folding */
     switch (opr) {
         case OPR_AND: {
             lua_assert(e1->t == NO_JUMP); /* list closed by 'luaK_infix' */

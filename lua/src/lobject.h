@@ -507,7 +507,7 @@ typedef struct Udata0 {
 /// @param name 表示 Upvalue 的名称, 主要用于调试信息
 /// @param instack Upvalue 是否存在于函数的栈空间（即寄存器）中.如果存在,则为 1,否则为 0.
 /// @param idx Upvalue 在栈空间或外部函数的 Upvalue 列表中的索引.如果上值存在于栈空间中,则为其在栈中的索引;否则为其在外部函数的上值列表中的索引.
-/// @param kind  0 表示全局变量, 1 表示局部变量, 2 表示 Upvalue, 3 表示表字段
+/// @param kind
 typedef struct Upvaldesc {
     TString* name; /* upvalue name (for debug information) */
     lu_byte instack; /* whether it is in stack (register) */
@@ -544,7 +544,7 @@ typedef struct AbsLineInfo {
 typedef struct Proto {
     CommonHeader; /* 通用对象头部 */
     lu_byte numparams; /* 函数的固定参数个数 number of fixed (named) parameters */
-    lu_byte is_vararg; /* 是否为变长参数函数 */
+    lu_byte is_vararg; // 是否为变长参数函数
     lu_byte maxstacksize; /* 表示该函数执行时最多需要多少个栈空间(寄存器, 对于函数来说,栈就是寄存器了) number of registers needed by this function */
     int sizeupvalues; /* size of 'upvalues' */
     int sizek; /* size of 'k' */
@@ -558,7 +558,7 @@ typedef struct Proto {
     TValue* k; /* constants used by the function */
     Instruction* code; /* 指令表,存放函数中的指令 opcodes */
     struct Proto** p; /* 使用**,是因为一个函数里可以写多个函数,是一个树结构 functions defined inside the function */
-    Upvaldesc* upvalues; /* 存储函数中用到的Upvalue信息 upvalue information */
+    Upvaldesc* upvalues; /* upvalue information */
     ls_byte* lineinfo; /* 行号信息表,存储每个指令对应的源代码行号 information about source lines (debug information) */
     AbsLineInfo* abslineinfo; /* 绝对行号信息表,存储每个指令对应的源代码绝对行号 idem */
     LocVar* locvars; /* information about local variables (debug information) */

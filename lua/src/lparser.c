@@ -84,7 +84,8 @@ static int testnext(LexState* ls, int c) {
 
 /// @brief Check that next token is 'c'.
 static void check(LexState* ls, int c) {
-    if (ls->t.token != c) error_expected(ls, c);
+    if (ls->t.token != c) //
+        error_expected(ls, c);
 }
 
 /// @brief Check that next token is 'c' and skip it.
@@ -267,7 +268,7 @@ static void adjustlocalvars(LexState* ls, int nvars) {
     }
 }
 
-/// @brief 从尾部移除 actvar.arr 中活动变量
+/// @brief 从尾部移除 actvar.arr 中活动变量 \r
 /// Close the scope for all variables up to level 'tolevel'. (debug info.)
 /// @param tolevel 要移除的变量的数量
 static void removevars(FuncState* fs, int tolevel) {
@@ -280,25 +281,27 @@ static void removevars(FuncState* fs, int tolevel) {
 }
 
 /*
-** Search the upvalues of the function 'fs' for one
-** with the given 'name'.
+** Search the upvalues of the function 'fs' for one with the given 'name'.
 */
 static int searchupvalue(FuncState* fs, TString* name) {
     int i;
     Upvaldesc* up = fs->f->upvalues;
     for (i = 0; i < fs->nups; i++) {
-        if (eqstr(up[i].name, name)) return i;
+        if (eqstr(up[i].name, name)) //
+            return i;
     }
     return -1; /* not found */
 }
 
-/// @brief 分配内存来存 Upvaldesc, fs->f->upvalues 指向内存, 返回下一个可用内存的地址
+/// @brief 分配内存来存 Upvaldesc, sizeupvalues 为 Upvaldesc 数组的大小, nups 为实际解析到的 upvalue 的数量
 static Upvaldesc* allocupvalue(FuncState* fs) {
     Proto* f = fs->f;
     int oldsize = f->sizeupvalues;
     checklimit(fs, fs->nups + 1, MAXUPVAL, "upvalues");
     luaM_growvector(fs->ls->L, f->upvalues, fs->nups, f->sizeupvalues, Upvaldesc, MAXUPVAL, "upvalues");
-    while (oldsize < f->sizeupvalues) f->upvalues[oldsize++].name = NULL;
+    // 上一步分配完内存后, f->sizeupvalues 至少为 4
+    while (oldsize < f->sizeupvalues) //
+        f->upvalues[oldsize++].name = NULL;
     return &f->upvalues[fs->nups++];
 }
 
@@ -545,7 +548,8 @@ static void movegotosout(FuncState* fs, BlockCnt* bl) {
     for (i = bl->firstgoto; i < gl->n; i++) { /* for each pending goto */
         Labeldesc* gt = &gl->arr[i];
         /* leaving a variable scope? */
-        if (reglevel(fs, gt->nactvar) > reglevel(fs, bl->nactvar)) gt->close |= bl->upval; /* jump may need a close */
+        if (reglevel(fs, gt->nactvar) > reglevel(fs, bl->nactvar)) //
+            gt->close |= bl->upval; /* jump may need a close */
         gt->nactvar = bl->nactvar; /* update goto level */
     }
 }
@@ -579,14 +583,15 @@ static l_noret undefgoto(LexState* ls, Labeldesc* gt) {
 }
 
 static void leaveblock(FuncState* fs) {
-    BlockCnt* bl = fs->bl;
+    BlockCnt* bl = fs->bl; // 拿到当前的 block
     LexState* ls = fs->ls;
     int hasclose = 0;
     int stklevel = reglevel(fs, bl->nactvar); /* level outside the block */
     if (bl->isloop) /* fix pending breaks? */
         hasclose = createlabel(ls, luaS_newliteral(ls->L, "break"), 0, 0);
-    if (!hasclose && bl->previous && bl->upval) luaK_codeABC(fs, OP_CLOSE, stklevel, 0, 0);
-    fs->bl = bl->previous;
+    if (!hasclose && bl->previous && bl->upval) //
+        luaK_codeABC(fs, OP_CLOSE, stklevel, 0, 0);
+    fs->bl = bl->previous; // 去年 block 链层的元素
     removevars(fs, bl->nactvar);
     lua_assert(bl->nactvar == fs->nactvar);
     fs->freereg = stklevel; /* free registers */
@@ -1755,23 +1760,23 @@ static void statement(LexState* ls) {
 /* }====================================================================== */
 
 /*
-** compiles the main function, which is a regular vararg function with an
-** upvalue named LUA_ENV
+** compiles the main function, which is a regular vararg function with an upvalue named LUA_ENV
 */
 static void mainfunc(LexState* ls, FuncState* fs) {
-    BlockCnt bl;
-    Upvaldesc* env;
+    BlockCnt bl; // 主函数的 block
+    Upvaldesc* env; // 主函数的 _ENV
     open_func(ls, fs, &bl); // 主函数的 prev 为 NULL
+    // 主函数的第一条指令
     setvararg(fs, 0); /* main function is always declared vararg */
     env = allocupvalue(fs); /* ...set environment upvalue */
-    env->instack = 1;
-    env->idx = 0;
-    env->kind = VDKREG;
+    env->instack = 1; // 在主函数的栈上
+    env->idx = 0; // 栈的索引
+    env->kind = VDKREG; // 普通的寄存器变量
     env->name = ls->envn; // 在 luaX_setinput() 中赋值的, 所以主闭包的第一个 upvalue 就是 _ENV
     luaC_objbarrier(ls->L, fs->f, env->name);
     luaX_next(ls); /* read first token */
     statlist(ls); /* parse main body */
-    check(ls, TK_EOS);
+    check(ls, TK_EOS); // 看看 lua 脚本是不是读取完毕了
     close_func(ls);
 }
 

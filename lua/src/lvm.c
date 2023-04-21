@@ -1146,6 +1146,7 @@ returning: /* trap already set */
         lua_assert(base <= L->top && L->top < L->stack_last);
         /* invalidate top for instructions not expecting it */
         lua_assert(isIT(i) || (cast_void(L->top = base), 1));
+        // 指令 i 的操作码
         vmdispatch(GET_OPCODE(i)) {
             vmcase(OP_MOVE) {
                 setobjs2s(L, ra, RB(i)); // R[A] := R[B]
