@@ -252,7 +252,7 @@ static int floatforloop(StkId ra) {
         return 0; /* finish the loop */
 }
 
-/// @brief 只要就是看看元表, val 为最后返回的值 \r
+/// @brief 顺着元表链找, val 为最后返回的值 \r
 /// Finish the table access 'val = t[key]'.
 /// If 'slot' is NULL, 't' is not a table; otherwise, 'slot' points to t[k] entry (which must be empty).
 void luaV_finishget(lua_State* L, const TValue* t, TValue* key, StkId val, const TValue* slot) {
@@ -1018,7 +1018,9 @@ void luaV_finishOp(lua_State* L) {
 #define RC(i) (base + GETARG_C(i))
 // 取指令 i 的 C 段指向的的寄存器中的值
 #define vRC(i) s2v(RC(i))
+// 取常量表中索引为指令 i 的 C 段值的
 #define KC(i) (k + GETARG_C(i))
+// 如果指 i 的 k 段为 1, 去常量表中找, 不然去寄存器里找
 #define RKC(i) ((TESTARG_k(i)) ? k + GETARG_C(i) : s2v(base + GETARG_C(i)))
 
 #define updatetrap(ci) (trap = ci->u.l.trap)
@@ -1222,12 +1224,11 @@ returning: /* trap already set */
                     Protect(luaV_finishget(L, upval, rc, ra, slot));
                 vmbreak;
             }
-            vmcase(OP_GETTABLE) {
+            vmcase(OP_GETTABLE) { // R[A] := R[B][R[C]]
                 const TValue* slot;
-                TValue* rb = vRB(i);
-                TValue* rc = vRC(i);
+                TValue* rb = vRB(i); // 表
+                TValue* rc = vRC(i); // 键
                 lua_Unsigned n;
-                // 如果 rc 是个整数
                 if (ttisinteger(rc) /* fast track for integers? */
                         ? (cast_void(n = ivalue(rc)), luaV_fastgeti(L, rb, n, slot))
                         : luaV_fastget(L, rb, rc, slot, luaH_get)) {
@@ -1236,10 +1237,10 @@ returning: /* trap already set */
                     Protect(luaV_finishget(L, rb, rc, ra, slot));
                 vmbreak;
             }
-            vmcase(OP_GETI) {
+            vmcase(OP_GETI) { // R[A] := R[B][C]
                 const TValue* slot;
-                TValue* rb = vRB(i);
-                int c = GETARG_C(i);
+                TValue* rb = vRB(i); // 表
+                int c = GETARG_C(i); // 整数键值
                 if (luaV_fastgeti(L, rb, c, slot)) {
                     setobj2s(L, ra, slot);
                 } else {
@@ -1249,10 +1250,10 @@ returning: /* trap already set */
                 }
                 vmbreak;
             }
-            vmcase(OP_GETFIELD) {
+            vmcase(OP_GETFIELD) { // R[A] := R[B][K[C]:string]
                 const TValue* slot;
                 TValue* rb = vRB(i);
-                TValue* rc = KC(i);
+                TValue* rc = KC(i); // K[C]
                 TString* key = tsvalue(rc); /* key must be a string */
                 if (luaV_fastget(L, rb, key, slot, luaH_getshortstr)) {
                     setobj2s(L, ra, slot);
@@ -1260,7 +1261,7 @@ returning: /* trap already set */
                     Protect(luaV_finishget(L, rb, rc, ra, slot));
                 vmbreak;
             }
-            vmcase(OP_SETTABUP) {
+            vmcase(OP_SETTABUP) { // UpValue[A][K[B]:string] := RK(C)
                 const TValue* slot;
                 TValue* upval = cl->upvals[GETARG_A(i)]->v;
                 TValue* rb = KB(i);
@@ -1272,7 +1273,7 @@ returning: /* trap already set */
                     Protect(luaV_finishset(L, upval, rb, rc, slot));
                 vmbreak;
             }
-            vmcase(OP_SETTABLE) {
+            vmcase(OP_SETTABLE) { // R[A][R[B]] := RK(C)
                 const TValue* slot;
                 TValue* rb = vRB(i); /* key (table is in 'ra') */
                 TValue* rc = RKC(i); /* value */
@@ -1285,10 +1286,11 @@ returning: /* trap already set */
                     Protect(luaV_finishset(L, s2v(ra), rb, rc, slot));
                 vmbreak;
             }
-            vmcase(OP_SETI) {
+            vmcase(OP_SETI) { // R[A][B] := RK(C)
                 const TValue* slot;
                 int c = GETARG_B(i);
                 TValue* rc = RKC(i);
+                // 表在 ra 里了
                 if (luaV_fastgeti(L, s2v(ra), c, slot)) {
                     luaV_finishfastset(L, s2v(ra), slot, rc);
                 } else {
@@ -1298,7 +1300,7 @@ returning: /* trap already set */
                 }
                 vmbreak;
             }
-            vmcase(OP_SETFIELD) {
+            vmcase(OP_SETFIELD) { // R[A][K[B]:string] := RK(C)
                 const TValue* slot;
                 TValue* rb = KB(i);
                 TValue* rc = RKC(i);
@@ -1309,12 +1311,17 @@ returning: /* trap already set */
                     Protect(luaV_finishset(L, s2v(ra), rb, rc, slot));
                 vmbreak;
             }
-            vmcase(OP_NEWTABLE) {
+            vmcase(OP_NEWTABLE) { // R[A] := {}; pc++
+                // hash 表的大小
                 int b = GETARG_B(i); /* log2(hash size) + 1 */
+                // 数组部分的大小
                 int c = GETARG_C(i); /* array size */
                 Table* t;
-                if (b > 0) b = 1 << (b - 1); /* size is 2^(b - 1) */
+                if (b > 0) //
+                    b = 1 << (b - 1); /* size is 2^(b - 1) */
+                // 如果当前指令的 k 部分为 0, 那么下一指令为无效的扩展指令
                 lua_assert((!TESTARG_k(i)) == (GETARG_Ax(*pc) == 0));
+                // 如果当前指令的 k 部分为 1, 那么下一条指令为有效的扩展指令
                 if (TESTARG_k(i)) /* non-zero extra argument? */
                     c += GETARG_Ax(*pc) * (MAXARG_C + 1); /* add it to size */
                 pc++; /* skip extra argument */
@@ -1325,7 +1332,7 @@ returning: /* trap already set */
                 checkGC(L, ra + 1);
                 vmbreak;
             }
-            vmcase(OP_SELF) {
+            vmcase(OP_SELF) { // R[A+1] := R[B]; R[A] := R[B][RK(C):string]
                 const TValue* slot;
                 TValue* rb = vRB(i);
                 TValue* rc = RKC(i);

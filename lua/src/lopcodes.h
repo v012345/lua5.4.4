@@ -145,6 +145,7 @@ enum OpMode {
 #define GETARG_Bx(i) check_exp(checkopm(i, iABx), getarg(i, POS_Bx, SIZE_Bx))
 #define SETARG_Bx(i, v) setarg(i, v, POS_Bx, SIZE_Bx)
 
+// 指令 i 的 Ax 部分的数值
 #define GETARG_Ax(i) check_exp(checkopm(i, iAx), getarg(i, POS_Ax, SIZE_Ax))
 #define SETARG_Ax(i, v) setarg(i, v, POS_Ax, SIZE_Ax)
 

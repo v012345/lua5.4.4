@@ -77,10 +77,8 @@ typedef enum {
     (!ttistable(t) ? (slot = NULL, 0) /* not a table; 'slot' is NULL and result is 0 */                                                                                                                \
                    : (slot = (l_castS2U(k) - 1u < hvalue(t)->alimit) ? &hvalue(t)->array[k - 1] : luaH_getint(hvalue(t), k), !isempty(slot))) /* result not empty? */
 
-/*
-** Finish a fast set operation (when fast get succeeds). In that case,
-** 'slot' points to the place to put the value.
-*/
+// 表中存在有效的 key, 不需要触发元表
+// Finish a fast set operation (when fast get succeeds). In that case, 'slot' points to the place to put the value.
 #define luaV_finishfastset(L, t, slot, v)                                                                                                                                                              \
     {                                                                                                                                                                                                  \
         setobj2t(L, cast(TValue*, slot), v);                                                                                                                                                           \
