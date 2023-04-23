@@ -153,6 +153,7 @@ enum OpMode {
 #define GETARG_sBx(i) check_exp(checkopm(i, iAsBx), getarg(i, POS_Bx, SIZE_Bx) - OFFSET_sBx)
 #define SETARG_sBx(i, b) SETARG_Bx((i), cast_uint((b) + OFFSET_sBx))
 
+// 指令 i 的 sJ 的部分, 用于跳转
 #define GETARG_sJ(i) check_exp(checkopm(i, isJ), getarg(i, POS_sJ, SIZE_sJ) - OFFSET_sJ)
 #define SETARG_sJ(i, j) setarg(i, cast_uint((j) + OFFSET_sJ), POS_sJ, SIZE_sJ)
 

@@ -835,10 +835,8 @@ void luaV_finishOp(lua_State* L) {
 #define l_gti(a, b) (a > b)
 #define l_gei(a, b) (a >= b)
 
-/*
-** Arithmetic operations with immediate operands. 'iop' is the integer
-** operation, 'fop' is the float operation.
-*/
+// C 在指令里, B 在寄存器里, 结果放到 A 寄存器里 \r
+// Arithmetic operations with immediate operands. 'iop' is the integer operation, 'fop' is the float operation.
 #define op_arithI(L, iop, fop)                                                                                                                                                                         \
     {                                                                                                                                                                                                  \
         TValue* v1 = vRB(i);                                                                                                                                                                           \
@@ -890,9 +888,8 @@ void luaV_finishOp(lua_State* L) {
         op_arithf_aux(L, v1, v2, fop);                                                                                                                                                                 \
     }
 
-/*
-** Arithmetic operations over integers and floats.
-*/
+// R[A] = v1 op v2 \r
+// Arithmetic operations over integers and floats.
 #define op_arith_aux(L, v1, v2, iop, fop)                                                                                                                                                              \
     {                                                                                                                                                                                                  \
         if (ttisinteger(v1) && ttisinteger(v2)) {                                                                                                                                                      \
@@ -914,9 +911,8 @@ void luaV_finishOp(lua_State* L) {
         op_arith_aux(L, v1, v2, iop, fop);                                                                                                                                                             \
     }
 
-/*
-** Arithmetic operations with K operands.
-*/
+// R[A] = R[B] op K[C] \r
+// Arithmetic operations with K operands.
 #define op_arithK(L, iop, fop)                                                                                                                                                                         \
     {                                                                                                                                                                                                  \
         TValue* v1 = vRB(i);                                                                                                                                                                           \
