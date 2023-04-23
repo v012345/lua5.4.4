@@ -58,7 +58,7 @@ const TValue* luaT_gettm(Table* events, TMS event, TString* ename) {
         return tm;
 }
 
-/// @brief 返回对象 o 的元表的的指定数据
+/// @brief 返回对象 o 的元表的的 event 字段
 const TValue* luaT_gettmbyobj(lua_State* L, const TValue* o, TMS event) {
     Table* mt;
     switch (ttype(o)) {
@@ -98,11 +98,10 @@ void luaT_callTM(lua_State* L, const TValue* f, const TValue* p1, const TValue* 
 }
 
 /// @brief
-/// @param L
-/// @param f
-/// @param p1
-/// @param p2
-/// @param res
+/// @param f 元方法
+/// @param p1 优先级高的操作数
+/// @param p2 优先级低的操作数
+/// @param res 存放结果的栈位置
 void luaT_callTMres(lua_State* L, const TValue* f, const TValue* p1, const TValue* p2, StkId res) {
     ptrdiff_t result = savestack(L, res); // 保存 res 的位置, 用来存返回的结果
     StkId func = L->top;
@@ -119,6 +118,9 @@ void luaT_callTMres(lua_State* L, const TValue* f, const TValue* p1, const TValu
     setobjs2s(L, res, --L->top); /* move result to its place */
 }
 
+/// @brief 如果 p1 有元表, 使用 p1 的元表, 没有使用 p2 的, 都没有, 返回 0
+/// @param p1 优先级高的操作数
+/// @param p2 优先级低的操作数
 static int callbinTM(lua_State* L, const TValue* p1, const TValue* p2, StkId res, TMS event) {
     const TValue* tm = luaT_gettmbyobj(L, p1, event); /* try first operand */
     if (notm(tm)) tm = luaT_gettmbyobj(L, p2, event); /* try second operand */
@@ -127,6 +129,9 @@ static int callbinTM(lua_State* L, const TValue* p1, const TValue* p2, StkId res
     return 1;
 }
 
+/// @brief 如果 p1 有元表, 使用 p1 的元表, 没有使用 p2 的, 都没有, 返回报错
+/// @param p1 优先级高的操作数
+/// @param p2 优先级低的操作数
 void luaT_trybinTM(lua_State* L, const TValue* p1, const TValue* p2, StkId res, TMS event) {
     if (l_unlikely(!callbinTM(L, p1, p2, res, event))) {
         switch (event) {

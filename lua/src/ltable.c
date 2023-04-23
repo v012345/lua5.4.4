@@ -210,7 +210,7 @@ static int equalkey(const TValue* k1, const Node* n2, int deadok) {
     }
 }
 
-// alimit 是为数组部分大小, alimit 一定小于等于数组部分大小 \r
+// alimit 是否为数组部分的实际大小, 表的 flags 的第 7 位的优先级高 \r
 // True if value of 'alimit' is equal to the real size of the array part of table 't'.
 // (Otherwise, the array part must be larger than 'alimit'.)
 #define limitequalsasize(t) (isrealasize(t) || ispow2((t)->alimit))
@@ -237,7 +237,7 @@ LUAI_FUNC unsigned int luaH_realasize(const Table* t) {
     }
 }
 
-/// @brief \r
+/// @brief 如果 alimit 是 2 的幂次, 那么 alimit 一定是数组部分的实际大小 \r
 /// Check whether real size of the array is a power of 2.
 /// (If it is not, 'alimit' cannot be changed to any other value without changing the real size.)
 static int ispow2realasize(const Table* t) { //
@@ -520,7 +520,7 @@ void luaH_resize(lua_State* L, Table* t, unsigned int newasize, unsigned int nhs
     /* allocation ok; initialize new part of the array */
     exchangehashpart(t, &newt); /* 't' has the new hash ('newt' has the old) */
     t->array = newarray; /* set new array part */
-    t->alimit = newasize;
+    t->alimit = newasize; // 这里 alimit 设置为物理大小
     for (i = oldasize; i < newasize; i++) /* clear new slice of the array */
         setempty(&t->array[i]);
     /* re-insert elements from old hash part into new parts */
@@ -797,6 +797,8 @@ static lua_Unsigned hash_search(Table* t, lua_Unsigned j) {
     return i;
 }
 
+/// @brief 现在 array 可以分为 AB 两段, A 段全不空, B 段全空, 用二分法快速找到分界线
+/// @return A 段最后一个元素的索引
 static unsigned int binsearch(const TValue* array, unsigned int i, unsigned int j) {
     while (j - i > 1u) { /* binary search */
         unsigned int m = (i + j) / 2;
@@ -841,7 +843,8 @@ static unsigned int binsearch(const TValue* array, unsigned int i, unsigned int 
 ** therefore cannot be used as a new limit.)
 */
 lua_Unsigned luaH_getn(Table* t) {
-    unsigned int limit = t->alimit;
+    unsigned int limit = t->alimit; // 拿到有效范围
+    // 数组部分分配了内存, 但是有效范围的最后一位没有值
     if (limit > 0 && isempty(&t->array[limit - 1])) { /* (1)? */
         /* there must be a boundary before 'limit' */
         if (limit >= 2 && !isempty(&t->array[limit - 2])) {
@@ -852,6 +855,7 @@ lua_Unsigned luaH_getn(Table* t) {
             }
             return limit - 1;
         } else { /* must search for a boundary in [0, limit] */
+            // 进到这里
             unsigned int boundary = binsearch(t->array, 0, limit);
             /* can this boundary represent the real size of the array? */
             if (ispow2realasize(t) && boundary > luaH_realasize(t) / 2) {

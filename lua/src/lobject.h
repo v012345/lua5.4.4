@@ -338,6 +338,7 @@ typedef struct GCObject {
         settt_(io, LUA_VNUMINT);                                                                                                                                                                       \
     }
 
+// 就是设置整数值 obj->i = x
 #define chgivalue(obj, x)                                                                                                                                                                              \
     {                                                                                                                                                                                                  \
         TValue* io = (obj);                                                                                                                                                                            \
@@ -733,6 +734,7 @@ typedef union Node {
 */
 
 #define BITRAS (1 << 7)
+/// @result 1 => alimit 等于物理大小, 0=> alimit 不等于物理大小
 #define isrealasize(t) (!((t)->flags & BITRAS))
 #define setrealasize(t) ((t)->flags &= cast_byte(~BITRAS))
 #define setnorealasize(t) ((t)->flags |= BITRAS)
