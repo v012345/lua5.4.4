@@ -520,6 +520,7 @@ int luaV_lessequal(lua_State* L, const TValue* l, const TValue* r) {
 int luaV_equalobj(lua_State* L, const TValue* t1, const TValue* t2) {
     const TValue* tm;
     if (ttypetag(t1) != ttypetag(t2)) { /* not the same variant? */
+        // 只有浮点与整数有可能在细分不同时, 但是值是等于的
         if (ttype(t1) != ttype(t2) || ttype(t1) != LUA_TNUMBER)
             return 0; /* only numbers can be equal with different variants */
         else { /* two numbers with different variants */
@@ -527,6 +528,7 @@ int luaV_equalobj(lua_State* L, const TValue* t1, const TValue* t2) {
                integer value, they cannot be equal; otherwise, compare their
                integer values. */
             lua_Integer i1, i2;
+            // 看看能不能等值转化为整数, 之后看看整数是否相等
             return (luaV_tointegerns(t1, &i1, F2Ieq) && luaV_tointegerns(t2, &i2, F2Ieq) && i1 == i2);
         }
     }
@@ -534,20 +536,28 @@ int luaV_equalobj(lua_State* L, const TValue* t1, const TValue* t2) {
     switch (ttypetag(t1)) {
         case LUA_VNIL:
         case LUA_VFALSE:
-        case LUA_VTRUE: return 1;
-        case LUA_VNUMINT: return (ivalue(t1) == ivalue(t2));
-        case LUA_VNUMFLT: return luai_numeq(fltvalue(t1), fltvalue(t2));
-        case LUA_VLIGHTUSERDATA: return pvalue(t1) == pvalue(t2);
-        case LUA_VLCF: return fvalue(t1) == fvalue(t2);
-        case LUA_VSHRSTR: return eqshrstr(tsvalue(t1), tsvalue(t2));
-        case LUA_VLNGSTR: return luaS_eqlngstr(tsvalue(t1), tsvalue(t2));
+        case LUA_VTRUE: // 这 3 种, 只要细分相同, 就相等
+            return 1;
+        case LUA_VNUMINT: //
+            return (ivalue(t1) == ivalue(t2));
+        case LUA_VNUMFLT: //
+            return luai_numeq(fltvalue(t1), fltvalue(t2));
+        case LUA_VLIGHTUSERDATA: //
+            return pvalue(t1) == pvalue(t2);
+        case LUA_VLCF: //
+            return fvalue(t1) == fvalue(t2);
+        case LUA_VSHRSTR: //
+            return eqshrstr(tsvalue(t1), tsvalue(t2));
+        case LUA_VLNGSTR: //
+            return luaS_eqlngstr(tsvalue(t1), tsvalue(t2));
         case LUA_VUSERDATA: {
             if (uvalue(t1) == uvalue(t2))
                 return 1;
             else if (L == NULL)
                 return 0;
             tm = fasttm(L, uvalue(t1)->metatable, TM_EQ);
-            if (tm == NULL) tm = fasttm(L, uvalue(t2)->metatable, TM_EQ);
+            if (tm == NULL) //
+                tm = fasttm(L, uvalue(t2)->metatable, TM_EQ);
             break; /* will try TM */
         }
         case LUA_VTABLE: {
@@ -556,7 +566,8 @@ int luaV_equalobj(lua_State* L, const TValue* t1, const TValue* t2) {
             else if (L == NULL)
                 return 0;
             tm = fasttm(L, hvalue(t1)->metatable, TM_EQ);
-            if (tm == NULL) tm = fasttm(L, hvalue(t2)->metatable, TM_EQ);
+            if (tm == NULL) //
+                tm = fasttm(L, hvalue(t2)->metatable, TM_EQ);
             break; /* will try TM */
         }
         default: return gcvalue(t1) == gcvalue(t2);
@@ -1171,10 +1182,10 @@ returning: /* trap already set */
                 setobj2s(L, ra, rb); // R[A] := K[Bx]
                 vmbreak;
             }
-            vmcase(OP_LOADKX) { // 下一条指令中的 Ax 是常量表的索引
+            vmcase(OP_LOADKX) { // 需要额外参数
                 TValue* rb;
-                rb = k + GETARG_Ax(*pc); // pc 现在是额外指令
-                pc++; // 取下一条指令
+                rb = k + GETARG_Ax(*pc); // pc 现在是额外参数
+                pc++; // 跳过被当作额外参数的指令
                 setobj2s(L, ra, rb); // R[A] := K[extra arg]
                 vmbreak;
             }
@@ -1799,7 +1810,7 @@ returning: /* trap already set */
                 updatebase(ci); /* function has new base after adjustment */
                 vmbreak;
             }
-            vmcase(OP_EXTRAARG) {
+            vmcase(OP_EXTRAARG) { // 如果额外参数都被正解处理了, 就不可能进入到这里
                 lua_assert(0);
                 vmbreak;
             }

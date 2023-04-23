@@ -71,7 +71,7 @@ enum OpMode {
 #define L_INTHASBITS(b) ((UINT_MAX >> ((b)-1)) >= 1)
 
 #if L_INTHASBITS(SIZE_Bx)
-// 131071
+// 2^17 - 1
 #define MAXARG_Bx ((1 << SIZE_Bx) - 1)
 #else
 #define MAXARG_Bx MAX_INT
@@ -80,6 +80,7 @@ enum OpMode {
 #define OFFSET_sBx (MAXARG_Bx >> 1) /* 'sBx' is signed */
 
 #if L_INTHASBITS(SIZE_Ax)
+// 2^25 - 1
 #define MAXARG_Ax ((1 << SIZE_Ax) - 1)
 #else
 #define MAXARG_Ax MAX_INT

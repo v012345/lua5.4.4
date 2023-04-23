@@ -354,18 +354,18 @@ int luaK_codeABCk(FuncState* fs, OpCode o, int a, int b, int c, int k) {
     return luaK_code(fs, CREATE_ABCk(o, a, b, c, k));
 }
 
-/*
-** Format and emit an 'iABx' instruction.
-*/
+/// @brief Format and emit an 'iABx' instruction.
+/// @param a ABx 类指令的 A 段数值
+/// @param bc ABx 类指令的 Bx 段数值
 int luaK_codeABx(FuncState* fs, OpCode o, int a, unsigned int bc) {
     lua_assert(getOpMode(o) == iABx);
     lua_assert(a <= MAXARG_A && bc <= MAXARG_Bx);
     return luaK_code(fs, CREATE_ABx(o, a, bc));
 }
 
-/*
-** Format and emit an 'iAsBx' instruction.
-*/
+/// @brief Format and emit an 'iAsBx' instruction.
+/// @param a AsBx 类指令的 A 段数值
+/// @param bc 加上 OFFSET_sBx 放到 AsBx 的 sBx段中
 int luaK_codeAsBx(FuncState* fs, OpCode o, int a, int bc) {
     unsigned int b = bc + OFFSET_sBx;
     lua_assert(getOpMode(o) == iAsBx);
@@ -386,16 +386,16 @@ static int codesJ(FuncState* fs, OpCode o, int sj, int k) {
 /*
 ** Emit an "extra argument" instruction (format 'iAx')
 */
+
+/// @brief 把 a 放到额外参数中
 static int codeextraarg(FuncState* fs, int a) {
     lua_assert(a <= MAXARG_Ax);
     return luaK_code(fs, CREATE_Ax(OP_EXTRAARG, a));
 }
 
-/*
-** Emit a "load constant" instruction, using either 'OP_LOADK'
-** (if constant index 'k' fits in 18 bits) or an 'OP_LOADKX'
-** instruction with "extra argument".
-*/
+/// @brief 如果 k 大于 MAXARG_Bx, 就要使用额外参数 \r
+/// Emit a "load constant" instruction, using either 'OP_LOADK' (if constant index 'k' fits in 18 bits)
+/// or an 'OP_LOADKX'  instruction with "extra argument".
 static int luaK_codek(FuncState* fs, int reg, int k) {
     if (k <= MAXARG_Bx)
         return luaK_codeABx(fs, OP_LOADK, reg, k);
@@ -406,8 +406,7 @@ static int luaK_codek(FuncState* fs, int reg, int k) {
     }
 }
 
-/// @brief 如果使用的寄存器比 fs->f->maxstacksize 多, 更新 fs->f->maxstacksize \r
-/// Check register-stack level, keeping track of its maximum size in field 'maxstacksize'
+/// @brief Check register-stack level, keeping track of its maximum size in field 'maxstacksize'
 void luaK_checkstack(FuncState* fs, int n) {
     int newstack = fs->freereg + n;
     if (newstack > fs->f->maxstacksize) {
@@ -418,7 +417,6 @@ void luaK_checkstack(FuncState* fs, int n) {
 }
 
 /// @brief Reserve 'n' registers in register stack
-/// @param n fs->freereg 增加 n
 void luaK_reserveregs(FuncState* fs, int n) {
     luaK_checkstack(fs, n);
     fs->freereg += n;
@@ -464,7 +462,7 @@ static void freeexps(FuncState* fs, expdesc* e1, expdesc* e2) {
     freeregs(fs, r1, r2);
 }
 
-/// @brief \r
+/// @brief 向函数原型的常量数组(k)中加值, 返回 v 在数组中的索引 \r
 /// Add constant 'v' to prototype's list of constants (field 'k').
 /// Use scanner's table to cache position of constants in constant list
 /// and try to reuse constants. Because some values should not be used
@@ -476,6 +474,7 @@ static int addk(FuncState* fs, TValue* key, TValue* v) {
     TValue val;
     lua_State* L = fs->ls->L;
     Proto* f = fs->f;
+    // h 当作一个 key => index 映射
     const TValue* idx = luaH_get(fs->ls->h, key); /* query scanner table */
     int k, oldsize;
     if (ttisinteger(idx)) { /* is there an index there? */
@@ -490,9 +489,11 @@ static int addk(FuncState* fs, TValue* key, TValue* v) {
     /* numerical value does not need GC barrier;
        table has no metatable, so it does not need to invalidate cache */
     setivalue(&val, k);
+    // 更新映射表
     luaH_finishset(L, fs->ls->h, key, idx, &val);
     luaM_growvector(L, f->k, k, f->sizek, TValue, MAXARG_Ax, "constants");
     while (oldsize < f->sizek) setnilvalue(&f->k[oldsize++]);
+    // 把值放到数组中
     setobj(L, &f->k[k], v);
     fs->nk++;
     luaC_barrier(L, f, v);
@@ -508,9 +509,7 @@ static int stringK(FuncState* fs, TString* s) {
     return addk(fs, &o, &o); /* use string itself as key */
 }
 
-/*
-** Add an integer to list of constants and return its index.
-*/
+/// @brief Add an integer to list of constants and return its index.
 static int luaK_intK(FuncState* fs, lua_Integer n) {
     TValue o;
     setivalue(&o, n);
@@ -588,6 +587,9 @@ static int fitsBx(lua_Integer i) { //
     return (-OFFSET_sBx <= i && i <= MAXARG_Bx - OFFSET_sBx);
 }
 
+/// @brief 运行时, 把 i 装载到 R[reg] 中
+/// @param reg 寄存器的索引, 也就是要放到指令 A 段中的数值
+/// @param i 之后要装载到 R[A] 中的值
 void luaK_int(FuncState* fs, int reg, lua_Integer i) {
     if (fitsBx(i))
         luaK_codeAsBx(fs, OP_LOADI, reg, cast_int(i));
@@ -756,7 +758,7 @@ static void discharge2reg(FuncState* fs, expdesc* e, int reg) {
             luaK_float(fs, reg, e->u.nval);
             break;
         }
-        case VKINT: {
+        case VKINT: { // 把整数装载到 R[reg] 中
             luaK_int(fs, reg, e->u.ival);
             break;
         }
@@ -810,7 +812,6 @@ static int need_value(FuncState* fs, int list) {
 /// @brief \r
 /// Ensures final expression result (which includes results from its jump lists) is in register 'reg'.
 /// If expression has jumps, need to patch these jumps either to its final position or to "load" instructions (for those tests that do not produce values).
-/// @param reg 使用的寄存索引
 static void exp2reg(FuncState* fs, expdesc* e, int reg) {
     discharge2reg(fs, e, reg);
     if (e->k == VJMP) /* expression itself is a test? */
@@ -841,8 +842,8 @@ static void exp2reg(FuncState* fs, expdesc* e, int reg) {
 void luaK_exp2nextreg(FuncState* fs, expdesc* e) {
     luaK_dischargevars(fs, e);
     freeexp(fs, e);
-    luaK_reserveregs(fs, 1);
-    exp2reg(fs, e, fs->freereg - 1);
+    luaK_reserveregs(fs, 1); // 预留一个寄存器
+    exp2reg(fs, e, fs->freereg - 1); // 使用上面申请到的寄存器
 }
 
 /*

@@ -111,7 +111,7 @@ static void check_match(LexState* ls, int what, int who, int where) {
     }
 }
 
-/// @brief 检查当前 token 是不是 TK_NAME, 然后取下一个 token, 返回 TK_NAME 的变量名
+/// @brief 检查当前 token 是不是 TK_NAME,是,取下一个 token, 返回 TK_NAME 的变量名, 否则报错
 static TString* str_checkname(LexState* ls) {
     TString* ts;
     check(ls, TK_NAME);
@@ -1418,7 +1418,8 @@ static void forbody(LexState* ls, int base, int line, int nvars, int isgen) {
 static void fornum(LexState* ls, TString* varname, int line) {
     /* fornum -> NAME = exp,exp[,exp] forbody */
     FuncState* fs = ls->fs;
-    int base = fs->freereg;
+    int base = fs->freereg; // 当前 forbody 的 base
+    // 申请 3 个临时变量与 1 个正常变量, 如果超过 MAXVARS, 报错
     new_localvarliteral(ls, "(for state)");
     new_localvarliteral(ls, "(for state)");
     new_localvarliteral(ls, "(for state)");

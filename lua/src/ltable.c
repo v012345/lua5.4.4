@@ -588,7 +588,7 @@ static Node* getfreepos(Table* t) {
     return NULL; /* could not find a free place */
 }
 
-/// @brief \r
+/// @brief t[key] = value \r
 /// inserts a new key into a hash table; first, check whether key's main
 /// position is free. If not, check whether colliding node is in its main
 /// position or not: if it is not, move colliding node to an empty place and
@@ -725,12 +725,11 @@ const TValue* luaH_get(Table* t, const TValue* key) {
     }
 }
 
-/*
-** Finish a raw "set table" operation, where 'slot' is where the value
-** should have been (the result of a previous "get table").
-** Beware: when using this function you probably need to check a GC
-** barrier and invalidate the TM cache.
-*/
+/// @brief 给表赋值, 无视元表, t[key] = value \r
+/// Finish a raw "set table" operation, where 'slot' is where the value
+/// should have been (the result of a previous "get table").
+/// Beware: when using this function you probably need to check a GC
+/// barrier and invalidate the TM cache.
 void luaH_finishset(lua_State* L, Table* t, const TValue* key, const TValue* slot, TValue* value) {
     if (isabstkey(slot))
         luaH_newkey(L, t, key, value);
