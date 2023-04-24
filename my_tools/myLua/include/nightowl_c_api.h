@@ -27,5 +27,5 @@ int DeleteFile(lua_State* L);
 int Test(lua_State* L);
 int GetFilesLastModifiedTimestamp(lua_State* L);
 void C_API(lua_State* L);
-int PrintProtoCode(lua_State* L);
+int GetOpCodes(lua_State* L);
 } // namespace NIGHTOWL

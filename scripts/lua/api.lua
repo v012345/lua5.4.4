@@ -11,7 +11,7 @@ function GetFilesInFolder(folder, exclude) return {} end
 
 ---返回编译后的操作指令
 ---@return table
-function PrintProtoCode() return {} end
+function GetOpCodes() return {} end
 
 ---comment
 ---@param files table

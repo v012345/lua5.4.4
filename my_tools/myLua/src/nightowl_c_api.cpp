@@ -15,7 +15,7 @@ void C_API(lua_State* L) {
     lua_register(L, "GetFilesLastModifiedTimestamp", GetFilesLastModifiedTimestamp);
     lua_register(L, "GetFilesMd5", GetFilesMd5);
     lua_register(L, "Test", Test);
-    lua_register(L, "PrintProtoCode", PrintProtoCode);
+    lua_register(L, "GetOpCodes", GetOpCodes);
 }
 
 int GetFilesLastModifiedTimestamp(lua_State* L) {
@@ -45,7 +45,7 @@ int GetFileLastModifiedTimestamp(lua_State* L) {
     return 1;
 }
 
-int PrintProtoCode(lua_State* L) {
+int GetOpCodes(lua_State* L) {
     CallInfo* ci = L->ci;
     lua_newtable(L);
     size_t j = 1;
