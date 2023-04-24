@@ -3,7 +3,7 @@
 
 namespace NIGHTOWL {
 
-void C_API(lua_State *L) {
+void C_API(lua_State* L) {
     lua_register(L, "GetFileLastModifiedTimestamp", GetFileLastModifiedTimestamp);
     lua_register(L, "CopyFile", CopyFile);
     lua_register(L, "DeleteFile", DeleteFile);
@@ -15,9 +15,10 @@ void C_API(lua_State *L) {
     lua_register(L, "GetFilesLastModifiedTimestamp", GetFilesLastModifiedTimestamp);
     lua_register(L, "GetFilesMd5", GetFilesMd5);
     lua_register(L, "Test", Test);
+    lua_register(L, "PrintProtoCode", PrintProtoCode);
 }
 
-int GetFilesLastModifiedTimestamp(lua_State *L) {
+int GetFilesLastModifiedTimestamp(lua_State* L) {
     std::vector<std::string> timestamp;
 
     size_t filesCount = lua_rawlen(L, 1);
@@ -29,7 +30,7 @@ int GetFilesLastModifiedTimestamp(lua_State *L) {
         lua_pop(L, 1);
     }
     lua_newtable(L);
-    for (auto &&i : timestamp) {
+    for (auto&& i : timestamp) {
         size_t t = std::filesystem::last_write_time(i).time_since_epoch() / std::chrono::milliseconds(1);
         lua_pushstring(L, i.c_str());
         lua_pushinteger(L, t);
@@ -37,14 +38,42 @@ int GetFilesLastModifiedTimestamp(lua_State *L) {
     }
     return 1;
 }
-int GetFileLastModifiedTimestamp(lua_State *L) {
-    const char *file = lua_tostring(L, 1);
+int GetFileLastModifiedTimestamp(lua_State* L) {
+    const char* file = lua_tostring(L, 1);
     size_t timestamp = std::filesystem::last_write_time(file).time_since_epoch() / std::chrono::milliseconds(1);
     lua_pushinteger(L, timestamp);
     return 1;
 }
 
-int Lua_GetFilesInFolder(lua_State *L) {
+int PrintProtoCode(lua_State* L) {
+    CallInfo* ci = L->ci;
+    lua_newtable(L);
+    size_t j = 1;
+    while (ci->previous != NULL) { ci = ci->previous; }
+    while (ci->next != NULL) {
+        TValue* tv = s2v(ci->func);
+        if (ttisLclosure(tv)) {
+            lua_pushinteger(L, j);
+            lua_newtable(L);
+            j++;
+            LClosure* LC = clLvalue(tv);
+            Proto* p = LC->p;
+            for (size_t i = 0; i < p->sizecode; i++) {
+                lua_pushinteger(L, i + 1);
+                lua_pushinteger(L, p->code[i]);
+                lua_settable(L, -3);
+            }
+            lua_pushstring(L, "script_name");
+            lua_pushstring(L, getstr(p->source));
+            lua_settable(L, -3);
+            lua_settable(L, -3);
+        }
+        ci = ci->next;
+    }
+    return 1;
+}
+
+int Lua_GetFilesInFolder(lua_State* L) {
     std::filesystem::path folder(lua_tostring(L, 1));
     size_t j = lua_rawlen(L, 2);
     std::unordered_set<std::string> exclude;
@@ -59,12 +88,11 @@ int Lua_GetFilesInFolder(lua_State *L) {
     return 1;
 }
 
-void GetFilesInFolder(lua_State *L, std::filesystem::path folder, std::unordered_set<std::string> &exclude) {
+void GetFilesInFolder(lua_State* L, std::filesystem::path folder, std::unordered_set<std::string>& exclude) {
 
-    for (auto &&directoryOrFile : std::filesystem::directory_iterator(folder)) {
+    for (auto&& directoryOrFile : std::filesystem::directory_iterator(folder)) {
         if (directoryOrFile.is_directory()) {
-            if (exclude.find(directoryOrFile.path().filename().string()) == exclude.end())
-                GetFilesInFolder(L, directoryOrFile, exclude);
+            if (exclude.find(directoryOrFile.path().filename().string()) == exclude.end()) GetFilesInFolder(L, directoryOrFile, exclude);
         } else {
             lua_pushinteger(L, lua_rawlen(L, -1) + 1);
             lua_pushstring(L, directoryOrFile.path().string().c_str());
@@ -72,12 +100,12 @@ void GetFilesInFolder(lua_State *L, std::filesystem::path folder, std::unordered
         }
     }
 }
-int DeleteFile(lua_State *L) {
+int DeleteFile(lua_State* L) {
     remove(lua_tostring(L, 1));
     return 0;
 }
 
-int GetFilesMd5(lua_State *L) {
+int GetFilesMd5(lua_State* L) {
     luaL_checktype(L, 1, LUA_TTABLE);
     std::vector<std::string> files;
 
@@ -85,9 +113,7 @@ int GetFilesMd5(lua_State *L) {
 
     for (size_t i = 1; i <= n; i++) {
         int ret_type = lua_rawgeti(L, 1, i);
-        if (ret_type == LUA_TSTRING) {
-            files.push_back(lua_tostring(L, -1));
-        }
+        if (ret_type == LUA_TSTRING) { files.push_back(lua_tostring(L, -1)); }
         lua_pop(L, 1);
     }
     int processor_count = std::thread::hardware_concurrency();
@@ -113,12 +139,10 @@ int GetFilesMd5(lua_State *L) {
             }
         }));
     }
-    for (auto &&worker : workers) {
-        worker.join();
-    }
+    for (auto&& worker : workers) { worker.join(); }
 
     lua_newtable(L);
-    for (auto &&file : filesMd5) {
+    for (auto&& file : filesMd5) {
         lua_pushstring(L, file.first.c_str());
         lua_pushstring(L, file.second.c_str());
         lua_settable(L, -3);
@@ -126,7 +150,7 @@ int GetFilesMd5(lua_State *L) {
     return 1;
 }
 
-int CopyFileMultiThreads(lua_State *L) {
+int CopyFileMultiThreads(lua_State* L) {
     std::cout << "CopyFileMultiThreads" << std::endl;
     luaL_checktype(L, 1, LUA_TTABLE);
     lua_pushnil(L);
@@ -141,9 +165,7 @@ int CopyFileMultiThreads(lua_State *L) {
         // printf("%s => %s\n", key, val);
         if (false) {
             auto parent_path = std::filesystem::path(to).parent_path();
-            if (!std::filesystem::exists(parent_path)) {
-                std::filesystem::create_directories(parent_path);
-            }
+            if (!std::filesystem::exists(parent_path)) { std::filesystem::create_directories(parent_path); }
 
             std::filesystem::copy(from, to, std::filesystem::copy_options::overwrite_existing);
         } else {
@@ -169,9 +191,7 @@ int CopyFileMultiThreads(lua_State *L) {
                 // all_tables.erase(all_tables.begin());
                 mutex.unlock();
                 auto parent_path = std::filesystem::path(to_).parent_path();
-                if (!std::filesystem::exists(parent_path)) {
-                    std::filesystem::create_directories(parent_path);
-                }
+                if (!std::filesystem::exists(parent_path)) { std::filesystem::create_directories(parent_path); }
                 // std::filesystem::copy(form_, to_,
                 // std::filesystem::copy_options::overwrite_existing);
                 getFileMD5(form_);
@@ -179,14 +199,12 @@ int CopyFileMultiThreads(lua_State *L) {
         }));
     }
     int processor_count = std::thread::hardware_concurrency();
-    for (auto &&copyWorker : copyWorkers) {
-        copyWorker.join();
-    }
+    for (auto&& copyWorker : copyWorkers) { copyWorker.join(); }
 
     return 0;
 }
 
-int LuaArrayToCpp(lua_State *L) {
+int LuaArrayToCpp(lua_State* L) {
     luaL_checktype(L, 1, LUA_TTABLE);
     int n = lua_rawlen(L, 1);
     for (int i = 1; i <= n; i++) {
@@ -205,31 +223,29 @@ int LuaArrayToCpp(lua_State *L) {
     return 0;
 }
 
-int CopyFile(lua_State *L) {
-    const char *from = lua_tostring(L, 1);
-    const char *to = lua_tostring(L, 2);
+int CopyFile(lua_State* L) {
+    const char* from = lua_tostring(L, 1);
+    const char* to = lua_tostring(L, 2);
     auto parent_path = std::filesystem::path(to).parent_path();
-    if (!std::filesystem::exists(parent_path)) {
-        std::filesystem::create_directories(parent_path);
-    }
+    if (!std::filesystem::exists(parent_path)) { std::filesystem::create_directories(parent_path); }
     std::filesystem::copy(from, to, std::filesystem::copy_options::overwrite_existing);
     lua_pushboolean(L, true);
     return 1;
 }
 
-int GetFileMd5(lua_State *L) {
-    const char *file = lua_tostring(L, 1);
+int GetFileMd5(lua_State* L) {
+    const char* file = lua_tostring(L, 1);
     lua_pushstring(L, getFileMD5(file).c_str());
     return 1;
 }
 
-int IsFileExist(lua_State *L) {
-    const char *file = lua_tostring(L, 1);
+int IsFileExist(lua_State* L) {
+    const char* file = lua_tostring(L, 1);
     lua_pushboolean(L, std::filesystem::exists(file));
     return 1;
 }
 
-int Test(lua_State *L) {
+int Test(lua_State* L) {
     std::cout << lua_gettop(L) << std::endl;
     // std::cout << lua_gettop(L) << std::endl;
     // lua_pushstring(L, "aaa");
@@ -267,24 +283,24 @@ int Test(lua_State *L) {
     return 0;
 }
 
-int StackDump(lua_State *L) {
+int StackDump(lua_State* L) {
     std::cout << "\nbegin dump lua stack" << std::endl;
     int top = lua_gettop(L);
     for (int i = 1; i <= top; ++i) {
         int t = lua_type(L, i);
         switch (t) {
-        case LUA_TSTRING: {
-            printf("'%s' ", lua_tostring(L, i));
-        } break;
-        case LUA_TBOOLEAN: {
-            printf(lua_toboolean(L, i) ? "true " : "false ");
-        } break;
-        case LUA_TNUMBER: {
-            printf("%g ", lua_tonumber(L, i));
-        } break;
-        default: {
-            printf("%s ", lua_typename(L, t));
-        } break;
+            case LUA_TSTRING: {
+                printf("'%s' ", lua_tostring(L, i));
+            } break;
+            case LUA_TBOOLEAN: {
+                printf(lua_toboolean(L, i) ? "true " : "false ");
+            } break;
+            case LUA_TNUMBER: {
+                printf("%g ", lua_tonumber(L, i));
+            } break;
+            default: {
+                printf("%s ", lua_typename(L, t));
+            } break;
         }
     }
     std::cout << "\nend dump lua stack" << std::endl;

@@ -3,12 +3,15 @@
 ---@return integer
 function GetFileLastModifiedTimestamp(file) return 0 end
 
-
 ---递归出给出文件夹的全部文件
 ---@param folder string 文件夹
 ---@param exclude table 排除的文件夹
 ---@return table
 function GetFilesInFolder(folder, exclude) return {} end
+
+---返回编译后的操作指令
+---@return table
+function PrintProtoCode() return {} end
 
 ---comment
 ---@param files table
@@ -54,5 +57,3 @@ function GetFilesMd5(files) return {} end
 ---@param files table
 ---@return table
 function GetFilesLastModifiedTimestamp(files) return {} end
-
-

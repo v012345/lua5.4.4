@@ -4,6 +4,7 @@
 #include "nightowl_cpp_api.hpp"
 #define LUA_MAIN_SCRIPT "./main.lua"
 #define LUA_ARGV_SCRIPT "./parser_example.lua"
+
 int main(int argc, char const *argv[])
 {
 
@@ -11,6 +12,7 @@ int main(int argc, char const *argv[])
     luaL_openlibs(L);
     if (std::filesystem::exists(LUA_ARGV_SCRIPT))
     {
+         NIGHTOWL::C_API(L);
         luaL_dofile(L, LUA_ARGV_SCRIPT);
         // lua_getglobal(L, "argv");
         // for (size_t i = 0; i < argc; i++)
