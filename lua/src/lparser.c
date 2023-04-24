@@ -142,7 +142,7 @@ static void codename(LexState* ls, expdesc* e) { //
     codestring(e, str_checkname(ls));
 }
 
-/// @brief
+/// @brief 局部变量的寄存器分配完毕后, 这里记录变量的名字与对应的指令, 返回变量在 locvars 中的索引 \r
 /// Register a new local variable in the active 'Proto' (for debug information).
 static int registerlocalvar(LexState* ls, FuncState* fs, TString* varname) {
     Proto* f = fs->f;
@@ -177,7 +177,7 @@ static int new_localvar(LexState* ls, TString* name) {
 /// @brief 通过索引拿到局部变量 \r
 /// Return the "variable description" (Vardesc) of a given variable.
 /// (Unless noted otherwise, all variables are referred to by their compiler indices.)
-static Vardesc* getlocalvardesc(FuncState* fs, int vidx) {
+static Vardesc* getlocalvardesc(FuncState* fs, int vidx) { //
     return &fs->ls->dyd->actvar.arr[fs->firstlocal + vidx];
 }
 
@@ -214,7 +214,7 @@ static LocVar* localdebuginfo(FuncState* fs, int vidx) {
     }
 }
 
-/// @brief 初始化一个表示局部变量的 expdesc \r
+/// @brief 使用一个 VLOCAL 表达式 vidx 为变量的索引, ridx 为寄存器索引 \r
 /// Create an expression representing variable 'vidx'
 static void init_var(FuncState* fs, expdesc* e, int vidx) {
     e->f = e->t = NO_JUMP;
@@ -323,7 +323,7 @@ static int newupvalue(FuncState* fs, TString* name, expdesc* v) {
     return fs->nups - 1;
 }
 
-/// @brief 遍历当前的 FuncState 的局部变量, 通过变量名来找对应变量 \r
+/// @brief 反向遍历局部变量, 通过变量名来找对应变量 \r
 /// Look for an active local variable with the name 'n' in the
 /// function 'fs'. If found, initialize 'var' with it and return
 /// its expression kind; otherwise return -1.
@@ -377,6 +377,7 @@ static void singlevaraux(FuncState* fs, TString* n, expdesc* var, int base) {
     else {
         int v = searchvar(fs, n, var); /* look up locals at current level */
         if (v >= 0) { /* found? */
+            // 当 base 为 0, 表示变量不在当前作用域中, 当当前 upvalue 使用
             if (v == VLOCAL && !base) /* local will be used as an upval */
                 markupval(fs, var->u.var.vidx);
         } else { /* not found as local at current level; try upvalues */
@@ -1538,7 +1539,7 @@ static void localfunc(LexState* ls) {
     localdebuginfo(fs, fvar)->startpc = fs->pc;
 }
 
-/// @brief 目前还没有用到, 所以返回的都是 VDKREG
+/// @brief 如果脚本显式指明变量类型, 否则都使用 VDKREG
 static int getlocalattribute(LexState* ls) {
     /* ATTRIB -> ['<' Name '>'] */
     if (testnext(ls, '<')) {
@@ -1554,6 +1555,7 @@ static int getlocalattribute(LexState* ls) {
     return VDKREG; /* regular variable */
 }
 
+/// @brief 目前用不到, level 都是 -1
 static void checktoclose(FuncState* fs, int level) {
     if (level != -1) { /* is there a to-be-closed variable? */
         marktobeclosed(fs);
@@ -1568,13 +1570,14 @@ static void localstat(LexState* ls) {
     int toclose = -1; /* index of to-be-closed variable (if any) */
     Vardesc* var; /* last variable */
     int vidx, kind; /* index and kind of last variable */
-    int nvars = 0; // local 关键后面跟的变量数
+    int nvars = 0; // local 后面跟的变量数
     int nexps; // = 后面表达式的个数
     expdesc e;
     do { // 现在只是解析到变量名, 知道有这么一个名字的变量
         vidx = new_localvar(ls, str_checkname(ls));
-        kind = getlocalattribute(ls);
-        getlocalvardesc(fs, vidx)->vd.kind = kind;
+        kind = getlocalattribute(ls); // 目前返回的都是 VDKREG
+        getlocalvardesc(fs, vidx)->vd.kind = kind; // 所以这里都显示变量
+        // 这里是不会进入的
         if (kind == RDKTOCLOSE) { /* to-be-closed? */
             if (toclose != -1) /* one already present? */
                 luaK_semerror(ls, "multiple to-be-closed variables in local list");
@@ -1598,7 +1601,7 @@ static void localstat(LexState* ls) {
         adjust_assign(ls, nvars, nexps, &e); // 给最后一个表达式分配寄存器
         adjustlocalvars(ls, nvars);
     }
-    checktoclose(fs, toclose);
+    checktoclose(fs, toclose); // 不用管这个
 }
 
 static int funcname(LexState* ls, expdesc* v) {
