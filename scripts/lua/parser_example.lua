@@ -1,7 +1,4 @@
-for index, value in ipairs(t) do
-    
-end
-
-for i = 1, 10, 1 do
-    
-end
+local counter, step = 10, 1
+local counter = 12
+step = 6
+print(counter)

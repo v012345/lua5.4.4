@@ -727,11 +727,10 @@ void luaK_dischargevars(FuncState* fs, expdesc* e) {
     }
 }
 
-/*
-** Ensure expression value is in register 'reg', making 'e' a
-** non-relocatable expression.
-** (Expression still may have jump lists.)
-*/
+/// @brief 处理除了 VJMP 类型 \r
+/// Ensure expression value is in register 'reg', making 'e' a
+/// non-relocatable expression.
+/// (Expression still may have jump lists.)
 static void discharge2reg(FuncState* fs, expdesc* e, int reg) {
     luaK_dischargevars(fs, e);
     switch (e->k) {
@@ -813,7 +812,7 @@ static int need_value(FuncState* fs, int list) {
 /// Ensures final expression result (which includes results from its jump lists) is in register 'reg'.
 /// If expression has jumps, need to patch these jumps either to its final position or to "load" instructions (for those tests that do not produce values).
 static void exp2reg(FuncState* fs, expdesc* e, int reg) {
-    discharge2reg(fs, e, reg);
+    discharge2reg(fs, e, reg); // 处理除了 VJMP 类型
     if (e->k == VJMP) /* expression itself is a test? */
         luaK_concat(fs, &e->t, e->u.info); /* put this jump in 't' list */
     if (hasjumps(e)) {

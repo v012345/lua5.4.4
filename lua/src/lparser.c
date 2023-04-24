@@ -142,7 +142,8 @@ static void codename(LexState* ls, expdesc* e) { //
     codestring(e, str_checkname(ls));
 }
 
-/// @brief Register a new local variable in the active 'Proto' (for debug information).
+/// @brief
+/// Register a new local variable in the active 'Proto' (for debug information).
 static int registerlocalvar(LexState* ls, FuncState* fs, TString* varname) {
     Proto* f = fs->f;
     int oldsize = f->sizelocvars;
@@ -150,14 +151,13 @@ static int registerlocalvar(LexState* ls, FuncState* fs, TString* varname) {
     while (oldsize < f->sizelocvars) //
         f->locvars[oldsize++].varname = NULL;
     f->locvars[fs->ndebugvars].varname = varname;
-    f->locvars[fs->ndebugvars].startpc = fs->pc;
+    f->locvars[fs->ndebugvars].startpc = fs->pc; // 当前变量对应的指令
     luaC_objbarrier(ls->L, f, varname);
     return fs->ndebugvars++;
 }
 
-/// @brief 把 FuncState 用到的局部变量存入到 Vardesc 数组中 \r
+/// @brief 通过名字记录一个局部变量 \r
 /// Create a new local variable with the given 'name'. Return its index in the function.
-/// @return 在数组中的**相对**索引
 static int new_localvar(LexState* ls, TString* name) {
     lua_State* L = ls->L;
     FuncState* fs = ls->fs;
@@ -171,13 +171,13 @@ static int new_localvar(LexState* ls, TString* name) {
     return dyd->actvar.n - 1 - fs->firstlocal;
 }
 
+// 通过名字记录一个局部变量
 #define new_localvarliteral(ls, v) new_localvar(ls, luaX_newstring(ls, "" v, (sizeof(v) / sizeof(char)) - 1));
 
-/// @brief 拿到局部变量的描述(Vardesc 数组中了) \r
+/// @brief 通过索引拿到局部变量 \r
 /// Return the "variable description" (Vardesc) of a given variable.
 /// (Unless noted otherwise, all variables are referred to by their compiler indices.)
 static Vardesc* getlocalvardesc(FuncState* fs, int vidx) {
-    // 返回 Dyndata 中 arr 中 vidx(实际上是 fs->firstlocal + vidx ) 的值;
     return &fs->ls->dyd->actvar.arr[fs->firstlocal + vidx];
 }
 
@@ -253,17 +253,15 @@ static void check_readonly(LexState* ls, expdesc* e) {
     }
 }
 
-/*
-** Start the scope for the last 'nvars' created variables.
-*/
+/// @brief Start the scope for the last 'nvars' created variables.
 static void adjustlocalvars(LexState* ls, int nvars) {
     FuncState* fs = ls->fs;
-    int reglevel = luaY_nvarstack(fs);
+    int reglevel = luaY_nvarstack(fs); // 找到一个可用的寄存器
     int i;
     for (i = 0; i < nvars; i++) {
-        int vidx = fs->nactvar++;
-        Vardesc* var = getlocalvardesc(fs, vidx);
-        var->vd.ridx = reglevel++;
+        int vidx = fs->nactvar++; // 与寄存器同步增加
+        Vardesc* var = getlocalvardesc(fs, vidx); // 之前已经放到数组里了
+        var->vd.ridx = reglevel++; // 指出变量使用的寄存器
         var->vd.pidx = registerlocalvar(ls, fs, var->vd.name);
     }
 }
@@ -899,6 +897,7 @@ static void body(LexState* ls, expdesc* e, int ismethod, int line) {
     close_func(ls);
 }
 
+/// @brief 返回解析到的表达式列表中表达式的个数, v 记录表达式列表的最后一个表达式
 static int explist(LexState* ls, expdesc* v) {
     /* explist -> expr { ',' expr } */
     int n = 1; /* at least one expression */
@@ -1539,6 +1538,7 @@ static void localfunc(LexState* ls) {
     localdebuginfo(fs, fvar)->startpc = fs->pc;
 }
 
+/// @brief 目前还没有用到, 所以返回的都是 VDKREG
 static int getlocalattribute(LexState* ls) {
     /* ATTRIB -> ['<' Name '>'] */
     if (testnext(ls, '<')) {
@@ -1571,7 +1571,7 @@ static void localstat(LexState* ls) {
     int nvars = 0; // local 关键后面跟的变量数
     int nexps; // = 后面表达式的个数
     expdesc e;
-    do {
+    do { // 现在只是解析到变量名, 知道有这么一个名字的变量
         vidx = new_localvar(ls, str_checkname(ls));
         kind = getlocalattribute(ls);
         getlocalvardesc(fs, vidx)->vd.kind = kind;
@@ -1583,7 +1583,7 @@ static void localstat(LexState* ls) {
         nvars++;
     } while (testnext(ls, ','));
     if (testnext(ls, '='))
-        nexps = explist(ls, &e);
+        nexps = explist(ls, &e); // 除了最后一个表达式, 其他已经分配到了寄存器, e 记录最后一个表达式
     else {
         e.k = VVOID;
         nexps = 0;
@@ -1595,7 +1595,7 @@ static void localstat(LexState* ls) {
         adjustlocalvars(ls, nvars - 1); /* exclude last variable */
         fs->nactvar++; /* but count it */
     } else {
-        adjust_assign(ls, nvars, nexps, &e);
+        adjust_assign(ls, nvars, nexps, &e); // 给最后一个表达式分配寄存器
         adjustlocalvars(ls, nvars);
     }
     checktoclose(fs, toclose);

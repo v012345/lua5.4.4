@@ -1713,7 +1713,7 @@ returning: /* trap already set */
                     goto returning; /* continue running caller in this frame */
                 }
             }
-            vmcase(OP_FORLOOP) {
+            vmcase(OP_FORLOOP) { // update counters; if loop continues then pc-=Bx;
                 if (ttisinteger(s2v(ra + 2))) { /* integer loop? */
                     lua_Unsigned count = l_castS2U(ivalue(s2v(ra + 1)));
                     if (count > 0) { /* still more iterations? */
