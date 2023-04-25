@@ -11,7 +11,8 @@
                 "l_mathop=${workspaceFolder}/lua/src/luaconf.h",
                 "vRB=${workspaceFolder}/lua/src/lvm.c",
                 "vRC=${workspaceFolder}/lua/src/lvm.c",
-                "KC=${workspaceFolder}/lua/src/lvm.c"
+                "KC=${workspaceFolder}/lua/src/lvm.c",
+                "docondjump=${workspaceFolder}/lua/src/lvm.c"
             ],
             "intelliSenseMode": "gcc-x64"
         }

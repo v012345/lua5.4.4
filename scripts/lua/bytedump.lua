@@ -3,6 +3,9 @@ Bytedump = {
     A_mask = 0x7F80,
     B_pos = 16,
     B_mask = 0xFF0000,
+    sB_pos = 16,
+    sB_mask = 0xFF0000,
+    sB_offset = 0x7F,
     Bx_pos = 15,
     Bx_mask = 0xFFFF8000,
     sBx_pos = 15,
@@ -251,7 +254,15 @@ local OP_ACT = {
     OP_EQI = nil,
     OP_LTI = nil,
     OP_LEI = nil,
-    OP_GTI = nil,
+    OP_GTI = function(index, code)
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "if (R[%s] > sB:%s) == %s goto %s else goto %s"
+        local A = Bytedump:A(code)
+        local k = Bytedump:k(code)
+        local sB = Bytedump:sB(code)
+        local sJ = Bytedump:sJ(Bytedump.codes[index + 1])
+        print(index, name, "", string.format(f, A, sB, k, index + 2, index + sJ + 2))
+    end,
     OP_GEI = nil,
     OP_TEST = function(index, code)
         local f = "if bool(R[%s]) == %s goto %s else goto %s"
@@ -263,12 +274,16 @@ local OP_ACT = {
     end,
     OP_TESTSET = nil,
     OP_CALL = function(index, code)
-        local f = "R[%s](arg * B:%s) {return * (C:%s - 1)}"
+        local f = "R[%s](arg * %s) {return * (C:%s - 1)}"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", string.format(f, A, B, C))
+        local nargs = B - 1
+        if B == 0 then
+            nargs = "B:0 call another func"
+        end
+        print(index, name, "", string.format(f, A, nargs, C))
     end,
     OP_TAILCALL = nil,
     OP_RETURN = nil,
@@ -308,6 +323,10 @@ end
 
 function Bytedump:B(code)
     return (code & self.B_mask) >> self.B_pos
+end
+
+function Bytedump:sB(code)
+    return ((code & self.sB_mask) >> self.sB_pos) - self.sB_offset
 end
 
 function Bytedump:Bx(code)

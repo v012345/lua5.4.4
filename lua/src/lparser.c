@@ -948,8 +948,8 @@ static void funcargs(LexState* ls, expdesc* f, int line) {
     }
     init_exp(f, VCALL, luaK_codeABC(fs, OP_CALL, base, nparams + 1, 2));
     luaK_fixline(fs, line);
-    fs->freereg = base + 1; /* call remove function and arguments and leaves
-                               (unless changed) one result */
+    /* call remove function and arguments and leaves (unless changed) one result */
+    fs->freereg = base + 1;
 }
 
 /*
