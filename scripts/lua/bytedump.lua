@@ -106,26 +106,26 @@ local OP_CODE = {
 
 local OP_ACT = {
     OP_MOVE = function(index, code)
-        local f = "%s R[%s] => R[%s]"
+        local f = "R[%s] = R[%s]"
         local name = OP_CODE[(code & 0x7F) + 1]
         local B = Bytedump:B(code)
         local A = Bytedump:A(code)
-        print(index, string.format(f, name, B, A))
+        print(index, name, "", string.format(f, A, B))
     end,
     OP_LOADI = function(index, code)
-        local f = "%s sBx:%s => R[%s]"
+        local f = "R[%s] = sBx:%s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local sBx = Bytedump:sBx(code)
         local A = Bytedump:A(code)
-        print(index, string.format(f, name, sBx, A))
+        print(index, name, string.format(f, A, sBx))
     end,
     OP_LOADF = nil,
     OP_LOADK = function(index, code)
-        local f = "%s K[%s] => R[%s]"
+        local f = "R[%s] = K[%s]"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
-        print(index, string.format(f, name, B, A))
+        print(index, name, string.format(f, A, B))
     end,
     OP_LOADKX = nil,
     OP_LOADFALSE = function(index, code)
@@ -145,21 +145,32 @@ local OP_ACT = {
     OP_GETUPVAL = nil,
     OP_SETUPVAL = nil,
     OP_GETTABUP = function(index, code)
-        local f = "%s UpValue[%s][K[%s]] => R[%s]"
+        local f = "R[%s] = UpValue[%s][K[%s]]"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, string.format(f, name, B, C, A))
+        print(index, name, string.format(f, A, B, C))
     end,
     OP_GETTABLE = nil,
     OP_GETI = nil,
     OP_GETFIELD = nil,
-    OP_SETTABUP = nil,
+    OP_SETTABUP = function(index, code)
+        local f = "UpValue[%s][K[%s]] = R[%s]"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        local k = Bytedump:k(code)
+        if k == 1 then
+            f = "UpValue[%s][K[%s]] = K[%s]"
+        end
+        print(index, name, string.format(f, A, B, C))
+    end,
     OP_SETTABLE = nil,
     OP_SETI = nil,
     OP_SETFIELD = function(index, code)
-        local f = "%s R[%s][K[%s]] = R[%s]"
+        local f = "R[%s][K[%s]] = R[%s]"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
@@ -168,16 +179,16 @@ local OP_ACT = {
         if k == 1 then
             f = "%s R[%s][K[%s]] = K[%s]"
         end
-        print(index, string.format(f, name, A, B, C))
+        print(index, name, string.format(f, A, B, C))
     end,
     OP_NEWTABLE = function(index, code)
-        local f = "%s R[%s] = { hash * B:%s , array * C:%s} k = %s"
+        local f = "R[%s] = { hash * B:%s , array * C:%s} k = %s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
         local k = Bytedump:k(code)
-        print(index, string.format(f, name, A, B, C, k))
+        print(index, name, string.format(f, A, B, C, k))
     end,
     OP_SELF = nil,
     OP_ADDI = nil,
@@ -216,10 +227,10 @@ local OP_ACT = {
     OP_CLOSE = nil,
     OP_TBC = nil,
     OP_JMP = function(index, code)
-        local f = "%s Jumpto %s"
+        local f = "jump to %s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local sJ = Bytedump:sJ(code)
-        print(index, string.format(f, name, index + sJ + 1))
+        print(index, name, "", string.format(f, index + sJ + 1))
     end,
     OP_EQ = nil,
     OP_LT = nil,
@@ -231,21 +242,21 @@ local OP_ACT = {
     OP_GTI = nil,
     OP_GEI = nil,
     OP_TEST = function(index, code)
-        local f = "%s if bool(R[%s]) == %s goto %s else goto %s "
+        local f = "if bool(R[%s]) == %s goto %s else goto %s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local k = Bytedump:k(code)
-        local sJ = Bytedump:sJ(code)
-        print(index, string.format(f, name, A, k, index + 2, index + sJ + 2))
+        local sJ = Bytedump:sJ(Bytedump.codes[index + 1])
+        print(index, name, "", string.format(f, A, k, index + 2, index + sJ + 2))
     end,
     OP_TESTSET = nil,
     OP_CALL = function(index, code)
-        local f = "%s R[%s](arg * B:%s) {return * (C:%s - 1)}"
+        local f = "R[%s](arg * B:%s) {return * (C:%s - 1)}"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, string.format(f, name, A, B, C))
+        print(index, name, "", string.format(f, A, B, C))
     end,
     OP_TAILCALL = nil,
     OP_RETURN = nil,
@@ -257,13 +268,19 @@ local OP_ACT = {
     OP_TFORCALL = nil,
     OP_TFORLOOP = nil,
     OP_SETLIST = nil,
-    OP_CLOSURE = nil,
-    OP_VARARG = nil,
-    OP_VARARGPREP = function(index, code)
-        local f = "%s A:%s"
+    OP_CLOSURE = function(index, code)
+        local f = "R[%s] = closure(P[%s])"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
-        print(index, string.format(f, name, A))
+        local Bx = Bytedump:Bx(code)
+        print(index, name, string.format(f, A, Bx))
+    end,
+    OP_VARARG = nil,
+    OP_VARARGPREP = function(index, code)
+        local f = "A:%s"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        print(index, name, string.format(f, A))
     end,
     OP_EXTRAARG = nil,
 }

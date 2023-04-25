@@ -1790,7 +1790,7 @@ returning: /* trap already set */
                 }
                 vmbreak;
             }
-            vmcase(OP_CLOSURE) {
+            vmcase(OP_CLOSURE) { // R[A] := closure(KPROTO[Bx])
                 Proto* p = cl->p->p[GETARG_Bx(i)];
                 halfProtect(pushclosure(L, p, cl->upvals, base, ra)); // 在虚拟机运行的过程中被动态构造出的 lua 闭包
                 checkGC(L, ra + 1);
