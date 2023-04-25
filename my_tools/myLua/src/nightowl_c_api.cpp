@@ -46,30 +46,24 @@ int GetFileLastModifiedTimestamp(lua_State* L) {
 }
 
 int GetOpCodes(lua_State* L) {
-    CallInfo* ci = L->ci;
+    CallInfo* ci = L->ci; // 指的当前的 c 函数调用
     lua_newtable(L);
-    size_t j = 1;
-    while (ci->previous != NULL) { ci = ci->previous; }
-    while (ci->next != NULL) {
-        TValue* tv = s2v(ci->func);
-        if (ttisLclosure(tv)) {
-            lua_pushinteger(L, j);
-            lua_newtable(L);
-            j++;
-            LClosure* LC = clLvalue(tv);
-            Proto* p = LC->p;
-            for (size_t i = 0; i < p->sizecode; i++) {
-                lua_pushinteger(L, i + 1);
-                lua_pushinteger(L, p->code[i]);
-                lua_settable(L, -3);
-            }
-            lua_pushstring(L, "script_name");
-            lua_pushstring(L, getstr(p->source));
-            lua_settable(L, -3);
-            lua_settable(L, -3);
-        }
-        ci = ci->next;
+    ci = ci->previous;
+    TValue* tv = s2v(ci->func);
+    LClosure* LC = clLvalue(tv);
+    Proto* p = LC->p;
+    lua_newtable(L);
+    lua_pushstring(L, "instructions");
+    lua_newtable(L);
+    for (size_t i = 0; i < p->sizecode; i++) {
+        lua_pushinteger(L, i + 1);
+        lua_pushinteger(L, p->code[i]);
+        lua_settable(L, -3);
     }
+    lua_settable(L, -3);
+    lua_pushstring(L, "script_name");
+    lua_pushstring(L, getstr(p->source));
+    lua_settable(L, -3);
     return 1;
 }
 
