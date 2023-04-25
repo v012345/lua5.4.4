@@ -9,6 +9,8 @@ Bytedump = {
     sBx_offset = 0xFFFF,
     C_pos = 24,
     C_mask = 0xFF000000,
+    k_pos = 15,
+    k_mask = 0x8000,
 }
 function Bytedump:sBx(code)
     return ((code & self.Bx_mask) >> self.sBx_pos) - self.sBx_offset
@@ -28,6 +30,10 @@ end
 
 function Bytedump:C(code)
     return (code & self.C_mask) >> self.C_pos
+end
+
+function Bytedump:k(code)
+    return (code & self.k_mask) >> self.k_pos
 end
 
 local OP_CODE = {
@@ -171,7 +177,15 @@ local OP_ACT = {
     OP_SETTABLE = nil,
     OP_SETI = nil,
     OP_SETFIELD = nil,
-    OP_NEWTABLE = nil,
+    OP_NEWTABLE = function(code)
+        local f = "%s R[%s] = { hash * B:%s , array * C:%s} k = %s"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        local k = Bytedump:k(code)
+        print(string.format(f, name, A, B, C, k))
+    end,
     OP_SELF = nil,
     OP_ADDI = nil,
     OP_ADDK = nil,
