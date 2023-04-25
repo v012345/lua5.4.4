@@ -1,21 +1,9 @@
-function X()
-    Bytedump:dump(GetOpCodes())
-    local A = 100
-    return A
-end
-
-local C = {
-
-}
-function C:p()
-    self.X = 11
-end
-
 require("bytedump")
+for i = 1, 10, 1 do
+    local j = i
+    if j > 5 then
+        break
+    end
+end
 
 Bytedump:dump(GetOpCodes())
-X()
-
-print("end")
-
-return

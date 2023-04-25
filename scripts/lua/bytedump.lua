@@ -124,8 +124,8 @@ local OP_ACT = {
         local f = "R[%s] = K[%s]"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
-        local B = Bytedump:B(code)
-        print(index, name, string.format(f, A, B))
+        local Bx = Bytedump:Bx(code)
+        print(index, name, string.format(f, A, Bx))
     end,
     OP_LOADKX = nil,
     OP_LOADFALSE = function(index, code)
@@ -177,7 +177,7 @@ local OP_ACT = {
         local C = Bytedump:C(code)
         local k = Bytedump:k(code)
         if k == 1 then
-            f = "%s R[%s][K[%s]] = K[%s]"
+            f = "R[%s][K[%s]] = K[%s]"
         end
         print(index, name, string.format(f, A, B, C))
     end,
@@ -190,7 +190,19 @@ local OP_ACT = {
         local k = Bytedump:k(code)
         print(index, name, string.format(f, A, B, C, k))
     end,
-    OP_SELF = nil,
+    OP_SELF = function(index, code)
+        -- R[A+1] := R[B]; R[A] := R[B][RK(C):string]
+        local f = "R[%s] = R[%s]; R[%s] = R[%s]R[%s]"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        local k = Bytedump:k(code)
+        if k == 1 then
+            f = "R[%s] = R[%s]; R[%s] = R[%s]K[%s]"
+        end
+        print(index, name, "", string.format(f, A + 1, B, A, B, C))
+    end,
     OP_ADDI = nil,
     OP_ADDK = nil,
     OP_SUBK = nil,
