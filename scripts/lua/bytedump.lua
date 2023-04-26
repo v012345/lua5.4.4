@@ -159,7 +159,14 @@ local OP_ACT = {
         print(index, name, string.format(f, A, B, C))
     end,
     OP_GETTABLE = nil,
-    OP_GETI = nil,
+    OP_GETI = function(index, code)
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s][C:%s]"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        print(index, name, "", string.format(f, A, B, C))
+    end,
     OP_GETFIELD = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
         local f = "R[%s] = R[%s][K[%s]]"
