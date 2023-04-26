@@ -1570,7 +1570,7 @@ returning: /* trap already set */
                 docondjump();
                 vmbreak;
             }
-            vmcase(OP_EQI) {
+            vmcase(OP_EQI) { // if ((R[A] == sB) ~= k) then pc++
                 int cond;
                 int im = GETARG_sB(i);
                 if (ttisinteger(s2v(ra)))

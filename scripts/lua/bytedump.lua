@@ -269,7 +269,15 @@ local OP_ACT = {
     OP_LT = nil,
     OP_LE = nil,
     OP_EQK = nil,
-    OP_EQI = nil,
+    OP_EQI = function(index, code)
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "if (R[%s] == sB:%s) != %s goto %s else goto %s"
+        local A = Bytedump:A(code)
+        local k = Bytedump:k(code)
+        local sB = Bytedump:sB(code)
+        local sJ = Bytedump:sJ(Bytedump.codes[index + 1])
+        print(index, name, "", string.format(f, A, sB, k, index + 2, index + sJ + 2))
+    end,
     OP_LTI = nil,
     OP_LEI = nil,
     OP_GTI = function(index, code)

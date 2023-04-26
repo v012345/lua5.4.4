@@ -8,5 +8,9 @@ for i = 1, 10, 2 do
     i = i - 20
     i = i - 20.3
 end
+local i = 1
+if i == 2 then
+    print(i)
+end
 
 Bytedump:dump(GetOpCodes())
