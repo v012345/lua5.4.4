@@ -269,10 +269,7 @@ static const char* l_str2d(const char* s, lua_Number* result) {
 #define MAXBY10 cast(lua_Unsigned, LUA_MAXINTEGER / 10)
 #define MAXLASTD cast_int(LUA_MAXINTEGER % 10)
 
-/// @brief
-/// @param s
-/// @param result
-/// @return
+/// @brief 尝试把字符串转化为整数, 结果保存到 result 中
 static const char* l_str2int(const char* s, lua_Integer* result) {
     lua_Unsigned a = 0;
     int empty = 1;
@@ -303,6 +300,7 @@ static const char* l_str2int(const char* s, lua_Integer* result) {
     }
 }
 
+/// @brief 字符串转化为 lua 数字
 size_t luaO_str2num(const char* s, TValue* o) {
     lua_Integer i;
     lua_Number n;

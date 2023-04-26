@@ -399,7 +399,7 @@ typedef struct TString {
 // Get the actual string (array of bytes) from a 'TString'.
 #define getstr(ts) ((ts)->contents)
 
-/* 拿到 TString 里 C 字符串指针 contents; get the actual string (array of bytes) from a Lua value */
+// get the actual string (array of bytes) from a Lua value
 #define svalue(o) getstr(tsvalue(o))
 
 /* get string length from 'TString *s' */
