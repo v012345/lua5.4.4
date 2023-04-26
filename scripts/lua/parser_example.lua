@@ -6,7 +6,7 @@ for i = 1, 10, 2 do
     end
     i = i - j
     i = i - 20
-    i = i - 20.3
+    i = i - 100000000000
 end
 local i = 1
 if i == 2 then

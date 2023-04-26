@@ -330,14 +330,19 @@ local OP_ACT = {
     OP_RETURN0 = nil,
     OP_RETURN1 = nil,
     OP_FORLOOP = function(index, code)
-        local f =
-        "from = R[%s], to = R[%s], step = R[%s], if still in loop temp = R[%s] + R[%s], R[%s] = temp, R[%s] = temp and goto %s"
+        local f = "for i = R[%s], R[%s], R[%s] then t = R[%s] + R[%s], R[%s] = t, R[%s] = t and goto %s else goto %s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local Bx = Bytedump:Bx(code)
-        print(index, name, string.format(f, A, A + 1, A + 2, A, A + 2, A, A + 3, index - Bx + 1))
+        print(index, name, string.format(f, A, A + 1, A + 2, A, A + 2, A, A + 3, index - Bx + 1, index + 1))
     end,
-    OP_FORPREP = nil,
+    OP_FORPREP = function(index, code)
+        local f = "for i = R[%s], R[%s], R[%s] then R[%s] = R[%s] if R[%s] <= R[%s] goto %s else goto %s"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        local Bx = Bytedump:Bx(code)
+        print(index, name, string.format(f, A, A + 1, A + 2, A + 3, A, A, A + 1, index + 1, index + Bx + 2))
+    end,
     OP_TFORPREP = nil,
     OP_TFORCALL = nil,
     OP_TFORLOOP = nil,
