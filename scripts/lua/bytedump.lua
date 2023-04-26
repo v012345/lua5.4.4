@@ -12,6 +12,9 @@ Bytedump = {
     sBx_offset = 0xFFFF,
     C_pos = 24,
     C_mask = 0xFF000000,
+    sC_pos = 24,
+    sC_mask = 0xFF000000,
+    sC_offset = 0x7F,
     k_pos = 15,
     k_mask = 0x8000,
     sJ_pos = 7,
@@ -206,9 +209,24 @@ local OP_ACT = {
         end
         print(index, name, "", string.format(f, A + 1, B, A, B, C))
     end,
-    OP_ADDI = nil,
+    OP_ADDI = function(index, code)
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s] + sC:%s and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local sC = Bytedump:sC(code)
+        print(index, name, "", string.format(f, A, B, sC, index + 2))
+    end,
     OP_ADDK = nil,
-    OP_SUBK = nil,
+    OP_SUBK = function(index, code)
+        -- R[A] = R[B] - K[C]:number; pc++
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s] + K[%s] and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        print(index, name, "", string.format(f, A, B, C, index + 2))
+    end,
     OP_MULK = nil,
     OP_MODK = nil,
     OP_POWK = nil,
@@ -289,7 +307,14 @@ local OP_ACT = {
     OP_RETURN = nil,
     OP_RETURN0 = nil,
     OP_RETURN1 = nil,
-    OP_FORLOOP = nil,
+    OP_FORLOOP = function(index, code)
+        local f =
+        "from = R[%s], to = R[%s], step = R[%s], if still in loop temp = R[%s] + R[%s], R[%s] = temp, R[%s] = temp and goto %s"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        local Bx = Bytedump:Bx(code)
+        print(index, name, string.format(f, A, A + 1, A + 2, A, A + 2, A, A + 3, index - Bx + 1))
+    end,
     OP_FORPREP = nil,
     OP_TFORPREP = nil,
     OP_TFORCALL = nil,
@@ -335,6 +360,10 @@ end
 
 function Bytedump:C(code)
     return (code & self.C_mask) >> self.C_pos
+end
+
+function Bytedump:sC(code)
+    return ((code & self.sC_mask) >> self.sC_pos) - self.sC_offset
 end
 
 function Bytedump:k(code)
