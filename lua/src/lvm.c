@@ -143,22 +143,20 @@ int luaV_tointeger(const TValue* obj, lua_Integer* p, F2Imod mode) {
     return luaV_tointegerns(obj, p, mode);
 }
 
-/*
-** Try to convert a 'for' limit to an integer, preserving the semantics
-** of the loop. Return true if the loop must not run; otherwise, '*p'
-** gets the integer limit.
-** (The following explanation assumes a positive step; it is valid for
-** negative steps mutatis mutandis.)
-** If the limit is an integer or can be converted to an integer,
-** rounding down, that is the limit.
-** Otherwise, check whether the limit can be converted to a float. If
-** the float is too large, clip it to LUA_MAXINTEGER.  If the float
-** is too negative, the loop should not run, because any initial
-** integer value is greater than such limit; so, the function returns
-** true to signal that. (For this latter case, no integer limit would be
-** correct; even a limit of LUA_MININTEGER would run the loop once for
-** an initial value equal to LUA_MININTEGER.)
-*/
+/// @brief  \r
+/// Try to convert a 'for' limit to an integer, preserving the semantics of the loop.
+/// Return true if the loop must not run; otherwise, '*p' gets the integer limit.
+/// (The following explanation assumes a positive step; it is valid for negative steps mutatis mutandis.)
+/// If the limit is an integer or can be converted to an integer, rounding down, that is the limit.
+/// Otherwise, check whether the limit can be converted to a float. If the float is too large, clip it to LUA_MAXINTEGER.
+/// If the float is too negative, the loop should not run, because any initial integer value is greater than such limit;
+/// so, the function returns true to signal that. (For this latter case, no integer limit would be correct;
+/// even a limit of LUA_MININTEGER would run the loop once for an initial value equal to LUA_MININTEGER.)
+/// @param init 内部索引初始值
+/// @param lim 内部索引终值
+/// @param p
+/// @param step 步长
+/// @return 在初始条件下能否进入循环
 static int forlimit(lua_State* L, lua_Integer init, const TValue* lim, lua_Integer* p, lua_Integer step) {
     if (!luaV_tointeger(lim, p, (step < 0 ? F2Iceil : F2Ifloor))) {
         /* not coercible to in integer */
@@ -187,14 +185,16 @@ static int forlimit(lua_State* L, lua_Integer init, const TValue* lim, lua_Integ
 **   ra + 3 : control variable
 */
 static int forprep(lua_State* L, StkId ra) {
-    TValue* pinit = s2v(ra);
-    TValue* plimit = s2v(ra + 1);
-    TValue* pstep = s2v(ra + 2);
+    TValue* pinit = s2v(ra); // 内部索引的初始值
+    TValue* plimit = s2v(ra + 1); // 内部索引的终值
+    TValue* pstep = s2v(ra + 2); // 内部索引的步长
     if (ttisinteger(pinit) && ttisinteger(pstep)) { /* integer loop? */
-        lua_Integer init = ivalue(pinit);
-        lua_Integer step = ivalue(pstep);
+        lua_Integer init = ivalue(pinit); // 内部索引的初始值
+        lua_Integer step = ivalue(pstep); // 内部索引的步长
         lua_Integer limit;
-        if (step == 0) luaG_runerror(L, "'for' step is zero");
+        if (step == 0) // 0 步长直接报错, 但是如果是函数返回的 0 呢?
+            luaG_runerror(L, "'for' step is zero");
+        // forbody 内部使用的内部索引的复制
         setivalue(s2v(ra + 3), init); /* control variable */
         if (forlimit(L, init, plimit, &limit, step))
             return 1; /* skip the loop */
