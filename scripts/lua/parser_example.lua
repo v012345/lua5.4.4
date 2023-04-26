@@ -1,16 +1,13 @@
 require("bytedump")
-for i = 1, 10, 2 do
-    local j = i
-    if j > 5 then
-        break
-    end
-    i = i - j
-    i = i - 20
-    i = i - 100000000000
+
+local x = {}
+x.a = {}
+x.b = function(s)
+    print(s)
 end
-local i = 1
-if i == 2 then
-    print(i)
+x.c = function(s)
+    print(s)
 end
+x.b("23")
 
 Bytedump:dump(GetOpCodes())
