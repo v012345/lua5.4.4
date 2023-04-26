@@ -237,8 +237,22 @@ local OP_ACT = {
     OP_BXORK = nil,
     OP_SHRI = nil,
     OP_SHLI = nil,
-    OP_ADD = nil,
-    OP_SUB = nil,
+    OP_ADD = function(index, code)
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s] + R[%s] and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        print(index, name, "", string.format(f, A, B, C, index + 2))
+    end,
+    OP_SUB = function(index, code)
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s] - R[%s] and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        print(index, name, "", string.format(f, A, B, C, index + 2))
+    end,
     OP_MUL = nil,
     OP_MOD = nil,
     OP_POW = nil,
