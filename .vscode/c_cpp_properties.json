@@ -12,7 +12,8 @@
                 "vRB=${workspaceFolder}/lua/src/lvm.c",
                 "vRC=${workspaceFolder}/lua/src/lvm.c",
                 "KC=${workspaceFolder}/lua/src/lvm.c",
-                "docondjump=${workspaceFolder}/lua/src/lvm.c"
+                "docondjump=${workspaceFolder}/lua/src/lvm.c",
+                "gco2ts=${workspaceFolder}/lua/src/lstate.h"
             ],
             "intelliSenseMode": "gcc-x64"
         }

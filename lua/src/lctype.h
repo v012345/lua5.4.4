@@ -51,9 +51,12 @@
 */
 #define lislalpha(c) testprop(c, MASK(ALPHABIT))
 #define lislalnum(c) testprop(c, (MASK(ALPHABIT) | MASK(DIGITBIT)))
+// 看看字符是不是 '0' 到 '9'
 #define lisdigit(c) testprop(c, MASK(DIGITBIT))
+// 看看字符 c 是不是空格
 #define lisspace(c) testprop(c, MASK(SPACEBIT))
 #define lisprint(c) testprop(c, MASK(PRINTBIT))
+// 看看字符 c 是不是一个十六进制的符号
 #define lisxdigit(c) testprop(c, MASK(XDIGITBIT))
 
 // 大写字母或上与小写的不同就成了小写, 而小写或上这个不同还是本身, 还有 . 或上这个不同,也还是 . \r

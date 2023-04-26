@@ -23,6 +23,10 @@
 #define NONA 0x00 /* default */
 #endif
 
+// c 字符转为符号数后 + 1, 的映射
+// 第 2 位为 1 的就是 '0' 到 '9'
+// 第 4 位为 1 的就是空格
+// 第 5 位为 1 的就是一个十六进制的字符
 LUAI_DDEF const lu_byte luai_ctype_[UCHAR_MAX + 2] = {
     0x00,  /* EOZ */
     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,         /* 0. */

@@ -19,6 +19,7 @@
 #endif
 
 #if !defined(LUA_NOCVTS2N)
+// 看看 o 是不是一个字符串, 只有字符串才可能转化为数字
 #define cvt2num(o) ttisstring(o)
 #else
 #define cvt2num(o) 0 /* no conversion from strings to numbers */

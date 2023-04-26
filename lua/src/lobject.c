@@ -126,9 +126,7 @@ void luaO_arith(lua_State* L, int op, const TValue* p1, const TValue* p2, StkId 
     }
 }
 
-/// @brief
-/// @param c
-/// @return
+/// @brief 返回十六进制字符的十进制数
 int luaO_hexavalue(int c) {
     if (lisdigit(c))
         return c - '0';
@@ -269,13 +267,16 @@ static const char* l_str2d(const char* s, lua_Number* result) {
 #define MAXBY10 cast(lua_Unsigned, LUA_MAXINTEGER / 10)
 #define MAXLASTD cast_int(LUA_MAXINTEGER % 10)
 
-/// @brief 尝试把字符串转化为整数, 结果保存到 result 中
+/// @brief 尝试把字符串转化为整数, 结果保存到 result 中, 返回最后一个字符的地址
 static const char* l_str2int(const char* s, lua_Integer* result) {
     lua_Unsigned a = 0;
-    int empty = 1;
-    int neg;
-    while (lisspace(cast_uchar(*s))) s++; /* skip initial spaces */
+    int empty = 1; // 1 为转化失败, 0 为前部分转化成功
+    int neg; // 1 为负数, 0 为正数
+    // 跳过前置空白
+    while (lisspace(cast_uchar(*s))) // 这里转为无符号, 因为有可能出现大于 127 的数
+        s++; /* skip initial spaces */
     neg = isneg(&s);
+    // 通过前两位判断是不是十六进制
     if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) { /* hex? */
         s += 2; /* skip '0x' */
         for (; lisxdigit(cast_uchar(*s)); s++) {
@@ -291,16 +292,18 @@ static const char* l_str2int(const char* s, lua_Integer* result) {
             empty = 0;
         }
     }
-    while (lisspace(cast_uchar(*s))) s++; /* skip trailing spaces */
-    if (empty || *s != '\0')
+    while (lisspace(cast_uchar(*s))) // 跳过后置空白
+        s++; /* skip trailing spaces */
+    if (empty || *s != '\0') // *s != '\0' 表示后半部分有问题
         return NULL; /* something wrong in the numeral */
     else {
+        // 调整符号
         *result = l_castU2S((neg) ? 0u - a : a);
-        return s;
+        return s; // 指向字符串的最后一个字符
     }
 }
 
-/// @brief 字符串转化为 lua 数字
+/// @brief 字符串转化为 lua 数字, 返回 s 的长度, 用 o 来保存结果
 size_t luaO_str2num(const char* s, TValue* o) {
     lua_Integer i;
     lua_Number n;
