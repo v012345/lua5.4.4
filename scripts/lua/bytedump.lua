@@ -261,7 +261,15 @@ local OP_ACT = {
         local C = Bytedump:C(code)
         print(index, name, "", string.format(f, A, B, C, index + 2))
     end,
-    OP_MODK = nil,
+    OP_MODK = function(index, code)
+        -- R[A] = R[B] % K[C]:number; pc++
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s] %% K[%s] and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        print(index, name, "", string.format(f, A, B, C, index + 2))
+    end,
     OP_POWK = nil,
     OP_DIVK = function(index, code)
         -- R[A] = R[B] / K[C]:number; pc++
