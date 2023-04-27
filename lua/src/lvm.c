@@ -1594,7 +1594,7 @@ returning: /* trap already set */
                 op_orderI(L, l_gti, luai_numgt, 1, TM_LT);
                 vmbreak;
             }
-            vmcase(OP_GEI) {
+            vmcase(OP_GEI) { // if ((R[A] >= sB) ~= k) then pc++
                 op_orderI(L, l_gei, luai_numge, 1, TM_LE);
                 vmbreak;
             }
