@@ -23,6 +23,34 @@ Bytedump = {
     codes = {},
 }
 
+local TM = {
+    "__index",
+    "__newindex",
+    "__gc",
+    "__mode",
+    "__len",
+    "__eq",
+    "__add",
+    "__sub",
+    "__mul",
+    "__mod",
+    "__pow",
+    "__div",
+    "__idiv",
+    "__band",
+    "__bor",
+    "__bxor",
+    "__shl",
+    "__shr",
+    "__unm",
+    "__bnot",
+    "__lt",
+    "__le",
+    "__concat",
+    "__call",
+    "__close",
+}
+
 
 local OP_CODE = {
     "OP_MOVE",
@@ -507,9 +535,45 @@ local OP_ACT = {
         local C = Bytedump:C(code)
         print(index, name, "", string.format(f, A, B, C, index + 2))
     end,
-    OP_MMBIN = nil,
-    OP_MMBINI = nil,
-    OP_MMBINK = nil,
+    OP_MMBIN = function(index, code)
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = call R[%s] or R[%s] %s"
+        local oA = Bytedump:A(Bytedump.codes[index - 1])
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code) -- lua need add 1 to adopt c
+        print(index, name, string.format(f, oA, A, B, TM[C + 1]))
+    end,
+    OP_MMBINI = function(index, code)
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = call R[%s] or sB:%s %s"
+        local oA = Bytedump:A(Bytedump.codes[index - 1])
+        local A = Bytedump:A(code)
+        local sB = Bytedump:sB(code)
+        local k = Bytedump:k(code)
+        local C = Bytedump:C(code) -- lua need add 1 to adopt c
+        if k == 0 then
+            print(index, name, string.format(f, oA, A, sB, TM[C + 1]))
+        else
+            f = "R[%s] = call sB:%s or R[%s] %s"
+            print(index, name, string.format(f, oA, sB, A, TM[C + 1]))
+        end
+    end,
+    OP_MMBINK = function(index, code)
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = call R[%s] or K[%s] %s"
+        local oA = Bytedump:A(Bytedump.codes[index - 1])
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local k = Bytedump:k(code)
+        local C = Bytedump:C(code) -- lua need add 1 to adopt c
+        if k == 0 then
+            print(index, name, string.format(f, oA, A, B, TM[C + 1]))
+        else
+            f = "R[%s] = call K[%s] or R[%s] %s"
+            print(index, name, string.format(f, oA, B, A, TM[C + 1]))
+        end
+    end,
     OP_UNM = function(index, code)
         -- R[A] := -R[B]
         local name = OP_CODE[(code & 0x7F) + 1]

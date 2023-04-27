@@ -1,15 +1,16 @@
 require("bytedump")
+local mt = {
+    __len = function()
+        return 1
+    end,
+    __add = function(a, b)
+        return 2
+    end
+}
 local t = {}
-local a = 0
-local b = 2
-local c = a >= 1
-local c = a | b
-local c = not a
-local c = ~b
-local c = -b
-local c = #t
-local c = a - b
-local c = a % b
-local c = a ^ b
-print(a)
+setmetatable(t, mt)
+print(111111111111 + t)
+
+
+
 Bytedump:dump(GetOpCodes())
