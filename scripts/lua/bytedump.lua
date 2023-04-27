@@ -393,7 +393,15 @@ local OP_ACT = {
         local sC = Bytedump:sC(code)
         print(index, name, "", string.format(f, A, B, sC, index + 2))
     end,
-    OP_SHLI = nil,
+    OP_SHLI = function(index, code)
+        -- R[A] = sC << R[B]; pc++
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = (sC:%s) << R[%s] and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local sC = Bytedump:sC(code)
+        print(index, name, "", string.format(f, A, sC, B, index + 2))
+    end,
     OP_ADD = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
         local f = "R[%s] = R[%s] + R[%s] and jump to %s"
@@ -418,8 +426,23 @@ local OP_ACT = {
     OP_BAND = nil,
     OP_BOR = nil,
     OP_BXOR = nil,
-    OP_SHL = nil,
-    OP_SHR = nil,
+    OP_SHL = function(index, code)
+        -- R[A] = R[B] << R[C]; pc++
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s] << R[%s] and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        print(index, name, "", string.format(f, A, B, C, index + 2))
+    end,
+    OP_SHR = function(index, code)
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s] >> R[%s] and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        print(index, name, "", string.format(f, A, B, C, index + 2))
+    end,
     OP_MMBIN = nil,
     OP_MMBINI = nil,
     OP_MMBINK = nil,

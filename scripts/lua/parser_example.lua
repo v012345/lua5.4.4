@@ -1,6 +1,7 @@
 require("bytedump")
 local a = 0
 local b = 2
-a = b | 111111111111111
+a = 1 << b
+a = 1 >> b
 print(a)
 Bytedump:dump(GetOpCodes())
