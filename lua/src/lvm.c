@@ -1555,11 +1555,11 @@ returning: /* trap already set */
                 docondjump();
                 vmbreak;
             }
-            vmcase(OP_LT) {
+            vmcase(OP_LT) { // if ((R[A] < R[B]) ~= k) then pc++
                 op_order(L, l_lti, LTnum, lessthanothers);
                 vmbreak;
             }
-            vmcase(OP_LE) {
+            vmcase(OP_LE) { // if ((R[A] <= R[B]) ~= k) then pc++
                 op_order(L, l_lei, LEnum, lessequalothers);
                 vmbreak;
             }

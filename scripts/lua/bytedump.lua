@@ -125,7 +125,13 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         print(index, name, string.format(f, A, sBx))
     end,
-    OP_LOADF = nil,
+    OP_LOADF = function(index, code)
+        local f = "R[%s] = (double)sBx:%s"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local sBx = Bytedump:sBx(code)
+        local A = Bytedump:A(code)
+        print(index, name, string.format(f, A, sBx))
+    end,
     OP_LOADK = function(index, code)
         local f = "R[%s] = K[%s]"
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -133,21 +139,33 @@ local OP_ACT = {
         local Bx = Bytedump:Bx(code)
         print(index, name, string.format(f, A, Bx))
     end,
-    OP_LOADKX = nil,
+    OP_LOADKX = nil, -- 常量个数大于 2^17 -1 之后, 才会用到这个指令
     OP_LOADFALSE = function(index, code)
-        local f = "%s false => R[%s]"
+        local f = "R[%s] = false"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
-        print(index, string.format(f, name, A))
+        print(index, name, string.format(f, A))
     end,
-    OP_LFALSESKIP = nil,
+    OP_LFALSESKIP = function(index, code)
+        local f = "R[%s] = false goto %s"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        print(index, name, string.format(f, A, index + 2))
+    end,
     OP_LOADTRUE = function(index, code)
-        local f = "%s true => R[%s]"
+        local f = "R[%s] = true"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
-        print(index, string.format(f, name, A))
+        print(index, name, string.format(f, A))
     end,
-    OP_LOADNIL = nil,
+    OP_LOADNIL = function(index, code)
+        -- R[A], R[A+1], ..., R[A+B] := nil
+        local f = "for i = 0 to %s then R[%s+i] = nil"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        print(index, name, string.format(f, B, A))
+    end,
     OP_GETUPVAL = nil,
     OP_SETUPVAL = nil,
     OP_GETTABUP = function(index, code)
@@ -344,9 +362,30 @@ local OP_ACT = {
         local sJ = Bytedump:sJ(code)
         print(index, name, "", string.format(f, index + sJ + 1))
     end,
-    OP_EQ = nil,
-    OP_LT = nil,
-    OP_LE = nil,
+    OP_EQ = function(index, code)
+        local f = "if R[%s] == R[%s]) != %s then goto %s"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local k = Bytedump:k(code)
+        print(index, name, "", string.format(f, A, B, k, index + 2))
+    end,
+    OP_LT = function(index, code)
+        local f = "if R[%s] < R[%s]) != %s then goto %s"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local k = Bytedump:k(code)
+        print(index, name, "", string.format(f, A, B, k, index + 2))
+    end,
+    OP_LE = function(index, code)
+        local f = "if R[%s] <= R[%s]) != %s then goto %s"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local k = Bytedump:k(code)
+        print(index, name, "", string.format(f, A, B, k, index + 2))
+    end,
     OP_EQK = nil,
     OP_EQI = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]

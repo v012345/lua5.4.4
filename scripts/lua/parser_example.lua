@@ -1,16 +1,15 @@
 require("bytedump")
-
-x = 1
-x = x * 20
-x = x / 20
-x = x + 20
-x = x - 20
-x = x >> 20
-x = x << 20
-x = x % 20
-x = x ~ 20
-if x <= 10 then
-    x = nil
+local b = 2
+local a = 1
+local c
+if a > b then
+    c = a > b
+else
+    c = a < b
+    c = a <= b
+    c = a >= b
+    c = a == b
+    c = a ~= b
 end
 
 
