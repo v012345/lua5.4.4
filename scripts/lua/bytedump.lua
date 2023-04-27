@@ -371,7 +371,14 @@ local OP_ACT = {
     OP_TFORPREP = nil,
     OP_TFORCALL = nil,
     OP_TFORLOOP = nil,
-    OP_SETLIST = nil,
+    OP_SETLIST = function(index, code)
+        local f = "for i = 1 to %s then R[%s][%s + i] = R[%s + i]"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        print(index, name, string.format(f, B, A, C, A))
+    end,
     OP_CLOSURE = function(index, code)
         local f = "R[%s] = closure(P[%s])"
         local name = OP_CODE[(code & 0x7F) + 1]

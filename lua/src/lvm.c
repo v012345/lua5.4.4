@@ -1767,7 +1767,7 @@ returning: /* trap already set */
                 }
                 vmbreak;
             }
-            vmcase(OP_SETLIST) {
+            vmcase(OP_SETLIST) { // R[A][C+i] := R[A+i], 1 <= i <= B
                 int n = GETARG_B(i);
                 unsigned int last = GETARG_C(i);
                 Table* h = hvalue(s2v(ra));
