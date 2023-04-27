@@ -1,7 +1,7 @@
 require("bytedump")
 
 local x = {
-    "jio"
+    "jio",[2] = "jio"
 }
 x.a = {}
 x.b = function(s)

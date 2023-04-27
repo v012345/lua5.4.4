@@ -188,7 +188,18 @@ local OP_ACT = {
         print(index, name, string.format(f, A, B, C))
     end,
     OP_SETTABLE = nil,
-    OP_SETI = nil,
+    OP_SETI = function(index, code)
+        local f = "R[%s][%s] = R[%s]"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        local k = Bytedump:k(code)
+        if k == 1 then
+            f = "R[%s][%s] = K[%s]"
+        end
+        print(index, name, "", string.format(f, A, B, C))
+    end,
     OP_SETFIELD = function(index, code)
         local f = "R[%s][K[%s]] = R[%s]"
         local name = OP_CODE[(code & 0x7F) + 1]
