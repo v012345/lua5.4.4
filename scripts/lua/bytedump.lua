@@ -614,7 +614,12 @@ local OP_ACT = {
         local B = Bytedump:B(code)
         print(index, name, string.format(f, B, A, A, A))
     end,
-    OP_CLOSE = nil,
+    OP_CLOSE = function(index, code)
+        local f = "close upvalues >= level:%s"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        print(index, name, string.format(f, A))
+    end,
     OP_TBC = nil,
     OP_JMP = function(index, code)
         local f = "jump to %s"

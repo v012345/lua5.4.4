@@ -10,6 +10,15 @@ local mt = {
 local t = {}
 setmetatable(t, mt)
 print(111111111111 + t)
+local x
+for i = 1, 10, 1 do
+    local j = 1
+    x = function()
+        j = j + 1
+        return j
+    end
+end
+x()
 
 
 
