@@ -283,7 +283,15 @@ local OP_ACT = {
     OP_IDIVK = nil,
     OP_BANDK = nil,
     OP_BORK = nil,
-    OP_BXORK = nil,
+    OP_BXORK = function(index, code)
+        -- R[A] = R[B] ~ K[C]:integer; pc++
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s] xor K[%s] and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        print(index, name, string.format(f, A, B, C, index + 2))
+    end,
     OP_SHRI = function(index, code)
         -- R[A] = R[B] >> sC; pc++
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -350,7 +358,16 @@ local OP_ACT = {
         print(index, name, "", string.format(f, A, sB, k, index + 2, index + sJ + 2))
     end,
     OP_LTI = nil,
-    OP_LEI = nil,
+    OP_LEI = function(index, code)
+        -- if ((R[A] <= sB) ~= k) then pc++
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "if (R[%s] <= sB:%s) != %s goto %s else goto %s"
+        local A = Bytedump:A(code)
+        local k = Bytedump:k(code)
+        local sB = Bytedump:sB(code)
+        local sJ = Bytedump:sJ(Bytedump.codes[index + 1])
+        print(index, name, "", string.format(f, A, sB, k, index + 2, index + sJ + 2))
+    end,
     OP_GTI = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
         local f = "if (R[%s] > sB:%s) == %s goto %s else goto %s"
