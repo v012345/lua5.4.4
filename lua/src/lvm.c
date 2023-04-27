@@ -1582,7 +1582,7 @@ returning: /* trap already set */
                 docondjump();
                 vmbreak;
             }
-            vmcase(OP_LTI) {
+            vmcase(OP_LTI) { // if ((R[A] < sB) ~= k) then pc++
                 op_orderI(L, l_lti, luai_numlt, 0, TM_LT);
                 vmbreak;
             }

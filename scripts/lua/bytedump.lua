@@ -510,8 +510,22 @@ local OP_ACT = {
     OP_MMBIN = nil,
     OP_MMBINI = nil,
     OP_MMBINK = nil,
-    OP_UNM = nil,
-    OP_BNOT = nil,
+    OP_UNM = function(index, code)
+        -- R[A] := -R[B]
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = -R[%s]"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        print(index, name, "", string.format(f, A, B))
+    end,
+    OP_BNOT = function(index, code)
+        -- R[A] := ~R[B]
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = ~R[%s]"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        print(index, name, "", string.format(f, A, B))
+    end,
     OP_NOT = function(index, code)
         -- R[A] := not R[B]
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -520,7 +534,14 @@ local OP_ACT = {
         local B = Bytedump:B(code)
         print(index, name, "", string.format(f, A, B))
     end,
-    OP_LEN = nil,
+    OP_LEN = function(index, code)
+        -- R[A] := #R[B]
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = #R[%s]"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        print(index, name, "", string.format(f, A, B))
+    end,
     OP_CONCAT = function(index, code)
         -- // R[A] := R[A].. ... ..R[A + B - 1]
         local f = "for i = 1 to B:%s - 1 then  R[%s] == R[%s] .. R[%s + i]"
@@ -579,7 +600,16 @@ local OP_ACT = {
         local sJ = Bytedump:sJ(Bytedump.codes[index + 1])
         print(index, name, "", string.format(f, A, sB, k, index + 2, index + sJ + 2))
     end,
-    OP_LTI = nil,
+    OP_LTI = function(index, code)
+        -- if ((R[A] < sB) ~= k) then pc++
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "if (R[%s] < sB:%s) != %s goto %s else goto %s"
+        local A = Bytedump:A(code)
+        local k = Bytedump:k(code)
+        local sB = Bytedump:sB(code)
+        local sJ = Bytedump:sJ(Bytedump.codes[index + 1])
+        print(index, name, "", string.format(f, A, sB, k, index + 2, index + sJ + 2))
+    end,
     OP_LEI = function(index, code)
         -- if ((R[A] <= sB) ~= k) then pc++
         local name = OP_CODE[(code & 0x7F) + 1]
