@@ -13,12 +13,17 @@ print(111111111111 + t)
 local x
 for i = 1, 10, 1 do
     local j = 1
-    x = function()
+    x = function(a, b, c, ...)
+        local e = ...
+        Bytedump:dump(GetOpCodes())
         j = j + 1
         return j
     end
 end
-x()
+for key, value in pairs(t) do
+
+end
+local a, b, c = x(1, 3)
 
 
 

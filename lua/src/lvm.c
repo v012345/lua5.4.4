@@ -1796,7 +1796,7 @@ returning: /* trap already set */
                 checkGC(L, ra + 1);
                 vmbreak;
             }
-            vmcase(OP_VARARG) {
+            vmcase(OP_VARARG) { // R[A], R[A+1], ..., R[A+C-2] = vararg
                 int n = GETARG_C(i) - 1; /* required results */
                 Protect(luaT_getvarargs(L, ci, ra, n));
                 vmbreak;

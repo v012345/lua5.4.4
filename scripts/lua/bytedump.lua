@@ -187,7 +187,6 @@ local OP_ACT = {
         print(index, name, string.format(f, A))
     end,
     OP_LOADNIL = function(index, code)
-        -- R[A], R[A+1], ..., R[A+B] := nil
         local f = "for i = 0 to %s then R[%s+i] = nil"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
@@ -773,7 +772,20 @@ local OP_ACT = {
         local Bx = Bytedump:Bx(code)
         print(index, name, string.format(f, A, Bx))
     end,
-    OP_VARARG = nil,
+    OP_VARARG = function(index, code)
+        -- // R[A], R[A+1], ..., R[A+C-2] = vararg
+        -- int n = GETARG_C(i) - 1; /* required results */
+        --Protect(luaT_getvarargs(L, ci, ra, n));
+        local f = "for i = 0 to C:%s -2 then R[%s+i] = arsg[i]"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        local C = Bytedump:C(code)
+        if C == 0 then
+            print(index, name, "get all varargs")
+        else
+            print(index, name, string.format(f, C, A))
+        end
+    end,
     OP_VARARGPREP = function(index, code)
         local f = "A:%s"
         local name = OP_CODE[(code & 0x7F) + 1]
