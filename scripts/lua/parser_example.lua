@@ -1,17 +1,6 @@
 require("bytedump")
+local a = 0
 local b = 2
-local a = 1
-local c
-if a > b then
-    c = a > b
-else
-    c = a < b
-    c = a <= b
-    c = a >= b
-    c = a == b
-    c = a ~= b
-    c = a ~= "jihfa" .. "jijf" .. "jif"
-end
-
-
+a = b | 111111111111111
+print(a)
 Bytedump:dump(GetOpCodes())
