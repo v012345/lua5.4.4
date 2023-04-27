@@ -1,7 +1,12 @@
 require("bytedump")
 local a = 0
 local b = 2
-a = 1 << b
-a = 1 >> b
+local c = a & b
+local c = a | b
+local c = not a
+local c = a ~ b
+local c = a - b
+local c = a % b
+local c = a ^ b
 print(a)
 Bytedump:dump(GetOpCodes())

@@ -1603,7 +1603,7 @@ returning: /* trap already set */
                 docondjump();
                 vmbreak;
             }
-            vmcase(OP_TESTSET) {
+            vmcase(OP_TESTSET) { // if (not R[B] == k) then pc++ else R[A] := R[B]
                 TValue* rb = vRB(i);
                 if (l_isfalse(rb) == GETARG_k(i))
                     pc++;

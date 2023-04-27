@@ -418,14 +418,78 @@ local OP_ACT = {
         local C = Bytedump:C(code)
         print(index, name, "", string.format(f, A, B, C, index + 2))
     end,
-    OP_MUL = nil,
-    OP_MOD = nil,
-    OP_POW = nil,
-    OP_DIV = nil,
-    OP_IDIV = nil,
-    OP_BAND = nil,
-    OP_BOR = nil,
-    OP_BXOR = nil,
+    OP_MUL = function(index, code)
+        -- R[A] = R[B] * R[C]; pc++
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s] * R[%s] and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        print(index, name, "", string.format(f, A, B, C, index + 2))
+    end,
+    OP_MOD = function(index, code)
+        -- R[A] = R[B] % R[C]; pc++
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s] %% R[%s] and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        print(index, name, "", string.format(f, A, B, C, index + 2))
+    end,
+    OP_POW = function(index, code)
+        -- R[A] = R[B] ^ R[C]; pc++
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s] ^ R[%s] and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        print(index, name, "", string.format(f, A, B, C, index + 2))
+    end,
+    OP_DIV = function(index, code)
+        -- // R[A] = R[B] / R[C]; pc++
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s] / R[%s] and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        print(index, name, "", string.format(f, A, B, C, index + 2))
+    end,
+    OP_IDIV = function(index, code)
+        -- R[A] = R[B] // R[C]; pc++
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s] // R[%s] and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        print(index, name, "", string.format(f, A, B, C, index + 2))
+    end,
+    OP_BAND = function(index, code)
+        --  R[A] = R[B] & R[C]; pc++
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s] & R[%s] and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        print(index, name, "", string.format(f, A, B, C, index + 2))
+    end,
+    OP_BOR = function(index, code)
+        -- R[A] = R[B] | R[C]; pc++
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s] | R[%s] and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        print(index, name, "", string.format(f, A, B, C, index + 2))
+    end,
+    OP_BXOR = function(index, code)
+        -- R[A] = R[B] ~ R[C]; pc++
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s] ~ R[%s] and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        print(index, name, "", string.format(f, A, B, C, index + 2))
+    end,
     OP_SHL = function(index, code)
         -- R[A] = R[B] << R[C]; pc++
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -448,7 +512,14 @@ local OP_ACT = {
     OP_MMBINK = nil,
     OP_UNM = nil,
     OP_BNOT = nil,
-    OP_NOT = nil,
+    OP_NOT = function(index, code)
+        -- R[A] := not R[B]
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = not R[%s]"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        print(index, name, "", string.format(f, A, B))
+    end,
     OP_LEN = nil,
     OP_CONCAT = function(index, code)
         -- // R[A] := R[A].. ... ..R[A + B - 1]
@@ -537,7 +608,15 @@ local OP_ACT = {
         local sJ = Bytedump:sJ(Bytedump.codes[index + 1])
         print(index, name, "", string.format(f, A, k, index + 2, index + sJ + 2))
     end,
-    OP_TESTSET = nil,
+    OP_TESTSET = function(index, code)
+        -- if (not R[B] == k) then pc++ else R[A] := R[B]
+        local f = "if not R[%s] == %s goto %s else R[%s] = R[%s]"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        local k = Bytedump:k(code)
+        local B = Bytedump:B(code)
+        print(index, name, string.format(f, B, k, index + 2, A, B))
+    end,
     OP_CALL = function(index, code)
         local f = "R[%s](arg * %s) {return * (C:%s - 1)}"
         local name = OP_CODE[(code & 0x7F) + 1]
