@@ -353,7 +353,14 @@ local OP_ACT = {
     OP_BNOT = nil,
     OP_NOT = nil,
     OP_LEN = nil,
-    OP_CONCAT = nil,
+    OP_CONCAT = function(index, code)
+        -- // R[A] := R[A].. ... ..R[A + B - 1]
+        local f = "for i = 1 to B:%s - 1 then  R[%s] == R[%s] .. R[%s + i]"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        print(index, name, string.format(f, B, A, A, A))
+    end,
     OP_CLOSE = nil,
     OP_TBC = nil,
     OP_JMP = function(index, code)
@@ -386,7 +393,15 @@ local OP_ACT = {
         local k = Bytedump:k(code)
         print(index, name, "", string.format(f, A, B, k, index + 2))
     end,
-    OP_EQK = nil,
+    OP_EQK = function(index, code)
+        -- if ((R[A] == K[B]) ~= k) then pc++
+        local f = "if R[%s] == K[%s]) != %s then goto %s"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local k = Bytedump:k(code)
+        print(index, name, "", string.format(f, A, B, k, index + 2))
+    end,
     OP_EQI = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
         local f = "if (R[%s] == sB:%s) != %s goto %s else goto %s"

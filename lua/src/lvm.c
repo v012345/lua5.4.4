@@ -1563,7 +1563,7 @@ returning: /* trap already set */
                 op_order(L, l_lei, LEnum, lessequalothers);
                 vmbreak;
             }
-            vmcase(OP_EQK) {
+            vmcase(OP_EQK) { // if ((R[A] == K[B]) ~= k) then pc++
                 TValue* rb = KB(i);
                 /* basic types do not use '__eq'; we can use raw equality */
                 int cond = luaV_rawequalobj(s2v(ra), rb);

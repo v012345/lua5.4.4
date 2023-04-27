@@ -10,6 +10,7 @@ else
     c = a >= b
     c = a == b
     c = a ~= b
+    c = a ~= "jihfa" .. "jijf" .. "jif"
 end
 
 
