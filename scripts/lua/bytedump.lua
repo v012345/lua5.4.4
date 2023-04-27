@@ -252,15 +252,39 @@ local OP_ACT = {
         local C = Bytedump:C(code)
         print(index, name, "", string.format(f, A, B, C, index + 2))
     end,
-    OP_MULK = nil,
+    OP_MULK = function(index, code)
+        -- R[A] = R[B] * K[C]:number; pc++
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s] * K[%s] and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        print(index, name, "", string.format(f, A, B, C, index + 2))
+    end,
     OP_MODK = nil,
     OP_POWK = nil,
-    OP_DIVK = nil,
+    OP_DIVK = function(index, code)
+        -- R[A] = R[B] / K[C]:number; pc++
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s] / K[%s] and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local C = Bytedump:C(code)
+        print(index, name, "", string.format(f, A, B, C, index + 2))
+    end,
     OP_IDIVK = nil,
     OP_BANDK = nil,
     OP_BORK = nil,
     OP_BXORK = nil,
-    OP_SHRI = nil,
+    OP_SHRI = function(index, code)
+        -- R[A] = R[B] >> sC; pc++
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local f = "R[%s] = R[%s] >> -(sC:%s) and jump to %s"
+        local A = Bytedump:A(code)
+        local B = Bytedump:B(code)
+        local sC = Bytedump:sC(code)
+        print(index, name, "", string.format(f, A, B, sC, index + 2))
+    end,
     OP_SHLI = nil,
     OP_ADD = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
