@@ -511,7 +511,7 @@ typedef struct Udata0 {
 /// @param name 表示 Upvalue 的名称, 主要用于调试信息
 /// @param instack Upvalue 是否存在于函数的栈空间（即寄存器）中.如果存在,则为 1,否则为 0.
 /// @param idx Upvalue 在栈空间或外部函数的 Upvalue 列表中的索引.如果上值存在于栈空间中,则为其在栈中的索引;否则为其在外部函数的上值列表中的索引.
-/// @param kind
+/// @param kind 就是关联到的变量的类型
 typedef struct Upvaldesc {
     TString* name; /* upvalue name (for debug information) */
     lu_byte instack; /* whether it is in stack (register) */

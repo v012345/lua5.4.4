@@ -470,6 +470,7 @@ static void freeexps(FuncState* fs, expdesc* e1, expdesc* e2) {
 /// keys), the caller must provide a useful 'key' for indexing the cache.
 /// Note that all functions share the same table, so entering or exiting
 /// a function can make some indices wrong.
+/// @param key 扫描表的 key 值, 保证长变量名可重用同一 TValue
 static int addk(FuncState* fs, TValue* key, TValue* v) {
     TValue val;
     lua_State* L = fs->ls->L;
@@ -531,11 +532,13 @@ static int luaK_numberK(FuncState* fs, lua_Number r) {
     TValue o;
     lua_Integer ik;
     setfltvalue(&o, r);
+    // 如果浮点数与整数不能等值转化, 直接使用浮点数为 key
     if (!luaV_flttointeger(r, &ik, F2Ieq)) /* not an integral value? */
         return addk(fs, &o, &o); /* use number itself as key */
+    // 可以等值转化, 就有点麻烦了
     else { /* must build an alternative key */
-        const int nbm = l_floatatt(MANT_DIG);
-        const lua_Number q = l_mathop(ldexp)(l_mathop(1.0), -nbm + 1);
+        const int nbm = l_floatatt(MANT_DIG); // DBL_MANT_DIG 表示 double 类型的尾数位数
+        const lua_Number q = l_mathop(ldexp)(l_mathop(1.0), -nbm + 1);// 1/2^52
         const lua_Number k = (ik == 0) ? q : r + r * q; /* new key */
         TValue kv;
         setfltvalue(&kv, k);

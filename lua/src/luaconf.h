@@ -420,6 +420,7 @@
 
 #define LUA_NUMBER double
 
+// ## 把 DBL_ 与 n 连接到了一起
 #define l_floatatt(n) (DBL_##n)
 
 #define LUAI_UACNUMBER double

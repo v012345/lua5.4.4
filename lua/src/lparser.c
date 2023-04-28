@@ -123,6 +123,7 @@ static TString* str_checkname(LexState* ls) {
 /// @brief 初始化一个表达式描述结构
 /// @param i 额外信息
 /// VVARARG => i 存 OP_VARARG 指令
+/// VUPVAL => i upvalues 中的索引值
 /// VFALSE | VTRUE | VNIL | VKFLT | VKINT | VKSTR => 不使用 i
 static void init_exp(expdesc* e, expkind k, int i) {
     e->f = e->t = NO_JUMP;
@@ -278,9 +279,10 @@ static void removevars(FuncState* fs, int tolevel) {
     }
 }
 
-/*
-** Search the upvalues of the function 'fs' for one with the given 'name'.
-*/
+/// @brief 在函数的 Upvalues 中找
+/// Search the upvalues of the function 'fs' for one with the given 'name'.
+/// @param name 变量名
+/// @return 找到返回索引, 否则返回 -1
 static int searchupvalue(FuncState* fs, TString* name) {
     int i;
     Upvaldesc* up = fs->f->upvalues;
@@ -292,6 +294,7 @@ static int searchupvalue(FuncState* fs, TString* name) {
 }
 
 /// @brief 分配内存来存 Upvaldesc, sizeupvalues 为 Upvaldesc 数组的大小, nups 为实际解析到的 upvalue 的数量
+/// @return 返回一个可用的 Upvaldesc
 static Upvaldesc* allocupvalue(FuncState* fs) {
     Proto* f = fs->f;
     int oldsize = f->sizeupvalues;
@@ -304,12 +307,13 @@ static Upvaldesc* allocupvalue(FuncState* fs) {
 }
 
 /// @brief 当解析出来的表达式类型是 local 或 upvalue 时, 要为当时函数生成新的 Upvaldesc
+/// @return 返回此 upvalue 的索引
 static int newupvalue(FuncState* fs, TString* name, expdesc* v) {
     Upvaldesc* up = allocupvalue(fs);
-    FuncState* prev = fs->prev;
+    FuncState* prev = fs->prev; // 必定是在上一级函数中找到的
     if (v->k == VLOCAL) {
         up->instack = 1; // local 变量在栈里
-        up->idx = v->u.var.ridx; // 在寄存器(数据栈)的位置, 我不确定是不是相对于 func 的位置
+        up->idx = v->u.var.ridx; // 在寄存器(数据栈)的位置, 相对于变量所在函数
         up->kind = getlocalvardesc(prev, v->u.var.vidx)->vd.kind;
         lua_assert(eqstr(name, getlocalvardesc(prev, v->u.var.vidx)->vd.name));
     } else {
@@ -323,11 +327,10 @@ static int newupvalue(FuncState* fs, TString* name, expdesc* v) {
     return fs->nups - 1;
 }
 
-/// @brief 反向遍历局部变量, 通过变量名来找对应变量 \r
-/// Look for an active local variable with the name 'n' in the
-/// function 'fs'. If found, initialize 'var' with it and return
-/// its expression kind; otherwise return -1.
-/// @return 如果找到就返回变量类型(一般为 VLOCAL), 否则返回 -1
+/// @brief 反向遍历 fs 已解析出来的局部变量, 通过变量名来找对应变量 \r
+/// Look for an active local variable with the name 'n' in the function 'fs'.
+/// If found, initialize 'var' with it and return its expression kind; otherwise return -1.
+/// @return 如果找到就返回变量类型(VCONST 与 VLOCAL), 并且填充 var, 否则返回 -1
 static int searchvar(FuncState* fs, TString* n, expdesc* var) {
     int i;
     for (i = cast_int(fs->nactvar) - 1; i >= 0; i--) {
@@ -343,10 +346,8 @@ static int searchvar(FuncState* fs, TString* n, expdesc* var) {
     return -1; /* not found */
 }
 
-/*
-** Mark block where variable at given level was defined
-** (to emit close instructions later).
-*/
+/// @brief 找到局部变量所在的作用域, 标记一下引作用域, 之后关闭 upvalues 要用到
+/// Mark block where variable at given level was defined (to emit close instructions later).
 static void markupval(FuncState* fs, int level) {
     BlockCnt* bl = fs->bl;
     while (bl->nactvar > level) bl = bl->previous;
@@ -364,28 +365,28 @@ static void marktobeclosed(FuncState* fs) {
     fs->needclose = 1;
 }
 
-/// @brief singlevar 的辅助函数 \r
-/// Find a variable with the given name 'n'. If it is an upvalue, add
-/// this upvalue into all intermediate functions. If it is a global, set
-/// 'var' as 'void' as a flag.
+/// @brief singlevar 的辅助函数, 先在当前函数里查, 再递归到父级里查, 通过 var 传递信息 \r
+/// Find a variable with the given name 'n'. If it is an upvalue, add this upvalue
+/// into all intermediate functions. If it is a global, set 'var' as 'void' as a flag.
 /// @param n 变量的名称
 /// @param var 要被填充的 expdesc
-/// @param base 是不是当前的作用域, 1 为当前作用域, 0 为父级作用域
+/// @param base 1 为当前作用域, 0 为父级作用域
 static void singlevaraux(FuncState* fs, TString* n, expdesc* var, int base) {
     if (fs == NULL) /* no more levels? */
         init_exp(var, VVOID, 0); /* default is global */
     else {
         int v = searchvar(fs, n, var); /* look up locals at current level */
         if (v >= 0) { /* found? */
-            // 当 base 为 0, 表示变量不在当前作用域中, 当当前 upvalue 使用
             if (v == VLOCAL && !base) /* local will be used as an upval */
                 markupval(fs, var->u.var.vidx);
         } else { /* not found as local at current level; try upvalues */
             int idx = searchupvalue(fs, n); /* try existing upvalues */
             if (idx < 0) { /* not found? */
                 singlevaraux(fs->prev, n, var, 0); /* try upper levels */
+                // 如果在某一级找到了, 更新中间函数的 upvalues
                 if (var->k == VLOCAL || var->k == VUPVAL) /* local or upvalue? */
                     idx = newupvalue(fs, n, var); /* will be a new upvalue */
+                // 这里就是找到头了 var->k = VVOID 了
                 else /* it is a global or a constant */
                     return; /* don't need to do anything at this level */
             }
@@ -402,6 +403,7 @@ static void singlevar(LexState* ls, expdesc* var) {
     singlevaraux(fs, varname, var, 1);
     if (var->k == VVOID) { /* global name? */
         expdesc key;
+        // 找 _ENV
         singlevaraux(fs, ls->envn, var, 1); /* get environment variable */
         lua_assert(var->k != VVOID); /* this one must exist */
         codestring(&key, varname); /* key is variable name */
