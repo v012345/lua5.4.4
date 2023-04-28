@@ -787,7 +787,7 @@ local OP_ACT = {
         end
     end,
     OP_VARARGPREP = function(index, code)
-        local f = "A:%s"
+        local f = "fixed args number: A:%s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         print(index, name, string.format(f, A))

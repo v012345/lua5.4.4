@@ -841,8 +841,8 @@ static void constructor(LexState* ls, expdesc* t) {
 
 /* }====================================================================== */
 
-/// @brief 把 fs 设置成可接受可变长参数
-/// @param nparams 数接受的固定参数的数量
+/// @brief 把当前函数设置成可接受可变长参数的函数
+/// @param nparams 固定参数的数量
 static void setvararg(FuncState* fs, int nparams) {
     fs->f->is_vararg = 1;
     luaK_codeABC(fs, OP_VARARGPREP, nparams, 0, 0);

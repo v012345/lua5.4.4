@@ -1735,7 +1735,7 @@ returning: /* trap already set */
                 if (forprep(L, ra)) pc += GETARG_Bx(i) + 1; /* skip the loop */
                 vmbreak;
             }
-            vmcase(OP_TFORPREP) {
+            vmcase(OP_TFORPREP) { // create upvalue for R[A + 3]; pc+=Bx
                 /* create to-be-closed upvalue (if needed) */
                 halfProtect(luaF_newtbcupval(L, ra + 3));
                 pc += GETARG_Bx(i);
