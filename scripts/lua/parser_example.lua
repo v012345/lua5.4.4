@@ -1,16 +1,7 @@
 require("bytedump")
-local a = 11111111111111.000001
+local function a()
+    return 1, 2, 3
+end
+print(a(), 4, a())
 
-local a = 11111111111111.0
-
-local a = 11111111111111.000011
-
-local a = 11111111111111.0
-
-
-
-local a = 11111111111111.000001
-
-local a = 11111
-print( 11111111111111.0== 11111111111111.000001)
 Bytedump:dump(GetOpCodes())

@@ -501,9 +501,8 @@ static int addk(FuncState* fs, TValue* key, TValue* v) {
     return k;
 }
 
-/*
-** Add a string to list of constants and return its index.
-*/
+/// @brief 向常量表中插入一个字符串, 返回索引, 如果已经存在, 则直接返回索引 \r
+/// Add a string to list of constants and return its index.
 static int stringK(FuncState* fs, TString* s) {
     TValue o;
     setsvalue(fs->ls->L, &o, s);
@@ -538,7 +537,7 @@ static int luaK_numberK(FuncState* fs, lua_Number r) {
     // 可以等值转化, 就有点麻烦了
     else { /* must build an alternative key */
         const int nbm = l_floatatt(MANT_DIG); // DBL_MANT_DIG 表示 double 类型的尾数位数
-        const lua_Number q = l_mathop(ldexp)(l_mathop(1.0), -nbm + 1);// 1/2^52
+        const lua_Number q = l_mathop(ldexp)(l_mathop(1.0), -nbm + 1); // 1/2^52
         const lua_Number k = (ik == 0) ? q : r + r * q; /* new key */
         TValue kv;
         setfltvalue(&kv, k);
@@ -649,13 +648,12 @@ void luaK_setreturns(FuncState* fs, expdesc* e, int nresults) {
     }
 }
 
-/*
-** Convert a VKSTR to a VK
-*/
+/// @brief 字符串放入常量表, info 记录字符串在常量表中的索引 \r
+/// Convert a VKSTR to a VK
 static void str2K(FuncState* fs, expdesc* e) {
     lua_assert(e->k == VKSTR);
     e->u.info = stringK(fs, e->u.strval);
-    e->k = VK;
+    e->k = VK; // 表示已经放入常量表
 }
 
 /*
@@ -680,7 +678,7 @@ void luaK_setoneret(FuncState* fs, expdesc* e) {
     }
 }
 
-/// @brief VFALSE 不处理 \r
+/// @brief VFALSE VRELOC 不处理 \r
 /// Ensure that expression 'e' is not a variable (nor a <const>). (Expression still may have jump lists.)
 void luaK_dischargevars(FuncState* fs, expdesc* e) {
     switch (e->k) {
@@ -698,9 +696,10 @@ void luaK_dischargevars(FuncState* fs, expdesc* e) {
             e->k = VRELOC;
             break;
         }
-        case VINDEXUP: {
+        case VINDEXUP: { // e->u.ind.t 是 UpValue 表的索引, e->u.ind.idx 是常量表的索引
             e->u.info = luaK_codeABC(fs, OP_GETTABUP, 0, e->u.ind.t, e->u.ind.idx);
-            e->k = VRELOC;
+            // e->u.info 记录指令的索引
+            e->k = VRELOC; // 需要重定位结果到某个寄存器中
             break;
         }
         case VINDEXI: {
@@ -778,8 +777,8 @@ static void discharge2reg(FuncState* fs, expdesc* e, int reg) {
             return; /* nothing to do... */
         }
     }
-    e->u.info = reg;
-    e->k = VNONRELOC;
+    e->u.info = reg; // 现在 info 记录寄存器索引
+    e->k = VNONRELOC; // 都已经找到对应的寄存器了, 所以就不需要重定位了
 }
 
 /*
@@ -1116,7 +1115,9 @@ static void codenot(FuncState* fs, expdesc* e) {
 /*
 ** Check whether expression 'e' is a small literal string
 */
-static int isKstr(FuncState* fs, expdesc* e) { return (e->k == VK && !hasjumps(e) && e->u.info <= MAXARG_B && ttisshrstring(&fs->f->k[e->u.info])); }
+static int isKstr(FuncState* fs, expdesc* e) { //
+    return (e->k == VK && !hasjumps(e) && e->u.info <= MAXARG_B && ttisshrstring(&fs->f->k[e->u.info]));
+}
 
 /*
 ** Check whether expression 'e' is a literal integer.
@@ -1161,7 +1162,8 @@ static int isSCnumber(expdesc* e, int* pi, int* isfloat) {
 ** values in registers.
 */
 void luaK_indexed(FuncState* fs, expdesc* t, expdesc* k) {
-    if (k->k == VKSTR) str2K(fs, k);
+    if (k->k == VKSTR) // 还没有放入常量表
+        str2K(fs, k); // 变量名入常量表, k->u.info 记录索引
     lua_assert(!hasjumps(t) && (t->k == VLOCAL || t->k == VNONRELOC || t->k == VUPVAL));
     if (t->k == VUPVAL && !isKstr(fs, k)) /* upvalue indexed by non 'Kstr'? */
         luaK_exp2anyreg(fs, t); /* put it in a register */

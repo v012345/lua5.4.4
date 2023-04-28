@@ -403,10 +403,11 @@ static void singlevar(LexState* ls, expdesc* var) {
     singlevaraux(fs, varname, var, 1);
     if (var->k == VVOID) { /* global name? */
         expdesc key;
-        // 找 _ENV
         singlevaraux(fs, ls->envn, var, 1); /* get environment variable */
+        // var 现在表示 _ENV 这个 upvalue
         lua_assert(var->k != VVOID); /* this one must exist */
         codestring(&key, varname); /* key is variable name */
+        // key 现在记录着变量名
         luaK_indexed(fs, var, &key); /* env[varname] */
     }
 }
@@ -924,6 +925,7 @@ static void funcargs(LexState* ls, expdesc* f, int line) {
                 args.k = VVOID;
             else {
                 explist(ls, &args);
+                // 这里就是只有最后一参数是函数调用时, 才会使用全部返回值
                 if (hasmultret(args.k)) luaK_setmultret(fs, &args);
             }
             check_match(ls, ')', '(', line);
@@ -945,8 +947,9 @@ static void funcargs(LexState* ls, expdesc* f, int line) {
     if (hasmultret(args.k))
         nparams = LUA_MULTRET; /* open call */
     else {
-        if (args.k != VVOID) luaK_exp2nextreg(fs, &args); /* close last argument */
-        nparams = fs->freereg - (base + 1);
+        if (args.k != VVOID) // 有参数
+            luaK_exp2nextreg(fs, &args); /* close last argument */
+        nparams = fs->freereg - (base + 1); // 实际解析到的参数个数
     }
     init_exp(f, VCALL, luaK_codeABC(fs, OP_CALL, base, nparams + 1, 2));
     luaK_fixline(fs, line);
