@@ -1,7 +1,10 @@
 require("bytedump")
-local function a()
-    return 1, 2, 3
+local function x()
+    return true
 end
-print(a(), 4, a())
+
+if x() then
+    local a = x
+end
 
 Bytedump:dump(GetOpCodes())
