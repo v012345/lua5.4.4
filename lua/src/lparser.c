@@ -606,9 +606,8 @@ static void leaveblock(FuncState* fs) {
     }
 }
 
-/*
-** adds a new prototype into list of prototypes
-*/
+/// @brief 函数原型链上加上一个函数原型, 返回此原型
+/// adds a new prototype into list of prototypes
 static Proto* addprototype(LexState* ls) {
     Proto* clp;
     lua_State* L = ls->L;
@@ -695,7 +694,7 @@ static int block_follow(LexState* ls, int withuntil) {
     switch (ls->t.token) {
         case TK_ELSE:
         case TK_ELSEIF:
-        case TK_END:
+        case TK_END: // 一个语句块结束了
         case TK_EOS: return 1;
         case TK_UNTIL: return withuntil;
         default: return 0;
@@ -1178,6 +1177,7 @@ static void expr(LexState* ls, expdesc* v) { //
 ** =======================================================================
 */
 
+/// @brief 进入一个语句块, 分析完成后, 再离开
 static void block(LexState* ls) {
     /* block -> statlist */
     FuncState* fs = ls->fs;
@@ -1534,7 +1534,7 @@ static void ifstat(LexState* ls, int line) {
 }
 
 static void localfunc(LexState* ls) {
-    expdesc b;
+    expdesc b; // 之后 codeclosure 的描述结构
     FuncState* fs = ls->fs;
     int fvar = fs->nactvar; /* function's variable index */
     new_localvar(ls, str_checkname(ls)); /* new local variable */
