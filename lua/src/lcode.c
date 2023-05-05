@@ -127,10 +127,8 @@ void luaK_nil(FuncState* fs, int from, int n) {
     luaK_codeABC(fs, OP_LOADNIL, from, n - 1, 0); /* else no optimization */
 }
 
-/*
-** Gets the destination address of a jump instruction. Used to traverse
-** a list of jumps.
-*/
+/// @brief
+/// Gets the destination address of a jump instruction. Used to traverse a list of jumps.
 static int getjump(FuncState* fs, int pc) {
     int offset = GETARG_sJ(fs->f->code[pc]);
     if (offset == NO_JUMP) /* point to itself represents end of list */
@@ -199,10 +197,9 @@ static int condjump(FuncState* fs, OpCode op, int A, int B, int C, int k) {
     return luaK_jump(fs);
 }
 
-/// @brief fs->lasttarget = fs->pc \r
+/// @brief 把当前指令记录到 lasttarget 中, 同时返回当前指令 \r
 /// returns current 'pc' and marks it as a jump target (to avoid wrong
 /// optimizations with consecutive instructions not in the same basic block).
-/// @return fs->pc
 int luaK_getlabel(FuncState* fs) {
     fs->lasttarget = fs->pc;
     return fs->pc;

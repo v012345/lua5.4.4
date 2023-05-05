@@ -125,6 +125,7 @@ static TString* str_checkname(LexState* ls) {
 /// VVARARG => i 存 OP_VARARG 指令
 /// VUPVAL => i upvalues 中的索引值
 /// VFALSE | VTRUE | VNIL | VKFLT | VKINT | VKSTR => 不使用 i
+/// VVARARG => u.info 记录一条指令
 static void init_exp(expdesc* e, expkind k, int i) {
     e->f = e->t = NO_JUMP;
     e->k = k;
@@ -1025,39 +1026,42 @@ static void suffixedexp(LexState* ls, expdesc* v) {
 static void simpleexp(LexState* ls, expdesc* v) {
     /* simpleexp -> FLT | INT | STRING | NIL | TRUE | FALSE | ... | constructor | FUNCTION body | suffixedexp */
     switch (ls->t.token) {
-        case TK_FLT: {
+        case TK_FLT: { // 就是浮点数
             init_exp(v, VKFLT, 0);
             v->u.nval = ls->t.seminfo.r;
             break;
         }
-        case TK_INT: {
+        case TK_INT: { // 就是整数
             init_exp(v, VKINT, 0);
             v->u.ival = ls->t.seminfo.i;
             break;
         }
-        case TK_STRING: {
+        case TK_STRING: { // VKSTR 类型, 字符串
             codestring(v, ls->t.seminfo.ts);
             break;
         }
-        case TK_NIL: {
+        case TK_NIL: { // nil
             init_exp(v, VNIL, 0);
             break;
         }
-        case TK_TRUE: {
+        case TK_TRUE: { // true
             init_exp(v, VTRUE, 0);
             break;
         }
-        case TK_FALSE: {
+        case TK_FALSE: { // false
             init_exp(v, VFALSE, 0);
             break;
         }
         case TK_DOTS: { /* vararg */
             FuncState* fs = ls->fs;
+            // 当前函数必须是可变长函数
             check_condition(ls, fs->f->is_vararg, "cannot use '...' outside a vararg function");
             init_exp(v, VVARARG, luaK_codeABC(fs, OP_VARARG, 0, 0, 1));
             break;
         }
-        case '{': { /* constructor */ constructor(ls, v); return;
+        case '{': { /* constructor */
+            constructor(ls, v); // 表
+            return;
         }
         case TK_FUNCTION: {
             luaX_next(ls);
@@ -1271,6 +1275,7 @@ static void restassign(LexState* ls, struct LHS_assign* lh, int nvars) {
     luaK_storevar(ls->fs, &lh->v, &e);
 }
 
+/// @brief 解析条件表达式
 static int cond(LexState* ls) {
     /* cond -> exp */
     expdesc v;

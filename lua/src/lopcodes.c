@@ -10,8 +10,13 @@
 
 #include "lopcodes.h"
 
-/* 与 OpCode 枚举是一一对应的; ORDER OP */
+/* ORDER OP */
 LUAI_DDEF const lu_byte luaP_opmodes[NUM_OPCODES] = {
+    // MM:表示 "模式掩码"(Mode Mask),是用来区分指令模式的.
+    // OT:表示 "操作码类型"(Opcode Type),它给出了该操作码的基本类型.
+    // IT:表示 "指令类型"(Instruction Type),它指示指令是否是一个跳转指令.
+    // T:表示 "测试标志"(Test Flag),它表示指令是否是一个测试指令.
+    // A:表示 "A 模式"(A Mode),它表示指令的 A 操作数的类型.
     /*     MM OT IT T  A  mode       opcode  */
     opmode(0, 0, 0, 0, 1, iABC), /* OP_MOVE */
     opmode(0, 0, 0, 0, 1, iAsBx), /* OP_LOADI */

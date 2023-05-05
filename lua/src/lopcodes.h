@@ -372,6 +372,7 @@ LUAI_DDEC(const lu_byte luaP_opmodes[NUM_OPCODES];)
 // 指令的对应的操作模式, 取操作模式的低 3 位(就是指令对应的格式)
 #define getOpMode(m) (cast(enum OpMode, luaP_opmodes[m] & 7))
 #define testAMode(m) (luaP_opmodes[m] & (1 << 3))
+// 看看指令是不是 T 指令, 就是比较指令
 #define testTMode(m) (luaP_opmodes[m] & (1 << 4))
 // 指令 i 中低 7 位中第 5 位的值: 0 或 1
 #define testITMode(m) (luaP_opmodes[m] & (1 << 5))
