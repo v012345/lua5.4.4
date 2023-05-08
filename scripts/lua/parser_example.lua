@@ -1,4 +1,6 @@
 require("bytedump")
+local a = ...
+print(a)
 local function x()
     return true
 end

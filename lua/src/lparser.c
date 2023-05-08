@@ -693,11 +693,13 @@ static void close_func(LexState* ls) {
 */
 static int block_follow(LexState* ls, int withuntil) {
     switch (ls->t.token) {
-        case TK_ELSE:
-        case TK_ELSEIF:
+        case TK_ELSE: // else 有一点像 end
+        case TK_ELSEIF: // elseif 也有一点像 end
         case TK_END: // 一个语句块结束了
-        case TK_EOS: return 1;
-        case TK_UNTIL: return withuntil;
+        case TK_EOS: // 文件结束了
+            return 1;
+        case TK_UNTIL: // until 有一点特殊, 我目前还不知道
+            return withuntil;
         default: return 0;
     }
 }
@@ -1780,11 +1782,11 @@ static void mainfunc(LexState* ls, FuncState* fs) {
     BlockCnt bl; // 主函数的 block
     Upvaldesc* env; // 主函数的 _ENV
     open_func(ls, fs, &bl); // 主函数的 prev 为 NULL
-    // 主函数的第一条指令
+    // 主函数的第一条指令, 主函数都是变长参数
     setvararg(fs, 0); /* main function is always declared vararg */
     env = allocupvalue(fs); /* ...set environment upvalue */
     env->instack = 1; // 在主函数的栈上
-    env->idx = 0; // 栈的索引
+    env->idx = 0; // 索引
     env->kind = VDKREG; // 普通的寄存器变量
     env->name = ls->envn; // 在 luaX_setinput() 中赋值的, 所以主闭包的第一个 upvalue 就是 _ENV
     luaC_objbarrier(ls->L, fs->f, env->name);

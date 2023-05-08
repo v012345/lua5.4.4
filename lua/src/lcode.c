@@ -137,15 +137,15 @@ static int getjump(FuncState* fs, int pc) {
         return (pc + 1) + offset; /* turn offset into absolute position */
 }
 
-/*
-** Fix jump instruction at position 'pc' to jump to 'dest'.
-** (Jump addresses are relative in Lua)
-*/
+/// @brief pc 为跳转指令的地址, dest 为目标地址 \r
+/// Fix jump instruction at position 'pc' to jump to 'dest'. (Jump addresses are relative in Lua)
 static void fixjump(FuncState* fs, int pc, int dest) {
     Instruction* jmp = &fs->f->code[pc];
     int offset = dest - (pc + 1);
     lua_assert(dest != NO_JUMP);
-    if (!(-OFFSET_sJ <= offset && offset <= MAXARG_sJ - OFFSET_sJ)) luaX_syntaxerror(fs->ls, "control structure too long");
+    // 指令太多了, 超过 sJ 能表示的范围
+    if (!(-OFFSET_sJ <= offset && offset <= MAXARG_sJ - OFFSET_sJ)) //
+        luaX_syntaxerror(fs->ls, "control structure too long");
     lua_assert(GET_OPCODE(*jmp) == OP_JMP);
     SETARG_sJ(*jmp, offset);
 }
