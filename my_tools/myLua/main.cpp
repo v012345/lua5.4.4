@@ -1,18 +1,17 @@
-#include <lua.hpp>
-#include <filesystem>
+#include "god.hpp"
 #include "nightowl_c_api.h"
 #include "nightowl_cpp_api.hpp"
+#include <filesystem>
+#include <lua.hpp>
 #define LUA_MAIN_SCRIPT "./main.lua"
 #define LUA_ARGV_SCRIPT "./parser_example.lua"
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const* argv[]) {
 
-    lua_State *L = luaL_newstate();
+    lua_State* L = luaL_newstate();
     luaL_openlibs(L);
-    if (std::filesystem::exists(LUA_ARGV_SCRIPT))
-    {
-         NIGHTOWL::C_API(L);
+    if (std::filesystem::exists(LUA_ARGV_SCRIPT)) {
+        NIGHTOWL::C_API(L);
         luaL_dofile(L, LUA_ARGV_SCRIPT);
         // lua_getglobal(L, "argv");
         // for (size_t i = 0; i < argc; i++)
