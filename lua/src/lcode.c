@@ -490,7 +490,8 @@ static int addk(FuncState* fs, TValue* key, TValue* v) {
     // 更新映射表
     luaH_finishset(L, fs->ls->h, key, idx, &val);
     luaM_growvector(L, f->k, k, f->sizek, TValue, MAXARG_Ax, "constants");
-    while (oldsize < f->sizek) setnilvalue(&f->k[oldsize++]);
+    while (oldsize < f->sizek) //
+        setnilvalue(&f->k[oldsize++]);
     // 把值放到数组中
     setobj(L, &f->k[k], v);
     fs->nk++;
@@ -694,6 +695,7 @@ void luaK_dischargevars(FuncState* fs, expdesc* e) {
             break;
         }
         case VINDEXUP: { // e->u.ind.t 是 UpValue 表的索引, e->u.ind.idx 是常量表的索引
+            // A 寄存器还不确定
             e->u.info = luaK_codeABC(fs, OP_GETTABUP, 0, e->u.ind.t, e->u.ind.idx);
             // e->u.info 记录指令的索引
             e->k = VRELOC; // 需要重定位结果到某个寄存器中
@@ -728,8 +730,8 @@ void luaK_dischargevars(FuncState* fs, expdesc* e) {
 
 /// @brief 处理除了 VJMP 类型 \r
 /// Ensure expression value is in register 'reg', making 'e' a
-/// non-relocatable expression.
-/// (Expression still may have jump lists.)
+/// non-relocatable expression. (Expression still may have jump lists.)
+/// @param reg 要使用的寄存器, 一般为指令的 A 值
 static void discharge2reg(FuncState* fs, expdesc* e, int reg) {
     luaK_dischargevars(fs, e);
     switch (e->k) {
@@ -760,7 +762,7 @@ static void discharge2reg(FuncState* fs, expdesc* e, int reg) {
             luaK_int(fs, reg, e->u.ival);
             break;
         }
-        case VRELOC: {
+        case VRELOC: { // 指令索引已经放到了 e 中
             Instruction* pc = &getinstruction(fs, e);
             SETARG_A(*pc, reg); /* instruction will put result in 'reg' */
             break;
@@ -829,8 +831,11 @@ static void exp2reg(FuncState* fs, expdesc* e, int reg) {
         patchlistaux(fs, e->f, final, reg, p_f);
         patchlistaux(fs, e->t, final, reg, p_t);
     }
+    // 已经处理完毕, 不用跳转
     e->f = e->t = NO_JUMP;
+    // 存一下表达式结果要存放的寄存器
     e->u.info = reg;
+    // 也不用重定位
     e->k = VNONRELOC;
 }
 
@@ -1109,11 +1114,14 @@ static void codenot(FuncState* fs, expdesc* e) {
     removevalues(fs, e->t);
 }
 
-/*
-** Check whether expression 'e' is a small literal string
-*/
+/// @brief Check whether expression 'e' is a small literal string
 static int isKstr(FuncState* fs, expdesc* e) { //
-    return (e->k == VK && !hasjumps(e) && e->u.info <= MAXARG_B && ttisshrstring(&fs->f->k[e->u.info]));
+    return (
+        e->k == VK && // 已经在 k 中, info 记录 k 中的索引
+        !hasjumps(e) && // 不用跳转
+        e->u.info <= MAXARG_B && // 不需要使用额外指令
+        ttisshrstring(&fs->f->k[e->u.info]) // 是一个短串
+    );
 }
 
 /*
@@ -1152,12 +1160,12 @@ static int isSCnumber(expdesc* e, int* pi, int* isfloat) {
         return 0;
 }
 
-/*
-** Create expression 't[k]'. 't' must have its final result already in a
-** register or upvalue. Upvalues can only be indexed by literal strings.
-** Keys can be literal strings in the constant table or arbitrary
-** values in registers.
-*/
+/// @brief
+/// Create expression 't[k]'. 't' must have its final result already in a register or upvalue.
+/// Upvalues can only be indexed by literal strings.
+/// Keys can be literal strings in the constant table or arbitrary values in registers.
+/// @param t 表的描述结构
+/// @param k 键的描述结构
 void luaK_indexed(FuncState* fs, expdesc* t, expdesc* k) {
     if (k->k == VKSTR) // 还没有放入常量表
         str2K(fs, k); // 变量名入常量表, k->u.info 记录索引
@@ -1165,9 +1173,11 @@ void luaK_indexed(FuncState* fs, expdesc* t, expdesc* k) {
     if (t->k == VUPVAL && !isKstr(fs, k)) /* upvalue indexed by non 'Kstr'? */
         luaK_exp2anyreg(fs, t); /* put it in a register */
     if (t->k == VUPVAL) {
+        // 记录表在 upvalue 中的索引
         t->u.ind.t = t->u.info; /* upvalue index */
+        // 键在常量表中的索引
         t->u.ind.idx = k->u.info; /* literal string */
-        t->k = VINDEXUP;
+        t->k = VINDEXUP; // 现在 t 描述着两个索引
     } else {
         /* register index of the table */
         t->u.ind.t = (t->k == VLOCAL) ? t->u.var.ridx : t->u.info;

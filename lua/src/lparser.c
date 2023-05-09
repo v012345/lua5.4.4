@@ -294,7 +294,7 @@ static int searchupvalue(FuncState* fs, TString* name) {
     return -1; /* not found */
 }
 
-/// @brief 分配内存来存 Upvaldesc, sizeupvalues 为 Upvaldesc 数组的大小, nups 为实际解析到的 upvalue 的数量
+/// @brief 分配出一个可用的 Upvaldesc, 同时记录分配的个数 nups
 /// @return 返回一个可用的 Upvaldesc
 static Upvaldesc* allocupvalue(FuncState* fs) {
     Proto* f = fs->f;

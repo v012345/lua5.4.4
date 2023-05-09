@@ -70,7 +70,8 @@ typedef enum UnOpr {
     OPR_NOUNOPR // 不是一元操作符
 } UnOpr;
 
-/* get (pointer to) instruction of given 'expdesc' */
+// 
+// get (pointer to) instruction of given 'expdesc'
 #define getinstruction(fs, e) ((fs)->f->code[(e)->u.info])
 
 #define luaK_setmultret(fs, e) luaK_setreturns(fs, e, LUA_MULTRET)
