@@ -70,7 +70,7 @@ typedef enum UnOpr {
     OPR_NOUNOPR // 不是一元操作符
 } UnOpr;
 
-// 
+// 通过描述符, 拿到实际的指令 \r
 // get (pointer to) instruction of given 'expdesc'
 #define getinstruction(fs, e) ((fs)->f->code[(e)->u.info])
 

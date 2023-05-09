@@ -748,10 +748,10 @@ static void discharge2reg(FuncState* fs, expdesc* e, int reg) {
             break;
         }
         case VKSTR: {
-            str2K(fs, e);
+            str2K(fs, e); // 到解析到字符串放到常量表中
         } /* FALLTHROUGH */
         case VK: {
-            luaK_codek(fs, reg, e->u.info);
+            luaK_codek(fs, reg, e->u.info); // info 记录常量表索引
             break;
         }
         case VKFLT: {
@@ -916,12 +916,10 @@ static int luaK_exp2K(FuncState* fs, expdesc* e) {
     return 0;
 }
 
-/*
-** Ensures final expression result is in a valid R/K index
-** (that is, it is either in a register or in 'k' with an index
-** in the range of R/K indices).
-** Returns 1 iff expression is K.
-*/
+/// @brief 如果 e 可以放到常量表中, 刚放入常量表, 否则使用寄存器 \r
+/// Ensures final expression result is in a valid R/K index
+/// (that is, it is either in a register or in 'k' with an index in the range of R/K indices).
+/// Returns 1 iff expression is K.
 int luaK_exp2RK(FuncState* fs, expdesc* e) {
     if (luaK_exp2K(fs, e))
         return 1;
@@ -931,8 +929,9 @@ int luaK_exp2RK(FuncState* fs, expdesc* e) {
     }
 }
 
+/// @brief 要么从寄存器中读, 要么从常量表中读
 static void codeABRK(FuncState* fs, OpCode o, int a, int b, expdesc* ec) {
-    int k = luaK_exp2RK(fs, ec);
+    int k = luaK_exp2RK(fs, ec); // k 为 1, 表示在常量表中
     luaK_codeABCk(fs, o, a, b, ec->u.info, k);
 }
 
@@ -959,7 +958,8 @@ void luaK_storevar(FuncState* fs, expdesc* var, expdesc* ex) {
             codeABRK(fs, OP_SETI, var->u.ind.t, var->u.ind.idx, ex);
             break;
         }
-        case VINDEXSTR: {
+        case VINDEXSTR: { // VINDEXSTR 指明要从常量表中找键
+            // t 表所在的寄存器, idx 键所在的常量表索引, ex 值的描述符,
             codeABRK(fs, OP_SETFIELD, var->u.ind.t, var->u.ind.idx, ex);
             break;
         }
@@ -969,7 +969,7 @@ void luaK_storevar(FuncState* fs, expdesc* var, expdesc* ex) {
         }
         default: lua_assert(0); /* invalid var kind to store */
     }
-    freeexp(fs, ex);
+    freeexp(fs, ex); // 如果是 VNONRELOC 刚释放
 }
 
 /*
@@ -1124,16 +1124,15 @@ static int isKstr(FuncState* fs, expdesc* e) { //
     );
 }
 
-/*
-** Check whether expression 'e' is a literal integer.
-*/
-int luaK_isKint(expdesc* e) { return (e->k == VKINT && !hasjumps(e)); }
+/// @brief Check whether expression 'e' is a literal integer.
+int luaK_isKint(expdesc* e) { //
+    return (e->k == VKINT && !hasjumps(e));
+}
 
-/*
-** Check whether expression 'e' is a literal integer in
-** proper range to fit in register C
-*/
-static int isCint(expdesc* e) { return luaK_isKint(e) && (l_castS2U(e->u.ival) <= l_castS2U(MAXARG_C)); }
+/// @brief Check whether expression 'e' is a literal integer in proper range to fit in register C
+static int isCint(expdesc* e) { //
+    return luaK_isKint(e) && (l_castS2U(e->u.ival) <= l_castS2U(MAXARG_C));
+}
 
 /*
 ** Check whether expression 'e' is a literal integer in
@@ -1182,6 +1181,7 @@ void luaK_indexed(FuncState* fs, expdesc* t, expdesc* k) {
         /* register index of the table */
         t->u.ind.t = (t->k == VLOCAL) ? t->u.var.ridx : t->u.info;
         if (isKstr(fs, k)) {
+            // idx 存放常量表的索引
             t->u.ind.idx = k->u.info; /* literal string */
             t->k = VINDEXSTR;
         } else if (isCint(k)) {
@@ -1615,11 +1615,17 @@ void luaK_fixline(FuncState* fs, int line) {
     savelineinfo(fs, fs->f, line);
 }
 
+/// @brief 解析完表后, 最后设置表的大小
+/// @param pc OP_NEWTABLE 指令
+/// @param ra 表要存放的寄存器
+/// @param asize 数组部分的大小
+/// @param hsize 哈希部分的大小
 void luaK_settablesize(FuncState* fs, int pc, int ra, int asize, int hsize) {
     Instruction* inst = &fs->f->code[pc];
     int rb = (hsize != 0) ? luaO_ceillog2(hsize) + 1 : 0; /* hash size */
     int extra = asize / (MAXARG_C + 1); /* higher bits of array size */
     int rc = asize % (MAXARG_C + 1); /* lower bits of array size */
+    // 如果数组部分过大, 那么就要使用 k 来标记使用额外指令
     int k = (extra > 0); /* true iff needs extra argument */
     *inst = CREATE_ABCk(OP_NEWTABLE, ra, rb, rc, k);
     *(inst + 1) = CREATE_Ax(OP_EXTRAARG, extra);

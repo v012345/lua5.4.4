@@ -753,15 +753,19 @@ static void recfield(LexState* ls, ConsControl* cc) {
     /* recfield -> (NAME | '['exp']') = exp */
     FuncState* fs = ls->fs;
     int reg = ls->fs->freereg;
-    expdesc tab, key, val;
+    expdesc //
+        tab, // 表的描述结构
+        key, // 键名描述结构
+        val; //
     if (ls->t.token == TK_NAME) {
         checklimit(fs, cc->nh, MAX_INT, "items in a constructor");
         codename(ls, &key); // 设置键的名
     } else /* ls->t.token == '[' */
         yindex(ls, &key);
-    cc->nh++;
+    cc->nh++; // record 的数量加 1
     checknext(ls, '=');
     tab = *cc->t;
+    // 这里把键的信息存放到 tab 的 info 中, tab 为 VNONRELOC
     luaK_indexed(fs, &tab, &key);
     expr(ls, &val); // 值是一个表达式
     luaK_storevar(fs, &tab, &val);
@@ -769,7 +773,8 @@ static void recfield(LexState* ls, ConsControl* cc) {
 }
 
 static void closelistfield(FuncState* fs, ConsControl* cc) {
-    if (cc->v.k == VVOID) return; /* there is no list item */
+    if (cc->v.k == VVOID) //
+        return; /* there is no list item */
     luaK_exp2nextreg(fs, &cc->v);
     cc->v.k = VVOID;
     if (cc->tostore == LFIELDS_PER_FLUSH) {
@@ -825,10 +830,11 @@ static void constructor(LexState* ls, expdesc* t) {
     FuncState* fs = ls->fs;
     int line = ls->linenumber;
     int pc = luaK_codeABC(fs, OP_NEWTABLE, 0, 0, 0);
-    ConsControl cc;
+    ConsControl cc; // 解析表时, 用来存储解析的状态
     luaK_code(fs, 0); /* space for extra arg. */
     cc.na = cc.nh = cc.tostore = 0;
     cc.t = t;
+    // 表在哪里声明就放到哪里
     init_exp(t, VNONRELOC, fs->freereg); /* table will be at stack top */
     luaK_reserveregs(fs, 1);
     init_exp(&cc.v, VVOID, 0); /* no value (yet) */
@@ -918,7 +924,7 @@ static int explist(LexState* ls, expdesc* v) {
 
 static void funcargs(LexState* ls, expdesc* f, int line) {
     FuncState* fs = ls->fs;
-    expdesc args;
+    expdesc args; // 函数的最后一个参数的描述结构
     int base, nparams;
     switch (ls->t.token) {
         case '(': { /* funcargs -> '(' [ explist ] ')' */
@@ -926,9 +932,10 @@ static void funcargs(LexState* ls, expdesc* f, int line) {
             if (ls->t.token == ')') /* arg list is empty? */
                 args.k = VVOID;
             else {
-                explist(ls, &args);
+                explist(ls, &args); // 解析一下参数列表
                 // 这里就是只有最后一参数是函数调用时, 才会使用全部返回值
-                if (hasmultret(args.k)) luaK_setmultret(fs, &args);
+                if (hasmultret(args.k)) // 最后一个参数是函数调用或显式多参
+                    luaK_setmultret(fs, &args);
             }
             check_match(ls, ')', '(', line);
             break;
@@ -945,6 +952,7 @@ static void funcargs(LexState* ls, expdesc* f, int line) {
         }
     }
     lua_assert(f->k == VNONRELOC);
+    // 这里 info 是解析到的函数名所在的寄存器索引
     base = f->u.info; /* base register for call */
     if (hasmultret(args.k))
         nparams = LUA_MULTRET; /* open call */
@@ -953,6 +961,9 @@ static void funcargs(LexState* ls, expdesc* f, int line) {
             luaK_exp2nextreg(fs, &args); /* close last argument */
         nparams = fs->freereg - (base + 1); // 实际解析到的参数个数
     }
+    // 更新 f 的类型为 VCALL, info 存储指令, base 为函数所在寄存器
+    // 如果 nparams + 1 大于 0, 说明是固定参数, +1 是了之后直接以 base 为基础
+    // 加上指令中的 B 值, 直接确定出 L->top 的位置
     init_exp(f, VCALL, luaK_codeABC(fs, OP_CALL, base, nparams + 1, 2));
     luaK_fixline(fs, line);
     /* call remove function and arguments and leaves (unless changed) one result */
@@ -1655,6 +1666,7 @@ static void exprstat(LexState* ls) {
         Instruction* inst;
         check_condition(ls, v.v.k == VCALL, "syntax error");
         inst = &getinstruction(fs, &v.v);
+        // 只是函数调用, 所以不需要返回值
         SETARG_C(*inst, 1); /* call statement uses no results */
     }
 }
