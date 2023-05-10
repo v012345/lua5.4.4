@@ -849,10 +849,7 @@ void luaK_exp2nextreg(FuncState* fs, expdesc* e) {
     exp2reg(fs, e, fs->freereg - 1); // 使用上面申请到的寄存器
 }
 
-/*
-** Ensures final expression result is in some (any) register
-** and return that register.
-*/
+/// @brief Ensures final expression result is in some (any) register and return that register.
 int luaK_exp2anyreg(FuncState* fs, expdesc* e) {
     luaK_dischargevars(fs, e);
     if (e->k == VNONRELOC) { /* expression already has a register? */
