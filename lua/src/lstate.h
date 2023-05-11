@@ -180,7 +180,7 @@ typedef struct CallInfo {
             unsigned short ntransfer; /* number of values transferred */
         } transferinfo; // 用于保存调用钩子函数时传递的信息,比如转移值的偏移量和数量
     } u2; // 联合体,用于保存各种类型函数的返回值信息
-    short nresults; /* 期望从当前函数返回的值的数量 expected number of results from this function */
+    short nresults; /* expected number of results from this function */
     unsigned short callstatus; // 调用状态,有多个预定义的状态值,包括 CIST_HOOKED、CIST_YPCALL、CIST_LUA 等
 } CallInfo;
 

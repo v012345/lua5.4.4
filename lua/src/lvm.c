@@ -1615,17 +1615,21 @@ returning: /* trap already set */
             }
             vmcase(OP_CALL) {
                 CallInfo* newci;
-                int b = GETARG_B(i);
-                int nresults = GETARG_C(i) - 1;
+                int b = GETARG_B(i); // 函数签名中参数个数
+                int nresults = GETARG_C(i) - 1; // 要被调用函数的返回个数
                 if (b != 0) /* fixed number of arguments? */
                     L->top = ra + b; /* top signals number of arguments */
                 /* else previous instruction set top */
+                // 保存了 OP_CALL 的下一指令索引到 savedpc 中, 如果出现异常可以正常运行
                 savepc(L); /* in case of errors */
+                // ra 为要调用函数的寄存器
                 if ((newci = luaD_precall(L, ra, nresults)) == NULL)
+                    // 如果是 c 函数调用, luaD_precall 已经调用完毕
                     updatetrap(ci); /* C call; nothing else to be done */
                 else { /* Lua call: run function in this same C frame */
+                    // 如果是 lua 调用, 刚在相同的 c 调用帧上进行
                     ci = newci;
-                    goto startfunc;
+                    goto startfunc; // 在 lu a 函数中继续调用 lua 函数
                 }
                 vmbreak;
             }
@@ -1682,9 +1686,12 @@ returning: /* trap already set */
                     trap = 1;
                 } else { /* do the 'poscall' here */
                     int nres;
+                    // 要返回了
                     L->ci = ci->previous; /* back to caller */
-                    L->top = base - 1;
-                    for (nres = ci->nresults; l_unlikely(nres > 0); nres--) setnilvalue(s2v(L->top++)); /* all results are nil */
+                    L->top = base - 1; // 返回栈顶, 就是 func 所在的栈
+                    // ci 有期望的返回参数, 调正 top, 全置成 nil,
+                    for (nres = ci->nresults; l_unlikely(nres > 0); nres--) //
+                        setnilvalue(s2v(L->top++)); /* all results are nil */
                 }
                 goto ret;
             }
@@ -1705,6 +1712,7 @@ returning: /* trap already set */
                         for (; l_unlikely(nres > 1); nres--) setnilvalue(s2v(L->top++)); /* complete missing results */
                     }
                 }
+            // 尾调用与三个返回最后都到这里
             ret: /* return from a Lua function */
                 if (ci->callstatus & CIST_FRESH)
                     return; /* end this frame */

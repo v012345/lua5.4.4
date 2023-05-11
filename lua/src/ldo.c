@@ -560,6 +560,7 @@ l_sinline void ccall(lua_State* L, StkId func, int nResults, int inc) {
     if (l_unlikely(getCcalls(L) >= LUAI_MAXCCALLS)) //
         luaE_checkcstack(L); // 检查 Lua 栈是否有足够的空间存储函数调用所需的参数和返回值
     if ((ci = luaD_precall(L, func, nResults)) != NULL) { /* Lua function? */
+        // c 调用 lua 函数后, 在 lua 的 return 指令的返回时, 从虚拟机中跳出, 结束引调用帧
         ci->callstatus = CIST_FRESH; /* mark that it is a "fresh" execute */
         luaV_execute(L, ci); /* call it */
     }

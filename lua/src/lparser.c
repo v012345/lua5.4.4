@@ -316,7 +316,7 @@ static int newupvalue(FuncState* fs, TString* name, expdesc* v) {
     Upvaldesc* up = allocupvalue(fs);
     FuncState* prev = fs->prev; // 必定是在上一级函数中找到的
     if (v->k == VLOCAL) {
-        up->instack = 1; // local 变量在栈里
+        up->instack = 1; // 变量是上一级函数的局部变量, 所以在栈里
         up->idx = v->u.var.ridx; // 在寄存器(数据栈)的位置, 相对于变量所在函数
         up->kind = getlocalvardesc(prev, v->u.var.vidx)->vd.kind;
         lua_assert(eqstr(name, getlocalvardesc(prev, v->u.var.vidx)->vd.name));
@@ -352,10 +352,13 @@ static int searchvar(FuncState* fs, TString* n, expdesc* var) {
 
 /// @brief 找到局部变量所在的作用域, 标记一下引作用域, 之后关闭 upvalues 要用到
 /// Mark block where variable at given level was defined (to emit close instructions later).
+/// @param level 为当前函数的局部变量基于当前函数在 actvar.arr 中的索引
 static void markupval(FuncState* fs, int level) {
-    BlockCnt* bl = fs->bl;
-    while (bl->nactvar > level) bl = bl->previous;
-    bl->upval = 1;
+    BlockCnt* bl = fs->bl; // 取当前代码块, bl 都是基于 fs 的
+    // 此处 nactvar 为引 block 外部的有效变量数量
+    while (bl->nactvar > level) //
+        bl = bl->previous;
+    bl->upval = 1; // 表示此代码块的子块有使用引块的局部变量
     fs->needclose = 1;
 }
 
@@ -673,6 +676,7 @@ static void close_func(LexState* ls) {
     lua_State* L = ls->L;
     FuncState* fs = ls->fs;
     Proto* f = fs->f;
+    // 不管如何函数有没有 return, 都会在编译关闭函数时, 插入一个 没有返回值的 return
     luaK_ret(fs, luaY_nvarstack(fs), 0); /* final return */
     leaveblock(fs);
     lua_assert(fs->bl == NULL);
