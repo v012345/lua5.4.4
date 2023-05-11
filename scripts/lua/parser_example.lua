@@ -1,24 +1,20 @@
-require("bytedump")
-
-local file = io.open("aaa.pbm", "w")
-io.output(file)
-local function disk(cx, cy, r)
-    return function(x, y)
-        return (x - cx) ^ 2 + (y - cy) ^ 2 <= r ^ 2
-    end
-end
-
-local function plot(r, M, N)
-    io.write("P1\n", M, " ", N, "\n")
-    for i = 1, N, 1 do
-        local y = (N - i * 2) / N
-        for j = 1, M, 1 do
-            local x = (j * 2 - M) / M
-            io.write(r(x, y) and "1" or "0")
+-- require("bytedump")
+function F(x)
+    return {
+        set = function(y)
+            x = y
+        end,
+        get = function()
+            return x
         end
-        io.write("\n")
-    end
+    }
 end
-plot(disk(0, 0, 1), 500, 500)
-io.close(file)
-Bytedump:dump(GetOpCodes())
+
+-- local o1 = F(10)
+-- local o2 = F(20)
+-- print(o1.get(), o2.get())
+-- o1.set(100)
+-- o2.set(200)
+-- print(o1.get(), o2.get())
+
+-- Bytedump:dump(GetOpCodes())

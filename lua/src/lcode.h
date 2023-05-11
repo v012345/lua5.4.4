@@ -40,18 +40,19 @@ typedef enum BinOpr {
     OPR_CONCAT,
     /* comparison operators */
     OPR_EQ,
-    OPR_LT,
-    OPR_LE,
+    OPR_LT, // <
+    OPR_LE, // <=
     OPR_NE,
-    OPR_GT,
-    OPR_GE,
+    OPR_GT, // >
+    OPR_GE, // >=
     /* logical operators */
     OPR_AND,
     OPR_OR,
     OPR_NOBINOPR
 } BinOpr;
 
-/* true if operation is foldable (that is, it is arithmetic or bitwise) */
+// 看看操作符是不是算数或位运算符 \r
+// true if operation is foldable (that is, it is arithmetic or bitwise)
 #define foldbinop(op) ((op) <= OPR_SHR)
 
 /// @brief 把指令放到函数原型的 code 数组的 pc 位置, 同时 pc++

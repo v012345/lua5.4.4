@@ -46,15 +46,19 @@ l_noret luaK_semerror(LexState* ls, const char* msg) {
 /// If expression is a numeric constant, fills 'v' with its value and returns 1. Otherwise, returns 0.
 /// @return e 是数字返回 1, 否则返回 0
 static int tonumeral(const expdesc* e, TValue* v) {
-    if (hasjumps(e)) return 0; /* not a numeral */
+    if (hasjumps(e)) //
+        return 0; /* not a numeral */
     switch (e->k) {
         case VKINT:
-            if (v) setivalue(v, e->u.ival);
+            if (v) //
+                setivalue(v, e->u.ival);
             return 1;
         case VKFLT:
-            if (v) setfltvalue(v, e->u.nval);
+            if (v) //
+                setfltvalue(v, e->u.nval);
             return 1;
-        default: return 0;
+        default: //
+            return 0;
     }
 }
 
@@ -419,7 +423,7 @@ void luaK_reserveregs(FuncState* fs, int n) {
     fs->freereg += n;
 }
 
-/// @brief
+/// @brief  \r
 /// Free register 'reg', if it is neither a constant index nor a local variable.
 static void freereg(FuncState* fs, int reg) {
     if (reg >= luaY_nvarstack(fs)) {
@@ -441,11 +445,9 @@ static void freeregs(FuncState* fs, int r1, int r2) {
     }
 }
 
-/*
-** Free register used by expression 'e' (if any)
-*/
+/// @brief Free register used by expression 'e' (if any)
 static void freeexp(FuncState* fs, expdesc* e) {
-    if (e->k == VNONRELOC) //
+    if (e->k == VNONRELOC) // 此时 info 就是 e 使用的寄存器
         freereg(fs, e->u.info);
 }
 
@@ -751,6 +753,7 @@ static void discharge2reg(FuncState* fs, expdesc* e, int reg) {
             str2K(fs, e); // 到解析到字符串放到常量表中
         } /* FALLTHROUGH */
         case VK: {
+            // info 为常量数组的索引, 把常量放到 reg 号寄存器中
             luaK_codek(fs, reg, e->u.info); // info 记录常量表索引
             break;
         }
@@ -864,7 +867,7 @@ int luaK_exp2anyreg(FuncState* fs, expdesc* e) {
            Go through to the default case. */
     }
     luaK_exp2nextreg(fs, e); /* default: use next available register */
-    return e->u.info;
+    return e->u.info; // e 的值存放的寄存器号
 }
 
 /*
@@ -956,17 +959,18 @@ void luaK_storevar(FuncState* fs, expdesc* var, expdesc* ex) {
             break;
         }
         case VINDEXSTR: { // VINDEXSTR 指明要从常量表中找键
-            // t 表所在的寄存器, idx 键所在的常量表索引, ex 值的描述符,
+            // t 表所在的寄存器, idx 键所在的常量表索引, ex 值的描述符, ex 可能在常量表, 也可能在寄存器中
             codeABRK(fs, OP_SETFIELD, var->u.ind.t, var->u.ind.idx, ex);
             break;
         }
-        case VINDEXED: {
+        case VINDEXED: { // VINDEXED 指明要从寄存器中读表的键
+            // t 表所在的寄存器, idx 键所在的寄存器索引, ex 值的描述符, ex 可能在常量表, 也可能在寄存器中
             codeABRK(fs, OP_SETTABLE, var->u.ind.t, var->u.ind.idx, ex);
             break;
         }
         default: lua_assert(0); /* invalid var kind to store */
     }
-    freeexp(fs, ex); // 如果是 VNONRELOC 刚释放
+    freeexp(fs, ex); // 如果是 VNONRELOC 则释放
 }
 
 /*
@@ -1135,12 +1139,11 @@ static int isCint(expdesc* e) { //
 ** Check whether expression 'e' is a literal integer in
 ** proper range to fit in register sC
 */
-static int isSCint(expdesc* e) { return luaK_isKint(e) && fitsC(e->u.ival); }
+static int isSCint(expdesc* e) { //
+    return luaK_isKint(e) && fitsC(e->u.ival);
+}
 
-/*
-** Check whether expression 'e' is a literal integer or float in
-** proper range to fit in a register (sB or sC).
-*/
+/// @brief Check whether expression 'e' is a literal integer or float in proper range to fit in a register (sB or sC).
 static int isSCnumber(expdesc* e, int* pi, int* isfloat) {
     lua_Integer i;
     if (e->k == VKINT)
@@ -1185,6 +1188,7 @@ void luaK_indexed(FuncState* fs, expdesc* t, expdesc* k) {
             t->u.ind.idx = cast_int(k->u.ival); /* int. constant in proper range */
             t->k = VINDEXI;
         } else {
+            // idx 存放寄存器的索引
             t->u.ind.idx = luaK_exp2anyreg(fs, k); /* register */
             t->k = VINDEXED;
         }
@@ -1473,7 +1477,8 @@ void luaK_infix(FuncState* fs, BinOpr op, expdesc* v) {
         case OPR_BXOR:
         case OPR_SHL:
         case OPR_SHR: {
-            if (!tonumeral(v, NULL)) luaK_exp2anyreg(fs, v);
+            if (!tonumeral(v, NULL)) //
+                luaK_exp2anyreg(fs, v);
             /* else keep numeral, which may be folded with 2nd operand */
             break;
         }
@@ -1488,7 +1493,8 @@ void luaK_infix(FuncState* fs, BinOpr op, expdesc* v) {
         case OPR_GT:
         case OPR_GE: {
             int dummy, dummy2;
-            if (!isSCnumber(v, &dummy, &dummy2)) luaK_exp2anyreg(fs, v);
+            if (!isSCnumber(v, &dummy, &dummy2)) //
+                luaK_exp2anyreg(fs, v);
             /* else keep numeral, which may be an immediate operand */
             break;
         }

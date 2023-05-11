@@ -158,7 +158,7 @@ static int registerlocalvar(LexState* ls, FuncState* fs, TString* varname) {
     return fs->ndebugvars++;
 }
 
-/// @brief 通过名字记录一个局部变量 \r
+/// @brief 通过名字记录一个局部变量, 注意, 这里只是把变量记录到 actvar.aar 中, fs 的 nactvar 还没有更新, 也没有分配寄存器 \r
 /// Create a new local variable with the given 'name'. Return its index in the function.
 static int new_localvar(LexState* ls, TString* name) {
     lua_State* L = ls->L;
@@ -176,14 +176,14 @@ static int new_localvar(LexState* ls, TString* name) {
 // 通过名字记录一个局部变量
 #define new_localvarliteral(ls, v) new_localvar(ls, luaX_newstring(ls, "" v, (sizeof(v) / sizeof(char)) - 1));
 
-/// @brief 通过索引拿到局部变量 \r
+/// @brief 通过索引拿到局部变量的描述结构 \r
 /// Return the "variable description" (Vardesc) of a given variable.
 /// (Unless noted otherwise, all variables are referred to by their compiler indices.)
 static Vardesc* getlocalvardesc(FuncState* fs, int vidx) { //
     return &fs->ls->dyd->actvar.arr[fs->firstlocal + vidx];
 }
 
-/// @brief 返回一个可用的寄存器索引 \r
+/// @brief 从 nvar 反向查找, 返回一个可用的寄存器索引 \r
 /// Convert 'nvar', a compiler index level, to its corresponding
 /// register. For that, search for the highest variable below that level
 /// that is in a register and uses its register index ('ridx') plus one.
@@ -196,9 +196,10 @@ static int reglevel(FuncState* fs, int nvar) {
     return 0; /* no variables in registers */
 }
 
-/// @brief 当前函数使用的寄存器个数 \r
+/// @brief 当前函数有效的局部变量数(重复声明同名的局部变量, 会使用之前的变量失效) \r
 /// Return the number of variables in the register stack for the given function.
 int luaY_nvarstack(FuncState* fs) { //
+    // nactvar 为已经确认为有效局部变量的个数
     return reglevel(fs, fs->nactvar);
 }
 
@@ -220,7 +221,7 @@ static LocVar* localdebuginfo(FuncState* fs, int vidx) {
 /// Create an expression representing variable 'vidx'
 static void init_var(FuncState* fs, expdesc* e, int vidx) {
     e->f = e->t = NO_JUMP;
-    e->k = VLOCAL;
+    e->k = VLOCAL; // 已经解析完毕, 且分配了寄存器
     e->u.var.vidx = vidx; // actvar.arr 索引
     e->u.var.ridx = getlocalvardesc(fs, vidx)->vd.ridx; // 寄存器索引
 }
@@ -255,10 +256,12 @@ static void check_readonly(LexState* ls, expdesc* e) {
     }
 }
 
-/// @brief Start the scope for the last 'nvars' created variables.
+/// @brief 变量已经存到了 arr 中, 这里为新增加变量分配寄存器, 同时增加 nactvar \r
+/// Start the scope for the last 'nvars' created variables.
 static void adjustlocalvars(LexState* ls, int nvars) {
     FuncState* fs = ls->fs;
-    int reglevel = luaY_nvarstack(fs); // 找到一个可用的寄存器
+    // 找到一个可用的寄存器
+    int reglevel = luaY_nvarstack(fs);
     int i;
     for (i = 0; i < nvars; i++) {
         int vidx = fs->nactvar++; // 与寄存器同步增加
@@ -562,13 +565,15 @@ static void movegotosout(FuncState* fs, BlockCnt* bl) {
 /// @param isloop 1 为循环体, 0 为非循环体
 static void enterblock(FuncState* fs, BlockCnt* bl, lu_byte isloop) {
     bl->isloop = isloop;
+    // 如果是新函数, nactvar 为 0, 如果是代码块, 那就是当前函数解析出的有效局部变量
     bl->nactvar = fs->nactvar; // 一进入就确定了, 之后不会变了
     bl->firstlabel = fs->ls->dyd->label.n;
     bl->firstgoto = fs->ls->dyd->gt.n; // 一进入就确定了, 之后不会变了
-    bl->upval = 0;
+    bl->upval = 0; // 此 block 是否有 upvalues
     bl->insidetbc = (fs->bl != NULL && fs->bl->insidetbc);
     bl->previous = fs->bl; // 把 block 接到链上
     fs->bl = bl; // 更新函数状态机上的块状态机
+    // 进入新 block 时, 所有表达式都已算完, 此时不需要临时寄存器了
     lua_assert(fs->freereg == luaY_nvarstack(fs));
 }
 
@@ -660,6 +665,7 @@ static void open_func(LexState* ls, FuncState* fs, BlockCnt* bl) {
     f->source = ls->source;
     luaC_objbarrier(ls->L, f, f->source);
     f->maxstacksize = 2; /* registers 0/1 are always valid */
+    // 上面都是在初始化 FuncState, 下面才记录代码块状态
     enterblock(fs, bl, 0);
 }
 
@@ -756,7 +762,7 @@ static void recfield(LexState* ls, ConsControl* cc) {
     expdesc //
         tab, // 表的描述结构
         key, // 键名描述结构
-        val; //
+        val; // 值表达式的描述结构
     if (ls->t.token == TK_NAME) {
         checklimit(fs, cc->nh, MAX_INT, "items in a constructor");
         codename(ls, &key); // 设置键的名
@@ -883,20 +889,23 @@ static void parlist(LexState* ls) {
         } while (!isvararg && testnext(ls, ','));
     }
     adjustlocalvars(ls, nparams);
-    f->numparams = cast_byte(fs->nactvar);
-    if (isvararg) setvararg(fs, f->numparams); /* declared vararg */
+    // 上面只是刚刚分析完参数列表, 所以这里 nactvar 就是函数签名中参数的个数
+    f->numparams = cast_byte(fs->nactvar); //
+    if (isvararg) // 如果参数列表最后是 ... , 就是可变参数
+        setvararg(fs, f->numparams); /* declared vararg */
+    // 为参数预留寄存器
     luaK_reserveregs(fs, fs->nactvar); /* reserve registers for parameters */
 }
 
 static void body(LexState* ls, expdesc* e, int ismethod, int line) {
     /* body ->  '(' parlist ')' block END */
-    FuncState new_fs;
+    FuncState new_fs; // 新函数来了
     BlockCnt bl;
     new_fs.f = addprototype(ls);
     new_fs.f->linedefined = line;
-    open_func(ls, &new_fs, &bl);
+    open_func(ls, &new_fs, &bl); // 进入新的代码块
     checknext(ls, '(');
-    if (ismethod) {
+    if (ismethod) { // 如果是使用了 : , 在这里帮补上一个 self
         new_localvarliteral(ls, "self"); /* create 'self' parameter */
         adjustlocalvars(ls, 1);
     }
@@ -1351,6 +1360,7 @@ static void whilestat(LexState* ls, int line) {
     int condexit;
     BlockCnt bl;
     luaX_next(ls); /* skip WHILE */
+    // while 指令在 code 中的索引, c 数组是从 0 开始的
     whileinit = luaK_getlabel(fs);
     condexit = cond(ls);
     enterblock(fs, &bl, 1);
@@ -1627,11 +1637,13 @@ static void localstat(LexState* ls) {
     checktoclose(fs, toclose); // 不用管这个
 }
 
+/// @brief 解析函数名, 如果最后使用 :, 就是方法
 static int funcname(LexState* ls, expdesc* v) {
     /* funcname -> NAME {fieldsel} [':' NAME] */
     int ismethod = 0;
     singlevar(ls, v);
-    while (ls->t.token == '.') fieldsel(ls, v);
+    while (ls->t.token == '.') //
+        fieldsel(ls, v);
     if (ls->t.token == ':') {
         ismethod = 1;
         fieldsel(ls, v);
@@ -1739,7 +1751,7 @@ static void statement(LexState* ls) {
         }
         case TK_FUNCTION: {
             /* stat -> funcstat */
-            funcstat(ls, line);
+            funcstat(ls, line); // 非局部函数走这里
             break;
         }
         case TK_LOCAL: {
@@ -1781,6 +1793,7 @@ static void statement(LexState* ls) {
         }
     }
     lua_assert(ls->fs->f->maxstacksize >= ls->fs->freereg && ls->fs->freereg >= luaY_nvarstack(ls->fs));
+    // 一个代码块解析完毕之后, 要解析内存代码使用寄存器
     ls->fs->freereg = luaY_nvarstack(ls->fs); /* free registers */
     leavelevel(ls);
 }
