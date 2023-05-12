@@ -125,6 +125,7 @@ LUALIB_API void(luaL_requiref)(lua_State* L, const char* modname, lua_CFunction 
 
 #define luaL_getmetatable(L, n) (lua_getfield(L, LUA_REGISTRYINDEX, (n)))
 
+// 如果栈 n 为 NULL 或其中的值为 nil, 直接返回 d, 否则调用 f
 #define luaL_opt(L, f, n, d) (lua_isnoneornil(L, (n)) ? (d) : f(L, (n)))
 
 #define luaL_loadbuffer(L, s, sz, n) luaL_loadbufferx(L, s, sz, n, NULL)

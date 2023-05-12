@@ -398,13 +398,16 @@ static void interror(lua_State* L, int arg) {
 LUALIB_API lua_Integer luaL_checkinteger(lua_State* L, int arg) {
     int isnum;
     lua_Integer d = lua_tointegerx(L, arg, &isnum);
-    if (l_unlikely(!isnum)) { interror(L, arg); }
+    if (l_unlikely(!isnum)) { //
+        interror(L, arg);
+    }
     return d;
 }
 
 /// @brief 如果 stack[arg] 为空, 直接返回 def. 否则,
-LUALIB_API lua_Integer luaL_optinteger(lua_State* L, int arg, lua_Integer def) {
-    //
+/// @param arg 寄存器索引, 一般存 lua 参数
+/// @param def 默认值
+LUALIB_API lua_Integer luaL_optinteger(lua_State* L, int arg, lua_Integer def) { //
     return luaL_opt(L, luaL_checkinteger, arg, def);
 }
 

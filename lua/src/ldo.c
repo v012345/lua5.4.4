@@ -286,14 +286,14 @@ void luaD_inctop(lua_State* L) {
 ** function, can be changed asynchronously by signals.)
 */
 void luaD_hook(lua_State* L, int event, int line, int ftransfer, int ntransfer) {
-    lua_Hook hook = L->hook;
+    lua_Hook hook = L->hook; // 一般就是 hookf, 当然也可以使用外部钩子
     if (hook && L->allowhook) { /* make sure there is a hook */
         int mask = CIST_HOOKED;
         CallInfo* ci = L->ci;
         ptrdiff_t top = savestack(L, L->top); /* preserve original 'top' */
         ptrdiff_t ci_top = savestack(L, ci->top); /* idem for 'ci->top' */
         lua_Debug ar;
-        ar.event = event;
+        ar.event = event; // 什么类型的钩子
         ar.currentline = line;
         ar.i_ci = ci;
         if (ntransfer != 0) {
@@ -301,19 +301,21 @@ void luaD_hook(lua_State* L, int event, int line, int ftransfer, int ntransfer) 
             ci->u2.transferinfo.ftransfer = ftransfer;
             ci->u2.transferinfo.ntransfer = ntransfer;
         }
-        if (isLua(ci) && L->top < ci->top) L->top = ci->top; /* protect entire activation register */
+        if (isLua(ci) && L->top < ci->top) //
+            L->top = ci->top; /* protect entire activation register */
         luaD_checkstack(L, LUA_MINSTACK); /* ensure minimum stack size */
-        if (ci->top < L->top + LUA_MINSTACK) ci->top = L->top + LUA_MINSTACK;
+        if (ci->top < L->top + LUA_MINSTACK) //
+            ci->top = L->top + LUA_MINSTACK;
         L->allowhook = 0; /* cannot call hooks inside a hook */
-        ci->callstatus |= mask;
+        ci->callstatus |= mask; // 更新 CallInfo 的调用状态
         lua_unlock(L);
         (*hook)(L, &ar);
         lua_lock(L);
         lua_assert(!L->allowhook);
-        L->allowhook = 1;
+        L->allowhook = 1; // 钩子执行完毕, 又允许调用钩子了
         ci->top = restorestack(L, ci_top);
         L->top = restorestack(L, top);
-        ci->callstatus &= ~mask;
+        ci->callstatus &= ~mask; // 还原 CallInfo 的调用状态
     }
 }
 

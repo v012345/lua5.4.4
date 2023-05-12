@@ -118,8 +118,10 @@ LUA_API void lua_sethook(lua_State* L, lua_Hook func, int mask, int count) {
         func = NULL;
     }
     L->hook = func;
+    // 设置钩子计数的基准值
     L->basehookcount = count;
-    resethookcount(L);
+    // hookcount 复位成基准值
+    resethookcount(L); // 这个时候 hookcount 就设置好了
     L->hookmask = cast_byte(mask);
     if (mask) settraps(L->ci); /* to trace inside 'luaV_execute' */
 }
@@ -783,16 +785,21 @@ int luaG_traceexec(lua_State* L, const Instruction* pc) {
     lu_byte mask = L->hookmask;
     const Proto* p = ci_func(ci)->p;
     int counthook;
+    // 这个只处理行与计数的钩子
     if (!(mask & (LUA_MASKLINE | LUA_MASKCOUNT))) { /* no hooks? */
+        // 不需要再执行 luaG_traceexec 了
         ci->u.l.trap = 0; /* don't need to stop again */
         return 0; /* turn off 'trap' */
     }
+    // 行号参考下一条指令
     pc++; /* reference is always next instruction */
+    // 保存指令, 之后回滚回去
     ci->u.l.savedpc = pc; /* save 'pc' */
+    // hookcount 减 1 后为 0 且 mask 中已开启 LUA_MASKCOUNT
     counthook = (--L->hookcount == 0 && (mask & LUA_MASKCOUNT));
-    if (counthook)
+    if (counthook) // 说明 hookcount 已经减到 0 了, 要复位为 basehookcount
         resethookcount(L); /* reset count */
-    else if (!(mask & LUA_MASKLINE))
+    else if (!(mask & LUA_MASKLINE)) // 如果连 LUA_MASKLINE 也没开启, 直接离开
         return 1; /* no line hook and count != 0; nothing to be done now */
     if (ci->callstatus & CIST_HOOKYIELD) { /* called hook last time? */
         ci->callstatus &= ~CIST_HOOKYIELD; /* erase mark */
@@ -800,7 +807,8 @@ int luaG_traceexec(lua_State* L, const Instruction* pc) {
     }
     if (!isIT(*(ci->u.l.savedpc - 1))) /* top not being used? */
         L->top = ci->top; /* correct top */
-    if (counthook) luaD_hook(L, LUA_HOOKCOUNT, -1, 0, 0); /* call count hook */
+    if (counthook) //
+        luaD_hook(L, LUA_HOOKCOUNT, -1, 0, 0); /* call count hook */
     if (mask & LUA_MASKLINE) {
         /* 'L->oldpc' may be invalid; use zero in this case */
         int oldpc = (L->oldpc < p->sizecode) ? L->oldpc : 0;

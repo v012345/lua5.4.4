@@ -1,4 +1,7 @@
 require("bytedump")
+debug.sethook(function(a, b, c)
+    print(a, b)
+end, "l", 3)
 function F(x)
     return {
         set = function(y)
@@ -18,8 +21,8 @@ end
 
 local o = F(10)
 o.set(100)
-print(o.get())
-debug.sethook()
+-- print(o.get())
+
 -- local o2 = F(20)
 -- print(o1.get(), o2.get())
 -- o1.set(100)

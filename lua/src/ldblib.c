@@ -296,9 +296,10 @@ static void hookf(lua_State* L, lua_Debug* ar) {
     }
 }
 
-/*
-** Convert a string mask (for 'sethook') into a bit mask
-*/
+/// @brief Convert a string mask (for 'sethook') into a bit mask
+/// @param smask c=>调用钩子, r=>返回钩子, l=>行钩子
+/// @param count 是不是计数
+/// @return 掩码
 static int makemask(const char* smask, int count) {
     int mask = 0;
     if (strchr(smask, 'c')) mask |= LUA_MASKCALL;
@@ -320,6 +321,7 @@ static char* unmakemask(int mask, char* smask) {
     return smask;
 }
 
+/// @brief hook 要在 lua 中设置
 static int db_sethook(lua_State* L) {
     int arg, mask, count;
     lua_Hook func;
@@ -330,10 +332,13 @@ static int db_sethook(lua_State* L) {
         mask = 0;
         count = 0; /* turn off hooks */
     } else {
+        // 获取第二个参数(字符串)
         const char* smask = luaL_checkstring(L, arg + 2);
+        // 看看第一个参数是不是函数( c 或 lua 都行)
         luaL_checktype(L, arg + 1, LUA_TFUNCTION);
+        // 看看第三个参数是不是可转化为整数, 能则使用之, 不能则使用 0
         count = (int)luaL_optinteger(L, arg + 3, 0);
-        func = hookf;
+        func = hookf; // 使得官方提供的钩子函数
         mask = makemask(smask, count);
     }
     if (!luaL_getsubtable(L, LUA_REGISTRYINDEX, HOOKKEY)) {
