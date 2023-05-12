@@ -348,6 +348,7 @@ LUA_API void(lua_closeslot)(lua_State* L, int idx);
 #define lua_isboolean(L, n) (lua_type(L, (n)) == LUA_TBOOLEAN)
 #define lua_isthread(L, n) (lua_type(L, (n)) == LUA_TTHREAD)
 #define lua_isnone(L, n) (lua_type(L, (n)) == LUA_TNONE)
+// 看看栈 n 中的值是不是为 nil 或 NULL
 #define lua_isnoneornil(L, n) (lua_type(L, (n)) <= 0)
 
 // 把字符串 s 压到栈顶

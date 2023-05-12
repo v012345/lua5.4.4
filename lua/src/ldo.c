@@ -430,7 +430,8 @@ l_sinline void moveresults(lua_State* L, StkId res, int nres, int wanted) {
 /// @param nres ci 实际返回参数的个数
 void luaD_poscall(lua_State* L, CallInfo* ci, int nres) {
     int wanted = ci->nresults; // 调用 lua_call 时的第三个参数
-    if (l_unlikely(L->hookmask && !hastocloseCfunc(wanted))) rethook(L, ci, nres);
+    if (l_unlikely(L->hookmask && !hastocloseCfunc(wanted))) //
+        rethook(L, ci, nres);
     /* move results to proper place */
     moveresults(L, ci->func, nres, wanted);
     /* function cannot be in any of these cases when returning */
@@ -535,11 +536,13 @@ retry:
             Proto* p = clLvalue(s2v(func))->p; // 获取栈 func 位置上 lua 闭包中的函数原型
             int narg = cast_int(L->top - func) - 1; /* number of real arguments */
             int nfixparams = p->numparams; // lua 函数签名中指定的参数个数
-            int fsize = p->maxstacksize; /* 函数执行时最多需要多少个栈空间 frame size */
+            // 函数执行时最多需要多少个栈空间
+            int fsize = p->maxstacksize; /* frame size */
             checkstackGCp(L, fsize, func);
             L->ci = ci = prepCallInfo(L, func, nresults, 0, func + 1 + fsize);
             ci->u.l.savedpc = p->code; /* 设置入口指令 starting point */
-            for (; narg < nfixparams; narg++) setnilvalue(s2v(L->top++)); /* complete missing arguments */
+            for (; narg < nfixparams; narg++) // 把缺失的参数置成 nil
+                setnilvalue(s2v(L->top++)); /* complete missing arguments */
             lua_assert(ci->top <= L->stack_last);
             return ci;
         }

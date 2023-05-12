@@ -19,6 +19,7 @@ end
 local o = F(10)
 o.set(100)
 print(o.get())
+debug.sethook()
 -- local o2 = F(20)
 -- print(o1.get(), o2.get())
 -- o1.set(100)

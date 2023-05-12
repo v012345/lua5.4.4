@@ -353,7 +353,7 @@ LUALIB_API void luaL_checkstack(lua_State* L, int space, const char* msg) {
     }
 }
 
-/// @brief 如果 type(stack[arg]) != t 就报错
+/// @brief 如果 type(stack[arg]) != t 就报错(大类型)
 LUALIB_API void luaL_checktype(lua_State* L, int arg, int t) {
     if (l_unlikely(lua_type(L, arg) != t)) tag_error(L, arg, t);
 }

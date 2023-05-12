@@ -124,11 +124,17 @@ LUA_API void lua_sethook(lua_State* L, lua_Hook func, int mask, int count) {
     if (mask) settraps(L->ci); /* to trace inside 'luaV_execute' */
 }
 
-LUA_API lua_Hook lua_gethook(lua_State* L) { return L->hook; }
+LUA_API lua_Hook lua_gethook(lua_State* L) { //
+    return L->hook;
+}
 
-LUA_API int lua_gethookmask(lua_State* L) { return L->hookmask; }
+LUA_API int lua_gethookmask(lua_State* L) { //
+    return L->hookmask;
+}
 
-LUA_API int lua_gethookcount(lua_State* L) { return L->basehookcount; }
+LUA_API int lua_gethookcount(lua_State* L) { //
+    return L->basehookcount;
+}
 
 LUA_API int lua_getstack(lua_State* L, int level, lua_Debug* ar) {
     int status;
