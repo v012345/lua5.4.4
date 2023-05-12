@@ -487,6 +487,7 @@ retry:
         case LUA_VLCF: /* light C function */ return precallC(L, func, LUA_MULTRET, fvalue(s2v(func)));
         case LUA_VLCL: { /* Lua function */
             Proto* p = clLvalue(s2v(func))->p;
+            // 调用栈帧最大空间, 编译时算出
             int fsize = p->maxstacksize; /* frame size */
             int nfixparams = p->numparams;
             int i;

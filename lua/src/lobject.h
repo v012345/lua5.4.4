@@ -547,7 +547,7 @@ typedef struct AbsLineInfo {
 ///@brief Function Prototypes
 typedef struct Proto {
     CommonHeader; /* 通用对象头部 */
-    lu_byte numparams; /* 函数的固定参数个数 number of fixed (named) parameters */
+    lu_byte numparams; /* number of fixed (named) parameters */
     lu_byte is_vararg; // 是否为变长参数函数
     lu_byte maxstacksize; /* number of registers needed by this function */
     int sizeupvalues; /* size of 'upvalues' */
