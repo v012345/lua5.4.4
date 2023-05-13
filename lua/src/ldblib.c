@@ -302,6 +302,7 @@ static void hookf(lua_State* L, lua_Debug* ar) {
 /// @return 掩码
 static int makemask(const char* smask, int count) {
     int mask = 0;
+    // strchr 返回字符串中要查找字符的指针
     if (strchr(smask, 'c')) mask |= LUA_MASKCALL;
     if (strchr(smask, 'r')) mask |= LUA_MASKRET;
     if (strchr(smask, 'l')) mask |= LUA_MASKLINE;

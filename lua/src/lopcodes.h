@@ -382,7 +382,8 @@ LUAI_DDEC(const lu_byte luaP_opmodes[NUM_OPCODES];)
 /* "out top" (set top for next instruction) */
 #define isOT(i) ((testOTMode(GET_OPCODE(i)) && GETARG_C(i) == 0) || GET_OPCODE(i) == OP_TAILCALL)
 
-/* 测试指令 i 中低 7 位中第 5 位的值 与 i 的 B 位置为 0; "in top" (uses top from previous instruction) */
+// 测试指令 i 中低 7 位中第 5 位的值 与 i 的 B 位置为 0 \r
+// "in top" (uses top from previous instruction)
 #define isIT(i) (testITMode(GET_OPCODE(i)) && GETARG_B(i) == 0)
 
 #define opmode(mm, ot, it, t, a, m) (((mm) << 7) | ((ot) << 6) | ((it) << 5) | ((t) << 4) | ((a) << 3) | (m))

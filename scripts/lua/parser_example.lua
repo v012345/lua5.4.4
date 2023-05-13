@@ -1,7 +1,10 @@
 require("bytedump")
-debug.sethook(function(a, b, c)
+debug.sethook(function(a, b)
     print(a, b)
-end, "l", 3)
+end, "rc")
+-- debug.sethook(function(a, b)
+--     print(a, b)
+-- end, "r")
 function F(x)
     return {
         set = function(y)
