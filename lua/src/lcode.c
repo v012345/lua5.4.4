@@ -131,8 +131,9 @@ void luaK_nil(FuncState* fs, int from, int n) {
     luaK_codeABC(fs, OP_LOADNIL, from, n - 1, 0); /* else no optimization */
 }
 
-/// @brief
+/// @brief 如果跳转指令为 NO_JUMP, 返回 NO_JUMP, 
 /// Gets the destination address of a jump instruction. Used to traverse a list of jumps.
+/// @param pc 跳转指令的索引
 static int getjump(FuncState* fs, int pc) {
     int offset = GETARG_sJ(fs->f->code[pc]);
     if (offset == NO_JUMP) /* point to itself represents end of list */
@@ -154,9 +155,10 @@ static void fixjump(FuncState* fs, int pc, int dest) {
     SETARG_sJ(*jmp, offset);
 }
 
-/*
-** Concatenate jump-list 'l2' into jump-list 'l1'
-*/
+/// @brief
+/// Concatenate jump-list 'l2' into jump-list 'l1'
+/// @param l1
+/// @param l2
 void luaK_concat(FuncState* fs, int* l1, int l2) {
     if (l2 == NO_JUMP)
         return; /* nothing to concatenate? */
@@ -192,10 +194,9 @@ void luaK_ret(FuncState* fs, int first, int nret) {
     luaK_codeABC(fs, op, first, nret + 1, 0);
 }
 
-/*
-** Code a "conditional jump", that is, a test or comparison opcode
-** followed by a jump. Return jump position.
-*/
+/// @brief 选生成一条 ABCk 指令, 后面再插入一条跳转指令
+/// Code a "conditional jump", that is, a test or comparison opcode followed by a jump. Return jump position.
+/// @return 指令的索引
 static int condjump(FuncState* fs, OpCode op, int A, int B, int C, int k) {
     luaK_codeABCk(fs, op, A, B, C, k);
     return luaK_jump(fs);
@@ -374,12 +375,15 @@ int luaK_codeAsBx(FuncState* fs, OpCode o, int a, int bc) {
     return luaK_code(fs, CREATE_ABx(o, a, b));
 }
 
-/*
-** Format and emit an 'isJ' instruction.
-*/
+/// @brief 这个函数很有意思, 只有一个地方在调用
+///  Format and emit an 'isJ' instruction.
+/// @param o OP_JMP
+/// @param sj NO_JUMP (-1)
+/// @param k 0
+/// @return 指令的索引
 static int codesJ(FuncState* fs, OpCode o, int sj, int k) {
     unsigned int j = sj + OFFSET_sJ;
-    lua_assert(getOpMode(o) == isJ);
+    lua_assert(getOpMode(o) == isJ); // OP_JMP 指令
     lua_assert(j <= MAXARG_sJ && (k & ~1) == 0);
     return luaK_code(fs, CREATE_sJ(o, j, k));
 }
@@ -656,16 +660,15 @@ static void str2K(FuncState* fs, expdesc* e) {
     e->k = VK; // 表示已经放入常量表
 }
 
-/*
-** Fix an expression to return one result.
-** If expression is not a multi-ret expression (function call or
-** vararg), it already returns one result, so nothing needs to be done.
-** Function calls become VNONRELOC expressions (as its result comes
-** fixed in the base register of the call), while vararg expressions
-** become VRELOC (as OP_VARARG puts its results where it wants).
-** (Calls are created returning one result, so that does not need
-** to be fixed.)
-*/
+/// @brief
+/// Fix an expression to return one result.
+/// If expression is not a multi-ret expression (function call or vararg),
+/// it already returns one result, so nothing needs to be done. Function calls become
+/// VNONRELOC expressions (as its result comes fixed in the base register of the call),
+/// while vararg expressions become VRELOC (as OP_VARARG puts its results where it wants).
+/// (Calls are created returning one result, so that does not need to be fixed.)
+/// @param fs
+/// @param e
 void luaK_setoneret(FuncState* fs, expdesc* e) {
     if (e->k == VCALL) { /* expression is an open function call? */
         /* already returns 1 value */
@@ -997,12 +1000,12 @@ static void negatecondition(FuncState* fs, expdesc* e) {
     SETARG_k(*pc, (GETARG_k(*pc) ^ 1));
 }
 
-/*
-** Emit instruction to jump if 'e' is 'cond' (that is, if 'cond'
-** is true, code will jump if 'e' is true.) Return jump position.
-** Optimize when 'e' is 'not' something, inverting the condition
-** and removing the 'not'.
-*/
+/// @brief
+/// Emit instruction to jump if 'e' is 'cond' (that is, if 'cond'
+/// is true, code will jump if 'e' is true.) Return jump position.
+/// Optimize when 'e' is 'not' something, inverting the condition
+/// and removing the 'not'.
+/// @return 指令索引
 static int jumponcond(FuncState* fs, expdesc* e, int cond) {
     if (e->k == VRELOC) {
         Instruction ie = getinstruction(fs, e);

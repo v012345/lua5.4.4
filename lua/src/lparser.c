@@ -1522,7 +1522,7 @@ static void forstat(LexState* ls, int line) {
 
 static void test_then_block(LexState* ls, int* escapelist) {
     /* test_then_block -> [IF | ELSEIF] cond THEN block */
-    BlockCnt bl; // 生成一个 block
+    BlockCnt bl; // if 或 elseif 的代码块
     FuncState* fs = ls->fs;
     expdesc v; // 表达式描述
     int jf; /* instruction to skip 'then' code (if condition is false) */

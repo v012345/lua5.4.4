@@ -87,12 +87,13 @@ enum OpMode {
 #endif
 
 #if L_INTHASBITS(SIZE_sJ)
+// 2^25 - 1
 #define MAXARG_sJ ((1 << SIZE_sJ) - 1)
 #else
 #define MAXARG_sJ MAX_INT
 #endif
 
-#define OFFSET_sJ (MAXARG_sJ >> 1)
+#define OFFSET_sJ (MAXARG_sJ >> 1) // (2^25 - 1) / 2
 
 #define MAXARG_A ((1 << SIZE_A) - 1) // 255
 #define MAXARG_B ((1 << SIZE_B) - 1) // 255
@@ -166,6 +167,7 @@ enum OpMode {
 
 #define CREATE_Ax(o, a) ((cast(Instruction, o) << POS_OP) | (cast(Instruction, a) << POS_Ax))
 
+// 生成一个 sJ 指令, o 为 OP_JMP, j 为
 #define CREATE_sJ(o, j, k) ((cast(Instruction, o) << POS_OP) | (cast(Instruction, j) << POS_sJ) | (cast(Instruction, k) << POS_k))
 
 #if !defined(MAXINDEXRK) /* (for debugging only) */
