@@ -643,10 +643,10 @@ static void const2exp(TValue* v, expdesc* e) {
     }
 }
 
-/*
-** Fix an expression to return the number of results 'nresults'.
-** 'e' must be a multi-ret expression (function call or vararg).
-*/
+/// @brief 如果 e 为 VCALL 则用来设置需要返回多少个值 \r
+/// Fix an expression to return the number of results 'nresults'.
+/// 'e' must be a multi-ret expression (function call or vararg).
+/// @param nresults
 void luaK_setreturns(FuncState* fs, expdesc* e, int nresults) {
     Instruction* pc = &getinstruction(fs, e);
     if (e->k == VCALL) /* expression is an open function call? */
@@ -791,8 +791,9 @@ static void discharge2reg(FuncState* fs, expdesc* e, int reg) {
             SETARG_A(*pc, reg); /* instruction will put result in 'reg' */
             break;
         }
-        case VNONRELOC: {
-            if (reg != e->u.info) luaK_codeABC(fs, OP_MOVE, reg, e->u.info, 0);
+        case VNONRELOC: { // info 存放放着原寄存器, reg 为要把数据复制到的寄存器
+            if (reg != e->u.info) //
+                luaK_codeABC(fs, OP_MOVE, reg, e->u.info, 0);
             break;
         }
         default: {

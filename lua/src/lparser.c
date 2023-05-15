@@ -419,13 +419,17 @@ static void singlevar(LexState* ls, expdesc* var) {
     }
 }
 
-/// @brief Adjust the number of results from an expression list 'e' with 'nexps' expressions to 'nvars' values.
+/// @brief 如果 e 有多个返回值, 要调整 e 的指令的 C 段 \r
+/// Adjust the number of results from an expression list 'e' with 'nexps' expressions to 'nvars' values.
+/// @param nvars 可以理解为赋值号左边的变量的个数
+/// @param nexps 可以理解为赋值号或边的表达式的个数
 static void adjust_assign(LexState* ls, int nvars, int nexps, expdesc* e) {
     FuncState* fs = ls->fs;
     int needed = nvars - nexps; /* extra values needed */
     if (hasmultret(e->k)) { /* last expression has multiple returns? */
         int extra = needed + 1; /* discount last expression itself */
         if (extra < 0) extra = 0;
+        // 在这里设置 OP_CALL 的 C 段的值 extra 为实现接收返回值的参数
         luaK_setreturns(fs, e, extra); /* last exp. provides the difference */
     } else {
         if (e->k != VVOID) /* at least one expression? */
@@ -433,7 +437,7 @@ static void adjust_assign(LexState* ls, int nvars, int nexps, expdesc* e) {
         if (needed > 0) /* missing values? */
             luaK_nil(fs, fs->freereg, needed); /* complete with nils */
     }
-    if (needed > 0)
+    if (needed > 0) // 需要多少个额外的寄存器
         luaK_reserveregs(fs, needed); /* registers for extra values */
     else /* adding 'needed' is actually a subtraction */
         fs->freereg += needed; /* remove extra values */

@@ -8,6 +8,9 @@ local function T()
     return true, false
 end
 
+local a, c = T()
+local a, c, d = T()
+
 if T() then
     print("true")
 end
