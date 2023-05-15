@@ -5,7 +5,12 @@ require("bytedump")
 -- end)
 
 local function T()
-    return true, false
+    Bytedump:dump(GetOpCodes())
+    local function b()
+    end
+    local y
+    local x = 1
+    return x, b()
 end
 
 local a, c = T()

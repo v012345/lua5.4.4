@@ -738,8 +738,17 @@ local OP_ACT = {
     end,
     OP_TAILCALL = nil,
     OP_RETURN = nil,
-    OP_RETURN0 = nil,
-    OP_RETURN1 = nil,
+    OP_RETURN0 = function(index, code)
+        local f = "back to caller"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        print(index, name, f)
+    end,
+    OP_RETURN1 = function(index, code)
+        local f = "return R[%s], back to caller"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        print(index, name, string.format(f, A))
+    end,
     OP_FORLOOP = function(index, code)
         local f = "for i = R[%s], R[%s], R[%s] then t = R[%s] + R[%s], R[%s] = t, R[%s] = t and goto %s else goto %s"
         local name = OP_CODE[(code & 0x7F) + 1]

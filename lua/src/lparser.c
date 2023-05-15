@@ -927,6 +927,7 @@ static void body(LexState* ls, expdesc* e, int ismethod, int line) {
 }
 
 /// @brief 返回解析到的表达式列表中表达式的个数, v 记录表达式列表的最后一个表达式
+/// @return 表达式的数量
 static int explist(LexState* ls, expdesc* v) {
     /* explist -> expr { ',' expr } */
     int n = 1; /* at least one expression */
@@ -1697,27 +1698,32 @@ static void retstat(LexState* ls) {
     expdesc e;
     int nret; /* number of values being returned */
     int first = luaY_nvarstack(fs); /* first slot to be returned */
+    // return 后面是代码块结束 token 或是 ; , 说明没有返回值
     if (block_follow(ls, 1) || ls->t.token == ';')
         nret = 0; /* return no values */
     else {
         nret = explist(ls, &e); /* optional return values */
-        if (hasmultret(e.k)) {
-            luaK_setmultret(fs, &e);
+        if (hasmultret(e.k)) { // 如果最后一个表达式是一个函数调用或者是 ...
+            luaK_setmultret(fs, &e); // 不定参数数量
             if (e.k == VCALL && nret == 1 && !fs->bl->insidetbc) { /* tail call? */
                 SET_OPCODE(getinstruction(fs, &e), OP_TAILCALL);
                 lua_assert(GETARG_A(getinstruction(fs, &e)) == luaY_nvarstack(fs));
             }
             nret = LUA_MULTRET; /* return all values */
-        } else {
+        } else { // 返回参数列表的最后一个表达式为确定数量
             if (nret == 1) /* only one single value? */
+                // 因为返回值只有一个, 看看可不可以不分配新的寄存器, 使用变量之前用的寄存器
                 first = luaK_exp2anyreg(fs, &e); /* can use original slot */
             else { /* values must go to the top of the stack */
-                luaK_exp2nextreg(fs, &e);
+                // 返回数量大于 1 个, 但是之前在解析的时候, 前面的表达式结果已经放到寄存器
+                // 只有最后一个表达式还没有分配寄存器, 注意一点, 返回值要在一组连续索引的寄存器中
+                luaK_exp2nextreg(fs, &e); //
                 lua_assert(nret == fs->freereg - first);
             }
         }
     }
     luaK_ret(fs, first, nret);
+    // 跳过代码块结束 token 前的 ;
     testnext(ls, ';'); /* skip optional semicolon */
 }
 

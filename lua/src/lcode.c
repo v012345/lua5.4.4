@@ -180,8 +180,9 @@ int luaK_jump(FuncState* fs) { //
     return codesJ(fs, OP_JMP, NO_JUMP, 0);
 }
 
-/// @brief Code a 'return' instruction
-/// @param first 第一个返回值在寄存器中的索引
+/// @brief 生成一个返回指令, 两个地方调用, 一个是遇见真的 return, 一个是关闭函数时 \r
+/// Code a 'return' instruction
+/// @param first 第一个返回值在寄存器中的索引, A 中的值
 /// @param nret 函数返回值的数量
 void luaK_ret(FuncState* fs, int first, int nret) {
     OpCode op;

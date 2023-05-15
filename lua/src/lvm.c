@@ -1124,7 +1124,7 @@ void luaV_finishOp(lua_State* L) {
 void luaV_execute(lua_State* L, CallInfo* ci) {
     LClosure* cl;
     TValue* k; // 函数的常量表, 编译过程生成
-    StkId base; // 当前函数的栈底
+    StkId base; // 当前函数的栈底 ci->func + 1
     const Instruction* pc; // 指向要执行指令的指针
     int trap;
 #if LUA_USE_JUMPTABLE
@@ -1689,7 +1689,9 @@ returning: /* trap already set */
                     // 要返回了
                     L->ci = ci->previous; /* back to caller */
                     L->top = base - 1; // 返回栈顶, 就是 func 所在的栈
-                    // ci 有期望的返回参数, 调正 top, 全置成 nil,
+                    // 当前 ci 结束时期望从此 ci 返回参数的个数,
+                    // 因为没有返回值,所以只能简单调正 top, 把接收寄存器置成 nil,
+                    // 如果 nresults 为 -1, 就什么也不用做
                     for (nres = ci->nresults; l_unlikely(nres > 0); nres--) //
                         setnilvalue(s2v(L->top++)); /* all results are nil */
                 }
@@ -1704,12 +1706,13 @@ returning: /* trap already set */
                 } else { /* do the 'poscall' here */
                     int nres = ci->nresults;
                     L->ci = ci->previous; /* back to caller */
-                    if (nres == 0)
+                    if (nres == 0) // 如果调用者不需要返回值, 修正 top 到 func 的位置
                         L->top = base - 1; /* asked for no results */
                     else {
                         setobjs2s(L, base - 1, ra); /* at least this result */
                         L->top = base;
-                        for (; l_unlikely(nres > 1); nres--) setnilvalue(s2v(L->top++)); /* complete missing results */
+                        for (; l_unlikely(nres > 1); nres--) // 调用者多余的调用值置 nil
+                            setnilvalue(s2v(L->top++)); /* complete missing results */
                     }
                 }
             // 尾调用与三个返回最后都到这里
@@ -1717,7 +1720,7 @@ returning: /* trap already set */
                 if (ci->callstatus & CIST_FRESH)
                     return; /* end this frame */
                 else {
-                    ci = ci->previous;
+                    ci = ci->previous; // 恢复调用函数的环境, 继续执行
                     goto returning; /* continue running caller in this frame */
                 }
             }

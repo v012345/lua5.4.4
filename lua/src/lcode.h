@@ -75,6 +75,7 @@ typedef enum UnOpr {
 // get (pointer to) instruction of given 'expdesc'
 #define getinstruction(fs, e) ((fs)->f->code[(e)->u.info])
 
+// 如果是函数调用指令, 则把 OP_CALL 的 C 段置为 0 (LUA_MULTRET + 1)
 #define luaK_setmultret(fs, e) luaK_setreturns(fs, e, LUA_MULTRET)
 
 #define luaK_jumpto(fs, t) luaK_patchlist(fs, luaK_jump(fs), t)
