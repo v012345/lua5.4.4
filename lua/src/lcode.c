@@ -62,9 +62,8 @@ static int tonumeral(const expdesc* e, TValue* v) {
     }
 }
 
-/*
-** Get the constant value from a constant expression
-*/
+/// @brief 处理编译时常量, 返回常量的值
+/// Get the constant value from a constant expression
 static TValue* const2val(FuncState* fs, const expdesc* e) {
     lua_assert(e->k == VCONST);
     return &fs->ls->dyd->actvar.arr[e->u.info].k;
@@ -86,7 +85,7 @@ int luaK_exp2const(FuncState* fs, const expdesc* e, TValue* v) {
             setsvalue(fs->ls->L, v, e->u.strval);
             return 1;
         }
-        case VCONST: {
+        case VCONST: { // 好像是处理编译时常量用的
             setobj(fs->ls->L, v, const2val(fs, e));
             return 1;
         }
@@ -131,7 +130,7 @@ void luaK_nil(FuncState* fs, int from, int n) {
     luaK_codeABC(fs, OP_LOADNIL, from, n - 1, 0); /* else no optimization */
 }
 
-/// @brief 如果跳转指令为 NO_JUMP, 返回 NO_JUMP, 
+/// @brief 如果跳转指令为 NO_JUMP, 返回 NO_JUMP,
 /// Gets the destination address of a jump instruction. Used to traverse a list of jumps.
 /// @param pc 跳转指令的索引
 static int getjump(FuncState* fs, int pc) {
@@ -427,7 +426,7 @@ void luaK_reserveregs(FuncState* fs, int n) {
     fs->freereg += n;
 }
 
-/// @brief  \r
+/// @brief 我猜测, 这个寄存器是临时分配的, 没有用来存放局部变量, 可能是存放中间值的 \r
 /// Free register 'reg', if it is neither a constant index nor a local variable.
 static void freereg(FuncState* fs, int reg) {
     if (reg >= luaY_nvarstack(fs)) {
@@ -611,9 +610,10 @@ static void luaK_float(FuncState* fs, int reg, lua_Number f) {
         luaK_codek(fs, reg, luaK_numberK(fs, f));
 }
 
-/*
-** Convert a constant in 'v' into an expression description 'e'
-*/
+/// @brief 编译时常量的值放入 expdesc 中 \r
+/// Convert a constant in 'v' into an expression description 'e'
+/// @param v 编译时常量的值
+/// @param e expdesc
 static void const2exp(TValue* v, expdesc* e) {
     switch (ttypetag(v)) {
         case LUA_VNUMINT:
@@ -624,15 +624,22 @@ static void const2exp(TValue* v, expdesc* e) {
             e->k = VKFLT;
             e->u.nval = fltvalue(v);
             break;
-        case LUA_VFALSE: e->k = VFALSE; break;
-        case LUA_VTRUE: e->k = VTRUE; break;
-        case LUA_VNIL: e->k = VNIL; break;
+        case LUA_VFALSE: //
+            e->k = VFALSE;
+            break;
+        case LUA_VTRUE: //
+            e->k = VTRUE;
+            break;
+        case LUA_VNIL: //
+            e->k = VNIL;
+            break;
         case LUA_VSHRSTR:
         case LUA_VLNGSTR:
             e->k = VKSTR;
             e->u.strval = tsvalue(v);
             break;
-        default: lua_assert(0);
+        default: //
+            lua_assert(0);
     }
 }
 
@@ -672,9 +679,9 @@ static void str2K(FuncState* fs, expdesc* e) {
 void luaK_setoneret(FuncState* fs, expdesc* e) {
     if (e->k == VCALL) { /* expression is an open function call? */
         /* already returns 1 value */
-        lua_assert(GETARG_C(getinstruction(fs, e)) == 2);
+        lua_assert(GETARG_C(getinstruction(fs, e)) == 2); // 解析函数调用 C 默认为 2
         e->k = VNONRELOC; /* result has fixed position */
-        e->u.info = GETARG_A(getinstruction(fs, e));
+        e->u.info = GETARG_A(getinstruction(fs, e)); // A 就是函数所在寄存器, 第一个返回值就在这个寄存器
     } else if (e->k == VVARARG) {
         SETARG_C(getinstruction(fs, e), 2);
         e->k = VRELOC; /* can relocate its simple result */
@@ -685,16 +692,21 @@ void luaK_setoneret(FuncState* fs, expdesc* e) {
 /// Ensure that expression 'e' is not a variable (nor a <const>). (Expression still may have jump lists.)
 void luaK_dischargevars(FuncState* fs, expdesc* e) {
     switch (e->k) {
-        case VCONST: {
+        case VCONST: { // 这个好像是处理编译时常量用的, 因为只有编译时常量才在 arr 中
             const2exp(const2val(fs, e), e);
             break;
         }
         case VLOCAL: { /* already in a register */
+            // 类型为 VLOCAL, 说明这个变量是当前函数的局部变量
+            // 局部变量在解析时就分配了寄存器, 放在 ridx 中了
+            // 所以这个时候直接使用就行, 类型改为 VNONRELOC
+            // info 存在局部变量的寄存器
             e->u.info = e->u.var.ridx;
             e->k = VNONRELOC; /* becomes a non-relocatable value */
             break;
         }
         case VUPVAL: { /* move value to some (pending) register */
+            // info 存指令, 但指令的 A 还没有定
             e->u.info = luaK_codeABC(fs, OP_GETUPVAL, 0, e->u.info, 0);
             e->k = VRELOC;
             break;
@@ -706,19 +718,24 @@ void luaK_dischargevars(FuncState* fs, expdesc* e) {
             e->k = VRELOC; // 需要重定位结果到某个寄存器中
             break;
         }
-        case VINDEXI: {
+        case VINDEXI: { // R[t][idx]
+            // 这里为什么要释放寄存器我知道一种情况, 比如多维表的情况 t[1][2][3]
+            // t[1] 是一个表会分配一个寄存器来存这个中间表, 而 t[1][2] 还会返回一个表
+            // 这种情况下就不再分配一个新的寄存器了, 直接使用 t[1] 占用的寄存器
+            // 这里就是先把 t[1] 占用的寄存器释放了, 之后再分配给 t[1][2]
             freereg(fs, e->u.ind.t);
             e->u.info = luaK_codeABC(fs, OP_GETI, 0, e->u.ind.t, e->u.ind.idx);
             e->k = VRELOC;
             break;
         }
-        case VINDEXSTR: {
+        case VINDEXSTR: { // 同上, 也有释放这个问题
             freereg(fs, e->u.ind.t);
             e->u.info = luaK_codeABC(fs, OP_GETFIELD, 0, e->u.ind.t, e->u.ind.idx);
             e->k = VRELOC;
             break;
         }
-        case VINDEXED: {
+        case VINDEXED: { // t 是表所在的寄存器, idx 是键所在的寄存器
+            // 表与键都可能不是局部变量, 所以要全释放一下
             freeregs(fs, e->u.ind.t, e->u.ind.idx);
             e->u.info = luaK_codeABC(fs, OP_GETTABLE, 0, e->u.ind.t, e->u.ind.idx);
             e->k = VRELOC;
@@ -726,6 +743,7 @@ void luaK_dischargevars(FuncState* fs, expdesc* e) {
         }
         case VVARARG:
         case VCALL: {
+            // 先说说 VCALL 第一个返回值就在函数所在寄存器
             luaK_setoneret(fs, e);
             break;
         }
@@ -1162,7 +1180,7 @@ static int isSCnumber(expdesc* e, int* pi, int* isfloat) {
         return 0;
 }
 
-/// @brief
+/// @brief 产生 VINDEX* 类型表达式, 就是从表 t 中, 取键 k 对应的值
 /// Create expression 't[k]'. 't' must have its final result already in a register or upvalue.
 /// Upvalues can only be indexed by literal strings.
 /// Keys can be literal strings in the constant table or arbitrary values in registers.
