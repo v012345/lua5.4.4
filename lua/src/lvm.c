@@ -1659,6 +1659,9 @@ returning: /* trap already set */
                 }
             }
             vmcase(OP_RETURN) {
+                // 这里 -1 是因为在写入 B 时加上了 1, 为什么加 1
+                // 因为要用 -1 表示不确定返回参数
+                // B 不能表表示负数, 为什么不用 sB 我就不知道了, 可能根本没有 sB 吧
                 int n = GETARG_B(i) - 1; /* number of results */
                 int nparams1 = GETARG_C(i);
                 if (n < 0) /* not fixed? */
