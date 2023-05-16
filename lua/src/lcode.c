@@ -1700,8 +1700,10 @@ static int finaltarget(Instruction* code, int i) {
 void luaK_finish(FuncState* fs) {
     int i;
     Proto* p = fs->f;
+    // 函数的所有指令已经解析完毕, 在这里做最后的遍历工作
     for (i = 0; i < fs->pc; i++) {
         Instruction* pc = &p->code[i];
+        // 这个断言到底要说明什么
         lua_assert(i == 0 || isOT(*(pc - 1)) == isIT(*pc));
         switch (GET_OPCODE(*pc)) {
             case OP_RETURN0:

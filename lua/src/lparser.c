@@ -1722,7 +1722,7 @@ static void retstat(LexState* ls) {
             }
         }
     }
-    luaK_ret(fs, first, nret);
+    luaK_ret(fs, first, nret); // 这里只是确定了返回指令中的 A 与 B 的值, C 的值在 luaK_finish 中设置
     // 跳过代码块结束 token 前的 ;
     testnext(ls, ';'); /* skip optional semicolon */
 }

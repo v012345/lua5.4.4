@@ -17,7 +17,11 @@ local a, c = T()
 local a, c, d = T()
 
 if T() then
-    print("true")
+    -- print("true")
 end
+
+
+
+-- print(opmode(1, 1, 1, 1, 1, 1))
 
 Bytedump:dump(GetOpCodes())
