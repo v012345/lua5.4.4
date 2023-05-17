@@ -131,45 +131,7 @@ local opmodes = {
 -- "in top" (uses top from previous instruction)
 -- function isIT(i)
 --     return (testITMode(GET_OPCODE(i)) && GETARG_B(i) == 0)
--- end 
-
-local function getMode(code)
-    local pc = (code & 0x7F) + 1
-    local modes = {
-        "iABC", "iABx", "iAsBx", "iAx", "isJ"
-    }
-    local pcmode = opmodes[pc]
-    -- print((pcmode & 7) + 1)
-    local mode = modes[(pcmode & 7) + 1]
-    mode = mode .. "\t"
-    if (pcmode & 8) == 8 then
-        mode = mode .. "A "
-    else
-        mode = mode .. "  "
-    end
-    if (pcmode & 16) == 16 then
-        mode = mode .. "T "
-    else
-        mode = mode .. "  "
-    end
-    if (pcmode & 32) == 32 and  Bytedump:B(code) == 0 then
-        mode = mode .. "IT "
-    else
-        mode = mode .. "   "
-    end
-    if (pcmode & 64) == 64 then
-        mode = mode .. "OT "
-    else
-        mode = mode .. "   "
-    end
-    if (pcmode & 128) == 128 then
-        mode = mode .. "MM"
-    else
-        mode = mode .. "  "
-    end
-    -- print(mode)
-    return mode
-end
+-- end
 
 
 local TM = {
@@ -286,6 +248,46 @@ local OP_CODE = {
     "OP_VARARGPREP",
     "OP_EXTRAARG"
 }
+
+local function getMode(code)
+    local pc = (code & 0x7F) + 1
+    local modes = {
+        "iABC", "iABx", "iAsBx", "iAx", "isJ"
+    }
+    local pcmode = opmodes[pc]
+    -- print((pcmode & 7) + 1)
+    local mode = modes[(pcmode & 7) + 1]
+    mode = mode .. "\t"
+    if (pcmode & 8) == 8 then
+        mode = mode .. "A "
+    else
+        mode = mode .. "  "
+    end
+    if (pcmode & 16) == 16 then
+        mode = mode .. "T "
+    else
+        mode = mode .. "  "
+    end
+    if (pcmode & 32) == 32 and Bytedump:B(code) == 0 then
+        mode = mode .. "IT "
+    else
+        mode = mode .. "   "
+    end
+    if (pcmode & 64) == 64 and Bytedump:C(code) == 0 or OP_CODE[pc] == "OP_TAILCALL" then
+        -- (testOTMode(GET_OPCODE(i)) && GETARG_C(i) == 0) || GET_OPCODE(i) == 
+        mode = mode .. "OT "
+    else
+        mode = mode .. "   "
+    end
+    if (pcmode & 128) == 128 then
+        mode = mode .. "MM"
+    else
+        mode = mode .. "  "
+    end
+    -- print(mode)
+    return mode
+end
+
 
 local OP_ACT = {
     OP_MOVE = function(index, code)
