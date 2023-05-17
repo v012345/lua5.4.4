@@ -128,6 +128,11 @@ local opmodes = {
     opmode(0, 0, 0, 0, 0, OpMode.iAx),   -- OP_EXTRAARG
 };
 
+-- "in top" (uses top from previous instruction)
+-- function isIT(i)
+--     return (testITMode(GET_OPCODE(i)) && GETARG_B(i) == 0)
+-- end 
+
 local function getMode(code)
     local pc = (code & 0x7F) + 1
     local modes = {
@@ -147,7 +152,7 @@ local function getMode(code)
     else
         mode = mode .. "  "
     end
-    if (pcmode & 32) == 32 then
+    if (pcmode & 32) == 32 and  Bytedump:B(code) == 0 then
         mode = mode .. "IT "
     else
         mode = mode .. "   "
