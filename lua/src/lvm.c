@@ -1663,7 +1663,7 @@ returning: /* trap already set */
                 // 因为要用 -1 表示不确定返回参数
                 // B 不能表表示负数, 为什么不用 sB 我就不知道了, 可能根本没有 sB 吧
                 int n = GETARG_B(i) - 1; /* number of results */
-                int nparams1 = GETARG_C(i);
+                int nparams1 = GETARG_C(i); // 此函数的参数个数 + 1
                 if (n < 0) /* not fixed? */
                     n = cast_int(L->top - ra); /* get what is available */
                 savepc(ci);
@@ -1675,7 +1675,7 @@ returning: /* trap already set */
                     updatestack(ci);
                 }
                 if (nparams1) /* vararg function? */
-                    ci->func -= ci->u.l.nextraargs + nparams1;
+                    ci->func -= ci->u.l.nextraargs + nparams1; // 修正函数的位置
                 L->top = ra + n; /* set call for 'luaD_poscall' */
                 luaD_poscall(L, ci, n);
                 updatetrap(ci); /* 'luaD_poscall' can change hooks */

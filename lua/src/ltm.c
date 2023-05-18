@@ -212,6 +212,7 @@ int luaT_callorderiTM(lua_State* L, const TValue* p1, int v2, int flip, int isfl
     return luaT_callorderTM(L, p1, p2, event);
 }
 
+/// @brief 只在 OP_VARARGPREP 指令处调用了
 void luaT_adjustvarargs(lua_State* L, int nfixparams, CallInfo* ci, const Proto* p) {
     int i;
     int actual = cast_int(L->top - ci->func) - 1; /* number of arguments */

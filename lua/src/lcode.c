@@ -1714,8 +1714,10 @@ void luaK_finish(FuncState* fs) {
             } /* FALLTHROUGH */
             case OP_RETURN:
             case OP_TAILCALL: {
-                if (fs->needclose) SETARG_k(*pc, 1); /* signal that it needs to close */
-                if (p->is_vararg) SETARG_C(*pc, p->numparams + 1); /* signal that it is vararg */
+                if (fs->needclose) // 此代码块中的局部变量被引用了
+                    SETARG_k(*pc, 1); /* signal that it needs to close */
+                if (p->is_vararg) // 在这里调用返回指令的 C 的值
+                    SETARG_C(*pc, p->numparams + 1); /* signal that it is vararg */
                 break;
             }
             case OP_JMP: {

@@ -274,7 +274,7 @@ local function getMode(code)
         mode = mode .. "   "
     end
     if (pcmode & 64) == 64 and Bytedump:C(code) == 0 or OP_CODE[pc] == "OP_TAILCALL" then
-        -- (testOTMode(GET_OPCODE(i)) && GETARG_C(i) == 0) || GET_OPCODE(i) == 
+        -- (testOTMode(GET_OPCODE(i)) && GETARG_C(i) == 0) || GET_OPCODE(i) ==
         mode = mode .. "OT "
     else
         mode = mode .. "   "
@@ -888,7 +888,17 @@ local OP_ACT = {
         print(index, name, "", getMode(code), string.format(f, A, nargs, C))
     end,
     OP_TAILCALL = nil,
-    OP_RETURN = nil,
+    OP_RETURN = function(index, code)
+        local n = Bytedump:B(code) - 1
+        local f = "back to caller"
+        if n < 0 then
+            f = f .. " with mul multiple return"
+        else
+            f = f .. " with " .. n .. " return"
+        end
+        local name = OP_CODE[(code & 0x7F) + 1]
+        print(index, name, getMode(code), f)
+    end,
     OP_RETURN0 = function(index, code)
         local f = "back to caller"
         local name = OP_CODE[(code & 0x7F) + 1]
