@@ -7,12 +7,12 @@ require("bytedump")
 local function T(a, c, d, ...)
     local r, z, e, aa, aaa, aaaa = ...
     local tt = { ... }
-    Bytedump:dump(GetOpCodes())
+    -- Bytedump:dump(GetOpCodes())
     local function b()
     end
     local y
     local x = 1
-    return x, b()
+    return ...
 end
 
 local a, c = T(1, 2, 3, 4, 5, 6)
@@ -22,7 +22,14 @@ if T() then
     -- print("true")
 end
 
-
+for key, value in pairs(debug.getregistry()) do
+    print(key, value)
+    if type(value) == "table" then
+        for k, v in pairs(value) do
+            print("\t", k, v)
+        end
+    end
+end
 
 -- print(opmode(1, 1, 1, 1, 1, 1))
 

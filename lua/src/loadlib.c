@@ -548,7 +548,8 @@ static void findloader(lua_State* L, const char* name) {
     int i;
     luaL_Buffer msg; /* to build error message */
     /* push 'package.searchers' to index 3 in the stack */
-    if (l_unlikely(lua_getfield(L, lua_upvalueindex(1), "searchers") != LUA_TTABLE)) luaL_error(L, "'package.searchers' must be a table");
+    if (l_unlikely(lua_getfield(L, lua_upvalueindex(1), "searchers") != LUA_TTABLE)) //
+        luaL_error(L, "'package.searchers' must be a table");
     luaL_buffinit(L, &msg);
     /*  iterate over available searchers to find a loader */
     for (i = 1;; i++) {
@@ -574,7 +575,7 @@ static void findloader(lua_State* L, const char* name) {
 }
 
 static int ll_require(lua_State* L) {
-    const char* name = luaL_checkstring(L, 1);
+    const char* name = luaL_checkstring(L, 1); // 要引入的文件名
     lua_settop(L, 1); /* LOADED table will be at index 2 */
     lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
     lua_getfield(L, 2, name); /* LOADED[name] */
