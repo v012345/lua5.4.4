@@ -341,9 +341,10 @@ LUA_API lua_State* lua_newstate(lua_Alloc f, void* ud) {
     lua_State* L;
     global_State* g;
     LG* l = cast(LG*, (*f)(ud, NULL, LUA_TTHREAD, sizeof(LG)));
-    if (l == NULL) return NULL;
-    L = &l->l.l;
-    g = &l->g;
+    if (l == NULL) // 没有内存
+        return NULL;
+    L = &l->l.l; // 主线程机
+    g = &l->g; // 全局状态机
     L->tt = LUA_VTHREAD;
     g->currentwhite = bitmask(WHITE0BIT); // 白 0 阶段
     L->marked = luaC_white(g); // 与 g->currentwhite 的 3 与 4 位置一样

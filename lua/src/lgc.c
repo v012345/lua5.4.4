@@ -710,10 +710,15 @@ static void freeupval(lua_State* L, UpVal* uv) {
     luaM_free(L, uv);
 }
 
+/// @brief 这个就是基层函数了, 释放对象
 static void freeobj(lua_State* L, GCObject* o) {
     switch (o->tt) {
-        case LUA_VPROTO: luaF_freeproto(L, gco2p(o)); break;
-        case LUA_VUPVAL: freeupval(L, gco2upv(o)); break;
+        case LUA_VPROTO: //
+            luaF_freeproto(L, gco2p(o));
+            break;
+        case LUA_VUPVAL: //
+            freeupval(L, gco2upv(o));
+            break;
         case LUA_VLCL: {
             LClosure* cl = gco2lcl(o);
             luaM_freemem(L, cl, sizeLclosure(cl->nupvalues));
@@ -724,8 +729,12 @@ static void freeobj(lua_State* L, GCObject* o) {
             luaM_freemem(L, cl, sizeCclosure(cl->nupvalues));
             break;
         }
-        case LUA_VTABLE: luaH_free(L, gco2t(o)); break;
-        case LUA_VTHREAD: luaE_freethread(L, gco2th(o)); break;
+        case LUA_VTABLE: //
+            luaH_free(L, gco2t(o));
+            break;
+        case LUA_VTHREAD: //
+            luaE_freethread(L, gco2th(o));
+            break;
         case LUA_VUSERDATA: {
             Udata* u = gco2u(o);
             luaM_freemem(L, o, sizeudata(u->nuvalue, u->len));
@@ -1281,7 +1290,6 @@ static void stepgenfull(lua_State* L, global_State* g) {
         setminordebt(g);
     } else { /* another bad collection; stay in incremental mode */
         g->GCestimate = gettotalbytes(g); /* first estimate */
-        ;
         entersweep(L);
         luaC_runtilstate(L, bitmask(GCSpause)); /* finish collection */
         setpause(g);

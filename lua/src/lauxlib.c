@@ -908,6 +908,7 @@ LUALIB_API const char* luaL_gsub(lua_State* L, const char* s, const char* p, con
 
 /// @param ptr 指向原来内存块的指针
 /// @param nsize 内存块新的大小 如果 nsize 为 0, 释放 ptr
+/// @return 分配到的内存的指针
 static void* l_alloc(void* ud, void* ptr, size_t osize, size_t nsize) {
     /* It works around some compiler warnings. Some compilers will warn if you don't use a function parameter. */
     (void)ud;
@@ -916,6 +917,7 @@ static void* l_alloc(void* ud, void* ptr, size_t osize, size_t nsize) {
         free(ptr);
         return NULL;
     } else
+        // 当 ptr 为 NULL 时, realloc 等效于 malloc
         return realloc(ptr, nsize);
 }
 
@@ -985,7 +987,8 @@ static void warnfon(void* ud, const char* message, int tocont) {
     warnfcont(ud, message, tocont); /* finish processing */
 }
 
-/// @brief 使用 lua_newstate 加入官方默认内存管理函数 生成一个 lua 状态机
+/// @brief 使用 lua_newstate 加入官方默认内存管理函数 生成一个 lua 状态机 \r
+/// 这就是梦开始的地方, 之后执行 luaL_openlibs 加载官方库
 LUALIB_API lua_State* luaL_newstate(void) {
     lua_State* L = lua_newstate(l_alloc, NULL);
     if (l_likely(L)) {

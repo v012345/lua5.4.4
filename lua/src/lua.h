@@ -105,7 +105,9 @@ typedef const char* (*lua_Reader)(lua_State* L, void* ud, size_t* sz);
 typedef int (*lua_Writer)(lua_State* L, const void* p, size_t sz, void* ud);
 
 /// @brief Type for memory-allocation functions
-/// @param nsize 分配的内存大小
+/// @param ptr 指向原来内存块的指针
+/// @param nsize 内存块新的大小 如果 nsize 为 0, 释放 ptr
+/// @return 分配到的内存的指针
 typedef void* (*lua_Alloc)(void* ud, void* ptr, size_t osize, size_t nsize);
 
 /*
