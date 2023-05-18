@@ -1663,7 +1663,7 @@ returning: /* trap already set */
                 // 因为要用 -1 表示不确定返回参数
                 // B 不能表表示负数, 为什么不用 sB 我就不知道了, 可能根本没有 sB 吧
                 int n = GETARG_B(i) - 1; /* number of results */
-                int nparams1 = GETARG_C(i); // 此函数的参数个数 + 1
+                int nparams1 = GETARG_C(i); // 如果是可变量参数,那么为此函数的固定参数个数 + 1
                 if (n < 0) /* not fixed? */
                     n = cast_int(L->top - ra); /* get what is available */
                 savepc(ci);
@@ -1816,6 +1816,7 @@ returning: /* trap already set */
                 vmbreak;
             }
             vmcase(OP_VARARGPREP) {
+                // 指令的 A 是固定参数的数量
                 ProtectNT(luaT_adjustvarargs(L, GETARG_A(i), ci, cl->p));
                 if (l_unlikely(trap)) { /* previous "Protect" updated trap */
                     luaD_hookcall(L, ci);

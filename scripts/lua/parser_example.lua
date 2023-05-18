@@ -4,7 +4,9 @@ require("bytedump")
 --     print(a, b, c)
 -- end)
 
-local function T()
+local function T(a, c, d, ...)
+    local r, z, e, aa, aaa, aaaa = ...
+    local tt = { ... }
     Bytedump:dump(GetOpCodes())
     local function b()
     end
@@ -13,7 +15,7 @@ local function T()
     return x, b()
 end
 
-local a, c = T()
+local a, c = T(1, 2, 3, 4, 5, 6)
 local a, c, d = T()
 
 if T() then

@@ -953,7 +953,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local C = Bytedump:C(code)
         if C == 0 then
-            print(index, name, "get all varargs")
+            print(index, name, getMode(code), "get all varargs")
         else
             print(index, name, getMode(code), string.format(f, C, A))
         end

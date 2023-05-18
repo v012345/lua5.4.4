@@ -215,9 +215,11 @@ int luaT_callorderiTM(lua_State* L, const TValue* p1, int v2, int flip, int isfl
 /// @brief 只在 OP_VARARGPREP 指令处调用了
 void luaT_adjustvarargs(lua_State* L, int nfixparams, CallInfo* ci, const Proto* p) {
     int i;
+    // 通过栈的位置, 算出寄存中的实际参数的个数
     int actual = cast_int(L->top - ci->func) - 1; /* number of arguments */
+    // 通过固定参数的个数算出额外参数的个数
     int nextra = actual - nfixparams; /* number of extra arguments */
-    ci->u.l.nextraargs = nextra;
+    ci->u.l.nextraargs = nextra; // 设置 nextraargs, 用于之后调整 func 位置
     luaD_checkstack(L, p->maxstacksize + 1);
     /* copy function to the top of the stack */
     setobjs2s(L, L->top++, ci->func);
@@ -231,15 +233,17 @@ void luaT_adjustvarargs(lua_State* L, int nfixparams, CallInfo* ci, const Proto*
     lua_assert(L->top <= ci->top && ci->top <= L->stack_last);
 }
 
+/// @brief 只在 OP_VARARG 指令处调用了
 void luaT_getvarargs(lua_State* L, CallInfo* ci, StkId where, int wanted) {
     int i;
-    int nextra = ci->u.l.nextraargs;
+    int nextra = ci->u.l.nextraargs; // 上面函数中设置的可变参数的个数
     if (wanted < 0) {
         wanted = nextra; /* get all extra arguments available */
         checkstackGCp(L, nextra, where); /* ensure stack space */
         L->top = where + nextra; /* next instruction will need top */
     }
-    for (i = 0; i < wanted && i < nextra; i++) setobjs2s(L, where + i, ci->func - nextra + i);
+    for (i = 0; i < wanted && i < nextra; i++) // 可变参数在 func 下面了
+        setobjs2s(L, where + i, ci->func - nextra + i);
     for (; i < wanted; i++) /* complete required results with nil */
         setnilvalue(s2v(where + i));
 }
