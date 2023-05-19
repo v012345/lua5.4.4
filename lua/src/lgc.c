@@ -119,26 +119,33 @@ static void entersweep(lua_State* L);
 */
 #define gnodelast(h) gnode(h, cast_sizet(sizenode(h)))
 
+/// @brief 这个 gclist 有什么用呢
 static GCObject** getgclist(GCObject* o) {
     switch (o->tt) {
-        case LUA_VTABLE: return &gco2t(o)->gclist;
-        case LUA_VLCL: return &gco2lcl(o)->gclist;
-        case LUA_VCCL: return &gco2ccl(o)->gclist;
-        case LUA_VTHREAD: return &gco2th(o)->gclist;
-        case LUA_VPROTO: return &gco2p(o)->gclist;
+        case LUA_VTABLE: //
+            return &gco2t(o)->gclist;
+        case LUA_VLCL: //
+            return &gco2lcl(o)->gclist;
+        case LUA_VCCL: //
+            return &gco2ccl(o)->gclist;
+        case LUA_VTHREAD: //
+            return &gco2th(o)->gclist;
+        case LUA_VPROTO: //
+            return &gco2p(o)->gclist;
         case LUA_VUSERDATA: {
             Udata* u = gco2u(o);
             lua_assert(u->nuvalue > 0);
             return &u->gclist;
         }
-        default: lua_assert(0); return 0;
+        default: //
+            lua_assert(0);
+            return 0;
     }
 }
 
-/*
-** Link a collectable object 'o' with a known type into the list 'p'.
-** (Must be a macro to access the 'gclist' field in different types.)
-*/
+// \r
+// Link a collectable object 'o' with a known type into the list 'p'.
+// (Must be a macro to access the 'gclist' field in different types.)
 #define linkgclist(o, p) linkgclist_(obj2gco(o), &(o)->gclist, &(p))
 
 static void linkgclist_(GCObject* o, GCObject** pnext, GCObject** list) {
@@ -148,9 +155,8 @@ static void linkgclist_(GCObject* o, GCObject** pnext, GCObject** list) {
     set2gray(o); /* now it is */
 }
 
-/*
-** Link a generic collectable object 'o' into the list 'p'.
-*/
+// \r
+// Link a generic collectable object 'o' into the list 'p'.
 #define linkobjgclist(o, p) linkgclist_(obj2gco(o), getgclist(o), &(p))
 
 /*
@@ -313,7 +319,8 @@ static void reallymarkobject(global_State* g, GCObject* o) {
 */
 static void markmt(global_State* g) {
     int i;
-    for (i = 0; i < LUA_NUMTAGS; i++) markobjectN(g, g->mt[i]);
+    for (i = 0; i < LUA_NUMTAGS; i++) //
+        markobjectN(g, g->mt[i]);
 }
 
 /*
@@ -1048,7 +1055,8 @@ static GCObject** sweepgen(lua_State* L, global_State* g, GCObject** p, GCObject
 */
 static void whitelist(global_State* g, GCObject* p) {
     int white = luaC_white(g);
-    for (; p != NULL; p = p->next) p->marked = cast_byte((p->marked & ~maskgcbits) | white);
+    for (; p != NULL; p = p->next) //
+        p->marked = cast_byte((p->marked & ~maskgcbits) | white);
 }
 
 /*
@@ -1256,7 +1264,9 @@ static lu_mem fullgen(lua_State* L, global_State* g) {
 ** Set debt for the next minor collection, which will happen when
 ** memory grows 'genminormul'%.
 */
-static void setminordebt(global_State* g) { luaE_setdebt(g, -(cast(l_mem, (gettotalbytes(g) / 100)) * g->genminormul)); }
+static void setminordebt(global_State* g) { //
+    luaE_setdebt(g, -(cast(l_mem, (gettotalbytes(g) / 100)) * g->genminormul));
+}
 
 /*
 ** Does a major collection after last collection was a "bad collection".
@@ -1496,11 +1506,17 @@ static lu_mem singlestep(lua_State* L) {
             ;
             break;
         }
-        case GCSswpallgc: { /* sweep "regular" objects */ work = sweepstep(L, g, GCSswpfinobj, &g->finobj); break;
+        case GCSswpallgc: { /* sweep "regular" objects */
+            work = sweepstep(L, g, GCSswpfinobj, &g->finobj); //
+            break;
         }
-        case GCSswpfinobj: { /* sweep objects with finalizers */ work = sweepstep(L, g, GCSswptobefnz, &g->tobefnz); break;
+        case GCSswpfinobj: { /* sweep objects with finalizers */
+            work = sweepstep(L, g, GCSswptobefnz, &g->tobefnz); //
+            break;
         }
-        case GCSswptobefnz: { /* sweep objects to be finalized */ work = sweepstep(L, g, GCSswpend, NULL); break;
+        case GCSswptobefnz: { /* sweep objects to be finalized */
+            work = sweepstep(L, g, GCSswpend, NULL); //
+            break;
         }
         case GCSswpend: { /* finish sweeps */
             checkSizes(L, g);
@@ -1518,7 +1534,9 @@ static lu_mem singlestep(lua_State* L) {
             }
             break;
         }
-        default: lua_assert(0); return 0;
+        default: //
+            lua_assert(0);
+            return 0;
     }
     g->gcstopem = 0;
     return work;
