@@ -167,7 +167,8 @@ void luaF_newtbcupval(lua_State* L, StkId level) {
 void luaF_unlinkupval(UpVal* uv) {
     lua_assert(upisopen(uv));
     *uv->u.open.previous = uv->u.open.next;
-    if (uv->u.open.next) uv->u.open.next->u.open.previous = uv->u.open.previous;
+    if (uv->u.open.next) //
+        uv->u.open.next->u.open.previous = uv->u.open.previous;
 }
 
 /// @brief Close all upvalues up to the given stack level.
@@ -237,15 +238,16 @@ Proto* luaF_newproto(lua_State* L) {
     return f;
 }
 
+/// @brief 释放原型
 void luaF_freeproto(lua_State* L, Proto* f) {
-    luaM_freearray(L, f->code, f->sizecode);
-    luaM_freearray(L, f->p, f->sizep);
-    luaM_freearray(L, f->k, f->sizek);
-    luaM_freearray(L, f->lineinfo, f->sizelineinfo);
-    luaM_freearray(L, f->abslineinfo, f->sizeabslineinfo);
-    luaM_freearray(L, f->locvars, f->sizelocvars);
-    luaM_freearray(L, f->upvalues, f->sizeupvalues);
-    luaM_free(L, f);
+    luaM_freearray(L, f->code, f->sizecode); // 指令
+    luaM_freearray(L, f->p, f->sizep); // 子原型
+    luaM_freearray(L, f->k, f->sizek); // 常量
+    luaM_freearray(L, f->lineinfo, f->sizelineinfo); // 行信息
+    luaM_freearray(L, f->abslineinfo, f->sizeabslineinfo); // 绝对行信息
+    luaM_freearray(L, f->locvars, f->sizelocvars); // 局部变量信息
+    luaM_freearray(L, f->upvalues, f->sizeupvalues); // upvalues
+    luaM_free(L, f); // 原型
 }
 
 /*

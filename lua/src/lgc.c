@@ -706,14 +706,15 @@ static void clearbyvalues(global_State* g, GCObject* l, GCObject* f) {
 }
 
 static void freeupval(lua_State* L, UpVal* uv) {
-    if (upisopen(uv)) luaF_unlinkupval(uv);
+    if (upisopen(uv)) //
+        luaF_unlinkupval(uv);
     luaM_free(L, uv);
 }
 
 /// @brief 这个就是基层函数了, 释放对象
 static void freeobj(lua_State* L, GCObject* o) {
     switch (o->tt) {
-        case LUA_VPROTO: //
+        case LUA_VPROTO: // 释放原型
             luaF_freeproto(L, gco2p(o));
             break;
         case LUA_VUPVAL: //
