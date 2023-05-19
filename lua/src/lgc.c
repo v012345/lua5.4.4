@@ -54,7 +54,8 @@
 */
 #define PAUSEADJ 100
 
-/* mask with all color bits */
+// 黑 白1 白0 ; 00111000 \r
+// mask with all color bits
 #define maskcolors (bitmask(BLACKBIT) | WHITEBITS)
 
 /* mask with all GC bits */
@@ -63,7 +64,8 @@
 /* macro to erase all color bits then set only the current white bit */
 #define makewhite(g, x) (x->marked = cast_byte((x->marked & ~maskcolors) | luaC_white(g)))
 
-/* make an object gray (neither white nor black) */
+// marked 的第 4 5 6 位全置成 0, 不是黑也不是白, 所以是灰 \r
+// make an object gray (neither white nor black)
 #define set2gray(x) resetbits(x->marked, maskcolors)
 
 /* make an object black (coming from any color) */
@@ -233,14 +235,20 @@ void luaC_barrierback_(lua_State* L, GCObject* o) {
         setage(o, G_TOUCHED1); /* touched in current cycle */
 }
 
+/// @brief 把 o 置老灰, 且从 allgc 链上移到 fixedgc 链上
 void luaC_fix(lua_State* L, GCObject* o) {
     global_State* g = G(L);
     lua_assert(g->allgc == o); /* object must be 1st in 'allgc' list! */
+    // marked 的 4 5 6 位全置成 0
     set2gray(o); /* they will be gray forever */
+    // marked 的 3 2  1 位全置成 1 0 0
     setage(o, G_OLD); /* and old forever */
+    // marked = 00111100 (灰 且 老)
+    // 把 o 从 allgc 链上移除
     g->allgc = o->next; /* remove object from 'allgc' list */
+    // 把 o 链到 fixedgc 链上
     o->next = g->fixedgc; /* link it to 'fixedgc' list */
-    g->fixedgc = o;
+    g->fixedgc = o; // 更正 fixedgc 到链头
 }
 
 /// @brief 生成一个新的需要进行垃圾回收的对象, 链到 g->allgc 的链头 \r

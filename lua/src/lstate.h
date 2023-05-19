@@ -259,6 +259,7 @@ typedef struct global_State {
     GCObject* ephemeron; /* list of ephemeron tables (weak keys) */
     GCObject* allweak; /* list of all-weak tables */
     GCObject* tobefnz; /* list of userdata to be GC */
+    // luaC_fix 函数固定下来的元素, 放到这个链上
     GCObject* fixedgc; /* list of objects not to be collected */
     /* fields for generational collector */
     GCObject* survival; /* start of objects that survived one GC cycle */

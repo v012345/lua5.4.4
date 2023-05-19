@@ -51,6 +51,7 @@
 /*
 ** some useful bit tricks
 */
+// 把 m 标记的位置置成 0
 #define resetbits(x, m) ((x) &= cast_byte(~(m)))
 #define setbits(x, m) ((x) |= (m))
 #define testbits(x, m) ((x) & (m)) // x 与 m 按位与
@@ -72,7 +73,8 @@
 
 #define TESTBIT 7
 
-#define WHITEBITS bit2mask(WHITE0BIT, WHITE1BIT) // 就是白(包括 白0 与 白1); 在 3 与 4 的位置上放上 1
+// 就是白(包括 白0 与 白1); 在 4 与 5 的位置上放上 1; 00011000
+#define WHITEBITS bit2mask(WHITE0BIT, WHITE1BIT)
 
 #define iswhite(x) testbits((x)->marked, WHITEBITS) // 对象的 marked 的第 3 和第 4 位的比特值
 #define isblack(x) testbit((x)->marked, BLACKBIT) // 对象的 marked 的第 BLACKBIT(5) 位的比特值
@@ -101,7 +103,9 @@
 
 #define AGEBITS 7 /* all age bits (111) */
 
+// marked 的低三位表示不同的时候世代
 #define getage(o) ((o)->marked & AGEBITS)
+// 设置 marked 的低三位为 a
 #define setage(o, a) ((o)->marked = cast_byte(((o)->marked & (~AGEBITS)) | a))
 #define isold(o) (getage(o) > G_SURVIVAL)
 
