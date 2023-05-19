@@ -2,7 +2,6 @@
 ** $Id: lgc.c $
 ** Garbage Collector
 ** See Copyright Notice in lua.h
-** 垃圾回收
 */
 
 #define lgc_c
@@ -250,10 +249,10 @@ void luaC_fix(lua_State* L, GCObject* o) {
 GCObject* luaC_newobj(lua_State* L, int tt, size_t sz) {
     global_State* g = G(L);
     GCObject* o = cast(GCObject*, luaM_newobject(L, novariant(tt), sz));
-    o->marked = luaC_white(g);
+    o->marked = luaC_white(g); // g->currentwhite & 00011000
     o->tt = tt;
     o->next = g->allgc;
-    g->allgc = o;
+    g->allgc = o; // g->allgc 是链头
     return o;
 }
 

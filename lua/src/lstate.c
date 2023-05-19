@@ -346,7 +346,7 @@ LUA_API lua_State* lua_newstate(lua_Alloc f, void* ud) {
     L = &l->l.l; // 主线程机
     g = &l->g; // 全局状态机
     L->tt = LUA_VTHREAD;
-    g->currentwhite = bitmask(WHITE0BIT); // 白 0 阶段
+    g->currentwhite = bitmask(WHITE0BIT); // 白 0 阶段, 就是 0001000
     L->marked = luaC_white(g); // 与 g->currentwhite 的 3 与 4 位置一样
     preinit_thread(L, g);
     g->allgc = obj2gco(L); /* 把主线程的 GCObject 入到链头; by now, only object is the main thread */
@@ -363,8 +363,8 @@ LUA_API lua_State* lua_newstate(lua_Alloc f, void* ud) {
     g->strt.hash = NULL;
     setnilvalue(&g->l_registry);
     g->panic = NULL;
-    g->gcstate = GCSpause;
-    g->gckind = KGC_INC;
+    g->gcstate = GCSpause; // 不进行垃圾回收
+    g->gckind = KGC_INC; // 初始时, 使用增量 gc
     g->gcstopem = 0;
     g->gcemergency = 0;
     g->finobj = g->tobefnz = g->fixedgc = NULL;

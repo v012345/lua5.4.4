@@ -68,7 +68,8 @@ typedef struct TValue {
 #define val_(o) ((o)->value_)
 #define valraw(o) (val_(o))
 
-// o 的细分类型(tt_); raw type tag of a TValue
+// o 的细分类型(tt_) \r
+// raw type tag of a TValue
 #define rawtt(o) ((o)->tt_)
 
 // tag with no variants (bits 0-3)
@@ -211,7 +212,9 @@ typedef StackValue* StkId;
 #define LUA_VTRUE makevariant(LUA_TBOOLEAN, 1)
 
 #define ttisboolean(o) checktype((o), LUA_TBOOLEAN)
+// false 不可以被回收
 #define ttisfalse(o) checktag((o), LUA_VFALSE)
+// true 不可以被回收
 #define ttistrue(o) checktag((o), LUA_VTRUE)
 
 #define l_isfalse(o) (ttisfalse(o) || ttisnil(o))
@@ -231,6 +234,7 @@ typedef StackValue* StkId;
 
 #define LUA_VTHREAD makevariant(LUA_TTHREAD, 0)
 
+// 看看是不是线程, 线程是可以回收的
 #define ttisthread(o) checktag((o), ctb(LUA_VTHREAD))
 
 #define thvalue(o) check_exp(ttisthread(o), gco2th(val_(o).gc))
@@ -254,31 +258,30 @@ typedef StackValue* StkId;
 ** ===================================================================
 */
 
-/*
-** Common Header for all collectable objects (in macro form, to be
-** included in other objects)
-@param tt 数据的类型
-*/
+// Common Header for all collectable objects (in macro form, to be included in other objects)
 #define CommonHeader                                                                                                                                                                                   \
     struct GCObject* next;                                                                                                                                                                             \
     lu_byte tt;                                                                                                                                                                                        \
     lu_byte marked
 
-/* Common type for all collectable objects
-@param tt 一个字节的类型标志,用于记录对象的具体类型,以便在垃圾回收时做出不同的处理
-@param marked 一个字节的标记,用于记录对象是否被标记为可达,以便在垃圾回收时判断对象是否需要被回收
-@param GCObject*next 指向下一个垃圾回收对象的指针,用于将所有的垃圾回收对象串联起来,形成一个链表
-*/
+/// @brief Common type for all collectable objects
+/// @param tt 一个字节的类型标志,用于记录对象的具体类型,以便在垃圾回收时做出不同的处理
+/// @param marked 一个字节的标记,用于记录对象是否被标记为可达,以便在垃圾回收时判断对象是否需要被回收
+/// @param GCObject* next 指向下一个垃圾回收对象的指针,用于将所有的垃圾回收对象串联起来,形成一个链表
 typedef struct GCObject {
     CommonHeader;
 } GCObject;
 
 /* Bit mark for collectable types */
+
+// 01000000
 #define BIT_ISCOLLECTABLE (1 << 6)
 
+// tt_ 的低 6 位表示类型, 而第 7 位说明是否可被回收
 #define iscollectable(o) (rawtt(o) & BIT_ISCOLLECTABLE)
 
-/* mark a tag as collectable */
+// 把一个类型标记成可被回收, 就是第 7 位标记成 1 \r
+// mark a tag as collectable
 #define ctb(t) ((t) | BIT_ISCOLLECTABLE)
 
 #define gcvalue(o) check_exp(iscollectable(o), val_(o).gc)
@@ -306,7 +309,9 @@ typedef struct GCObject {
 #define LUA_VNUMFLT makevariant(LUA_TNUMBER, 1) /* float numbers */
 
 #define ttisnumber(o) checktype((o), LUA_TNUMBER)
+// 浮点数不可以被回收
 #define ttisfloat(o) checktag((o), LUA_VNUMFLT)
+// 整数不可以被回收
 #define ttisinteger(o) checktag((o), LUA_VNUMINT)
 
 #define nvalue(o) check_exp(ttisnumber(o), (ttisinteger(o) ? cast_num(ivalue(o)) : fltvalue(o)))
@@ -360,7 +365,9 @@ typedef struct GCObject {
 #define LUA_VLNGSTR makevariant(LUA_TSTRING, 1) /* long strings */
 
 #define ttisstring(o) checktype((o), LUA_TSTRING)
+// 看看是不是短串, 短串是可以回收的
 #define ttisshrstring(o) checktag((o), ctb(LUA_VSHRSTR))
+// 看看是不是长串, 长串是可以回收的
 #define ttislngstring(o) checktag((o), ctb(LUA_VLNGSTR))
 
 #define tsvalueraw(v) (gco2ts((v).gc))
@@ -426,7 +433,9 @@ typedef struct TString {
 
 #define LUA_VUSERDATA makevariant(LUA_TUSERDATA, 0)
 
+// 看看是不是轻量用户数据(一般是 c 函数), 是不可以回收
 #define ttislightuserdata(o) checktag((o), LUA_VLIGHTUSERDATA)
+// 看看是不是用户数据, 用户数据是可以回收的
 #define ttisfulluserdata(o) checktag((o), ctb(LUA_VUSERDATA))
 
 #define pvalue(o) check_exp(ttislightuserdata(o), val_(o).p)
@@ -581,13 +590,19 @@ typedef struct Proto {
 #define LUA_VUPVAL makevariant(LUA_TUPVAL, 0)
 
 /* Variant tags for functions */
-#define LUA_VLCL makevariant(LUA_TFUNCTION, 0) /* 0000 1010; Lua closure */
-#define LUA_VLCF makevariant(LUA_TFUNCTION, 1) /* 0001 1010; light C function */
-#define LUA_VCCL makevariant(LUA_TFUNCTION, 2) /* 0010 1010; C closure */
+// 00001010
+#define LUA_VLCL makevariant(LUA_TFUNCTION, 0) /* Lua closure */
+// 00011010
+#define LUA_VLCF makevariant(LUA_TFUNCTION, 1) /* light C function */
+// 00101010
+#define LUA_VCCL makevariant(LUA_TFUNCTION, 2) /* C closure */
 
 #define ttisfunction(o) checktype(o, LUA_TFUNCTION)
+// lua 闭包可以被回收
 #define ttisLclosure(o) checktag((o), ctb(LUA_VLCL))
+// 轻量 c 函数不可以被回收
 #define ttislcf(o) checktag((o), LUA_VLCF)
+// c 闭包可以被回收
 #define ttisCclosure(o) checktag((o), ctb(LUA_VCCL))
 #define ttisclosure(o) (ttisLclosure(o) || ttisCclosure(o))
 
@@ -676,6 +691,7 @@ typedef union Closure {
 
 #define LUA_VTABLE makevariant(LUA_TTABLE, 0)
 
+// 表可以被回收
 #define ttistable(o) checktag((o), ctb(LUA_VTABLE))
 
 // 拿到 Tvalue 中 Value 中 gc 指针指向数据的 h 部分
