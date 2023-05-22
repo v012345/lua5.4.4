@@ -69,7 +69,8 @@
 // make an object gray (neither white nor black)
 #define set2gray(x) resetbits(x->marked, maskcolors)
 
-/* make an object black (coming from any color) */
+// 不影响年龄, 就是设置成黑色(就是第 6 位是 1) \r
+// make an object black (coming from any color)
 #define set2black(x) (x->marked = cast_byte((x->marked & ~WHITEBITS) | bitmask(BLACKBIT)))
 
 #define valiswhite(x) (iscollectable(x) && iswhite(gcvalue(x)))
@@ -116,9 +117,8 @@ static void entersweep(lua_State* L);
 ** =======================================================
 */
 
-/*
-** one after last element in a hash array
-*/
+// 表的哈希部分的最后一个结点 \r
+// one after last element in a hash array
 #define gnodelast(h) gnode(h, cast_sizet(sizenode(h)))
 
 /// @brief 这个 gclist 有什么用呢
@@ -145,11 +145,14 @@ static GCObject** getgclist(GCObject* o) {
     }
 }
 
-// \r
+// 把某个可回对象 o 收链到 p 的链头, p 指向链头 \r
 // Link a collectable object 'o' with a known type into the list 'p'.
 // (Must be a macro to access the 'gclist' field in different types.)
 #define linkgclist(o, p) linkgclist_(obj2gco(o), &(o)->gclist, &(p))
 
+/// @brief 把某个可回对象 o 收链到 *list 的链头, *list 指向链头
+/// @param pnext 某个可收回对象的 gclist 指针的指针
+/// @param list 某个链的链头指针的指针
 static void linkgclist_(GCObject* o, GCObject** pnext, GCObject** list) {
     lua_assert(!isgray(o)); /* cannot be in a gray list */
     *pnext = *list;
@@ -157,7 +160,7 @@ static void linkgclist_(GCObject* o, GCObject** pnext, GCObject** list) {
     set2gray(o); /* now it is */
 }
 
-// \r
+// 把某个可回对象 o 收链到 p 的链头, p 指向链头 \r
 // Link a generic collectable object 'o' into the list 'p'.
 #define linkobjgclist(o, p) linkgclist_(obj2gco(o), getgclist(o), &(p))
 
@@ -271,18 +274,15 @@ GCObject* luaC_newobj(lua_State* L, int tt, size_t sz) {
 ** =======================================================
 */
 
-/*
-** Mark an object.  Userdata with no user values, strings, and closed
-** upvalues are visited and turned black here.  Open upvalues are
-** already indirectly linked through their respective threads in the
-** 'twups' list, so they don't go to the gray list; nevertheless, they
-** are kept gray to avoid barriers, as their values will be revisited
-** by the thread or by 'remarkupvals'.  Other objects are added to the
-** gray list to be visited (and turned black) later.  Both userdata and
-** upvalues can call this function recursively, but this recursion goes
-** for at most two levels: An upvalue cannot refer to another upvalue
-** (only closures can), and a userdata's metatable must be a table.
-*/
+/// @brief \r
+/// Mark an object.
+/// Userdata with no user values, strings, and closed upvalues are visited and turned black here.
+/// Open upvalues are already indirectly linked through their respective threads in the 'twups' list,
+/// so they don't go to the gray list; nevertheless, they are kept gray to avoid barriers,
+/// as their values will be revisited by the thread or by 'remarkupvals'.
+/// Other objects are added to the gray list to be visited (and turned black) later.
+/// Both userdata and upvalues can call this function recursively, but this recursion goes for at most two levels:
+/// An upvalue cannot refer to another upvalue (only closures can), and a userdata's metatable must be a table.
 static void reallymarkobject(global_State* g, GCObject* o) {
     switch (o->tt) {
         case LUA_VSHRSTR:
@@ -380,8 +380,8 @@ static int remarkupvals(global_State* g) {
 }
 
 static void cleargraylists(global_State* g) {
-    g->gray = g->grayagain = NULL;
-    g->weak = g->allweak = g->ephemeron = NULL;
+    g->gray = g->grayagain = NULL; // 灰色链相关置空
+    g->weak = g->allweak = g->ephemeron = NULL; // 弱表相关链置空
 }
 
 /*
@@ -524,7 +524,9 @@ static lu_mem traversetable(global_State* g, Table* h) {
     const TValue* mode = gfasttm(g, h->metatable, TM_MODE);
     markobjectN(g, h->metatable);
     if (mode && ttisstring(mode) && /* is there a weak mode? */
-        (cast_void(weakkey = strchr(svalue(mode), 'k')), cast_void(weakvalue = strchr(svalue(mode), 'v')), (weakkey || weakvalue))) { /* is really weak? */
+        (cast_void(weakkey = strchr(svalue(mode), 'k')), // 是否指明是弱键
+         cast_void(weakvalue = strchr(svalue(mode), 'v')), // 指明是否是弱值
+         (weakkey || weakvalue))) { /* is really weak? */
         if (!weakkey) /* strong keys? */
             traverseweakvalue(g, h);
         else if (!weakvalue) /* strong values? */
@@ -932,7 +934,8 @@ static void separatetobefnz(global_State* g, int all) {
 ** If pointer 'p' points to 'o', move it to the next element.
 */
 static void checkpointer(GCObject** p, GCObject* o) {
-    if (o == *p) *p = o->next;
+    if (o == *p) //
+        *p = o->next;
 }
 
 /*
@@ -1482,13 +1485,14 @@ static int sweepstep(lua_State* L, global_State* g, int nextstate, GCObject** ne
     }
 }
 
+/// @brief 进入下一步
 static lu_mem singlestep(lua_State* L) {
     global_State* g = G(L);
     lu_mem work;
     lua_assert(!g->gcstopem); /* collector is not reentrant */
     g->gcstopem = 1; /* no emergency collections while collecting */
     switch (g->gcstate) {
-        case GCSpause: {
+        case GCSpause: { // 现在是暂停状态
             restartcollection(g);
             g->gcstate = GCSpropagate;
             work = 1;
@@ -1506,7 +1510,6 @@ static lu_mem singlestep(lua_State* L) {
             work = atomic(L); /* work is what was traversed by 'atomic' */
             entersweep(L);
             g->GCestimate = gettotalbytes(g); /* first estimate */
-            ;
             break;
         }
         case GCSswpallgc: { /* sweep "regular" objects */

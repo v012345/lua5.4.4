@@ -123,10 +123,7 @@
 /* wait memory to double before starting new cycle */
 #define LUAI_GCPAUSE 200
 
-/*
-** some gc parameters are stored divided by 4 to allow a maximum value
-** up to 1023 in a 'lu_byte'.
-*/
+// some gc parameters are stored divided by 4 to allow a maximum value up to 1023 in a 'lu_byte'.
 #define getgcparam(p) ((p)*4)
 #define setgcparam(p, v) ((p) = (v) / 4)
 
