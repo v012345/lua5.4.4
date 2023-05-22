@@ -26,8 +26,8 @@
 /*
 ** Possible states of the Garbage Collector
 */
-#define GCSpropagate 0 // 标记阶段, 遍历所有可达对象并标记为不可回收
-#define GCSenteratomic 1 // 进入原子阶段,暂停所有 Lua 线程并开始处理原子操作
+#define GCSpropagate 0 // 处理 gray 链阶段
+#define GCSenteratomic 1 // 要执行 atomic(L)
 #define GCSatomic 2 // 原子阶段, 执行原子操作
 #define GCSswpallgc 3 // 扫描阶段, 遍历所有对象并将未被标记为不可回收的对象从内存中移除
 #define GCSswpfinobj 4 // 扫描阶段, 处理一些特殊的对象(比如 userdata), 并将未被标记为不可回收的对象从内存中移除

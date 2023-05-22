@@ -62,7 +62,8 @@
 // mask with all GC bits
 #define maskgcbits (maskcolors | AGEBITS)
 
-/* macro to erase all color bits then set only the current white bit */
+// 设置成当前白
+// macro to erase all color bits then set only the current white bit
 #define makewhite(g, x) (x->marked = cast_byte((x->marked & ~maskcolors) | luaC_white(g)))
 
 // marked 的第 4 5 6 位全置成 0, 不是黑也不是白, 所以是灰 \r
@@ -93,15 +94,14 @@
         if keyiswhite (n) reallymarkobject(g, gckey(n));                                                                                                                                               \
     }
 
+// 如果 t 不是白色, 标记 t
 #define markobject(g, t)                                                                                                                                                                               \
     {                                                                                                                                                                                                  \
         if (iswhite(t)) reallymarkobject(g, obj2gco(t));                                                                                                                                               \
     }
 
-/*
-** mark an object that can be NULL (either because it is really optional,
-** or it was stripped as debug info, or inside an uncompleted structure)
-*/
+// 如果 t 不为 NULL, 那么尝试标记 t \r
+// mark an object that can be NULL (either because it is really optional, or it was stripped as debug info, or inside an uncompleted structure)
 #define markobjectN(g, t)                                                                                                                                                                              \
     {                                                                                                                                                                                                  \
         if (t) markobject(g, t);                                                                                                                                                                       \
@@ -286,16 +286,17 @@ GCObject* luaC_newobj(lua_State* L, int tt, size_t sz) {
 static void reallymarkobject(global_State* g, GCObject* o) {
     switch (o->tt) {
         case LUA_VSHRSTR:
-        case LUA_VLNGSTR: {
+        case LUA_VLNGSTR: { // 字符串直接标记为黑
             set2black(o); /* nothing to visit */
             break;
         }
-        case LUA_VUPVAL: {
+        case LUA_VUPVAL: { // 开放的 upvalue 标记为灰, 关闭的为黑
             UpVal* uv = gco2upv(o);
             if (upisopen(uv))
                 set2gray(uv); /* open upvalues are kept gray */
             else
                 set2black(uv); /* closed upvalues are visited here */
+            // 不管开闭, 都要标记内容
             markvalue(g, uv->v); /* mark its content */
             break;
         }
@@ -313,6 +314,7 @@ static void reallymarkobject(global_State* g, GCObject* o) {
         case LUA_VTABLE:
         case LUA_VTHREAD:
         case LUA_VPROTO: {
+            // 这里使用 linkobjgclist 因为各种状态都进来了, 使用对应不同的类型获取 gclist
             linkobjgclist(o, g->gray); /* to be visited later */
             break;
         }
@@ -320,9 +322,8 @@ static void reallymarkobject(global_State* g, GCObject* o) {
     }
 }
 
-/*
-** mark metamethods for basic types
-*/
+/// @brief 标记基础类型的元方法 \r
+/// mark metamethods for basic types
 static void markmt(global_State* g) {
     int i;
     for (i = 0; i < LUA_NUMTAGS; i++) //
@@ -388,10 +389,13 @@ static void cleargraylists(global_State* g) {
 ** mark root set and reset all gray lists, to start a new collection
 */
 static void restartcollection(global_State* g) {
-    cleargraylists(g);
+    cleargraylists(g); // 清理灰链
+    // mainthread 始初化的时候是当前白, 这里会链到 gray 链上
     markobject(g, g->mainthread);
+    // 全局对象表链到了 mainthread 之前
     markvalue(g, &g->l_registry);
-    markmt(g);
+    markmt(g); // 标记基础类型的元方法
+    // 第一次应该为 NULL 吧
     markbeingfnz(g); /* mark any finalizing object left from previous cycle */
 }
 
@@ -620,9 +624,8 @@ static int traversethread(global_State* g, lua_State* th) {
     return 1 + stacksize(th);
 }
 
-/*
-** traverse one gray object, turning it to black.
-*/
+/// @brief 把灰链的第一个对象拿下来, 设置成黑色, 标记一个这个对象引用的对象 \r
+/// traverse one gray object, turning it to black.
 static lu_mem propagatemark(global_State* g) {
     GCObject* o = g->gray; // 灰链的第一个元素
     nw2black(o); // 第一个元置成黑色
@@ -646,6 +649,7 @@ static lu_mem propagatemark(global_State* g) {
     }
 }
 
+/// @brief 循环调用 propagatemark 把 gray 清空
 static lu_mem propagateall(global_State* g) {
     lu_mem tot = 0;
     while (g->gray) tot += propagatemark(g);
@@ -780,13 +784,12 @@ static void freeobj(lua_State* L, GCObject* o) {
     }
 }
 
-/*
-** sweep at most 'countin' elements from a list of GCObjects erasing dead
-** objects, where a dead object is one marked with the old (non current)
-** white; change all non-dead objects back to white, preparing for next
-** collection cycle. Return where to continue the traversal or NULL if
-** list is finished. ('*countout' gets the number of elements traversed.)
-*/
+/// @brief \r
+/// sweep at most 'countin' elements from a list of GCObjects erasing dead objects,
+/// where a dead object is one marked with the old (non current) white;
+/// change all non-dead objects back to white, preparing for next collection cycle.
+/// Return where to continue the traversal or NULL if list is finished.
+/// ('*countout' gets the number of elements traversed.)
 static GCObject** sweeplist(lua_State* L, GCObject** p, int countin, int* countout) {
     global_State* g = G(L);
     int ow = otherwhite(g);
@@ -795,10 +798,12 @@ static GCObject** sweeplist(lua_State* L, GCObject** p, int countin, int* counto
     for (i = 0; *p != NULL && i < countin; i++) {
         GCObject* curr = *p;
         int marked = curr->marked;
+        // 不包含当前白就是说明死了
         if (isdeadm(ow, marked)) { /* is 'curr' dead? */
             *p = curr->next; /* remove 'curr' from list */
             freeobj(L, curr); /* erase 'curr' */
         } else { /* change mark to 'white' */
+            // 擦除年龄, 设置成当前的白
             curr->marked = cast_byte((marked & ~maskgcbits) | white);
             p = &curr->next; /* go to next element */
         }
@@ -807,12 +812,13 @@ static GCObject** sweeplist(lua_State* L, GCObject** p, int countin, int* counto
     return (*p == NULL) ? NULL : p;
 }
 
-/*
-** sweep a list until a live object (or end of list)
-*/
+/// @brief \r
+/// sweep a list until a live object (or end of list)
 static GCObject** sweeptolive(lua_State* L, GCObject** p) {
     GCObject** old = p;
-    do { p = sweeplist(L, p, 1, NULL); } while (p == old);
+    do { //
+        p = sweeplist(L, p, 1, NULL);
+    } while (p == old);
     return p;
 }
 
@@ -1393,13 +1399,10 @@ static void setpause(global_State* g) {
     luaE_setdebt(g, debt);
 }
 
-/*
-** Enter first sweep phase.
-** The call to 'sweeptolive' makes the pointer point to an object
-** inside the list (instead of to the header), so that the real sweep do
-** not need to skip objects created between "now" and the start of the
-** real sweep.
-*/
+/// @brief 进入 swp 阶段, 就是开扫了, 一步一步扫, 看看要释放哪个 \r
+/// Enter first sweep phase.
+/// The call to 'sweeptolive' makes the pointer point to an object inside the list (instead of to the header),
+/// so that the real sweep do not need to skip objects created between "now" and the start of the real sweep.
 static void entersweep(lua_State* L) {
     global_State* g = G(L);
     g->gcstate = GCSswpallgc;
@@ -1436,19 +1439,23 @@ void luaC_freeallobjects(lua_State* L) {
     lua_assert(g->strt.nuse == 0);
 }
 
+/// @brief 太复杂了
 static lu_mem atomic(lua_State* L) {
     global_State* g = G(L);
     lu_mem work = 0;
     GCObject *origweak, *origall;
+    // 保存原来的 grayagain
     GCObject* grayagain = g->grayagain; /* save original list */
     g->grayagain = NULL;
     lua_assert(g->ephemeron == NULL && g->weak == NULL);
     lua_assert(!iswhite(g->mainthread));
     g->gcstate = GCSatomic;
+    // 标记一下运行线程, 全局注册表, 为基础类型元方法, 这都是不用收回的
     markobject(g, L); /* mark running thread */
     /* registry and global metatables may be changed by API */
     markvalue(g, &g->l_registry);
     markmt(g); /* mark global metatables */
+    // 把 gray 链清空
     work += propagateall(g); /* empties 'gray' list */
     /* remark occasional upvalues of (maybe) dead threads */
     work += remarkupvals(g);
@@ -1480,6 +1487,7 @@ static lu_mem atomic(lua_State* L) {
     return work; /* estimate of slots marked by 'atomic' */
 }
 
+/// @param nextstate 下一个 GC 状态
 static int sweepstep(lua_State* L, global_State* g, int nextstate, GCObject** nextlist) {
     if (g->sweepgc) {
         l_mem olddebt = g->GCdebt;
@@ -1507,7 +1515,7 @@ static lu_mem singlestep(lua_State* L) {
             work = 1;
             break;
         }
-        case GCSpropagate: {
+        case GCSpropagate: { // 为什么只处理了一个灰对象
             if (g->gray == NULL) { /* no more gray objects? */
                 g->gcstate = GCSenteratomic; /* finish propagate phase */
                 work = 0;
@@ -1534,7 +1542,7 @@ static lu_mem singlestep(lua_State* L) {
             break;
         }
         case GCSswpend: { /* finish sweeps */
-            checkSizes(L, g);
+            checkSizes(L, g); // 看看能不能处理字符串表
             g->gcstate = GCScallfin;
             work = 0;
             break;

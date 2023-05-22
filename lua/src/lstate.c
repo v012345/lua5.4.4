@@ -384,7 +384,8 @@ LUA_API lua_State* lua_newstate(lua_Alloc f, void* ud) {
     g->gcstepsize = LUAI_GCSTEPSIZE;
     setgcparam(g->genmajormul, LUAI_GENMAJORMUL);
     g->genminormul = LUAI_GENMINORMUL;
-    for (i = 0; i < LUA_NUMTAGS; i++) g->mt[i] = NULL;
+    for (i = 0; i < LUA_NUMTAGS; i++) // 类型类型的元方法
+        g->mt[i] = NULL;
     // 初始化了一些 栈与串
     if (luaD_rawrunprotected(L, f_luaopen, NULL) != LUA_OK) {
         /* memory allocation error: free partial state */
