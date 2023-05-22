@@ -195,7 +195,8 @@ l_sinline Node* mainpositionfromnode(const Table* t, Node* nd) {
 */
 static int equalkey(const TValue* k1, const Node* n2, int deadok) {
     if ((rawtt(k1) != keytt(n2)) && /* not the same variants? */
-        !(deadok && keyisdead(n2) && iscollectable(k1)))
+        !(deadok && keyisdead(n2) && //
+          iscollectable(k1)))
         return 0; /* cannot be same key */
     switch (keytt(n2)) {
         case LUA_VNIL:

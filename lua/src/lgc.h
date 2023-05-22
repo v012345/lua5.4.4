@@ -53,10 +53,12 @@
 */
 // 把 m 标记的位置置成 0
 #define resetbits(x, m) ((x) &= cast_byte(~(m)))
+// 加入 m 标记的状态
 #define setbits(x, m) ((x) |= (m))
 #define testbits(x, m) ((x) & (m)) // x 与 m 按位与
 #define bitmask(b) (1 << (b)) // 在 b 位置上放一个 1
 #define bit2mask(b1, b2) (bitmask(b1) | bitmask(b2)) // 在 b1 与 b2 的位置的放上 1
+// 把 x 的第 b + 1 位置成 1
 #define l_setbit(x, b) setbits(x, bitmask(b))
 #define resetbit(x, b) resetbits(x, bitmask(b))
 #define testbit(x, b) testbits(x, bitmask(b)) // x 的 b 位的比特值
@@ -91,6 +93,7 @@
 #define isdead(g, v) isdeadm(otherwhite(g), (v)->marked)
 
 #define changewhite(x) ((x)->marked ^= WHITEBITS)
+// 把 x 的 marked 的第 6 位置成 1
 #define nw2black(x) check_exp(!iswhite(x), l_setbit((x)->marked, BLACKBIT))
 
 // 就是取当前白的状态

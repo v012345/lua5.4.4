@@ -121,7 +121,7 @@ static void entersweep(lua_State* L);
 // one after last element in a hash array
 #define gnodelast(h) gnode(h, cast_sizet(sizenode(h)))
 
-/// @brief 这个 gclist 有什么用呢
+/// @brief gclist 指向下一个可回收对象, 相当于链的 next
 static GCObject** getgclist(GCObject* o) {
     switch (o->tt) {
         case LUA_VTABLE: //
@@ -145,13 +145,13 @@ static GCObject** getgclist(GCObject* o) {
     }
 }
 
-// 把某个可回对象 o 收链到 p 的链头, p 指向链头 \r
+// 把某个可回对象 o 收链到 p 的链头, p 指向链头, gclist 指向原来的链头 \r
 // Link a collectable object 'o' with a known type into the list 'p'.
 // (Must be a macro to access the 'gclist' field in different types.)
 #define linkgclist(o, p) linkgclist_(obj2gco(o), &(o)->gclist, &(p))
 
 /// @brief 把某个可回对象 o 收链到 *list 的链头, *list 指向链头
-/// @param pnext 某个可收回对象的 gclist 指针的指针
+/// @param pnext 某个可收回对象的 gclist 指针的指针, gclist 指向原来的链头
 /// @param list 某个链的链头指针的指针
 static void linkgclist_(GCObject* o, GCObject** pnext, GCObject** list) {
     lua_assert(!isgray(o)); /* cannot be in a gray list */
@@ -160,7 +160,7 @@ static void linkgclist_(GCObject* o, GCObject** pnext, GCObject** list) {
     set2gray(o); /* now it is */
 }
 
-// 把某个可回对象 o 收链到 p 的链头, p 指向链头 \r
+// 把某个可回对象 o 收链到 p 的链头, p 指向链头, o->gclist 指向原来的链头 \r
 // Link a generic collectable object 'o' into the list 'p'.
 #define linkobjgclist(o, p) linkgclist_(obj2gco(o), getgclist(o), &(p))
 
@@ -501,6 +501,7 @@ static int traverseephemeron(global_State* g, Table* h, int inv) {
     return marked;
 }
 
+/// @brief 处理一个强表
 static void traversestrongtable(global_State* g, Table* h) {
     Node *n, *limit = gnodelast(h);
     unsigned int i;
@@ -623,17 +624,25 @@ static int traversethread(global_State* g, lua_State* th) {
 ** traverse one gray object, turning it to black.
 */
 static lu_mem propagatemark(global_State* g) {
-    GCObject* o = g->gray;
-    nw2black(o);
+    GCObject* o = g->gray; // 灰链的第一个元素
+    nw2black(o); // 第一个元置成黑色
     g->gray = *getgclist(o); /* remove from 'gray' list */
     switch (o->tt) {
-        case LUA_VTABLE: return traversetable(g, gco2t(o));
-        case LUA_VUSERDATA: return traverseudata(g, gco2u(o));
-        case LUA_VLCL: return traverseLclosure(g, gco2lcl(o));
-        case LUA_VCCL: return traverseCclosure(g, gco2ccl(o));
-        case LUA_VPROTO: return traverseproto(g, gco2p(o));
-        case LUA_VTHREAD: return traversethread(g, gco2th(o));
-        default: lua_assert(0); return 0;
+        case LUA_VTABLE: //
+            return traversetable(g, gco2t(o));
+        case LUA_VUSERDATA: //
+            return traverseudata(g, gco2u(o));
+        case LUA_VLCL: //
+            return traverseLclosure(g, gco2lcl(o));
+        case LUA_VCCL: //
+            return traverseCclosure(g, gco2ccl(o));
+        case LUA_VPROTO: //
+            return traverseproto(g, gco2p(o));
+        case LUA_VTHREAD: //
+            return traversethread(g, gco2th(o));
+        default: //
+            lua_assert(0);
+            return 0;
     }
 }
 
