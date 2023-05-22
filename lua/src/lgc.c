@@ -58,7 +58,8 @@
 // mask with all color bits
 #define maskcolors (bitmask(BLACKBIT) | WHITEBITS)
 
-/* mask with all GC bits */
+// gc 使用的所有比特位 \r
+// mask with all GC bits
 #define maskgcbits (maskcolors | AGEBITS)
 
 /* macro to erase all color bits then set only the current white bit */
@@ -219,10 +220,8 @@ void luaC_barrier_(lua_State* L, GCObject* o, GCObject* v) {
     }
 }
 
-/*
-** barrier that moves collector backward, that is, mark the black object
-** pointing to a white object as gray again.
-*/
+/// @brief \r
+/// barrier that moves collector backward, that is, mark the black object pointing to a white object as gray again.
 void luaC_barrierback_(lua_State* L, GCObject* o) {
     global_State* g = G(L);
     lua_assert(isblack(o) && !isdead(g, o));
@@ -1055,14 +1054,13 @@ static GCObject** sweepgen(lua_State* L, global_State* g, GCObject** p, GCObject
     return p;
 }
 
-/*
-** Traverse a list making all its elements white and clearing their
-** age. In incremental mode, all objects are 'new' all the time,
-** except for fixed strings (which are always old).
-*/
+/// @brief 把这个 p 链上的 marked 置成当前白, 把年龄抹去
+/// Traverse a list making all its elements white and clearing their age.
+/// In incremental mode, all objects are 'new' all the time,
+/// except for fixed strings (which are always old).
 static void whitelist(global_State* g, GCObject* p) {
     int white = luaC_white(g);
-    for (; p != NULL; p = p->next) //
+    for (; p != NULL; p = p->next) // 把这个链上的 marked 置成当前白
         p->marked = cast_byte((p->marked & ~maskgcbits) | white);
 }
 
@@ -1229,11 +1227,9 @@ static lu_mem entergen(lua_State* L, global_State* g) {
     return numobjs;
 }
 
-/*
-** Enter incremental mode. Turn all objects white, make all
-** intermediate lists point to NULL (to avoid invalid pointers),
-** and go to the pause state.
-*/
+/// @brief 进入增度式的垃圾回收模式 \r
+/// Enter incremental mode. Turn all objects white, make all intermediate lists
+/// point to NULL (to avoid invalid pointers), and go to the pause state.
 static void enterinc(global_State* g) {
     whitelist(g, g->allgc);
     g->reallyold = g->old1 = g->survival = NULL;
@@ -1245,9 +1241,8 @@ static void enterinc(global_State* g) {
     g->lastatomic = 0;
 }
 
-/*
-** Change collector mode to 'newmode'.
-*/
+/// @brief 切换收集器的模式, 一般都是 KGC_INC 模式, 除非在 lua 脚本中显式指明
+/// Change collector mode to 'newmode'.
 void luaC_changemode(lua_State* L, int newmode) {
     global_State* g = G(L);
     if (newmode != g->gckind) {
@@ -1467,6 +1462,7 @@ static lu_mem atomic(lua_State* L) {
     clearbyvalues(g, g->weak, origweak);
     clearbyvalues(g, g->allweak, origall);
     luaS_clearcache(g);
+    // 把 currentwhite 切换成另一个白
     g->currentwhite = cast_byte(otherwhite(g)); /* flip current white */
     lua_assert(g->gray == NULL);
     return work; /* estimate of slots marked by 'atomic' */
@@ -1581,12 +1577,10 @@ static void incstep(lua_State* L, global_State* g) {
     }
 }
 
-/*
-** performs a basic GC step if collector is running
-*/
+/// @brief performs a basic GC step if collector is running
 void luaC_step(lua_State* L) {
     global_State* g = G(L);
-    lua_assert(!g->gcemergency);
+    lua_assert(!g->gcemergency); // 非紧急情况
     if (gcrunning(g)) { /* running? */
         if (isdecGCmodegen(g))
             genstep(L, g);

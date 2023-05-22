@@ -239,7 +239,7 @@ typedef struct global_State {
     TValue l_registry;
     TValue nilvalue; /* a nil value */
     unsigned int seed; /* randomized seed for hashes */
-    lu_byte currentwhite;
+    lu_byte currentwhite; // 指明现在是 白0 还是 白1
     lu_byte gcstate; /* state of garbage collector */
     lu_byte gckind; /* kind of GC running */
     lu_byte gcstopem; /* stops emergency collections */

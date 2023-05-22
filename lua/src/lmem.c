@@ -157,7 +157,7 @@ void* luaM_realloc_(lua_State* L, void* block, size_t osize, size_t nsize) {
             return NULL; /* do not update 'GCdebt' */
     }
     lua_assert((nsize == 0) == (newblock == NULL));
-    g->GCdebt = (g->GCdebt + nsize) - osize;
+    g->GCdebt = (g->GCdebt + nsize) - osize; // 记录一下内存的变化情况
     return newblock;
 }
 

@@ -76,20 +76,24 @@
 // 就是白(包括 白0 与 白1); 在 4 与 5 的位置上放上 1; 00011000
 #define WHITEBITS bit2mask(WHITE0BIT, WHITE1BIT)
 
-#define iswhite(x) testbits((x)->marked, WHITEBITS) // 对象的 marked 的第 3 和第 4 位的比特值
-#define isblack(x) testbit((x)->marked, BLACKBIT) // 对象的 marked 的第 BLACKBIT(5) 位的比特值
+// 对象的 marked 的第 4 和第 5 位的比特值
+#define iswhite(x) testbits((x)->marked, WHITEBITS)
+// 对象的 marked 的第 6 位的比特值
+#define isblack(x) testbit((x)->marked, BLACKBIT)
 #define isgray(x) /* neither white nor black */ (!testbits((x)->marked, WHITEBITS | bitmask(BLACKBIT)))
 
 #define tofinalize(x) testbit((x)->marked, FINALIZEDBIT)
 
+// 另一个白的掩码
 #define otherwhite(g) ((g)->currentwhite ^ WHITEBITS)
 #define isdeadm(ow, m) ((m) & (ow))
+// 为什么另一个白是 0 就死了
 #define isdead(g, v) isdeadm(otherwhite(g), (v)->marked)
 
 #define changewhite(x) ((x)->marked ^= WHITEBITS)
 #define nw2black(x) check_exp(!iswhite(x), l_setbit((x)->marked, BLACKBIT))
 
-// 就是取 currentwhite 的第 4 位与第 5 位的比特
+// 就是取当前白的状态
 #define luaC_white(g) cast_byte((g)->currentwhite& WHITEBITS)
 
 /* object age in generational mode */
@@ -107,6 +111,7 @@
 #define getage(o) ((o)->marked & AGEBITS)
 // 设置 marked 的低三位为 a
 #define setage(o, a) ((o)->marked = cast_byte(((o)->marked & (~AGEBITS)) | a))
+// 比 G_SURVIVAL 大的都是 old
 #define isold(o) (getage(o) > G_SURVIVAL)
 
 #define changeage(o, f, t) check_exp(getage(o) == (f), (o)->marked ^= ((f) ^ (t)))
@@ -130,11 +135,8 @@
 /* how much to allocate before next GC step (log2) */
 #define LUAI_GCSTEPSIZE 13 /* 8 KB */
 
-/*
-** Check whether the declared GC mode is generational. While in
-** generational mode, the collector can go temporarily to incremental
-** mode to improve performance. This is signaled by 'g->lastatomic != 0'.
-*/
+// Check whether the declared GC mode is generational. While in generational mode, the collector can go
+// temporarily to incremental mode to improve performance. This is signaled by 'g->lastatomic != 0'.
 #define isdecGCmodegen(g) (g->gckind == KGC_GEN || g->lastatomic != 0)
 
 /*
@@ -143,14 +145,13 @@
 #define GCSTPUSR 1 /* bit true when GC stopped by user */
 #define GCSTPGC 2 /* bit true when GC stopped by itself */
 #define GCSTPCLS 4 /* bit true when closing Lua state */
+// gcstp 为 0 就是 GC 还正常可运行
 #define gcrunning(g) ((g)->gcstp == 0)
 
-/*
-** Does one step of collection when debt becomes positive. 'pre'/'pos'
-** allows some adjustments to be done only when needed. macro
-** 'condchangemem' is used only for heavy tests (forcing a full
-** GC cycle on every opportunity)
-*/
+// 进行"一步"收集 \r
+// Does one step of collection when debt becomes positive.
+// 'pre'/'pos' allows some adjustments to be done only when needed.
+// macro 'condchangemem' is used only for heavy tests (forcing a full GC cycle on every opportunity)
 #define luaC_condGC(L, pre, pos)                                                                                                                                                                       \
     {                                                                                                                                                                                                  \
         if (G(L)->GCdebt > 0) {                                                                                                                                                                        \
@@ -166,6 +167,9 @@
 
 #define luaC_barrier(L, p, v) ((iscollectable(v) && isblack(p) && iswhite(gcvalue(v))) ? luaC_barrier_(L, obj2gco(p), gcvalue(v)) : cast_void(0))
 
+// v 可被回收, 且 p 是黑色, 且 v 是白色, 才执行 luaC_barrierback_
+/// @param p 一个 GCObject*
+/// @param v 一个 TValue*
 #define luaC_barrierback(L, p, v) ((iscollectable(v) && isblack(p) && iswhite(gcvalue(v))) ? luaC_barrierback_(L, p) : cast_void(0))
 
 // 如何 p 是黑的, o 是白的, 那么

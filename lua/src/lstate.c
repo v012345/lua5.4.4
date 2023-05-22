@@ -346,7 +346,8 @@ LUA_API lua_State* lua_newstate(lua_Alloc f, void* ud) {
     L = &l->l.l; // 主线程机
     g = &l->g; // 全局状态机
     L->tt = LUA_VTHREAD;
-    g->currentwhite = bitmask(WHITE0BIT); // 白 0 阶段, 就是 0001000
+    // 初始化时当前白是白0
+    g->currentwhite = bitmask(WHITE0BIT); // 白 0 阶段, 就是 00001000
     L->marked = luaC_white(g); // 与 g->currentwhite 的 3 与 4 位置一样
     preinit_thread(L, g);
     g->allgc = obj2gco(L); /* 把主线程的 GCObject 入到链头; by now, only object is the main thread */
@@ -358,7 +359,7 @@ LUA_API lua_State* lua_newstate(lua_Alloc f, void* ud) {
     g->ud_warn = NULL;
     g->mainthread = L;
     g->seed = luai_makeseed(L); // 启动时生成的一个随机数种子, 主要是在求字符串哈希时使用
-    g->gcstp = GCSTPGC; /* 初始化 state 时不进行 GC; no GC while building state */
+    g->gcstp = GCSTPGC; /* no GC while building state */
     g->strt.size = g->strt.nuse = 0;
     g->strt.hash = NULL;
     setnilvalue(&g->l_registry);
