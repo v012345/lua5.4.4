@@ -698,7 +698,7 @@ void luaK_setoneret(FuncState* fs, expdesc* e) {
     }
 }
 
-/// @brief VFALSE VRELOC 不处理 \r
+/// @brief  \r
 /// Ensure that expression 'e' is not a variable (nor a <const>). (Expression still may have jump lists.)
 void luaK_dischargevars(FuncState* fs, expdesc* e) {
     switch (e->k) {

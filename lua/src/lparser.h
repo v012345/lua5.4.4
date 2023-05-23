@@ -59,8 +59,8 @@ typedef struct expdesc {
     /// @param ind k 为 VINDEXSTR 时,
     /// @param var k 为 VLOCAL 时, var.ridx 为寄存器 var.vidx 为 actvar.arr 的相对索引
     /// @param info k 为 VCONST 时, 存储 actvar.arr 的索引
-    /// @param info k 为其他类型时, 存储需要的数据
-    /// @param info k 为其他类型时, 存储需要的数据
+    /// @param info k 为 VNONRELOC 时, 存储寄存器索引
+    /// @param info k 为 VRELOC 时, 存储 A 未确定的指令
     /// @param info k 为其他类型时, 存储需要的数据
     /// @param info k 为其他类型时, 存储需要的数据
     /// @param info k 为其他类型时, 存储需要的数据
