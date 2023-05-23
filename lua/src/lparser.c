@@ -30,19 +30,20 @@
 // maximum number of local variables per function (must be smaller than 250, due to the bytecode format)
 #define MAXVARS 200
 
+// 函数调用与 ... 在编译阶段不能确定返回几个值
 #define hasmultret(k) ((k) == VCALL || (k) == VVARARG)
 
 // because all strings are unified by the scanner, the parser can use pointer equality for string equality
 #define eqstr(a, b) ((a) == (b))
 
-/*
-** nodes for block list (list of active blocks)
-*/
+// 代码块, previous 指向父块 \r
+// nodes for block list (list of active blocks)
 typedef struct BlockCnt {
     struct BlockCnt* previous; /* chain */
     int firstlabel; /* index of first label in this block */
     int firstgoto; /* index of first pending goto in this block */
     lu_byte nactvar; /* # active locals outside the block */
+    // 当前块, 包换当前块的子块, 是否有 upvalue
     lu_byte upval; /* true if some variable in the block is an upvalue */
     lu_byte isloop; /* true if 'block' is a loop */
     lu_byte insidetbc; /* true if inside the scope of a to-be-closed var. */
@@ -1847,7 +1848,7 @@ LClosure* luaY_parser(lua_State* L, ZIO* z, Mbuffer* buff, Dyndata* dyd, const c
     sethvalue2s(L, L->top, lexstate.h); /* anchor it */
     luaD_inctop(L);
     funcstate.f = cl->p = luaF_newproto(L); // 主闭包的原型
-    luaC_objbarrier(L, cl, cl->p);
+    luaC_objbarrier(L, cl, cl->p); // 这里什么情况会触发吗?
     funcstate.f->source = luaS_new(L, name); /* create and anchor TString */
     luaC_objbarrier(L, funcstate.f, funcstate.f->source);
     lexstate.buff = buff;

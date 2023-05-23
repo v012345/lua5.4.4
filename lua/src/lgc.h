@@ -172,7 +172,7 @@
 /// @param v 一个 TValue*
 #define luaC_barrierback(L, p, v) ((iscollectable(v) && isblack(p) && iswhite(gcvalue(v))) ? luaC_barrierback_(L, p) : cast_void(0))
 
-// 如何 p 是黑的, o 是白的, 那么
+// 如果 p 是黑的, o 是白的, 那么
 #define luaC_objbarrier(L, p, o) ((isblack(p) && iswhite(o)) ? luaC_barrier_(L, obj2gco(p), obj2gco(o)) : cast_void(0))
 
 LUAI_FUNC void luaC_fix(lua_State* L, GCObject* o);
