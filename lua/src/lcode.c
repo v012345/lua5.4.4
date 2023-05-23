@@ -62,26 +62,33 @@ static int tonumeral(const expdesc* e, TValue* v) {
     }
 }
 
-/// @brief 处理编译时常量, 返回常量的值
+/// @brief 表达式描述结构已经确定了常量在 actvar.arr 中的索引 \r
 /// Get the constant value from a constant expression
+/// @return 指向常量值的指针
 static TValue* const2val(FuncState* fs, const expdesc* e) {
     lua_assert(e->k == VCONST);
     return &fs->ls->dyd->actvar.arr[e->u.info].k;
 }
 
-/// @brief
+/// @brief 尝试把表达式转化为常量, false true nil 字符串 编译时常量 和 数字 可以转化 \r
 /// If expression is a constant, fills 'v' with its value and returns 1. Otherwise, returns 0.
-/// @param fs
-/// @param e
-/// @param v
-/// @return
+/// @param e 解析到的表达式的描述结果
+/// @param v 常量值存放地
+/// @return 是否成功转成常量
 int luaK_exp2const(FuncState* fs, const expdesc* e, TValue* v) {
-    if (hasjumps(e)) return 0; /* not a constant */
+    if (hasjumps(e)) //
+        return 0; /* not a constant */
     switch (e->k) {
-        case VFALSE: setbfvalue(v); return 1;
-        case VTRUE: setbtvalue(v); return 1;
-        case VNIL: setnilvalue(v); return 1;
-        case VKSTR: {
+        case VFALSE: // 表达式是 false 那直接把 v 设置成 false
+            setbfvalue(v);
+            return 1;
+        case VTRUE: // 表达式是 true 那直接把 v 设置成 true
+            setbtvalue(v);
+            return 1;
+        case VNIL: // 表达式是 nil 那直接把 v 设置成 nil
+            setnilvalue(v);
+            return 1;
+        case VKSTR: { // v 指向 *strval
             setsvalue(fs->ls->L, v, e->u.strval);
             return 1;
         }
@@ -89,7 +96,8 @@ int luaK_exp2const(FuncState* fs, const expdesc* e, TValue* v) {
             setobj(fs->ls->L, v, const2val(fs, e));
             return 1;
         }
-        default: return tonumeral(e, v);
+        default: // 尝试转化为数字
+            return tonumeral(e, v);
     }
 }
 
@@ -611,11 +619,12 @@ static void luaK_float(FuncState* fs, int reg, lua_Number f) {
         luaK_codek(fs, reg, luaK_numberK(fs, f));
 }
 
-/// @brief 编译时常量的值放入 expdesc 中 \r
+/// @brief 真实的常量(数 字符串 布尔 空), 编译时常量的值放入 expdesc 中 \r
 /// Convert a constant in 'v' into an expression description 'e'
 /// @param v 编译时常量的值
 /// @param e expdesc
 static void const2exp(TValue* v, expdesc* e) {
+    // 此时 e->k 为 VCONST, 下面会具体真实的常量类型
     switch (ttypetag(v)) {
         case LUA_VNUMINT:
             e->k = VKINT;
@@ -693,8 +702,9 @@ void luaK_setoneret(FuncState* fs, expdesc* e) {
 /// Ensure that expression 'e' is not a variable (nor a <const>). (Expression still may have jump lists.)
 void luaK_dischargevars(FuncState* fs, expdesc* e) {
     switch (e->k) {
-        case VCONST: { // 这个好像是处理编译时常量用的, 因为只有编译时常量才在 arr 中
+        case VCONST: { // 这个 e 描述 <const> 修饰的变量
             const2exp(const2val(fs, e), e);
+            // 这个时候 e 已经完成解析了, 描述了最终值
             break;
         }
         case VLOCAL: { /* already in a register */

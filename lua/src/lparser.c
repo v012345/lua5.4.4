@@ -166,11 +166,12 @@ static int new_localvar(LexState* ls, TString* name) {
     FuncState* fs = ls->fs;
     Dyndata* dyd = ls->dyd;
     Vardesc* var;
+    // 这里 +1 是现在马上要生成一个新的局部变量, 如果新加局部变量还没有超过 MAXVARS, 则正常进行
     checklimit(fs, dyd->actvar.n + 1 - fs->firstlocal, MAXVARS, "local variables");
     luaM_growvector(L, dyd->actvar.arr, dyd->actvar.n + 1, dyd->actvar.size, Vardesc, USHRT_MAX, "local variables");
     var = &dyd->actvar.arr[dyd->actvar.n++];
     var->vd.kind = VDKREG; /* default */
-    var->vd.name = name;
+    var->vd.name = name; // 变量的名字
     return dyd->actvar.n - 1 - fs->firstlocal;
 }
 
@@ -218,8 +219,7 @@ static LocVar* localdebuginfo(FuncState* fs, int vidx) {
     }
 }
 
-/// @brief 使用一个 VLOCAL 表达式 vidx 为变量的索引, ridx 为寄存器索引 \r
-/// Create an expression representing variable 'vidx'
+/// @brief Create an expression representing variable 'vidx'
 static void init_var(FuncState* fs, expdesc* e, int vidx) {
     e->f = e->t = NO_JUMP;
     e->k = VLOCAL; // 已经解析完毕, 且分配了寄存器
@@ -343,8 +343,9 @@ static int searchvar(FuncState* fs, TString* n, expdesc* var) {
         if (eqstr(n, vd->vd.name)) { /* found? */
             if (vd->vd.kind == RDKCTC) /* compile-time constant? */
                 init_exp(var, VCONST, fs->firstlocal + i);
+            // vd->vd.kind == VDKREG
             else /* real variable */
-                init_var(fs, var, i);
+                init_var(fs, var, i); // 某个表达式使用了此变量
             return var->k;
         }
     }
@@ -427,12 +428,14 @@ static void singlevar(LexState* ls, expdesc* var) {
 static void adjust_assign(LexState* ls, int nvars, int nexps, expdesc* e) {
     FuncState* fs = ls->fs;
     int needed = nvars - nexps; /* extra values needed */
+    // 如果 e 描述一个 ... 或函数调用
     if (hasmultret(e->k)) { /* last expression has multiple returns? */
         int extra = needed + 1; /* discount last expression itself */
         if (extra < 0) extra = 0;
         // 在这里设置 OP_CALL 的 C 段的值 extra 为实现接收返回值的参数
         luaK_setreturns(fs, e, extra); /* last exp. provides the difference */
     } else {
+        // 如果等号右边没有值, e->k 为 VVOID
         if (e->k != VVOID) /* at least one expression? */
             luaK_exp2nextreg(fs, e); /* close last expression */
         if (needed > 0) /* missing values? */
@@ -874,16 +877,18 @@ static void setvararg(FuncState* fs, int nparams) {
     luaK_codeABC(fs, OP_VARARGPREP, nparams, 0, 0);
 }
 
+/// @brief 只负责解析函数定义的参数列表
 static void parlist(LexState* ls) {
     /* parlist -> [ {NAME ','} (NAME | '...') ] */
     FuncState* fs = ls->fs;
     Proto* f = fs->f;
-    int nparams = 0;
+    int nparams = 0; // 函数签名中, 除 ... 外, 参数的个数
     int isvararg = 0;
     if (ls->t.token != ')') { /* is 'parlist' not empty? */
         do {
             switch (ls->t.token) {
                 case TK_NAME: {
+                    // 这里函数最最开始的局部变量
                     new_localvar(ls, str_checkname(ls));
                     nparams++;
                     break;
@@ -893,11 +898,12 @@ static void parlist(LexState* ls) {
                     isvararg = 1;
                     break;
                 }
-                default: luaX_syntaxerror(ls, "<name> or '...' expected");
+                default: // 函数的参数列表只能是 name 与 ...
+                    luaX_syntaxerror(ls, "<name> or '...' expected");
             }
-        } while (!isvararg && testnext(ls, ','));
+        } while (!isvararg && testnext(ls, ',')); // ... 须是最后一个参数, 不然 checknext 过不去
     }
-    adjustlocalvars(ls, nparams);
+    adjustlocalvars(ls, nparams); // 在函数中加入上面解析出来的局部变量
     // 上面只是刚刚分析完参数列表, 所以这里 nactvar 就是函数签名中参数的个数
     f->numparams = cast_byte(fs->nactvar); //
     if (isvararg) // 如果参数列表最后是 ... , 就是可变参数
@@ -941,6 +947,7 @@ static int explist(LexState* ls, expdesc* v) {
     return n;
 }
 
+/// @brief 只解析函数调用的参数列表
 static void funcargs(LexState* ls, expdesc* f, int line) {
     FuncState* fs = ls->fs;
     expdesc args; // 函数的最后一个参数的描述结构
@@ -1095,7 +1102,7 @@ static void simpleexp(LexState* ls, expdesc* v) {
             constructor(ls, v); // 表
             return;
         }
-        case TK_FUNCTION: {
+        case TK_FUNCTION: { // = function (...) 走里
             luaX_next(ls);
             body(ls, v, 0, ls->linenumber);
             return;
@@ -1200,7 +1207,7 @@ static BinOpr subexpr(LexState* ls, expdesc* v, int limit) {
     return op; /* return first untreated operator */
 }
 
-/// @brief 解析一个表达式
+/// @brief 解析一个表达式, 太复杂了
 static void expr(LexState* ls, expdesc* v) { //
     subexpr(ls, v, 0);
 }
@@ -1571,6 +1578,7 @@ static void ifstat(LexState* ls, int line) {
     luaK_patchtohere(fs, escapelist); /* patch escape list to 'if' end */
 }
 
+/// @brief local function F(...) 走这里
 static void localfunc(LexState* ls) {
     expdesc b; // 之后 codeclosure 的描述结构
     FuncState* fs = ls->fs;
@@ -1616,27 +1624,30 @@ static void localstat(LexState* ls) {
     int nvars = 0; // local 后面跟的变量数
     int nexps; // = 后面表达式的个数
     expdesc e;
-    do { // 现在只是解析到变量名, 知道有这么一个名字的变量
-        vidx = new_localvar(ls, str_checkname(ls));
-        kind = getlocalattribute(ls); // 目前返回的都是 VDKREG
-        getlocalvardesc(fs, vidx)->vd.kind = kind; // 所以这里都显示变量
-        // 这里是不会进入的
+    do {
+        vidx = new_localvar(ls, str_checkname(ls)); // 现在只是解析到变量名, 知道有这么一个名字的变量
+        kind = getlocalattribute(ls); // 返回声明的局部变量的属性 普通 编译 待关闭变量
+        getlocalvardesc(fs, vidx)->vd.kind = kind; // 更新局部变量的属性
+        // 一个 local 中只能有一个变量是 <close>
         if (kind == RDKTOCLOSE) { /* to-be-closed? */
             if (toclose != -1) /* one already present? */
                 luaK_semerror(ls, "multiple to-be-closed variables in local list");
-            toclose = fs->nactvar + nvars;
+            toclose = fs->nactvar + nvars; // 待关闭局部变量的在此函数全部局部变量中的位置
         }
         nvars++;
-    } while (testnext(ls, ','));
+    } while (testnext(ls, ',')); // 一条 local 语句的左边解析出来了
     if (testnext(ls, '='))
         nexps = explist(ls, &e); // 除了最后一个表达式, 其他已经分配到了寄存器, e 记录最后一个表达式
     else {
         e.k = VVOID;
         nexps = 0;
     }
+    // vidx 为解析到最后一个变量的索引
     var = getlocalvardesc(fs, vidx); /* get last variable */
-    /* no adjustments? && last variable is const? && compile-time constant? */
+    /* no adjustments? && last variable is const?  && compile-time constant? */
     if (nvars == nexps && var->vd.kind == RDKCONST && luaK_exp2const(fs, &e, &var->k)) {
+        // 只有可以转化为常量的才可以使用 RDKCTC
+        // 什么可以转化为常量 false true nil 数字 字符串 还有就是 另一个常量
         var->vd.kind = RDKCTC; /* variable is a compile-time constant */
         adjustlocalvars(ls, nvars - 1); /* exclude last variable */
         fs->nactvar++; /* but count it */
@@ -1764,7 +1775,7 @@ static void statement(LexState* ls) {
             repeatstat(ls, line);
             break;
         }
-        case TK_FUNCTION: {
+        case TK_FUNCTION: { // function F(...) 走这里
             /* stat -> funcstat */
             funcstat(ls, line); // 非局部函数走这里
             break;

@@ -109,10 +109,10 @@ static void callclosemethod(lua_State* L, TValue* obj, TValue* err, int yy) {
         luaD_callnoyield(L, top, 0);
 }
 
-/*
-** Check whether object at given level has a close metamethod and raise
-** an error if not.
-*/
+/// @brief \r
+/// Check whether object at given level has a close metamethod and raise an error if not.
+/// @param L
+/// @param level
 static void checkclosemth(lua_State* L, StkId level) {
     const TValue* tm = luaT_gettmbyobj(L, s2v(level), TM_CLOSE);
     if (ttisnil(tm)) { /* no metamethod? */
@@ -154,7 +154,8 @@ static void prepcallclosemth(lua_State* L, StkId level, int status, int yy) {
 */
 void luaF_newtbcupval(lua_State* L, StkId level) {
     lua_assert(level > L->tbclist);
-    if (l_isfalse(s2v(level))) return; /* false doesn't need to be closed */
+    if (l_isfalse(s2v(level))) // 只有 nil 与 false 是 false
+        return; /* false doesn't need to be closed */
     checkclosemth(L, level); /* value must have a close method */
     while (cast_uint(level - L->tbclist) > MAXDELTA) {
         L->tbclist += MAXDELTA; /* create a dummy node at maximum delta */

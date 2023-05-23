@@ -49,6 +49,21 @@ typedef enum {
 
 typedef struct expdesc {
     expkind k; // 当前表达式的类型
+
+    /// @param ival k 为 VKINT 时, 存储一个整数
+    /// @param nval k 为 VKFLT 时, 存储一个小数
+    /// @param strval k 为 VKSTR 时, 指向一个 TString
+    /// @param ind k 为 VINDEXED 时,
+    /// @param ind k 为 VINDEXUP 时,
+    /// @param ind k 为 VINDEXI 时,
+    /// @param ind k 为 VINDEXSTR 时,
+    /// @param var k 为 VLOCAL 时, var.ridx 为寄存器 var.vidx 为 actvar.arr 的相对索引
+    /// @param info k 为 VCONST 时, 存储 actvar.arr 的索引
+    /// @param info k 为其他类型时, 存储需要的数据
+    /// @param info k 为其他类型时, 存储需要的数据
+    /// @param info k 为其他类型时, 存储需要的数据
+    /// @param info k 为其他类型时, 存储需要的数据
+    /// @param info k 为其他类型时, 存储需要的数据
     union {
         lua_Integer ival; /* for VKINT */
         lua_Number nval; /* for VKFLT */
@@ -69,15 +84,28 @@ typedef struct expdesc {
 
 /* kinds of variables */
 #define VDKREG 0 /* regular */
-#define RDKCONST 1 /* constant */
-#define RDKTOCLOSE 2 /* to-be-closed */
-#define RDKCTC 3 /* compile-time constant */
+// 只有在脚本中使用 <const> 时, 解析过程中使用了一下, 之后会变成 RDKCTC \r
+// constant
+#define RDKCONST 1
+// 局部变量超出作用域后, 会自动调用 __close 元方法 \r
+// to-be-closed
+#define RDKTOCLOSE 2
+// actvar.arr 的解析到的局部变量使用 RDKCTC, 导出表达式结构时使用 VCONST \r
+// compile-time constant
+#define RDKCTC 3
 
-/* description of an active local variable */
+/// @brief 描述一个解析到的局部变量 \r
+/// description of an active local variable
+/// @param vd 变量的详细的描述
+/// @param k 当变量为常量时, 快速取到值
 typedef union Vardesc {
+    /// @param kind 变量的类型 普通 常量 等关闭
+    /// @param ridx 分配到的寄存器
+    /// @param pidx 变量在函数原型 locvars 的数组
+    /// @param name 变量名
     struct {
         TValuefields; /* constant value (if it is a compile-time constant) */
-        lu_byte kind; // 变量的类型 VDKREG RDKCONST RDKTOCLOSE RDKCTC
+        lu_byte kind;
         lu_byte ridx; /* register holding the variable */
         short pidx; /* index of the variable in the Proto's 'locvars' array */
         TString* name; /* variable name */
@@ -103,10 +131,15 @@ typedef struct Labellist {
 
 /* dynamic structures used by the parser */
 typedef struct Dyndata {
-    struct { /* list of all active local variables */
-        Vardesc* arr; // 解析到的变量描述结构体的数组首地址
-        int n; // arr数组已使用的数量
-        int size; // arr数组申请到的数量
+    /// @brief 全体的局部变量 \r
+    /// list of all active local variables
+    /// @param arr 解析到的变量描述结构体的数组首地址
+    /// @param n arr 数组已使用的数量
+    /// @param size arr 数组申请到的数量
+    struct {
+        Vardesc* arr;
+        int n;
+        int size;
     } actvar;
     Labellist gt; /* list of pending gotos */
     Labellist label; /* list of active labels */
@@ -127,7 +160,8 @@ typedef struct FuncState {
     int nk; /* number of elements in 'k' */
     int np; /* 被编译的代码，Proto的数量 number of elements in 'p' */
     int nabslineinfo; /* number of elements in 'abslineinfo' */
-    int firstlocal; /* index of first local var (in Dyndata array) */
+    /* index of first local var (in Dyndata array) */
+    int firstlocal; // 此函数的第一个局部变量在全体局部变量数组中的索引
     int firstlabel; /* index of first label (in 'dyd->label->arr') */
     short ndebugvars; /* number of elements in 'f->locvars' */
     lu_byte nactvar; /* number of active local variables */

@@ -295,7 +295,7 @@ struct lua_State {
     StkId stack; /* 栈底 stack base */
     UpVal* openupval; /* 指向 upvalues 链表的链头, 链头的 previous 指向 openupval; upvalues 链表最后一个元素的 next 指 NULL; upvalues 链表中除链头外 openupval 指向前一个元素的 next ; list of open
                          upvalues in this stack */
-    StkId tbclist; /* 待关闭的 Upvalue 列表 list of to-be-closed variables */
+    StkId tbclist; /* list of to-be-closed variables */
     GCObject* gclist; // 待 GC 的对象列表
     struct lua_State* twups; /* 当前线程的 open upvalue 列表 list of threads with open upvalues */
     struct lua_longjmp* errorJmp; /* current error recover point */
