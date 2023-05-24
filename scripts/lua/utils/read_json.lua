@@ -18,20 +18,22 @@ function JParser:open(file_path)
 end
 
 function JParser:next()
+    local b = string.byte(self.stream, self.pointer, self.pointer)
     self.pointer = self.pointer + 1
-    return string.byte(self.stream, self.pointer - 1, 1)
+    return b
 end
 
 function JParser:output()
+    -- Bytedump:dump(GetOpCodes())
     local t = {}
-    for i = 1, self.strlen, 1 do
+    for _ = 1, self.strlen, 1 do
         local char = string.char(self:next())
+        -- local char = string.byte(self.stream, i, i)
         if char ~= "\n" and
             char ~= "\t" and
             char ~= "\v" and
             char ~= " " then
-            print(i)
-            -- t[#t + 1] = char
+            t[#t + 1] = char
         end
     end
     -- print(self.strlen)

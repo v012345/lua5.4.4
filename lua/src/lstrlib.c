@@ -51,7 +51,7 @@ static int str_len(lua_State* L) {
     return 1;
 }
 
-/// @brief 如果 pos 为非负数, 就是正索引, 是负数就是反索引
+/// @brief 如果 pos 为非负数, 就是正索引, 是负数就是反索引 \r
 /// translate a relative initial string position (negative means back from end): clip result to [1, inf).
 /// The length of any string in Lua must fit in a lua_Integer, so there are no overflows in the casts.
 /// The inverted comparison avoids a possible overflow computing '-pos'.
@@ -166,7 +166,8 @@ static int str_byte(lua_State* L) {
         return luaL_error(L, "string slice too long");
     n = (int)(pose - posi) + 1;
     luaL_checkstack(L, n, "string slice too long");
-    for (i = 0; i < n; i++) lua_pushinteger(L, uchar(s[posi + i - 1]));
+    for (i = 0; i < n; i++) //
+        lua_pushinteger(L, uchar(s[posi + i - 1]));
     return n;
 }
 

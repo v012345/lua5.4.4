@@ -44,31 +44,37 @@ const char lua_ident[] = "$LuaVersion: " LUA_COPYRIGHT " $"
 /* test for upvalue */
 #define isupvalue(i) ((i) < LUA_REGISTRYINDEX)
 
-/// @brief Convert an acceptable index to a pointer to its respective value. Non-valid indices return the special nil value 'G(L)->nilvalue'.
+/// @brief 就是通过 idx 来取栈中值 \r
+/// Convert an acceptable index to a pointer to its respective value. Non-valid indices return the special nil value 'G(L)->nilvalue'.
 /// @param idx 基于当前 CallInfo 的 func 为底的 idx
 /// @return TValue *
 static TValue* index2value(lua_State* L, int idx) {
     CallInfo* ci = L->ci; // 取到当前的 CallInfo
     if (idx > 0) { // 从当前 CallInfo 对应栈的栈底向上数
-        StkId o = ci->func + idx;
+        StkId o = ci->func + idx; // 拿到要访问的栈
         api_check(L, idx <= L->ci->top - (ci->func + 1), "unacceptable index");
-        if (o >= L->top)
+        if (o >= L->top) // 超过栈顶了, 返回 nil 值
             return &G(L)->nilvalue;
-        else
+        else // 返回栈中值
             return s2v(o);
     } else if (!ispseudo(idx)) { /* negative index */
+        // 负索引, 但是没有进入保留负索引, idx 在 (-1001000, -1] 中
         api_check(L, idx != 0 && -idx <= L->top - (ci->func + 1), "invalid index");
         return s2v(L->top + idx);
     } else if (idx == LUA_REGISTRYINDEX)
+        // 保留索引的最大值为全局注册表
         return &G(L)->l_registry;
     else { /* upvalues */
-        idx = LUA_REGISTRYINDEX - idx;
+        // idx < -1001000, 表示要取 upvalues 了
+        idx = LUA_REGISTRYINDEX - idx; // 修正为真实索引, idx = abs(idx) - 1001000
         api_check(L, idx <= MAXUPVAL + 1, "upvalue index too large");
         if (ttisCclosure(s2v(ci->func))) { /* C closure? */
             CClosure* func = clCvalue(s2v(ci->func));
+            // 返回 c 闭包的 upvalues
             return (idx <= func->nupvalues) ? &func->upvalue[idx - 1] : &G(L)->nilvalue;
         } else { /* light C function or Lua function (through a hook)?) */
             api_check(L, ttislcf(s2v(ci->func)), "caller not a C function");
+            // light C function 可以理解, 为什么有一个 Lua function 呢
             return &G(L)->nilvalue; /* no upvalues */
         }
     }
