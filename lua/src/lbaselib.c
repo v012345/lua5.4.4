@@ -443,14 +443,15 @@ static int luaB_pcall(lua_State* L) {
     return finishpcall(L, status, 0);
 }
 
-/*
-** Do a protected call with error handling. After 'lua_rotate', the
-** stack will have <f, err, true, f, [args...]>; so, the function passes
-** 2 to 'finishpcall' to skip the 2 first values when returning results.
-*/
+/// @brief
+/// Do a protected call with error handling. After 'lua_rotate', the stack will have <f, err, true, f, [args...]>;
+/// so, the function passes 2 to 'finishpcall' to skip the 2 first values when returning results.
+/// @param L
+/// @return
 static int luaB_xpcall(lua_State* L) {
     int status;
     int n = lua_gettop(L);
+    // 第二个参数才是错误回调
     luaL_checktype(L, 2, LUA_TFUNCTION); /* check error function */
     lua_pushboolean(L, 1); /* first result */
     lua_pushvalue(L, 1); /* function */

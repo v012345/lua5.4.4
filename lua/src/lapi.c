@@ -153,7 +153,7 @@ LUA_API lua_Number lua_version(lua_State* L) {
 /// @brief convert an acceptable stack index into an absolute index
 LUA_API int lua_absindex(lua_State* L, int idx) { return (idx > 0 || ispseudo(idx)) ? idx : cast_int(L->top - L->ci->func) + idx; }
 
-/// @brief 返回当前 CallInfo 的栈顶 idx
+/// @brief 返回当前函数执行环境的的栈顶 idx
 LUA_API int lua_gettop(lua_State* L) { return cast_int(L->top - (L->ci->func + 1)); }
 
 /// @brief 参数允许传入任何可接受的索引以及 0 . 它将把堆栈的栈顶设为这个索引. 如果新的栈顶比原来的大,超出部分的新元素将被填为 nil . 如果 index 为 0,把栈上所有元素移除.

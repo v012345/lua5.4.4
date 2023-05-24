@@ -454,7 +454,7 @@ l_sinline CallInfo* prepCallInfo(lua_State* L, StkId func, int nret, int mask, S
     ci->func = func; // CallInfo 的最底
     ci->nresults = nret;
     ci->callstatus = mask;
-    ci->top = top; // L->top + 20
+    ci->top = top; // 这里 top 确定了, 之后应该是保持不变的F
     return ci;
 }
 
