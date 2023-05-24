@@ -1,24 +1,14 @@
 local JParser = {
-    file = nil,
     char_pointer = 1,
     stream = nil,
     stream_length = 0,
     current_char = nil,
     result = nil,
+}
 
-}
-local TokenType = {
-    NULL = 1,
-    STRING = 2,
-    NUMBER = 3,
-    INTEGER = 4,
-    TRUE = 5,
-    FALSE = 6,
-}
 function JParser:open(file_path)
     local f = io.open(file_path, "r")
     if f then
-        self.file = f
         self.stream = f:read("a")
         f:close()
         self.stream_length = #self.stream
@@ -26,17 +16,6 @@ function JParser:open(file_path)
     else
         return false, "can't open file : " .. tostring(file_path)
     end
-end
-
-function JParser:get_a_valid_char()
-    while not self:is_reach_end_of_stream() do
-        if self:is_space(self.current_char) then
-            self:get_next_char()
-        else
-            return self.current_char
-        end
-    end
-    return nil
 end
 
 function JParser:get_next_char()
@@ -123,7 +102,11 @@ end
 function JParser:read_an_array()
     self:get_next_char() -- 跳过 [
     self:skip_space()    -- 跳过 [ 后的空白
+    local mt = {
+        is_array = true
+    }
     local result = {}
+    setmetatable(result, mt)
     while self.current_char do
         if self.current_char == '"' then
             result[#result + 1] = self:read_a_string()
@@ -204,7 +187,12 @@ end
 function JParser:read_a_json_object()
     self:get_next_char() -- 跳过 {
     self:skip_space()    -- 跳过 { 后的空白
+    local mt = {
+        is_array = false
+    }
+
     local result = {}
+    setmetatable(result, mt)
     local key_table = {} -- 防止 key 重复
     local key, value = nil, nil
     while self.current_char do
@@ -281,39 +269,66 @@ function JParser:skip_space()
     end
 end
 
-function JParser:get_first_valid_char()
-    local position = 1
-    local char = nil
-    while position <= self.stream_length do
-        char = string.char(string.byte(self.stream, position, position))
-        if not self:is_space(char) then
-            self.char_pointer = position
-            return char
-        else
-            position = position + 1
+function JParser:dump_raw(file_path)
+    if self.stream then
+        local f = io.open(file_path, "w")
+        if f then
+            f:write(self.stream)
+            f:close()
         end
     end
 end
 
-function JParser:get_a_char() -- 没有实现 uft-8
-    if self.char_pointer > self.stream_length then
-        return true, ""
-    end
-    local b = string.byte(self.stream, self.char_pointer, self.char_pointer)
-    self.char_pointer = self.char_pointer + 1
-    self.current_char = string.char(b)
-    return false, self.current_char
-end
-
-function JParser:next()
-
-end
-
-function JParser:dump()
+function JParser:dump(file_path)
     if self.stream then
-        local f = io.open("C:\\Users\\Meteor\\Desktop\\o.txt", "w")
+        local f = io.open(file_path, "w")
         if f then
-            f:write(self.stream)
+            local function table_to_string(t)
+                if type(t) == 'table' then
+                    local mt = getmetatable(t)
+                    if mt then
+                        if mt.is_array then
+                            local len = #t
+
+                            local s = '['
+                            for k, v in ipairs(t) do
+                                s = s .. table_to_string(v)
+                                if k ~= len then
+                                    s = s .. ","
+                                end
+                            end
+                            return s .. '] '
+                        else
+                            local i = 1
+                            local l = 0
+                            for _, _ in pairs(t) do
+                                l = l + 1
+                            end
+
+                            local s = '{ '
+                            for k, v in pairs(t) do
+                                s = s .. '"' .. k .. '" : ' .. table_to_string(v)
+                                i = i + 1
+                                if i <= l then
+                                    s = s .. ', '
+                                end
+                            end
+                            return s .. '} '
+                        end
+                    else
+                        error("not a lua json")
+                    end
+                elseif type(t) == "string" then
+                    return string.format('"%s"', t)
+                else
+                    local base_type = tostring(t)
+                    if base_type == "nil" then
+                        base_type = "null"
+                    end
+                    return base_type
+                end
+            end
+            f:write(table_to_string(self.result))
             f:close()
         end
     end
@@ -336,13 +351,6 @@ function JParser:is_space(c)
     return false
 end
 
--- local function aaa()
---     print(".........日jj")
---     error("ji")
--- end
--- xpcall(aaa, function(a, b)
---     print(a, b)
--- end)
 function JParser:parser()
     if self.stream then
         return xpcall(self.read_root_json_object, function(error_msg)
