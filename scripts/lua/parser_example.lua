@@ -1,6 +1,6 @@
-print( "我")
 require("bytedump")
 local JSON = require("utils.read_json")
 JSON:open("C:\\Users\\Meteor\\Desktop\\New Text Document.json")
 JSON:dump()
+JSON:output()
 Bytedump:dump(GetOpCodes())

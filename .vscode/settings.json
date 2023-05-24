@@ -153,10 +153,6 @@
         "lauxlib.h": "c",
         "*.rh": "c"
     },
-    "Lua.diagnostics.globals": [
-        "argv",
-        "update",
-        "add_action"
-    ],
+    "Lua.diagnostics.globals": [],
     "C_Cpp.errorSquiggles": "disabled",
 }
