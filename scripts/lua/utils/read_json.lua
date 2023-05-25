@@ -11,10 +11,7 @@ function JParser:open(file_path)
     if f then
         self.stream = f:read("a")
         f:close()
-        self.stream_length = #self.stream
-        return true, ""
-    else
-        return false, "can't open file : " .. tostring(file_path)
+        return self:star()
     end
 end
 
@@ -51,9 +48,6 @@ function JParser:can_escape(char)
 end
 
 function JParser:read_a_string()
-    -- debug.sethook(function(a, b)
-    --     print(a, b)
-    -- end, "l", 0)
     local s = {}
     local char = self:get_next_char()
 
@@ -61,11 +55,9 @@ function JParser:read_a_string()
         if char == "\\" then
             char = self:get_next_char() -- 跳过第一个 "\"
             local escape_char = self:can_escape(char)
-            -- print(escape_char)
             if not escape_char then
                 error(tostring(char) .. " can't escape")
             else
-                -- print(escape_char)
                 s[#s + 1] = escape_char
             end
         else
@@ -80,7 +72,6 @@ function JParser:read_a_string()
     return table.concat(s)
 end
 
---- 键里不允许转义
 function JParser:read_a_key()
     return self:read_a_string()
 end
@@ -219,7 +210,6 @@ function JParser:read_a_json_object()
                 error(", must follw a \" in a json object")
             end
         else
-            print(self.current_char)
             error("wrong json object")
         end
     end
@@ -351,13 +341,28 @@ function JParser:is_space(c)
     return false
 end
 
-function JParser:parser()
-    if self.stream then
-        return xpcall(self.read_root_json_object, function(error_msg)
-            print(error_msg)
-        end, self)
-    end
-    return nil
+function JParser:star()
+    self.stream_length = #self.stream
+    return xpcall(self.read_root_json_object, function(error_msg)
+        print(error_msg)
+    end, self)
 end
 
-return JParser
+function JParser:parser(json_string)
+    self.stream = json_string
+    return self:star()
+end
+
+-- return JParser
+return function(path_or_string)
+    local f = io.open(path_or_string, "w")
+    local json_string = ""
+    if f then
+
+        json_string = f:read("a")
+        f:close()
+    else
+        json_string = path_or_string
+    end
+    return JParser:parser(json_string)
+end
