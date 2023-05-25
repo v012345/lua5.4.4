@@ -31,21 +31,39 @@ function JParser:can_escape(c)
     return escape[c]
 end
 
-function JParser:get_next_char()
-    if self:is_reach_end_of_stream() then
-        self.current_char = nil
-        return nil
+function JParser:utf8_byte_num(c)
+    if not c then
+        print(debug.traceback())
     end
-    local b = string.byte(self.json_string, self.char_pointer, self.char_pointer)
-    self.char_pointer = self.char_pointer + 1
-    self.current_char = string.char(b)
-    return self.current_char
+    if c & 0x80 == 0 then
+        return 1
+    elseif c & 0xd0 == 0xd0 then
+        return 2
+    elseif c & 0xe0 == 0xe0 then
+        return 3
+    elseif c & 0xf0 == 0xf0 then
+        return 4
+    elseif c & 0xf8 == 0xf8 then
+        return 5
+    else
+        error("need extending")
+    end
+end
+
+function JParser:get_next_char()
+    local start = self.char_pointer
+    local b = string.byte(self.json_string, start, start)
+    if b then
+        local len = self:utf8_byte_num(b)
+        self.current_char = string.sub(self.json_string, start, start + len - 1)
+        self.char_pointer = start + len
+        return self.current_char
+    end
+    self.current_char = false
+    return false
 end
 
 function JParser:read_a_string()
-    -- debug.sethook(function(a, b)
-    --     print(a, b)
-    -- end, "l", 0)
     local s = {}
     local char = self:get_next_char()
 
@@ -179,47 +197,45 @@ end
 function JParser:read_a_json_object()
     self:get_next_char() -- 跳过 {
     self:skip_space()    -- 跳过 { 后的空白
-    local mt = {
-        is_array = false
-    }
-
+    local len = 0
     local result = {}
-    setmetatable(result, mt)
     local key_table = {} -- 防止 key 重复
     local key, value = nil, nil
-    while self.current_char do
-        if self.current_char == '"' then
+    local current_char = self.current_char
+    while current_char do
+        if current_char == '"' then
             key, value = self:read_a_key_value_pair()
-            if key then
-                if key_table[key] then
-                    error("duplicate key")
-                else
-                    key_table[key] = true
-                    result[key] = value
-                end
+            if key_table[key] then
+                error("duplicate key")
             else
-                error("invalid key")
+                key_table[key] = true
+                result[key] = value
+                self:skip_space()
+                len = len + 1
             end
-        elseif self:is_space(self.current_char) then
-            self:get_next_char()
-        elseif self.current_char == "}" then
-            break
-        elseif self.current_char == "," then
+        elseif current_char == "," then
             self:get_next_char() -- 跳过 ,
             self:skip_space()
             if self.current_char ~= "\"" then
                 error(", must follw a \" in a json object")
             end
+        elseif current_char == "}" then
+            break
         else
-            print(self.current_char)
             error("wrong json object")
         end
+        current_char = self.current_char
     end
-    self:get_next_char() -- 跳过 {
+    self:get_next_char() -- 跳过 }
     self:skip_space()    -- 跳过文件结束空白
     if self.current_char and self.current_char == "," then
         self:get_next_char()
     end
+    local mt = {
+        is_array = false,
+        len = len
+    }
+    setmetatable(result, mt)
     return result
 end
 
@@ -227,22 +243,18 @@ function JParser:start()
     self.json_string_length = #self.json_string
     self:get_next_char() -- 读取第一个符
     self:skip_space()    -- 跳过文件开头空白
+    local current_char = self.current_char
 
-    while self.current_char do
-        if self.current_char == "{" then
-            self.result = self:read_a_json_object()
-        elseif self.current_char == "[" then
-            self.result = self:read_an_array()
-        elseif self.current_char == '"' then
-            self.result = self:read_a_string()
-        elseif self:is_space(self.current_char) then
-            self:get_next_char()
-        else
-            self.result = self:read_a_base_type()
-        end
+    if current_char == "{" then
+        self.result = self:read_a_json_object()
+    elseif current_char == "[" then
+        self.result = self:read_an_array()
+    elseif current_char == '"' then
+        self.result = self:read_a_string()
+    else
+        self.result = self:read_a_base_type()
     end
     self:skip_space() -- 跳过文件结束空白
-    self:get_next_char()
     if self.current_char then
         error("has redendent words")
     end
@@ -254,12 +266,8 @@ function JParser:is_reach_end_of_stream()
 end
 
 function JParser:skip_space()
-    while self:is_space(self.current_char) do
-        if self:is_reach_end_of_stream() then
-            return
-        else
-            self:get_next_char()
-        end
+    while space[self.current_char] do
+        self:get_next_char()
     end
 end
 

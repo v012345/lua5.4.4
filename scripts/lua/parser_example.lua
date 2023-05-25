@@ -1,11 +1,14 @@
 require("bytedump")
 require("utils.tools")
+
+
 local JSON = require("utils.read_json")
-print(type(JSON))
-local r1 = JSON("C:\\Users\\Meteor\\Desktop\\New Text Document.json")
+-- print(type(JSON))
+print( JSON:parser('{"我":"qqq我\b\n"}'))
+-- local r1 = JSON("C:\\Users\\Meteor\\Desktop\\New Text Document.json")
 -- local r2 = JSON("C:\\Users\\Meteor\\Desktop\\New Text Document.json")
 -- print(r1() == r2())
-print(r1)
+-- print(r1)
 -- print(type(r1))
 -- print(type(r2))
 -- if r then
