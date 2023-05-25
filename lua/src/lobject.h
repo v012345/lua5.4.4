@@ -81,7 +81,7 @@ typedef struct TValue {
 
 /* type tag of a TValue (bits 0-3 for tags + variant bits 4-5) */
 #define withvariant(t)	((t) & 0x3F)
-#define ttypetag(o)	withvariant(rawtt(o))
+#define ttypetag(o)	withvariant(rawtt(o)) // 不要回收位
 
 /* type of a TValue */
 #define ttype(o)	(novariant(rawtt(o)))
