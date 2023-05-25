@@ -224,6 +224,7 @@ function JParser:read_a_json_object()
 end
 
 function JParser:read_root_json_object()
+    self.json_string_length = #self.json_string
     self:skip_space() -- 跳过文件开头空白
 
     while self.current_char do
@@ -334,13 +335,9 @@ function JParser:parser(path_or_string)
     else
         self.json_string = path_or_string
     end
-    self.json_string_length = #self.json_string
-    if self.json_string then
-        return xpcall(self.read_root_json_object, function(error_msg)
-            print(error_msg)
-        end, self)
-    end
-    return nil
+    return xpcall(self.read_root_json_object, function(error_msg)
+        print(error_msg)
+    end, self)
 end
 
 return JParser
