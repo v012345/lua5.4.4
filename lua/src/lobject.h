@@ -333,7 +333,7 @@ typedef struct GCObject {
 #define ivalue(o)	check_exp(ttisinteger(o), val_(o).i)
 
 #define fltvalueraw(v)	((v).n)
-#define ivalueraw(v)	((v).i)
+
 
 #define setfltvalue(obj,x) \
   { TValue *io=(obj); val_(io).n=(x); settt_(io, LUA_VNUMFLT); }
