@@ -326,13 +326,13 @@ function JParser:dump(file_path)
     end
 end
 
-function JParser:parser(file_path)
-    local f = io.open(file_path, "r")
+function JParser:parser(path_or_string)
+    local f = io.open(path_or_string, "r")
     if f then
         self.json_string = f:read("a")
         f:close()
     else
-        self.json_string = file_path
+        self.json_string = path_or_string
     end
     self.json_string_length = #self.json_string
     if self.json_string then
