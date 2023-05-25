@@ -84,7 +84,7 @@ function JParser:read_a_value()
     elseif self.current_char == "[" then
         value = self:read_an_array()
     elseif self.current_char == "{" then
-        value = self:read_a_json_object()
+        value = self:object()
     else
         value = self:read_a_base_type()
     end
@@ -105,7 +105,7 @@ function JParser:read_an_array()
         elseif self:is_space(self.current_char) then
             self:get_next_char()
         elseif self.current_char == "{" then
-            result[#result + 1] = self:read_a_json_object()
+            result[#result + 1] = self:object()
         elseif self.current_char == "," then
             self:get_next_char() -- 跳过 ,
             self:skip_space()
@@ -176,7 +176,7 @@ function JParser:read_a_key_value_pair()
     return key, value
 end
 
-function JParser:read_a_json_object()
+function JParser:object()
     self:get_next_char() -- 跳过 {
     self:skip_space()    -- 跳过 { 后的空白
     local mt = {
@@ -230,7 +230,7 @@ function JParser:start()
 
     while self.current_char do
         if self.current_char == "{" then
-            self.result = self:read_a_json_object()
+            self.result = self:object()
         elseif self.current_char == "[" then
             self.result = self:read_an_array()
         elseif self.current_char == '"' then
