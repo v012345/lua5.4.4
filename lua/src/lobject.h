@@ -364,7 +364,7 @@ typedef struct GCObject {
 #define ttisshrstring(o)	checktag((o), ctb(LUA_VSHRSTR))
 #define ttislngstring(o)	checktag((o), ctb(LUA_VLNGSTR))
 
-#define tsvalueraw(v)	(gco2ts((v).gc))
+
 
 #define tsvalue(o)	check_exp(ttisstring(o), gco2ts(val_(o).gc))
 
