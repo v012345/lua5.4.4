@@ -225,7 +225,8 @@ end
 
 function JParser:start()
     self.json_string_length = #self.json_string
-    self:skip_space() -- 跳过文件开头空白
+    self:get_next_char() -- 读取第一个符
+    self:skip_space()    -- 跳过文件开头空白
 
     while self.current_char do
         if self.current_char == "{" then
