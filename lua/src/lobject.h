@@ -206,7 +206,7 @@ typedef union {
 /*
 ** macro to detect non-standard nils (used only in assertions)
 */
-#define isnonstrictnil(v)	(ttisnil(v) && !ttisstrictnil(v))
+#define isnonstrictnil(v)	(ttisnil(v) && !ttisstrictnil(v)) //  LUA_VEMPTY or LUA_VABSTKEY
 
 
 /*
