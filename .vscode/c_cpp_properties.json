@@ -16,8 +16,11 @@
                 "gco2ts=${workspaceFolder}/lua/src/lstate.h",
                 "G=${workspaceFolder}/lua/src/lstate.h",
                 "obj2gco=${workspaceFolder}/lua/src/lstate.h",
+                "gco2th=${workspaceFolder}/lua/src/lstate.h",
                 "iscollectable=${workspaceFolder}/lua/src/lobject.h",
                 "gcvalue=${workspaceFolder}/lua/src/lobject.h",
+                "ivalue=${workspaceFolder}/lua/src/lobject.h",
+                "fltvalue=${workspaceFolder}/lua/src/lobject.h",
                 "isdead=${workspaceFolder}/lua/src/lgc.h",
                 "ctb=${workspaceFolder}/lua/src/lobject.h"
             ],
