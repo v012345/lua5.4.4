@@ -844,10 +844,11 @@ static unsigned int binsearch(const TValue* array, unsigned int i, unsigned int 
 */
 lua_Unsigned luaH_getn(Table* t) {
     unsigned int limit = t->alimit; // 拿到有效范围
-    // 数组部分分配了内存, 但是有效范围的最后一位没有值
+    // 数组部分分配了内存, 但是有效范围的最后一位没有值, limit = 0 说明没有数组部分
     if (limit > 0 && isempty(&t->array[limit - 1])) { /* (1)? */
         /* there must be a boundary before 'limit' */
         if (limit >= 2 && !isempty(&t->array[limit - 2])) {
+            // 数组部分可能有空洞
             /* 'limit - 1' is a boundary; can it be a new limit? */
             if (ispow2realasize(t) && !ispow2(limit - 1)) {
                 t->alimit = limit - 1;

@@ -4,10 +4,6 @@
 ** See Copyright Notice in lua.h
 */
 
-/*
- 对象操作的一些函数
-*/
-
 #ifndef lobject_h
 #define lobject_h
 
@@ -35,15 +31,12 @@
 ** bit 6: whether value is collectable
 */
 
-/* t 是原基本类型(低 4 位), v 是扩展类型(高 4 位); add variant bits to a type */
+// t 是原基本类型(低 4 位), v 是扩展类型(第 5 6 位 ), 第 7 位指明是否为可回收对象 \r
+// add variant bits to a type
 #define makevariant(t, v) ((t) | ((v) << 4))
 
-/// @brief Union of all Lua values
-/// @param gc collectable objects 对应有 CommonHeader 的对象, 包括 TString, Udata, Udata0, Proto, UpVal, Closure, Table
-/// @param p light userdata 不需要 lua 来关心数据的生存期, 不被 gc 回收
-/// @param f int (*) (lua_State *L) 没有 upvalues, 就是一个普通的 c 函数, 所以不用 gc
-/// @param i long long 不被 gc 回收
-/// @param n double 不被 gc 回收
+/// @brief 所有 lua 值的联合体 \r
+/// Union of all Lua values
 typedef union Value {
     struct GCObject* gc; /* collectable objects */
     void* p; /* light userdata */
@@ -52,20 +45,20 @@ typedef union Value {
     lua_Number n; /* float numbers */
 } Value;
 
-/*
-** Tagged Values. This is the basic representation of values in Lua:
-** an actual value plus a tag with its type.
-*/
-
+// Tagged Values. This is the basic representation of values in Lua: an actual value plus a tag with its type.
 #define TValuefields                                                                                                                                                                                   \
     Value value_;                                                                                                                                                                                      \
     lu_byte tt_
 
+/// @param value_ 可能是指针, 也可能是数字
+/// @param tt_ 靠此来表明 value_ 到底是什么
 typedef struct TValue {
     TValuefields;
 } TValue;
 
+//
 #define val_(o) ((o)->value_)
+// 没有使用, 跟上面重复了
 #define valraw(o) (val_(o))
 
 // o 的细分类型(tt_) \r
@@ -753,9 +746,11 @@ typedef union Node {
 */
 
 #define BITRAS (1 << 7)
-/// @result 1 => alimit 等于物理大小, 0=> alimit 不等于物理大小
+// 如果 flags 的第 7 位为 1 说明 alimit 不是物理大小, 0 说明 alimit 是物理大小
 #define isrealasize(t) (!((t)->flags & BITRAS))
+// 把 flags 的第 7 位设置为 0, 说明 alimit 为物理大小
 #define setrealasize(t) ((t)->flags &= cast_byte(~BITRAS))
+// 把 flags 的第 7 位设置为 1, 说明 alimit 不为物理大小
 #define setnorealasize(t) ((t)->flags |= BITRAS)
 
 typedef struct Table {

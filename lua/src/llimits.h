@@ -51,6 +51,7 @@ typedef signed char ls_byte;
 */
 #define log2maxs(t) (sizeof(t) * 8 - 2)
 
+// x 是否为 2 的幂次或 0 \r
 // test whether an unsigned value is a power of 2 (or zero)
 #define ispow2(x) (((x) & ((x)-1)) == 0)
 

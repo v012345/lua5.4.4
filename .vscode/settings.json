@@ -151,7 +151,8 @@
         "limits.h": "c",
         "stddef.h": "c",
         "lauxlib.h": "c",
-        "*.rh": "c"
+        "*.rh": "c",
+        "luaconf.h": "c"
     },
     "Lua.diagnostics.globals": [],
     "C_Cpp.errorSquiggles": "disabled",
