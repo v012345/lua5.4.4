@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.20)
 project(myLua)
 add_executable(${PROJECT_NAME} main.cpp 
     src/nightowl_c_api.cpp
-    src/nightowl_cpp_api.cpp
     src/god.cpp
     src/angel.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE include)

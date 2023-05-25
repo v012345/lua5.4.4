@@ -49,7 +49,7 @@ int GetOpCodes(lua_State* L) {
     CallInfo* ci = L->ci; // 指的当前的 c 函数调用
     lua_newtable(L);
     ci = ci->previous;
-    TValue* tv = s2v(ci->func);
+    TValue* tv = s2v(ci->func.p);
     LClosure* LC = clLvalue(tv);
     Proto* p = LC->p;
     lua_newtable(L);

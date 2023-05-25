@@ -1,6 +1,5 @@
 #include "god.hpp"
 #include "nightowl_c_api.h"
-#include "nightowl_cpp_api.hpp"
 #include <filesystem>
 #include <lua.hpp>
 #define LUA_MAIN_SCRIPT "./main.lua"
