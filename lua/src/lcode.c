@@ -1745,7 +1745,7 @@ void luaK_posfix (FuncState *fs, BinOpr opr,
         codebini(fs, OP_SHLI, e1, e2, 1, line, TM_SHL);  /* I << r2 */
       }
       else if (finishbinexpneg(fs, e1, e2, OP_SHRI, line, TM_SHL)) {
-        /* coded as (r1 >> -I) */;
+        /* coded as (r1 >> -I) */
       }
       else  /* regular case (two registers) */
        codebinexpval(fs, opr, e1, e2, line);
