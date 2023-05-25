@@ -355,7 +355,7 @@ end
 
 -- return JParser
 return function(path_or_string)
-    local f = io.open(path_or_string, "w")
+    local f = io.open(path_or_string, "r")
     local json_string = ""
     if f then
 
