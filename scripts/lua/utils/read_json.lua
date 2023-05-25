@@ -1,21 +1,34 @@
 local JParser = {
     char_pointer = 1,
-    stream = nil,
-    stream_length = 0,
+    json_string = nil,
+    json_string_length = 0,
     current_char = nil,
     result = nil,
 }
+local space = {
+    [" "] = " ",
+    ["\t"] = "\t",
+    ["\n"] = "\n",
+    ["\f"] = "\f",
+    ["\v"] = "\v",
+}
+local escape = {
+    ["\\"] = "\\",
+    ["\""] = "\"",
+    ["/"] = "/",
+    ["r"] = "\r",
+    ["f"] = "\f",
+    ["n"] = "\n",
+    ["t"] = "\t",
+    ["b"] = "\b",
+}
 
-function JParser:open(file_path)
-    local f = io.open(file_path, "r")
-    if f then
-        self.stream = f:read("a")
-        f:close()
-        self.stream_length = #self.stream
-        return true, ""
-    else
-        return false, "can't open file : " .. tostring(file_path)
-    end
+function JParser:is_space(c)
+    return space[c]
+end
+
+function JParser:can_escape(c)
+    return escape[c]
 end
 
 function JParser:get_next_char()
@@ -23,31 +36,10 @@ function JParser:get_next_char()
         self.current_char = nil
         return nil
     end
-    local b = string.byte(self.stream, self.char_pointer, self.char_pointer)
+    local b = string.byte(self.json_string, self.char_pointer, self.char_pointer)
     self.char_pointer = self.char_pointer + 1
     self.current_char = string.char(b)
     return self.current_char
-end
-
-function JParser:can_escape(char)
-    if char == "\\" then
-        return "\\"
-    elseif char == "\"" then
-        return "\""
-    elseif char == "/" then
-        return "/"
-    elseif char == "r" then
-        return "\r"
-    elseif char == "n" then
-        return "\n"
-    elseif char == "t" then
-        return "\t"
-    elseif char == "b" then
-        return "\b"
-    elseif char == "f" then
-        return "\f"
-    end
-    return false
 end
 
 function JParser:read_a_string()
@@ -256,7 +248,7 @@ function JParser:read_root_json_object()
 end
 
 function JParser:is_reach_end_of_stream()
-    return self.char_pointer > self.stream_length
+    return self.char_pointer > self.json_string_length
 end
 
 function JParser:skip_space()
@@ -270,17 +262,17 @@ function JParser:skip_space()
 end
 
 function JParser:dump_raw(file_path)
-    if self.stream then
+    if self.json_string then
         local f = io.open(file_path, "w")
         if f then
-            f:write(self.stream)
+            f:write(self.json_string)
             f:close()
         end
     end
 end
 
 function JParser:dump(file_path)
-    if self.stream then
+    if self.json_string then
         local f = io.open(file_path, "w")
         if f then
             local function table_to_string(t)
@@ -334,25 +326,16 @@ function JParser:dump(file_path)
     end
 end
 
-function JParser:is_space(c)
-    if c == "\t" then
-        return true
-    elseif c == "\n" then
-        return true
-    elseif c == " " then
-        return true
-    elseif c == "\f" then
-        return true
-    elseif c == "\v" then
-        return true
-    elseif c == nil then
-        return true
+function JParser:parser(file_path)
+    local f = io.open(file_path, "r")
+    if f then
+        self.json_string = f:read("a")
+        f:close()
+    else
+        self.json_string = file_path
     end
-    return false
-end
-
-function JParser:parser()
-    if self.stream then
+    self.json_string_length = #self.json_string
+    if self.json_string then
         return xpcall(self.read_root_json_object, function(error_msg)
             print(error_msg)
         end, self)
