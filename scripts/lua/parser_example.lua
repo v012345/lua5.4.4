@@ -4,15 +4,18 @@ require("utils.tools")
 
 local JSON = require("utils.read_json")
 -- print(type(JSON))
-print( JSON:parser('{"我":"qqq我\b\n"}'))
--- local r1 = JSON("C:\\Users\\Meteor\\Desktop\\New Text Document.json")
+local s = os.clock()
+JSON:parser("C:\\Users\\Meteor\\Desktop\\New Text Document.json")
+local e = os.clock()
+print(e - s)
+JSON:dump("C:\\Users\\Meteor\\Desktop\\o.txt")
 -- local r2 = JSON("C:\\Users\\Meteor\\Desktop\\New Text Document.json")
 -- print(r1() == r2())
 -- print(r1)
 -- print(type(r1))
 -- print(type(r2))
 -- if r then
---     JSON:dump("C:\\Users\\Meteor\\Desktop\\o.txt")
+--
 -- end
 Bytedump:dump(GetOpCodes())
 

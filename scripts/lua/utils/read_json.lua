@@ -22,6 +22,34 @@ local escape = {
     ["t"] = "\t",
     ["b"] = "\b",
 }
+local escape_r = {
+    ["\\"] = "\\\\",
+    ["\""] = "\\\"",
+    ["/"] = "\\/",
+    ["\r"] = "\\r",
+    ["\f"] = "\\f",
+    ["\n"] = "\\n",
+    ["\t"] = "\\t",
+    ["\b"] = "\\b",
+}
+
+function JParser:escape_string(str)
+    local start = 1
+    local o = {}
+    local char_byte = string.byte(str, start, start)
+    while char_byte do
+        local len = self:utf8_byte_num(char_byte)
+        local char = string.sub(str, start, start + len - 1)
+        if escape_r[char] then
+            o[#o + 1] = escape_r[char]
+        else
+            o[#o + 1] = char
+        end
+        start = start + len
+        char_byte = string.byte(str, start, start)
+    end
+    return table.concat(o)
+end
 
 function JParser:is_space(c)
     return space[c]
@@ -32,9 +60,6 @@ function JParser:can_escape(c)
 end
 
 function JParser:utf8_byte_num(c)
-    if not c then
-        print(debug.traceback())
-    end
     if c & 0x80 == 0 then
         return 1
     elseif c & 0xd0 == 0xd0 then
@@ -52,9 +77,9 @@ end
 
 function JParser:get_next_char()
     local start = self.char_pointer
-    local b = string.byte(self.json_string, start, start)
-    if b then
-        local len = self:utf8_byte_num(b)
+    local char_byte = string.byte(self.json_string, start, start)
+    if char_byte then
+        local len = self:utf8_byte_num(char_byte)
         self.current_char = string.sub(self.json_string, start, start + len - 1)
         self.char_pointer = start + len
         return self.current_char
@@ -70,13 +95,11 @@ function JParser:read_a_string()
     while char and char ~= '"' do
         if char == "\\" then
             char = self:get_next_char() -- 跳过第一个 "\"
-            local escape_char = self:can_escape(char)
-            -- print(escape_char)
-            if not escape_char then
-                error(tostring(char) .. " can't escape")
-            else
-                -- print(escape_char)
+            local escape_char = escape[char]
+            if escape_char then
                 s[#s + 1] = escape_char
+            else
+                error(tostring(char) .. " can't escape")
             end
         else
             s[#s + 1] = char
@@ -90,18 +113,18 @@ function JParser:read_a_string()
     return table.concat(s)
 end
 
---- 键里不允许转义
 function JParser:read_a_key()
     return self:read_a_string()
 end
 
 function JParser:read_a_value()
     local value = nil
-    if self.current_char == "\"" then
+    local current_char = self.current_char
+    if current_char == "\"" then
         value = self:read_a_string()
-    elseif self.current_char == "[" then
+    elseif current_char == "[" then
         value = self:read_an_array()
-    elseif self.current_char == "{" then
+    elseif current_char == "{" then
         value = self:read_a_json_object()
     else
         value = self:read_a_base_type()
@@ -282,7 +305,7 @@ function JParser:dump_raw(file_path)
 end
 
 function JParser:dump(file_path)
-    if self.json_string then
+    if self.result then
         local f = io.open(file_path, "w")
         if f then
             local function table_to_string(t)
@@ -302,16 +325,11 @@ function JParser:dump(file_path)
                             return s .. '] '
                         else
                             local i = 1
-                            local l = 0
-                            for _, _ in pairs(t) do
-                                l = l + 1
-                            end
-
                             local s = '{ '
                             for k, v in pairs(t) do
-                                s = s .. '"' .. k .. '" : ' .. table_to_string(v)
-                                i = i + 1
-                                if i <= l then
+                                s = s .. table_to_string(k) .. ': ' .. table_to_string(v)
+                                if i < mt.len then
+                                    i = i + 1
                                     s = s .. ', '
                                 end
                             end
@@ -321,7 +339,7 @@ function JParser:dump(file_path)
                         error("not a lua json")
                     end
                 elseif type(t) == "string" then
-                    return string.format('"%s"', t)
+                    return string.format('"%s"', self:escape_string(t))
                 else
                     local base_type = tostring(t)
                     if base_type == "nil" then
