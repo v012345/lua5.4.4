@@ -1,7 +1,6 @@
 local JParser = {
     char_pointer = 1,
     json_string = nil,
-    json_string_length = 0,
     current_char = nil,
     result = nil,
 }
@@ -32,31 +31,19 @@ local escape_r = {
     ["\t"] = "\\t",
     ["\b"] = "\\b",
 }
+local concat = table.concat
 
 function JParser:escape_string(str)
-    local start = 1
     local o = {}
-    local char_byte = string.byte(str, start, start)
-    while char_byte do
-        local len = self:utf8_byte_num(char_byte)
-        local char = string.sub(str, start, start + len - 1)
+    for i = 1, #str do
+        local char = string.sub(str, i, i)
         if escape_r[char] then
-            o[#o + 1] = escape_r[char]
+            o[i] = escape_r[char]
         else
-            o[#o + 1] = char
+            o[i] = char
         end
-        start = start + len
-        char_byte = string.byte(str, start, start)
     end
-    return table.concat(o)
-end
-
-function JParser:is_space(c)
-    return space[c]
-end
-
-function JParser:can_escape(c)
-    return escape[c]
+    return concat(o)
 end
 
 function JParser:utf8_byte_num(c)
@@ -77,22 +64,16 @@ end
 
 function JParser:get_next_char()
     local start = self.char_pointer
-    local char_byte = string.byte(self.json_string, start, start)
-    if char_byte then
-        local len = self:utf8_byte_num(char_byte)
-        self.current_char = string.sub(self.json_string, start, start + len - 1)
-        self.char_pointer = start + len
-        return self.current_char
-    end
-    self.current_char = false
-    return false
+    self.current_char = string.sub(self.json_string, start, start)
+    self.char_pointer = start + 1
+    return self.current_char
 end
 
 function JParser:read_a_string()
     local s = {}
     local char = self:get_next_char()
 
-    while char and char ~= '"' do
+    while char ~= '"' do
         if char == "\\" then
             char = self:get_next_char() -- 跳过第一个 "\"
             local escape_char = escape[char]
@@ -110,7 +91,7 @@ function JParser:read_a_string()
         error("string unexcepted end")
     end
     self:get_next_char() --跳过结尾 "
-    return table.concat(s)
+    return concat(s)
 end
 
 function JParser:read_a_key()
@@ -143,7 +124,7 @@ function JParser:read_an_array()
     while self.current_char do
         if self.current_char == '"' then
             result[#result + 1] = self:read_a_string()
-        elseif self:is_space(self.current_char) then
+        elseif space[self.current_char] then
             self:get_next_char()
         elseif self.current_char == "{" then
             result[#result + 1] = self:read_a_json_object()
@@ -176,7 +157,7 @@ function JParser:read_a_base_type()
         s[#s + 1] = self.current_char
         self:get_next_char()
     end
-    local token = table.concat(s)
+    local token = concat(s)
     if token == "true" then
         r = true
     elseif token == "null" then
@@ -225,7 +206,7 @@ function JParser:read_a_json_object()
     local key_table = {} -- 防止 key 重复
     local key, value = nil, nil
     local current_char = self.current_char
-    while current_char do
+    while true do
         if current_char == '"' then
             key, value = self:read_a_key_value_pair()
             if key_table[key] then
@@ -242,7 +223,7 @@ function JParser:read_a_json_object()
             if self.current_char ~= "\"" then
                 error(", must follw a \" in a json object")
             end
-        elseif current_char == "}" then
+        elseif current_char == "}" or current_char == "" then
             break
         else
             error("wrong json object")
@@ -251,7 +232,7 @@ function JParser:read_a_json_object()
     end
     self:get_next_char() -- 跳过 }
     self:skip_space()    -- 跳过文件结束空白
-    if self.current_char and self.current_char == "," then
+    if self.current_char == "," then
         self:get_next_char()
     end
     local mt = {
@@ -263,7 +244,7 @@ function JParser:read_a_json_object()
 end
 
 function JParser:start()
-    self.json_string_length = #self.json_string
+    local s = os.clock()
     self:get_next_char() -- 读取第一个符
     self:skip_space()    -- 跳过文件开头空白
     local current_char = self.current_char
@@ -278,14 +259,12 @@ function JParser:start()
         self.result = self:read_a_base_type()
     end
     self:skip_space() -- 跳过文件结束空白
-    if self.current_char then
+    if self.current_char ~= "" then
         error("has redendent words")
     end
+    print(os.clock() - s)
+    print("----------")
     return self.result
-end
-
-function JParser:is_reach_end_of_stream()
-    return self.char_pointer > self.json_string_length
 end
 
 function JParser:skip_space()
@@ -322,18 +301,18 @@ function JParser:dump(file_path)
                                     s = s .. ","
                                 end
                             end
-                            return s .. '] '
+                            return s .. ']'
                         else
                             local i = 1
-                            local s = '{ '
+                            local s = '{'
                             for k, v in pairs(t) do
-                                s = s .. table_to_string(k) .. ': ' .. table_to_string(v)
+                                s = s .. table_to_string(k) .. ':' .. table_to_string(v)
                                 if i < mt.len then
                                     i = i + 1
-                                    s = s .. ', '
+                                    s = s .. ',k'
                                 end
                             end
-                            return s .. '} '
+                            return s .. '}'
                         end
                     else
                         error("not a lua json")
@@ -362,6 +341,7 @@ function JParser:parser(path_or_string)
     else
         self.json_string = path_or_string
     end
+
     return xpcall(self.start, function(error_msg)
         print(error_msg)
     end, self)
