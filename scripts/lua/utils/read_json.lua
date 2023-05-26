@@ -71,11 +71,12 @@ end
 
 function JParser:read_a_string()
     local s = {}
-    local char = self:get_next_char()
+    local _char_pointer = char_pointer
+    local char = string.sub(self.json_string, _char_pointer, _char_pointer) _char_pointer = _char_pointer + 1
 
     while char ~= '"' do
         if char == "\\" then
-            char = self:get_next_char() -- 跳过第一个 "\"
+            char = string.sub(self.json_string, _char_pointer, _char_pointer) _char_pointer = _char_pointer + 1 -- 跳过第一个 "\"
             local escape_char = escape[char]
             if escape_char then
                 s[#s + 1] = escape_char
@@ -85,11 +86,12 @@ function JParser:read_a_string()
         else
             s[#s + 1] = char
         end
-        char = self:get_next_char()
+        char = string.sub(self.json_string, _char_pointer, _char_pointer) _char_pointer = _char_pointer + 1
     end
     if char ~= '"' then
         error("string unexcepted end")
     end
+    char_pointer = _char_pointer
     self:get_next_char() --跳过结尾 "
     return concat(s)
 end
