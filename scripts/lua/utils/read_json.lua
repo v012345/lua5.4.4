@@ -120,14 +120,17 @@ function JParser:read_an_array()
         is_array = true
     }
     local result = {}
+    local len = 1
     setmetatable(result, mt)
     while self.current_char do
         if self.current_char == '"' then
-            result[#result + 1] = self:read_a_string()
+            result[len] = self:read_a_string()
+            len = len + 1
         elseif space[self.current_char] then
             self:get_next_char()
         elseif self.current_char == "{" then
-            result[#result + 1] = self:read_a_json_object()
+            result[len] = self:read_a_json_object()
+            len = len + 1
         elseif self.current_char == "," then
             self:get_next_char() -- 跳过 ,
             self:skip_space()
@@ -137,14 +140,16 @@ function JParser:read_an_array()
         elseif self.current_char == "]" then
             break
         elseif self.current_char == "[" then
-            result[#result + 1] = self:read_an_array()
+            result[len] = self:read_an_array()
+            len = len + 1
         else
-            result[#result + 1] = self:read_a_base_type()
+            result[len] = self:read_a_base_type()
+            len = len + 1
         end
     end
     self:get_next_char() -- 跳过 ]
     self:skip_space()    -- 跳过文件结束空白
-    if self.current_char and self.current_char == "," then
+    if self.current_char == "," then
         self:get_next_char()
     end
     return result
