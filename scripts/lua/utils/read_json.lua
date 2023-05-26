@@ -63,20 +63,23 @@ function JParser:utf8_byte_num(c)
 end
 
 function JParser:get_next_char()
-    -- local start = self.char_pointer
-    self.current_char = string.sub(self.json_string, char_pointer, char_pointer)
-    char_pointer = char_pointer + 1
+    local _char_pointer = char_pointer
+    self.current_char = string.sub(self.json_string, _char_pointer, _char_pointer)
+    _char_pointer = _char_pointer + 1
+    char_pointer = _char_pointer
     return self.current_char
 end
 
 function JParser:read_a_string()
     local s = {}
     local _char_pointer = char_pointer
-    local char = string.sub(self.json_string, _char_pointer, _char_pointer) _char_pointer = _char_pointer + 1
+    local char = string.sub(self.json_string, _char_pointer, _char_pointer)
+    _char_pointer = _char_pointer + 1
 
     while char ~= '"' do
         if char == "\\" then
-            char = string.sub(self.json_string, _char_pointer, _char_pointer) _char_pointer = _char_pointer + 1 -- 跳过第一个 "\"
+            char = string.sub(self.json_string, _char_pointer, _char_pointer)
+            _char_pointer = _char_pointer + 1                                                                   -- 跳过第一个 "\"
             local escape_char = escape[char]
             if escape_char then
                 s[#s + 1] = escape_char
@@ -86,7 +89,8 @@ function JParser:read_a_string()
         else
             s[#s + 1] = char
         end
-        char = string.sub(self.json_string, _char_pointer, _char_pointer) _char_pointer = _char_pointer + 1
+        char = string.sub(self.json_string, _char_pointer, _char_pointer)
+        _char_pointer = _char_pointer + 1
     end
     if char ~= '"' then
         error("string unexcepted end")
@@ -159,14 +163,14 @@ end
 
 function JParser:read_a_base_type()
     local s = {}
-    local r = nil
+    local r, i = true, 1
     while self.current_char and string.find(self.current_char, "[0-9aeflnrstu%.%-]") do
         s[#s + 1] = self.current_char
         self:get_next_char()
     end
     local token = concat(s)
     if token == "true" then
-        r = true
+        -- r = true
     elseif token == "null" then
         r = nil
     elseif token == "false" then
@@ -254,7 +258,7 @@ function JParser:start()
     -- local f = io.open("C:\\Users\\Meteor\\Desktop\\t.txt", "w")
     -- debug.sethook(function(a, b)
     --     f:write(b)
-    --     f:write("")
+    --     f:write("\n")
     -- end, "l", 0)
     local s = os.clock()
     self:get_next_char() -- 读取第一个符
@@ -275,7 +279,7 @@ function JParser:start()
         error("has redendent words")
     end
     print(os.clock() - s)
-    print("----------")
+    -- print("----------")
     -- debug.sethook(nil, "l", 0)
     -- f:close(b)
     return self.result

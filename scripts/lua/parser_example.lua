@@ -19,6 +19,8 @@ require("utils.tools")
 --     print(key, value)
 -- end
 
+
+
 local JSON = require("utils.read_json")
 -- -- print(type(JSON))
 local s = os.clock()
@@ -27,6 +29,11 @@ JSON:parser("C:\\Users\\Meteor\\Desktop\\New Text Document.json")
 JSON:dump("C:\\Users\\Meteor\\Desktop\\o.txt")
 local e = os.clock()
 print(e - s)
+
+
+
+
+
 -- local r2 = JSON("C:\\Users\\Meteor\\Desktop\\New Text Document.json")
 -- print(r1() == r2())
 -- print(r1)
