@@ -1,9 +1,26 @@
 require("bytedump")
 require("utils.tools")
 
+-- local f = io.open("C:\\Users\\Meteor\\Desktop\\t.txt", "r")
+-- local t = {}
+-- if f then
+--     local x = f:read("n")
+
+--     while x do
+--         if t[x] then
+--             t[x] = t[x] + 1
+--         else
+--             t[x] = 1
+--         end
+--         x = f:read("n")
+--     end
+-- end
+-- for key, value in pairs(t) do
+--     print(key, value)
+-- end
 
 local JSON = require("utils.read_json")
--- print(type(JSON))
+-- -- print(type(JSON))
 local s = os.clock()
 JSON:parser("C:\\Users\\Meteor\\Desktop\\New Text Document.json")
 

@@ -1,9 +1,9 @@
 local JParser = {
-    char_pointer = 1,
     json_string = nil,
     current_char = nil,
     result = nil,
 }
+local char_pointer = 1
 local space = {
     [" "] = " ",
     ["\t"] = "\t",
@@ -63,9 +63,9 @@ function JParser:utf8_byte_num(c)
 end
 
 function JParser:get_next_char()
-    local start = self.char_pointer
-    self.current_char = string.sub(self.json_string, start, start)
-    self.char_pointer = start + 1
+    -- local start = self.char_pointer
+    self.current_char = string.sub(self.json_string, char_pointer, char_pointer)
+    char_pointer = char_pointer + 1
     return self.current_char
 end
 
@@ -249,6 +249,11 @@ function JParser:read_a_json_object()
 end
 
 function JParser:start()
+    -- local f = io.open("C:\\Users\\Meteor\\Desktop\\t.txt", "w")
+    -- debug.sethook(function(a, b)
+    --     f:write(b)
+    --     f:write("")
+    -- end, "l", 0)
     local s = os.clock()
     self:get_next_char() -- 读取第一个符
     self:skip_space()    -- 跳过文件开头空白
@@ -269,6 +274,8 @@ function JParser:start()
     end
     print(os.clock() - s)
     print("----------")
+    -- debug.sethook(nil, "l", 0)
+    -- f:close(b)
     return self.result
 end
 
