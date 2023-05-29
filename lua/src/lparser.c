@@ -1317,12 +1317,12 @@ static void whilestat(LexState* ls, int line) {
     int condexit;
     BlockCnt bl;
     luaX_next(ls); /* skip WHILE */
-    whileinit = luaK_getlabel(fs);
+    whileinit = luaK_getlabel(fs); // while 的回跳地址
     condexit = cond(ls);
     enterblock(fs, &bl, 1);
     checknext(ls, TK_DO);
     block(ls);
-    luaK_jumpto(fs, whileinit);
+    luaK_jumpto(fs, whileinit); // 跳回 while 再进行条件检测
     check_match(ls, TK_END, TK_WHILE, line);
     leaveblock(fs);
     luaK_patchtohere(fs, condexit); /* false conditions finish the loop */
@@ -1666,9 +1666,13 @@ static void statement(LexState* ls) {
             luaX_next(ls); /* skip ';' */
             break;
         }
-        case TK_IF: { /* stat -> ifstat */ ifstat(ls, line); break;
+        case TK_IF: { /* stat -> ifstat */
+            ifstat(ls, line); //
+            break;
         }
-        case TK_WHILE: { /* stat -> whilestat */ whilestat(ls, line); break;
+        case TK_WHILE: { /* stat -> whilestat */
+            whilestat(ls, line); //
+            break;
         }
         case TK_DO: { /* stat -> DO block END */
             luaX_next(ls); /* skip DO */
@@ -1676,11 +1680,17 @@ static void statement(LexState* ls) {
             check_match(ls, TK_END, TK_DO, line);
             break;
         }
-        case TK_FOR: { /* stat -> forstat */ forstat(ls, line); break;
+        case TK_FOR: { /* stat -> forstat */
+            forstat(ls, line); //
+            break;
         }
-        case TK_REPEAT: { /* stat -> repeatstat */ repeatstat(ls, line); break;
+        case TK_REPEAT: { /* stat -> repeatstat */
+            repeatstat(ls, line); //
+            break;
         }
-        case TK_FUNCTION: { /* stat -> funcstat */ funcstat(ls, line); break;
+        case TK_FUNCTION: { /* stat -> funcstat */
+            funcstat(ls, line); //
+            break;
         }
         case TK_LOCAL: { /* stat -> localstat */
             luaX_next(ls); /* skip LOCAL */
@@ -1700,14 +1710,18 @@ static void statement(LexState* ls) {
             retstat(ls);
             break;
         }
-        case TK_BREAK: { /* stat -> breakstat */ breakstat(ls); break;
+        case TK_BREAK: { /* stat -> breakstat */
+            breakstat(ls); //
+            break;
         }
         case TK_GOTO: { /* stat -> 'goto' NAME */
             luaX_next(ls); /* skip 'goto' */
             gotostat(ls);
             break;
         }
-        default: { /* stat -> func | assignment */ exprstat(ls); break;
+        default: { /* stat -> func | assignment */
+            exprstat(ls); //
+            break;
         }
     }
     lua_assert(ls->fs->f->maxstacksize >= ls->fs->freereg && ls->fs->freereg >= luaY_nvarstack(ls->fs));
