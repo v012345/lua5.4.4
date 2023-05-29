@@ -121,7 +121,7 @@ static Node* hashint(const Table* t, lua_Integer i) {
 */
 #if !defined(l_hashfloat)
 static int l_hashfloat(lua_Number n) {
-    int i;
+    int i; // 指数部分
     lua_Integer ni;
     n = l_mathop(frexp)(n, &i) * -cast_num(INT_MIN);
     if (!lua_numbertointeger(n, &ni)) { /* is 'n' inf/-inf/NaN? */
@@ -205,7 +205,7 @@ static int equalkey(const TValue* k1, const Node* n2, int deadok) {
     if ((rawtt(k1) != keytt(n2)) && /* not the same variants? */
         !(deadok && keyisdead(n2) && iscollectable(k1)))
         return 0; /* cannot be same key */
-    switch (keytt(n2)) {
+    switch (keytt(n2)) { // 同类型
         case LUA_VNIL:
         case LUA_VFALSE:
         case LUA_VTRUE: return 1;
@@ -255,7 +255,9 @@ LUAI_FUNC unsigned int luaH_realasize(const Table* t) {
 ** (If it is not, 'alimit' cannot be changed to any other value
 ** without changing the real size.)
 */
-static int ispow2realasize(const Table* t) { return (!isrealasize(t) || ispow2(t->alimit)); }
+static int ispow2realasize(const Table* t) { //
+    return (!isrealasize(t) || ispow2(t->alimit));
+}
 
 static unsigned int setlimittosize(Table* t) {
     t->alimit = luaH_realasize(t);

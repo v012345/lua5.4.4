@@ -6,6 +6,9 @@
 #define LUA_ARGV_SCRIPT "./parser_example.lua"
 
 int main(int argc, char const* argv[]) {
+    // int i;
+    // double d = frexp(-1.0,&i);
+    // std::cout << d << std::endl;
     // std::cout << (size_t)(-1) << std::endl;
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
