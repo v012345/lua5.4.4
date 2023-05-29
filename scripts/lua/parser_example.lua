@@ -1,4 +1,17 @@
 require("bytedump")
+
+
+local function a()
+    local b = 1
+    Bytedump:dump(GetOpCodes())
+    return function()
+        Bytedump:dump(GetOpCodes())
+        b = b + 1
+        return b
+    end
+end
+local c = a()
+c()
 -- require("utils.tools")
 
 -- local f = io.open("C:\\Users\\Meteor\\Desktop\\t.txt", "r")
@@ -31,10 +44,10 @@ require("bytedump")
 -- print(e - s)
 
 
-local a
-while a do
-    print(a)
-end
+-- local a
+-- while a do
+--     print(a)
+-- end
 
 -- local r2 = JSON("C:\\Users\\Meteor\\Desktop\\New Text Document.json")
 -- print(r1() == r2())
