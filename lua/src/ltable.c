@@ -156,8 +156,10 @@ static Node* mainpositionTV(const Table* t, const TValue* key) {
             TString* ts = tsvalue(key);
             return hashpow2(t, luaS_hashlongstr(ts));
         }
-        case LUA_VFALSE: return hashboolean(t, 0);
-        case LUA_VTRUE: return hashboolean(t, 1);
+        case LUA_VFALSE: //
+            return hashboolean(t, 0);
+        case LUA_VTRUE: //
+            return hashboolean(t, 1);
         case LUA_VLIGHTUSERDATA: {
             void* p = pvalue(key);
             return hashpointer(t, p);
