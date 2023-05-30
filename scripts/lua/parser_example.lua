@@ -17,6 +17,7 @@ local f = io.open("C:\\Users\\Meteor\\Desktop\\UiWorldBossMain.csd", "r")
 local s = f and f:read("a") or ""
 local xml = require("utils.xml2table")
 local b = xml(s)
+print(#b.root)
 -- local c = xml("22222")
 -- print(b.xml_string)
 -- print(c.xml_string)

@@ -56,7 +56,6 @@ function Parser:parser_a_node()
             current_char = self:skip_space()
             if current_char == ">" then
                 self:get_next_char() -- 跳过 >
-                print(node.name)
                 return node
             else
                 error(current_char)
