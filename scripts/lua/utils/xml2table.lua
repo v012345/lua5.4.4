@@ -29,7 +29,7 @@ end
 function Parser:parser_a_node()
     local node = {
         name = nil,
-        attribute = {},
+        attributes = {},
         children = {},
     }
     node.name = self:parser_a_name()
@@ -67,7 +67,7 @@ function Parser:parser_a_node()
         else
             local key, value = self:parser_a_key_value_pair()
             if key then
-                node.attribute[key] = value
+                node.attributes[key] = value
             else
                 error("miss key")
             end

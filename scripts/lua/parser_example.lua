@@ -15,9 +15,16 @@
 -- require("utils.tools")
 local f = io.open("C:\\Users\\Meteor\\Desktop\\UiWorldBossMain.csd", "r")
 local s = f and f:read("a") or ""
+f:close()
 local xml = require("utils.xml2table")
 local b = xml(s)
-print(#b.root)
+print(b.root[1].children[1].attributes.Name)
+f = io.open("C:\\Users\\Meteor\\Desktop\\UiTutorialTips.csd", "r")
+s = f and f:read("a") or ""
+f:close()
+local c = xml(s)
+print(c.root[1].children[1].attributes.Name)
+print(b.root[1].children[1].attributes.Name)
 -- local c = xml("22222")
 -- print(b.xml_string)
 -- print(c.xml_string)
