@@ -12,6 +12,9 @@ function Parser:parser(xml_string)
     self.xml_string = xml_string
     local current_char = self:get_next_char()
     while true do
+        -- debug.sethook(function(a, b)
+        --     print(b)
+        -- end, "l")
         if space[current_char] then
             current_char = self:get_next_char()
         elseif current_char == "<" then
@@ -20,7 +23,7 @@ function Parser:parser(xml_string)
         else
             break
         end
-        print(current_char)
+
         current_char = self:get_next_char()
     end
 end
@@ -90,6 +93,7 @@ function Parser:parser_a_string()
         current_char = self:get_next_char() -- 跳过 "
         local s = {}
         while current_char do
+            print(current_char)
             if current_char == "\"" then
                 break
             end
