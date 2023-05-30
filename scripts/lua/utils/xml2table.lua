@@ -60,6 +60,7 @@ function Parser:parser_a_node()
         name = nil,
         attributes = {},
         children = {},
+        content = ""
     }
     node.name = self:parser_a_name()
 
@@ -92,7 +93,8 @@ function Parser:parser_a_node()
         elseif space[current_char] then
             current_char = self:skip_space()
         elseif current_char == ">" then
-            current_char = self:get_next_char()
+            self:get_next_char() -- 跳过 >
+            node.content = self:parser_content(node.attributes["xml:space"])
         else
             local key, value = self:parser_a_key_value_pair()
             if key then
@@ -102,6 +104,31 @@ function Parser:parser_a_node()
             end
         end
         current_char = self.current_char
+    end
+end
+
+function Parser:parser_content(value)
+    if value == "preserve" then
+        local current_char = self.current_char
+        local s = {}
+        while current_char do
+            if current_char == "<" then
+                return table.concat(s)
+            end
+            s[#s + 1] = current_char
+            current_char = self:get_next_char()
+        end
+    else
+        self:skip_space()
+        local current_char = self.current_char
+        local s = {}
+        while current_char do
+            if current_char == "<" then
+                return table.concat(s)
+            end
+            s[#s + 1] = current_char
+            current_char = self:get_next_char()
+        end
     end
 end
 
