@@ -20,12 +20,14 @@ function Parser:parser(xml_string)
         elseif current_char == "<" then
             self:get_next_char() -- 跳过 <
             self.root[#self.root + 1] = self:parser_a_node()
+            print(self.root[#self.root].name)
         else
             break
         end
 
         current_char = self:get_next_char()
     end
+    return self.root
 end
 
 function Parser:parser_a_node()
@@ -39,13 +41,17 @@ function Parser:parser_a_node()
     local current_char = self:skip_space()
     while current_char do
         if current_char == "<" then
+            self:get_next_char()
             current_char = self:skip_space()
+
             if current_char == "/" then
+                self:get_next_char()
                 if node.name ~= self:parser_a_name() then
                     error("don't close tag")
                 end
                 self:skip_space()
                 self:get_next_char()
+                print(node.name)
                 return node
             else
                 node.children[#node.children + 1] = self:parser_a_node()
@@ -55,6 +61,7 @@ function Parser:parser_a_node()
             current_char = self:skip_space()
             if current_char == ">" then
                 self:get_next_char() -- 跳过 >
+                print(node.name)
                 return node
             else
                 error(current_char)
@@ -93,7 +100,6 @@ function Parser:parser_a_string()
         current_char = self:get_next_char() -- 跳过 "
         local s = {}
         while current_char do
-            print(current_char)
             if current_char == "\"" then
                 break
             end
