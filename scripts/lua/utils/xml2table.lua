@@ -20,6 +20,7 @@ function Parser:parser(xml_string)
         else
             break
         end
+        print(current_char)
         current_char = self:get_next_char()
     end
 end
@@ -44,21 +45,22 @@ function Parser:parser_a_node()
                 self:get_next_char()
                 return node
             else
-                print(current_char)
                 node.children[#node.children + 1] = self:parser_a_node()
             end
         elseif current_char == "/" then
+            self:get_next_char()
             current_char = self:skip_space()
             if current_char == ">" then
                 self:get_next_char() -- 跳过 >
                 return node
+            else
+                error(current_char)
             end
         elseif space[current_char] then
             current_char = self:skip_space()
         elseif current_char == ">" then
             current_char = self:get_next_char()
         else
-            print(current_char)
             local key, value = self:parser_a_key_value_pair()
             if key then
                 node.attribute[key] = value
@@ -66,6 +68,7 @@ function Parser:parser_a_node()
                 error("miss key")
             end
         end
+        current_char = self.current_char
     end
 end
 
@@ -75,7 +78,9 @@ function Parser:parser_a_key_value_pair()
     if current_char ~= "=" then
         error("miss =")
     end
+    self:get_next_char()
     local value = self:parser_a_string()
+    -- print(key, value)
     return key, value
 end
 
@@ -138,7 +143,7 @@ return function(xml_string)
     }
     setmetatable(XML, { __index = Parser })
     xpcall(XML.parser, function(error_msg)
-        print(error_msg)
+        print(debug.traceback(error_msg))
     end, XML, xml_string)
     return XML
 end
