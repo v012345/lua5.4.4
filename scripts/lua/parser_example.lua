@@ -13,22 +13,25 @@
 -- local c = a()
 -- c()
 -- require("utils.tools")
-local f = io.open("C:\\Users\\Meteor\\Desktop\\UiWorldBossMain.csd", "r")
-local s = f and f:read("a") or ""
-f:close()
-local xml = require("utils.xml2table")
-local b = xml(s)
-print(b.root[1].children[1].attributes.Name)
-f = io.open("C:\\Users\\Meteor\\Desktop\\UiTutorialTips.csd", "r")
-s = f and f:read("a") or ""
-f:close()
-local c = xml(s)
-print(c.root[1].children[1].attributes.Name)
-print(b.root[1].children[1].attributes.Name)
+-- local f = io.open("C:\\Users\\Meteor\\Desktop\\UiWorldBossMain.csd", "r")
+-- local s = f and f:read("a") or ""
+-- f:close()
+-- local xml = require("utils.xml2table")
+-- local b = xml(s)
+-- print(b.root[1].children[1].attributes.Name)
+-- f = io.open("C:\\Users\\Meteor\\Desktop\\UiTutorialTips.csd", "r")
+-- s = f and f:read("a") or ""
+-- f:close()
+-- local c = xml(s)
+-- print(c.root[1].children[1].attributes.Name)
+-- print(b.root[1].children[1].attributes.Name)
 -- local c = xml("22222")
 -- print(b.xml_string)
 -- print(c.xml_string)
 -- xml:parser(s)
+
+local JSON   = require("utils.json2table")
+local config = JSON("C:\\Users\\Meteor\\Desktop\\configs\\no_config.json")
 
 -- --
 -- -- local t = {}
@@ -95,3 +98,12 @@ print(b.root[1].children[1].attributes.Name)
 -- -- print(counter2())
 -- -- local tools = { [1] = 2, [3] = 2, a = 2 }
 -- -- local a = #tools
+
+-- local folder_path = "C:\\Users\\Meteor\\AppData\\Local\\Closers"
+-- local cmd = string.format('dir /b "%s"', folder_path) -- Windows系统使用dir命令，Linux/Unix系统使用ls命令
+-- local handle = io.popen(cmd)
+-- local output = ""
+-- if
+-- handle and handle:read("*a");handle:close()) or ""
+
+-- print(output)
