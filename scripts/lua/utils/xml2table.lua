@@ -11,6 +11,12 @@ function Parser:parser(root, xml_string)
     char_pointer = 1
     self.xml_string = xml_string
     local current_char = self:get_next_char()
+    char_pointer = 1
+    current_char = self:skip_space()
+    if self:get_two_chars() == "<?" then
+        self:parser_a_head()
+    end
+    current_char = self:skip_space()
     while true do
         if space[current_char] then
             current_char = self:get_next_char()
@@ -24,6 +30,29 @@ function Parser:parser(root, xml_string)
         current_char = self:get_next_char()
     end
     return root
+end
+
+function Parser:get_two_chars()
+    local _char_pointer = char_pointer
+    return string.sub(self.xml_string, _char_pointer, _char_pointer + 1)
+end
+
+function Parser:parser_a_head()
+    -- self:parser_a_name()
+
+    local current_char = self:get_next_char() -- <
+    self:parser_a_name()
+    current_char = self:skip_space()
+    while current_char do
+        if current_char == "?" then
+            self:get_next_char()
+            self:get_next_char()
+            return
+        else
+            self:parser_a_key_value_pair()
+        end
+        current_char = self:skip_space()
+    end
 end
 
 function Parser:parser_a_node()
