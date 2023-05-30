@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <lua.hpp>
 #define LUA_MAIN_SCRIPT "./main.lua"
-#define LUA_ARGV_SCRIPT "./parser_example.lua"
+#define LUA_ARGV_SCRIPT "./review_excel.lua"
 
 int main(int argc, char const* argv[]) {
     // int i;

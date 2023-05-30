@@ -143,8 +143,12 @@ return function(xml_string)
         root = {},
     }
     setmetatable(XML, { __index = Parser })
-    xpcall(XML.parser, function(error_msg)
+    local s, r = xpcall(Parser.parser, function(error_msg)
         print(debug.traceback(error_msg))
-    end, XML, XML.root, xml_string)
-    return XML
+    end, Parser, XML.root, xml_string)
+    if s then
+        return r
+    else
+        return nil
+    end
 end

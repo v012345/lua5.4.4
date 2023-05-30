@@ -270,8 +270,12 @@ return function(json_string)
         root = {},
     }
     setmetatable(JSON, { __index = Parser })
-    xpcall(Parser.parser, function(error_msg)
+    local s, r = xpcall(Parser.parser, function(error_msg)
         print(debug.traceback(error_msg))
     end, Parser, JSON.root, json_string)
-    return JSON
+    if s then
+        return r
+    else
+        return nil
+    end
 end

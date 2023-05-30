@@ -13,9 +13,7 @@
 -- local c = a()
 -- c()
 -- require("utils.tools")
--- local f = io.open("C:\\Users\\Meteor\\Desktop\\UiWorldBossMain.csd", "r")
--- local s = f and f:read("a") or ""
--- f:close()
+
 -- local xml = require("utils.xml2table")
 -- local b = xml(s)
 -- print(b.root[1].children[1].attributes.Name)
@@ -29,10 +27,63 @@
 -- print(b.xml_string)
 -- print(c.xml_string)
 -- xml:parser(s)
+local f = io.open("C:\\Users\\Meteor\\Desktop\\configs\\no_config.json", "r")
+local s = ""
+if f then
+    s = f:read("a")
+    f:close()
+end
 
-local JSON   = require("utils.json2table")
-local config = JSON("C:\\Users\\Meteor\\Desktop\\configs\\no_config.json")
+local JSON = require("utils.json2table")
+local XML = require("utils.xml2table")
+local config = JSON(s)
+local csds = {}
+if config then
+    print()
+    local folder_path = config.test_csd_path
+    local cmd = string.format('dir /b "%s"', folder_path) -- Windows系统使用dir命令，Linux/Unix系统使用ls命令
+    local handle = io.popen(cmd)
 
+    local path = {}
+    if handle then
+        local output = handle:read("l")
+        while output do
+            if string.match(output, "^.+%.csd$") then
+                path[#path + 1] = folder_path .. "\\" .. output
+            end
+            output = handle:read("l")
+        end
+
+        handle:close()
+    end
+    for index, value in ipairs(path) do
+        f = io.open(value, "r")
+        if f then
+            csds[index] = XML(f:read("a"))
+            print(index, "praser", value)
+            f:close()
+        end
+    end
+    local log = io.open(config.result_output_to, "w")
+    if log then
+        local function check(node, index)
+            if node.attributes["Path"] and #node.attributes["Path"] < 5 then
+                log:write(path[index])
+                log:write("\n")
+            end
+            for key, value in pairs(node.children) do
+                print(index)
+                check(value, index)
+            end
+        end
+        for index, value in ipairs(csds) do
+            check(value[1], index)
+        end
+        log:close()
+    end
+end
+
+-- print(output)
 -- --
 -- -- local t = {}
 -- -- if f then
@@ -98,12 +149,3 @@ local config = JSON("C:\\Users\\Meteor\\Desktop\\configs\\no_config.json")
 -- -- print(counter2())
 -- -- local tools = { [1] = 2, [3] = 2, a = 2 }
 -- -- local a = #tools
-
--- local folder_path = "C:\\Users\\Meteor\\AppData\\Local\\Closers"
--- local cmd = string.format('dir /b "%s"', folder_path) -- Windows系统使用dir命令，Linux/Unix系统使用ls命令
--- local handle = io.popen(cmd)
--- local output = ""
--- if
--- handle and handle:read("*a");handle:close()) or ""
-
--- print(output)
