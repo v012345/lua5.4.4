@@ -33,20 +33,15 @@ function Parser:parser_a_node()
     node.name = self:parser_a_name()
 
     local current_char = self:skip_space()
-    debug.sethook(function(a, b)
-        print(b)
-    end, "l", 0)
+    local i = 1
     while current_char do
+        i = i + 1
         if current_char == "/" then
             current_char = self:skip_space()
             if current_char == ">" then
                 self:get_next_char() -- 跳过 >
                 return node
             end
-        elseif space[current_char] then
-            current_char = self:skip_space()
-        elseif current_char == ">" then
-            current_char = self:get_next_char()
         elseif current_char == "<" then
             current_char = self:skip_space()
             if current_char == "/" then
@@ -59,6 +54,10 @@ function Parser:parser_a_node()
             else
                 node.children[#node.children + 1] = self:parser_a_node()
             end
+        elseif space[current_char] then
+            current_char = self:skip_space()
+        elseif current_char == ">" then
+            current_char = self:get_next_char()
         else
             local key, value = self:parser_a_key_value_pair()
             if key then
@@ -69,7 +68,6 @@ function Parser:parser_a_node()
         end
         current_char = self:get_next_char()
     end
-    debug.sethook(nil, "l", 0)
 end
 
 function Parser:parser_a_key_value_pair()
@@ -130,7 +128,6 @@ function Parser:get_next_char()
     self.current_char = string.sub(self.xml_string, _char_pointer, _char_pointer)
     _char_pointer = _char_pointer + 1
     char_pointer = _char_pointer
-    print(self.current_char)
     return self.current_char
 end
 
@@ -142,7 +139,7 @@ return function(xml_string)
     }
     setmetatable(XML, { __index = Parser })
     xpcall(XML.parser, function(error_msg)
-        -- print(error_msg)
+        print(error_msg)
     end, XML, xml_string)
     return XML
 end
