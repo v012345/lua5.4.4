@@ -45,9 +45,7 @@ local function checkout_string_level(string_data, mt, column)
             mt[column] = 2
         end
     else
-        if mt[column] and mt[column] < 1 then
-            mt[column] = 1
-        else
+        if not mt[column] then
             mt[column] = 1
         end
     end
@@ -63,11 +61,22 @@ local function sheet_data_to_table(sheet_data, sharedStrings)
                     r[#r + 1] = sharedStrings[tonumber(c.children[1].content)]
                     checkout_string_level(r[#r], mt, #r)
                 end
+            elseif c.attributes.t == "str" then
+                for key, value in pairs(c.children) do
+                    if value.name == "v" then
+                        r[#r + 1] = value.content
+                        checkout_string_level(r[#r], mt, #r)
+                        break
+                    end
+                end
             else
                 -- print(i, #r)
-                if c.children[1] then
-                    r[#r + 1] = c.children[1].content
-                    checkout_string_level(r[#r], mt, #r)
+                for key, value in pairs(c.children) do
+                    if value.name == "v" then
+                        r[#r + 1] = value.content
+                        checkout_string_level(r[#r], mt, #r)
+                        break
+                    end
                 end
                 -- print
             end
@@ -130,13 +139,38 @@ local function write_to_lua_file(toLua, table_name, data)
     o:close()
 end
 
+local function create_id(lua_table)
+    local game_table = {}
+    local has_id = false
+    for key, value in pairs(lua_table[1]) do
+        if string.lower(key) == "id" then
+            has_id = true
+            break
+        end
+    end
+    if not has_id then
+        return lua_table
+    end
+    for key, value in pairs(lua_table) do
+        for k, v in pairs(value) do
+            if string.lower(k) == "id" then
+                if tonumber(value[k]) then
+                    game_table[v] = value
+                end
+                break
+            end
+        end
+    end
+
+    return game_table
+end
+
 local function lua_table_to_game_table(lua_table)
     local mt = getmetatable(lua_table)
     local game_table = {}
     local len = #lua_table[1]
     for i = 2, #lua_table, 1 do
         game_table[#game_table + 1] = {}
-        print(i, #lua_table[i])
         for index, value in ipairs(lua_table[i]) do
             if index <= len then
                 if mt[index] == 1 then
@@ -260,9 +294,12 @@ local function main()
     for key, value in pairs(lua_tables) do
         print("convert", string.sub(key, #config.temp + 2, #key - 4), "to game table")
         lua_tables[key] = lua_table_to_game_table(value)
-        print("convert", string.sub(key, #config.temp + 2, #key - 4), "to game table")
         -- PrintTableToJson(lua_tables[key])
         -- print("covert", string.sub(key, #config.temp + 2, #key - 4), "to game table")
+    end
+    for key, value in pairs(lua_tables) do
+        lua_tables[key] = create_id(value)
+        print("create id ", string.sub(key, #config.temp + 2, #key - 4))
     end
     for key, value in pairs(lua_tables) do
         write_to_lua_file(config.lua_test_output .. string.sub(key, #config.temp + 1, #key),
