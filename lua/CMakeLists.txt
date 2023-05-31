@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 project(lua)
 
-add_library(lua STATIC
-# add_library(lualib SHARED
+# add_library(lua STATIC
+add_library(lua SHARED
     lapi.c
     lauxlib.c
     lbaselib.c

@@ -3,8 +3,8 @@ project(modules VERSION 1.0.0)
 
 # # 设置生成的动态链接库的名称和源文件
 add_library(lfs SHARED lfs.c)
-target_include_directories(lfs PRIVATE ${CMAKE_SOURCE_DIR}/lua/src)
-target_link_libraries(lfs PRIVATE lualib)
+target_include_directories(lfs PRIVATE ${CMAKE_SOURCE_DIR}/lua)
+target_link_libraries(lfs PRIVATE lua)
 # target_link_libraries(lfs lualib)
 
 # 设置导出符号（可选）
