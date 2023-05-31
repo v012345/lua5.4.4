@@ -91,23 +91,43 @@ local function convert_excel_to_table(sheet, shared)
     return lua_table
 end
 
-local function write_to_lua_file(toLua)
-    local o = io.open(toLua, "w")
-    o:write("local excel = {")
-    for i = 2, #t, 1 do
-        o:write("[" .. (i - 1) .. "] = {")
-        for index, value in ipairs(t[i]) do
-            if t[1][index] ~= "name" and t[1][index] ~= "desc" then
-                o:write(t[1][index])
-                o:write(" =\' ")
-                o:write(value)
-                o:write("' ,\n ")
+local function write_to_lua_file(toLua, table_name, data)
+    local j = 0
+    local function dump(t)
+        if type(t) == 'table' then
+            j = j + 1
+            local s = ""
+            s = s .. '{\n'
+            for k, v in pairs(t) do
+                for i = 1, j, 1 do
+                    s = s .. "    "
+                end
+                if tonumber(k) then
+                    s = string.format("%s[%s] = %s,\n", s, k, dump(v))
+                else
+                    s = string.format("%s%s = %s,\n", s, k, dump(v))
+                end
+            end
+            j = j - 1
+            for i = 1, j, 1 do
+                s = s .. "    "
+            end
+            return s .. '}'
+        elseif type(t) == "string" then
+            local n = tonumber(t)
+            if n then
+                return n
+            else
+                return string.format('"%s"', t)
             end
         end
-        o:write("},")
     end
-    o:write("}\n")
-    o:write("return item_buff")
+    local o = io.open(toLua, "w")
+    o:write(string.format("local %s = ", table_name))
+    o:write(dump(data))
+    o:write("\n")
+    o:write("return " .. table_name)
+    o:close()
 end
 
 local function lua_table_to_game_table(lua_table)
@@ -234,10 +254,14 @@ local function main()
         print("convert", value, "to lua table")
     end
     for key, value in pairs(lua_tables) do
-        print("covert", string.sub(key, #config.temp + 2, #key - 4), "to game table")
         lua_tables[key] = lua_table_to_game_table(value)
+        print("convert", string.sub(key, #config.temp + 2, #key - 4), "to game table")
         -- PrintTableToJson(lua_tables[key])
         -- print("covert", string.sub(key, #config.temp + 2, #key - 4), "to game table")
+    end
+    for key, value in pairs(lua_tables) do
+        write_to_lua_file(key, string.sub(key, #config.temp + 2, #key - 4), value)
+        print("create", key)
     end
 end
 xpcall(main, function(a, b)
