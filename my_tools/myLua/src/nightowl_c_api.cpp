@@ -7,7 +7,7 @@ void C_API(lua_State* L) {
     lua_register(L, "GetFileLastModifiedTimestamp", GetFileLastModifiedTimestamp);
     lua_register(L, "CopyFile", CopyFile);
     lua_register(L, "DeleteFile", DeleteFile);
-    lua_register(L, "GetFileMd5", GetFileMd5);
+    // lua_register(L, "GetFileMd5", GetFileMd5);
     lua_register(L, "IsFileExist", IsFileExist);
     lua_register(L, "GetFilesInFolder", Lua_GetFilesInFolder);
     lua_register(L, "CopyFileMultiThreads", CopyFileMultiThreads);
@@ -100,48 +100,48 @@ int DeleteFile(lua_State* L) {
 }
 
 int GetFilesMd5(lua_State* L) {
-    luaL_checktype(L, 1, LUA_TTABLE);
-    std::vector<std::string> files;
+    // luaL_checktype(L, 1, LUA_TTABLE);
+    // std::vector<std::string> files;
 
-    size_t n = lua_rawlen(L, 1);
+    // size_t n = lua_rawlen(L, 1);
 
-    for (size_t i = 1; i <= n; i++) {
-        int ret_type = lua_rawgeti(L, 1, i);
-        if (ret_type == LUA_TSTRING) { files.push_back(lua_tostring(L, -1)); }
-        lua_pop(L, 1);
-    }
-    int processor_count = std::thread::hardware_concurrency();
-    std::vector<std::thread> workers;
-    std::map<std::string, std::string> filesMd5;
-    std::mutex mutex;
-    std::mutex mutex2;
-    for (size_t i = 0; i < processor_count; i++) {
-        workers.push_back(std::thread([&]() {
-            while (true) {
-                mutex.lock();
-                if (files.empty()) {
-                    mutex.unlock();
-                    return;
-                }
-                std::string file = files.front();
-                files.erase(files.begin());
-                mutex.unlock();
-                std::string md5 = getFileMD5(file);
-                mutex2.lock();
-                filesMd5.insert(std::make_pair(file, md5));
-                mutex2.unlock();
-            }
-        }));
-    }
-    for (auto&& worker : workers) { worker.join(); }
+    // for (size_t i = 1; i <= n; i++) {
+    //     int ret_type = lua_rawgeti(L, 1, i);
+    //     if (ret_type == LUA_TSTRING) { files.push_back(lua_tostring(L, -1)); }
+    //     lua_pop(L, 1);
+    // }
+    // int processor_count = std::thread::hardware_concurrency();
+    // std::vector<std::thread> workers;
+    // std::map<std::string, std::string> filesMd5;
+    // std::mutex mutex;
+    // std::mutex mutex2;
+    // for (size_t i = 0; i < processor_count; i++) {
+    //     workers.push_back(std::thread([&]() {
+    //         while (true) {
+    //             mutex.lock();
+    //             if (files.empty()) {
+    //                 mutex.unlock();
+    //                 return;
+    //             }
+    //             std::string file = files.front();
+    //             files.erase(files.begin());
+    //             mutex.unlock();
+    //             std::string md5 = getFileMD5(file);
+    //             mutex2.lock();
+    //             filesMd5.insert(std::make_pair(file, md5));
+    //             mutex2.unlock();
+    //         }
+    //     }));
+    // }
+    // for (auto&& worker : workers) { worker.join(); }
 
-    lua_newtable(L);
-    for (auto&& file : filesMd5) {
-        lua_pushstring(L, file.first.c_str());
-        lua_pushstring(L, file.second.c_str());
-        lua_settable(L, -3);
-    }
-    return 1;
+    // lua_newtable(L);
+    // for (auto&& file : filesMd5) {
+    //     lua_pushstring(L, file.first.c_str());
+    //     lua_pushstring(L, file.second.c_str());
+    //     lua_settable(L, -3);
+    // }
+    return 0;
 }
 
 int CopyFileMultiThreads(lua_State* L) {
@@ -188,7 +188,7 @@ int CopyFileMultiThreads(lua_State* L) {
                 if (!std::filesystem::exists(parent_path)) { std::filesystem::create_directories(parent_path); }
                 // std::filesystem::copy(form_, to_,
                 // std::filesystem::copy_options::overwrite_existing);
-                getFileMD5(form_);
+                // getFileMD5(form_);
             }
         }));
     }
@@ -227,11 +227,11 @@ int CopyFile(lua_State* L) {
     return 1;
 }
 
-int GetFileMd5(lua_State* L) {
-    const char* file = lua_tostring(L, 1);
-    lua_pushstring(L, getFileMD5(file).c_str());
-    return 1;
-}
+// int GetFileMd5(lua_State* L) {
+//     const char* file = lua_tostring(L, 1);
+//     lua_pushstring(L, getFileMD5(file).c_str());
+//     return 1;
+// }
 
 int IsFileExist(lua_State* L) {
     const char* file = lua_tostring(L, 1);

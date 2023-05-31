@@ -6,8 +6,10 @@ add_executable(${PROJECT_NAME} main.cpp
     src/angel.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lua/src)
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/libs/CalculateMd5/include)
-target_link_libraries(${PROJECT_NAME} lualib CalculateMd5 pugixml::pugixml)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/modules)
+# target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/libs/CalculateMd5/include)
+# target_link_libraries(${PROJECT_NAME} lualib CalculateMd5 pugixml::pugixml lfs)
+target_link_libraries(${PROJECT_NAME} lualib lfs)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 message("------------------- ${CMAKE_SOURCE_DIR} -------------------")
