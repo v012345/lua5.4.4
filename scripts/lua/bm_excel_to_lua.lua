@@ -133,28 +133,32 @@ end
 local function lua_table_to_game_table(lua_table)
     local mt = getmetatable(lua_table)
     local game_table = {}
+    local len = #lua_table[1]
     for i = 2, #lua_table, 1 do
         game_table[#game_table + 1] = {}
+        print(i, #lua_table[i])
         for index, value in ipairs(lua_table[i]) do
-            if mt[index] == 1 then
-                game_table[#game_table][lua_table[1][index]] = value
-            elseif mt[index] == 2 then
-                local value2 = {}
-                for key in string.gmatch(value, "[^|]+") do
-                    value2[#value2 + 1] = key
-                end
-                game_table[#game_table][lua_table[1][index]] = value2
-            elseif mt[index] == 3 then
-                local value3 = {}
-                for key in string.gmatch(value, "[^%^]+") do
-                    value3[#value3 + 1] = {}
-                    for k in string.gmatch(key, "[^|]+") do
-                        value3[#value3][#value3[#value3] + 1] = k
+            if index <= len then
+                if mt[index] == 1 then
+                    game_table[#game_table][lua_table[1][index]] = value
+                elseif mt[index] == 2 then
+                    local value2 = {}
+                    for key in string.gmatch(value, "[^|]+") do
+                        value2[#value2 + 1] = key
                     end
+                    game_table[#game_table][lua_table[1][index]] = value2
+                elseif mt[index] == 3 then
+                    local value3 = {}
+                    for key in string.gmatch(value, "[^%^]+") do
+                        value3[#value3 + 1] = {}
+                        for k in string.gmatch(key, "[^|]+") do
+                            value3[#value3][#value3[#value3] + 1] = k
+                        end
+                    end
+                    game_table[#game_table][lua_table[1][index]] = value3
+                else
+                    error("too many level")
                 end
-                game_table[#game_table][lua_table[1][index]] = value3
-            else
-                error("too many level")
             end
         end
     end
@@ -254,13 +258,15 @@ local function main()
         print("convert", value, "to lua table")
     end
     for key, value in pairs(lua_tables) do
+        print("convert", string.sub(key, #config.temp + 2, #key - 4), "to game table")
         lua_tables[key] = lua_table_to_game_table(value)
         print("convert", string.sub(key, #config.temp + 2, #key - 4), "to game table")
         -- PrintTableToJson(lua_tables[key])
         -- print("covert", string.sub(key, #config.temp + 2, #key - 4), "to game table")
     end
     for key, value in pairs(lua_tables) do
-        write_to_lua_file(key, string.sub(key, #config.temp + 2, #key - 4), value)
+        write_to_lua_file(config.lua_test_output .. string.sub(key, #config.temp + 1, #key),
+            string.sub(key, #config.temp + 2, #key - 4), value)
         print("create", key)
     end
 end

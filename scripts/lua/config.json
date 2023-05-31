@@ -4,5 +4,6 @@
     "xls2xlsx_cmd": "C:\\Users\\Meteor\\Desktop\\configs\\xls2xlsx_worker.exe \"%s\" \"%s\"",
     "xls_path": "D:\\Closers.cocos\\resource\\data\\branches\\test\\excel",
     "temp": "C:\\Users\\Meteor\\Desktop\\configs",
-    "zip_cmd": "tar -xf %s -C %s"
+    "zip_cmd": "tar -xf %s -C %s",
+    "lua_test_output": "D:\\Closers.cocos\\client\\branches\\test\\Resources\\src\\imports\\table"
 }
