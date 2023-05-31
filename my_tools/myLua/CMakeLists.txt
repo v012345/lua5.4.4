@@ -7,9 +7,8 @@ add_executable(${PROJECT_NAME} main.cpp
     )
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lua)
-# target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/libs/CalculateMd5/include)
-target_link_libraries(${PROJECT_NAME} lualib)
-# target_link_libraries(${PROJECT_NAME} "D:\\NightOwlTools\\Lua\\build\\modules\\Debug\\lfs.dll")
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/modules)
+target_link_libraries(${PROJECT_NAME} lualib lfs)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 message("------------------- ${CMAKE_SOURCE_DIR} -------------------")

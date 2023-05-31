@@ -2,6 +2,9 @@
 // #include "nightowl_c_api.h"
 #include <filesystem>
 #include <lua.hpp>
+extern "C" {
+#include <lfs.h>
+}
 #define LUA_MAIN_SCRIPT "./main.lua"
 #define LUA_ARGV_SCRIPT "./parser_example.lua"
 

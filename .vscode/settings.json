@@ -156,6 +156,11 @@
         "lualib.h": "c",
         "lfs.h": "c"
     },
-    "Lua.diagnostics.globals": [],
+    "Lua.diagnostics.globals": [
+        "lfs"
+    ],
     "C_Cpp.errorSquiggles": "disabled",
+    "Lua.workspace.library": [
+        "${3rd}/lfs/library"
+    ],
 }

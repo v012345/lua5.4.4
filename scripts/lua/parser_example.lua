@@ -1,6 +1,6 @@
-
-local file_path ="C:/Users/Meteor/Desktop/v2-1495b2ab24e5a03635e1b82cbd97b91e_r.jpg"
-
+print("jiii")
+local file_path = "C:\\Users\\MH\\Desktop\\日语单词\\0117.xlsx"
+local lfs = require "lfs"
 -- 获取文件大小
 local file_size = lfs.attributes(file_path, "size")
 print("文件大小：" .. file_size .. " bytes")
