@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
-project(lua)
+project(lualib)
 
-# add_library(lua STATIC
-add_library(lua SHARED
+add_library(lualib STATIC
     lapi.c
     lauxlib.c
     lbaselib.c
@@ -37,12 +36,11 @@ add_library(lua SHARED
     lutf8lib.c
     lvm.c
     lzio.c
+    lfs.c
 )
 
-# add_library(lua::lualib ALIAS lualib)
+add_executable(lua lua.c)
+target_link_libraries(lua lualib)
 
-# add_executable(lua lua.c)
-# target_link_libraries(lua lualib)
-
-# add_executable(luac luac.c)
-# target_link_libraries(luac lualib)
+add_executable(luac luac.c)
+target_link_libraries(luac lualib)

@@ -1,3 +1,3 @@
 print("1")
-print(require "lfs")
+print(lfs)
 print("2")

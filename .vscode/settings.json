@@ -153,7 +153,8 @@
         "lauxlib.h": "c",
         "*.rh": "c",
         "luaconf.h": "c",
-        "lualib.h": "c"
+        "lualib.h": "c",
+        "lfs.h": "c"
     },
     "Lua.diagnostics.globals": [],
     "C_Cpp.errorSquiggles": "disabled",
