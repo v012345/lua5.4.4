@@ -1,3 +1,4 @@
+-- require("utils.tools")
 local function get_sheet_data(sheet)
     for _, child in pairs(sheet.children) do
         if child.name == "sheetData" then
@@ -30,25 +31,50 @@ local function get_sst(shared)
     end
     return t
 end
+local function checkout_string_level(string_data, mt, column)
+    if string.find(string_data, "%^") then
+        if mt[column] and mt[column] < 3 then
+            mt[column] = 3
+        else
+            mt[column] = 3
+        end
+    elseif string.find(string_data, "|") then
+        if mt[column] and mt[column] < 2 then
+            mt[column] = 2
+        else
+            mt[column] = 2
+        end
+    else
+        if mt[column] and mt[column] < 1 then
+            mt[column] = 1
+        else
+            mt[column] = 1
+        end
+    end
+end
 local function sheet_data_to_table(sheet_data, sharedStrings)
     local t = {}
+    local mt = {}
     for i, row in pairs(sheet_data.children) do
         local r = {}
         for key, c in pairs(row.children) do
             if c.attributes.t == "s" then
                 if c.children[1] then
                     r[#r + 1] = sharedStrings[tonumber(c.children[1].content)]
+                    checkout_string_level(r[#r], mt, #r)
                 end
             else
                 -- print(i, #r)
                 if c.children[1] then
                     r[#r + 1] = c.children[1].content
+                    checkout_string_level(r[#r], mt, #r)
                 end
                 -- print
             end
         end
         t[#t + 1] = #r > 0 and r or nil
     end
+    setmetatable(t, mt)
     return t
 end
 
@@ -62,9 +88,7 @@ local function convert_excel_to_table(sheet, shared)
     local sheet_data = get_sheet_data(sheet)
     local sst = get_sst(shared)
     local lua_table = sheet_data_to_table(sheet_data, sst)
-    for i = 2, #lua_table, 1 do
-
-    end
+    return lua_table
 end
 
 local function write_to_lua_file(toLua)
@@ -84,6 +108,37 @@ local function write_to_lua_file(toLua)
     end
     o:write("}\n")
     o:write("return item_buff")
+end
+
+local function lua_table_to_game_table(lua_table)
+    local mt = getmetatable(lua_table)
+    local game_table = {}
+    for i = 2, #lua_table, 1 do
+        game_table[#game_table + 1] = {}
+        for index, value in ipairs(lua_table[i]) do
+            if mt[index] == 1 then
+                game_table[#game_table][lua_table[1][index]] = value
+            elseif mt[index] == 2 then
+                local value2 = {}
+                for key in string.gmatch(value, "[^|]+") do
+                    value2[#value2 + 1] = key
+                end
+                game_table[#game_table][lua_table[1][index]] = value2
+            elseif mt[index] == 3 then
+                local value3 = {}
+                for key in string.gmatch(value, "[^%^]+") do
+                    value3[#value3 + 1] = {}
+                    for k in string.gmatch(key, "[^|]+") do
+                        value3[#value3][#value3[#value3] + 1] = k
+                    end
+                end
+                game_table[#game_table][lua_table[1][index]] = value3
+            else
+                error("too many level")
+            end
+        end
+    end
+    return game_table
 end
 
 
@@ -128,6 +183,7 @@ local function main()
         handle = io.popen(cmd)
         local output = handle:read("a")
         xls_modify_time[key] = time_to_number(string.match(output, "%d%d/%d%d/%d%d%d%d  %d%d:%d%d %aM"))
+        print(key, "modify at", xls_modify_time[key])
         handle:close()
     end
 
@@ -141,11 +197,13 @@ local function main()
             handle = io.popen(cmd)
             local output = handle:read("a")
             local xlsx_create_time = time_to_number(string.match(output, "%d%d/%d%d/%d%d%d%d  %d%d:%d%d %aM"))
+            print(target, "create at", xlsx_create_time)
             if value >= xlsx_create_time then
                 covert_to_xlsx[config.xls_path .. "\\" .. key .. ".xls"] = target
             end
             handle:close()
         else
+            print("create", target)
             covert_to_xlsx[config.xls_path .. "\\" .. key .. ".xls"] = target
         end
     end
@@ -157,6 +215,7 @@ local function main()
         print("convert", key, "to", value, output)
         handle:close()
     end
+    local lua_tables = {}
     for key, value in pairs(covert_to_xlsx) do
         cmd = string.format(config.zip_cmd, value, config.temp)
         handle = io.popen(cmd)
@@ -171,9 +230,17 @@ local function main()
         end
         local sheet1 = f:read("a")
         f:close()
-        convert_excel_to_table(XML(sheet1)[1], XML(sheet1)[shared], string.gsub(value, "xlsx$", "lua", 1))
+        lua_tables[string.gsub(value, "xlsx$", "lua", 1)] = convert_excel_to_table(XML(sheet1)[1], XML(shared)[1])
+        print("convert", value, "to lua table")
+    end
+    for key, value in pairs(lua_tables) do
+        print("covert", string.sub(key, #config.temp + 2, #key - 4), "to game table")
+        lua_tables[key] = lua_table_to_game_table(value)
+        -- PrintTableToJson(lua_tables[key])
+        -- print("covert", string.sub(key, #config.temp + 2, #key - 4), "to game table")
     end
 end
 xpcall(main, function(a, b)
     print(a, b)
 end)
+-- other_activity_trial_config
