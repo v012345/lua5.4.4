@@ -6,8 +6,7 @@ local file = io.open("config.json", "r") or error("can't read config")
 local config = JSON(file:read("a")) or {}
 file:close()
 local images_map = {}
-
-local function traverseDirectory(path)
+local function traverseDirectory(path, root, prefix)
     local map = images_map
     for entry in lfs.dir(path) do
         if entry ~= "." and entry ~= ".." then
@@ -15,9 +14,9 @@ local function traverseDirectory(path)
             local fileAttributes = lfs.attributes(filePath)
 
             if fileAttributes.mode == "directory" then
-                traverseDirectory(filePath)
+                traverseDirectory(filePath, root, prefix)
             elseif fileAttributes.mode == "file" then
-                map[entry] = entry
+                map[entry] = string.gsub(filePath, root, prefix)
             end
         end
     end
@@ -56,14 +55,12 @@ local function get_sst(shared)
 end
 local function checkout_string_level(string_data, mt, column)
     if string.find(string_data, "%^") then
-        if mt[column] and mt[column] < 3 then
-            mt[column] = 3
-        else
-            mt[column] = 3
-        end
+        mt[column] = 3
     elseif string.find(string_data, "|") then
-        if mt[column] and mt[column] < 2 then
-            mt[column] = 2
+        if mt[column] then
+            if mt[column] < 2 then
+                mt[column] = 2
+            end
         else
             mt[column] = 2
         end
@@ -119,38 +116,45 @@ end
 
 local function write_to_lua_file(toLua, table_name, data)
     local j = 0
-    local function dump(t)
+    local function dump(t, o, q)
         if type(t) == 'table' then
             j = j + 1
-            local s = ""
-            s = s .. '{\n'
+            o:write('{\n')
             for k, v in pairs(t) do
                 for i = 1, j, 1 do
-                    s = s .. "    "
+                    o:write("    ")
                 end
                 if tonumber(k) then
-                    s = string.format("%s[%s] = %s,\n", s, k, dump(v))
+                    o:write(string.format("[%s] = ", k))
                 else
-                    s = string.format("%s%s = %s,\n", s, k, dump(v))
+                    o:write(string.format("%s = ", k))
                 end
+                dump(v, o, true)
             end
             j = j - 1
             for i = 1, j, 1 do
-                s = s .. "    "
+                o:write("    ")
             end
-            return s .. '}'
+
+            if q then
+                o:write('},\n')
+            else
+                o:write('}\n')
+            end
         elseif type(t) == "string" then
             local n = tonumber(t)
             if n then
-                return n
+                o:write(n)
             else
-                return string.format('"%s"', t)
+                o:write(string.format('"%s"', images_map[t] or t))
             end
+            o:write(",")
+            o:write("\n")
         end
     end
-    local o = io.open(toLua, "w")
+    local o = io.open(toLua, "w") or error("can't write")
     o:write(string.format("local %s = ", table_name))
-    o:write(dump(data))
+    dump(data, o, false)
     o:write("\n")
     o:write("return " .. table_name)
     o:close()
@@ -219,8 +223,11 @@ end
 
 local function main()
     print(">>> collecting images info >>>")
-    traverseDirectory(config.piece)
-    traverseDirectory(config.image)
+    for _, res in pairs(config.res) do
+        print("traverse", res)
+        traverseDirectory(res, res .. "/", "")
+    end
+    -- traverseDirectory(config.image)
     print("==============================")
 
     print(">>> collecting xls info >>>")
