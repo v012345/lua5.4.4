@@ -221,8 +221,6 @@ local function main()
     print(">>> collecting images info >>>")
     traverseDirectory(config.piece)
     traverseDirectory(config.image)
-    print("<<< collecting images info <<<")
-
     print("==============================")
 
     print(">>> collecting xls info >>>")
@@ -234,9 +232,6 @@ local function main()
             xls_modify_time[string.gsub(entry, ".xls", "")] = lfs.attributes(filePath, "modification")
         end
     end
-
-    print("<<< collecting xls info <<<")
-
     print("==============================")
 
     print(">>> collecting xlsx info >>>")
@@ -252,7 +247,7 @@ local function main()
             covert_to_xlsx[source] = target
         end
     end
-    print("<<< collecting xlsx info <<<")
+
     print("==============================")
     print(">>> covert to xlsx >>>")
     for source, target in pairs(covert_to_xlsx) do
@@ -263,45 +258,45 @@ local function main()
         handle:close()
     end
 
-    print("<<< covert to xlsx <<<")
     print("==============================")
-
-    do
-        return
-    end
+    print(">>> convert to lua table >>>")
     local lua_tables = {}
-    for key, value in pairs(covert_to_xlsx) do
-        cmd = string.format(config.zip_cmd, value, config.temp)
-        handle = io.popen(cmd)
+    for _, xlsx in pairs(covert_to_xlsx) do
+        local cmd = string.format(config.zip_cmd, xlsx, config.temp)
+        local handle = io.popen(cmd) or error("can't execute unzip")
         handle:close()
-        f = io.open(config.temp .. "\\xl\\sharedStrings.xml", "r")
+        local f = io.open(config.temp .. "\\xl\\sharedStrings.xml", "r") or error("can't open sharedStrings.xml")
         local shared = f:read("a")
         f:close()
-        -- local xml = XML(s)
-        f = io.open(config.temp .. "\\xl\\worksheets\\sheet1.xml", "r")
-        if not f then
-            error(key .. " miss sheet1")
-        end
+        f = io.open(config.temp .. "\\xl\\worksheets\\sheet1.xml", "r") or error("can't open sheet1.xml")
         local sheet1 = f:read("a")
         f:close()
-        lua_tables[string.gsub(value, "xlsx$", "lua", 1)] = convert_excel_to_table(XML(sheet1)[1], XML(shared)[1])
-        print("convert", value, "to lua table")
+        print("convert ok", xlsx)
+        lua_tables[string.gsub(xlsx, "xlsx$", "lua", 1)] = convert_excel_to_table(XML(sheet1)[1], XML(shared)[1])
     end
-    for key, value in pairs(lua_tables) do
-        print("convert", string.sub(key, #config.temp + 2, #key - 4), "to game table")
-        lua_tables[key] = lua_table_to_game_table(value)
-        -- PrintTableToJson(lua_tables[key])
-        -- print("covert", string.sub(key, #config.temp + 2, #key - 4), "to game table")
+    print("==============================")
+    print(">>> convert to game table >>>")
+    local game_tables = {}
+    for xlsx_path, lua_table in pairs(lua_tables) do
+        local game_table_name = string.sub(xlsx_path, #config.temp + 2, #xlsx_path - 4)
+        print("convert ok", game_table_name)
+        game_tables[game_table_name] = lua_table_to_game_table(lua_table)
     end
-    for key, value in pairs(lua_tables) do
-        lua_tables[key] = create_id(value)
-        print("create id ", string.sub(key, #config.temp + 2, #key - 4))
+    print("==============================")
+    print(">>> adjust game table id >>>")
+    for game_table_name, game_table in pairs(game_tables) do
+        print("adjust ok ", game_table_name)
+        game_tables[game_table_name] = create_id(game_table)
     end
-    for key, value in pairs(lua_tables) do
-        write_to_lua_file(config.lua_test_output .. string.sub(key, #config.temp + 1, #key),
-            string.sub(key, #config.temp + 2, #key - 4), value)
-        print("create", key)
+    print("==============================")
+    print(">>> write game table to lua file >>>")
+    for game_table_name, game_table in pairs(game_tables) do
+        print("write ok", game_table_name)
+        local target = config.lua_test_output .. "\\" .. game_table_name .. ".lua"
+        write_to_lua_file(target, game_table_name, game_table)
     end
+    print("==============================")
+    print("bye bey")
 end
 xpcall(main, function(a, b)
     print(a, b)
