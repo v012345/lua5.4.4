@@ -9,7 +9,6 @@ extern "C" {
 #define LUA_ARGV_SCRIPT "./bm_excel_to_lua.lua"
 
 int main(int argc, char const* argv[]) {
-    // int i;
     // double d = frexp(-1.0,&i);
     // std::cout << d << std::endl;
     // std::cout << (size_t)(-1) << std::endl;
