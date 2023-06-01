@@ -6,7 +6,7 @@ extern "C" {
 #include <lfs.h>
 }
 #define LUA_MAIN_SCRIPT "./main.lua"
-#define LUA_ARGV_SCRIPT "./parser_example.lua"
+#define LUA_ARGV_SCRIPT "./bm_excel_to_lua.lua"
 
 int main(int argc, char const* argv[]) {
     // int i;

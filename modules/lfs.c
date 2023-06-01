@@ -983,9 +983,20 @@ static void set_info(lua_State* L) {
 }
 
 static const struct luaL_Reg fslib[] = {
-    {"attributes", file_info},  {"chdir", change_dir}, {"currentdir", get_dir},          {"dir", dir_iter_factory},  {"link", make_link},   {"lock", file_lock},
-    {"mkdir", make_dir},        {"rmdir", remove_dir}, {"symlinkattributes", link_info}, {"setmode", lfs_f_setmode}, {"touch", file_utime}, {"unlock", file_unlock},
-    {"lock_dir", lfs_lock_dir}, {NULL, NULL},
+    {"attributes", file_info}, //
+    {"chdir", change_dir},
+    {"currentdir", get_dir},
+    {"dir", dir_iter_factory},
+    {"link", make_link},
+    {"lock", file_lock},
+    {"mkdir", make_dir},
+    {"rmdir", remove_dir},
+    {"symlinkattributes", link_info},
+    {"setmode", lfs_f_setmode},
+    {"touch", file_utime},
+    {"unlock", file_unlock},
+    {"lock_dir", lfs_lock_dir},
+    {NULL, NULL},
 };
 
 LFS_EXPORT int luaopen_lfs(lua_State* L) {

@@ -1,9 +1,11 @@
 {
-    "test_csd_path": "D:\\Closers.cocos\\resource\\ui\\branches\\test\\cocosstudio\\ui",
+    "ui": "D:\\Closers.cocos\\resource\\ui\\branches\\yougubt_test\\zhcn\\cocosstudio\\ui",
+    "piece": "D:\\Closers.cocos\\resource\\ui\\branches\\yougubt_test\\zhcn\\cocosstudio\\piece",
+    "image": "D:\\Closers.cocos\\resource\\ui\\branches\\yougubt_test\\zhcn\\cocosstudio\\image",
     "result_output_to": "C:\\Users\\Meteor\\Desktop\\configs\\log.txt",
     "xls2xlsx_cmd": "C:\\Users\\Meteor\\Desktop\\configs\\xls2xlsx_worker.exe \"%s\" \"%s\"",
-    "xls_path": "D:\\Closers.cocos\\resource\\data\\branches\\test\\excel",
+    "xls_path": "D:\\Closers.cocos\\resource\\data\\branches\\yougubt_test\\excel",
     "temp": "C:\\Users\\Meteor\\Desktop\\configs",
     "zip_cmd": "tar -xf %s -C %s",
-    "lua_test_output": "D:\\Closers.cocos\\client\\branches\\test\\Resources\\src\\imports\\table"
+    "lua_test_output": "D:\\Closers.cocos\\client\\branches\\yougubt_test\\Resources\\src\\imports\\table"
 }

@@ -1,4 +1,27 @@
 -- require("utils.tools")
+local lfs = require("lfs")
+local JSON = require("utils.json2table")
+local XML = require("utils.xml2table")
+local file = io.open("config.json", "r") or error("can't read config")
+local config = JSON(file:read("a")) or {}
+file:close()
+local images_map = {}
+
+local function traverseDirectory(path)
+    local map = images_map
+    for entry in lfs.dir(path) do
+        if entry ~= "." and entry ~= ".." then
+            local filePath = path .. "/" .. entry
+            local fileAttributes = lfs.attributes(filePath)
+
+            if fileAttributes.mode == "directory" then
+                traverseDirectory(filePath)
+            elseif fileAttributes.mode == "file" then
+                map[entry] = entry
+            end
+        end
+    end
+end
 local function get_sheet_data(sheet)
     for _, child in pairs(sheet.children) do
         if child.name == "sheetData" then
@@ -85,12 +108,6 @@ local function sheet_data_to_table(sheet_data, sharedStrings)
     end
     setmetatable(t, mt)
     return t
-end
-
-local function string_to_table(string_data, level)
-    if level == 3 then
-        local res = {}
-    end
 end
 
 local function convert_excel_to_table(sheet, shared)
@@ -201,77 +218,56 @@ end
 
 
 local function main()
-    local JSON = require("utils.json2table")
-    local XML = require("utils.xml2table")
-    local f = io.open("config.json", "r")
-    local config = JSON(f:read("a"))
-    f:close()
-    for key, value in pairs(config) do
-        print(key, value)
-    end
+    print(">>> collecting images info >>>")
+    traverseDirectory(config.piece)
+    traverseDirectory(config.image)
+    print("<<< collecting images info <<<")
 
+    print("==============================")
+
+    print(">>> collecting xls info >>>")
     local folder_path = config.xls_path
-    local cmd = string.format('dir /b "%s"', folder_path) -- Windows系统使用dir命令，Linux/Unix系统使用ls命令
-    local handle = io.popen(cmd)
-    local path = {}
-    if handle then
-        local output = handle:read("l")
-        while output do
-            if string.match(output, "^.+%.xls$") then
-                path[string.gsub(output, ".xls", "")] = folder_path .. "\\" .. output
-            end
-            output = handle:read("l")
-        end
-        handle:close()
-    end
-
-    local function time_to_number(time_string)
-        local date_string = string.gsub(time_string, "(%d%d)/(%d%d)/(%d%d%d%d)  (%d%d):(%d%d) %aM", "%3%1%2%4%5")
-        -- print(date_string)
-        local time = tonumber(date_string)
-        if string.find(time_string, "PM", 19) then
-            time = time + 1200
-        end
-        return time
-    end
     local xls_modify_time = {}
-
-    for key, value in pairs(path) do
-        cmd = string.format('dir /t:w "%s"', value)
-        handle = io.popen(cmd)
-        local output = handle:read("a")
-        xls_modify_time[key] = time_to_number(string.match(output, "%d%d/%d%d/%d%d%d%d  %d%d:%d%d %aM"))
-        print(key, "modify at", xls_modify_time[key])
-        handle:close()
+    for entry in lfs.dir(folder_path) do
+        if string.match(entry, "^.+%.xls$") then
+            local filePath = folder_path .. "/" .. entry
+            xls_modify_time[string.gsub(entry, ".xls", "")] = lfs.attributes(filePath, "modification")
+        end
     end
+
+    print("<<< collecting xls info <<<")
+
+    print("==============================")
+
+    print(">>> collecting xlsx info >>>")
 
     local covert_to_xlsx = {}
-    for key, value in pairs(xls_modify_time) do
-        local target = config.temp .. "\\" .. key .. ".xlsx"
-        f = io.open(target, "r")
-        if f then
-            f:close()
-            cmd = string.format('dir /t:w "%s"', target)
-            handle = io.popen(cmd)
-            local output = handle:read("a")
-            local xlsx_create_time = time_to_number(string.match(output, "%d%d/%d%d/%d%d%d%d  %d%d:%d%d %aM"))
-            print(target, "create at", xlsx_create_time)
-            if value >= xlsx_create_time then
-                covert_to_xlsx[config.xls_path .. "\\" .. key .. ".xls"] = target
-            end
-            handle:close()
-        else
-            print("create", target)
-            covert_to_xlsx[config.xls_path .. "\\" .. key .. ".xls"] = target
+    for file_name, modify_time in pairs(xls_modify_time) do
+        local target = config.temp .. "\\" .. file_name .. ".xlsx"
+        local source = config.xls_path .. "\\" .. file_name .. ".xls"
+        local create_time = lfs.attributes(target, "modification")
+        if not create_time then
+            covert_to_xlsx[source] = target
+        elseif create_time <= modify_time then
+            covert_to_xlsx[source] = target
         end
     end
-
-    for key, value in pairs(covert_to_xlsx) do
-        cmd = string.format(config.xls2xlsx_cmd, key, value)
-        handle = io.popen(cmd)
+    print("<<< collecting xlsx info <<<")
+    print("==============================")
+    print(">>> covert to xlsx >>>")
+    for source, target in pairs(covert_to_xlsx) do
+        local cmd = string.format(config.xls2xlsx_cmd, source, target)
+        local handle = io.popen(cmd) or error("can't execute cmd")
         local output = handle:read("a")
-        print("convert", key, "to", value, output)
+        print("create", output, target)
         handle:close()
+    end
+
+    print("<<< covert to xlsx <<<")
+    print("==============================")
+
+    do
+        return
     end
     local lua_tables = {}
     for key, value in pairs(covert_to_xlsx) do
