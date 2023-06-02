@@ -1,19 +1,36 @@
---- 脚本的入口文件
-local start_at = os.time()
--- print(package.path)
--- local s = GetMainLuaFilePath()
-package.path = "./utils/?.lua;./config/?.lua;./src/module/?.lua;" .. package.path
-require "tools"
-local a = require "coroutine_example"
-a:run()
--- (require "test"):run()
--- if argv["module"] then
---     require(argv["module"]):run()
--- else
---     (require "test"):run()
--- end
--- print("script main.lua")
+local frame = 0
+local input = {}
+local renderCoroutine
+local logicCoroutine
+local function render()
+    -- 渲染逻辑
+    while true do
+        print( os.clock())
+        os.clock()
+        coroutine.yield()
+    end
+end
 
-local end_at = os.time()
-print(string.format("run time : %ss", end_at - start_at))
-return
+local function logic()
+    -- 逻辑计算
+    frame = frame + 1
+end
+
+local function gameLoop()
+    renderCoroutine = coroutine.create(render)
+    logicCoroutine = coroutine.create(logic)
+    while true do
+        -- 渲染
+
+        coroutine.resume(renderCoroutine)
+
+        -- 逻辑计算
+
+        coroutine.resume(logicCoroutine)
+
+        -- 等待一帧的时间
+    end
+end
+xpcall(gameLoop, function(e)
+    print(e)
+end)
