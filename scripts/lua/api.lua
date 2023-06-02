@@ -57,3 +57,5 @@ function GetFilesMd5(files) return {} end
 ---@param files table
 ---@return table
 function GetFilesLastModifiedTimestamp(files) return {} end
+
+_Lua_function = {}
