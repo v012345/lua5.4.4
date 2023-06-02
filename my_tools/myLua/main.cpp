@@ -1,4 +1,7 @@
+
 #include <filesystem>
+#include <iostream>
+
 #include <lua.hpp>
 extern "C" {
 #include <lfs.h>
@@ -61,7 +64,7 @@ int main(int argc, char const* argv[]) {
     luaL_openlibs(L);
     luaopen_lfs(L);
     if (std::filesystem::exists(LUA_ARGV_SCRIPT)) { //
-        luaL_dofile(L, LUA_ARGV_SCRIPT);
+        // luaL_dofile(L, LUA_ARGV_SCRIPT);
     }
     // ImGui_ImplWin32_EnableDpiAwareness();
     WNDCLASSEXW wc = {sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"ImGui Example", NULL};
@@ -90,6 +93,7 @@ int main(int argc, char const* argv[]) {
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     // ImGui::StyleColorsLight();
+    io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\simhei.ttf", 15.0f, NULL, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
 
     // Setup Platform/Renderer backends
     ImGui_ImplWin32_Init(hwnd);
@@ -167,6 +171,12 @@ int main(int argc, char const* argv[]) {
             ImGui::Begin("Another Window", &show_another_window); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
             ImGui::Text("Hello from another window!");
             if (ImGui::Button("Close Me")) show_another_window = false;
+            ImGui::End();
+        }
+
+        {
+            ImGui::Begin("Dear ImGui Demo1", NULL, ImGuiWindowFlags_NoTitleBar);
+            ImGui::Text("我也什么不知道");
             ImGui::End();
         }
 
