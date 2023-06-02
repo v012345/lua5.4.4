@@ -57,15 +57,24 @@ FrameContext* WaitForNextFrameResources();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 #define LUA_MAIN_SCRIPT "./main.lua"
-#define LUA_ARGV_SCRIPT "./bm_excel_to_lua.lua"
+const char* Call_Lua(lua_State* L, size_t render_frame, const char* function_name) {
+    lua_getglobal(L, "_Lua_functions"); // 获取函数引用
+    lua_getfield(L, -1, function_name);
+    lua_remove(L, -2); // 从栈中移除表
+    lua_pushinteger(L, render_frame);
+    lua_call(L, 1, 1); // 调用函数，1个参数，1个返回值
+    const char* errorMsg = lua_tostring(L, -1);
+    return errorMsg;
+}
 
 int main(int argc, char const* argv[]) {
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
     luaopen_lfs(L);
-    if (std::filesystem::exists(LUA_ARGV_SCRIPT)) { //
-        // luaL_dofile(L, LUA_ARGV_SCRIPT);
-    }
+    luaL_dofile(L, LUA_MAIN_SCRIPT);
+
+    size_t render_frame = 0;
+
     // ImGui_ImplWin32_EnableDpiAwareness();
     WNDCLASSEXW wc = {sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"ImGui Example", NULL};
     ::RegisterClassExW(&wc);
@@ -121,7 +130,7 @@ int main(int argc, char const* argv[]) {
     bool show_demo_window = true;
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
+    char* x = NULL;
     // Main loop
     bool done = false;
     while (!done) {
@@ -175,8 +184,14 @@ int main(int argc, char const* argv[]) {
         }
 
         {
+            render_frame++;
             ImGui::Begin("Dear ImGui Demo1", NULL, ImGuiWindowFlags_NoTitleBar);
             ImGui::Text("我也什么不知道");
+            if (ImGui::Button("Button")) { //
+            }
+            x = (char*)Call_Lua(L, render_frame, "logic");
+            if (x) { ImGui::Text(x); }
+
             ImGui::End();
         }
 

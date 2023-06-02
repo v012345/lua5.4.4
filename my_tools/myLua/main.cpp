@@ -70,7 +70,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             if (LOWORD(wParam) == BN_CLICKED && (HWND)lParam == g_hButton) { //
                 // MessageBox(hwnd, "Button Clicked!", "Info", MB_OK);
 
-                Call_Lua(L, "print_time");
+                Call_Lua(L, "logic");
                 // lua_pushnumber(L, 123); // 传递参数
             }
             return 0;
