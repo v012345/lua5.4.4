@@ -31,6 +31,7 @@ local input_queue = {}
 local logicCoroutine
 
 local function logic(render_frame, birth_time, life_time)
+    local map_index = 1
     local function check_die()
         if os.clock() - birth_time >= life_time then
             render_frame, birth_time, life_time = coroutine.yield("快写吧~~")
@@ -38,11 +39,12 @@ local function logic(render_frame, birth_time, life_time)
     end
     while true do
         check_die()
-        if input_queue[current] then
-            if input_queue[current] == "next" then
-                current = current + 1
-                render_frame, birth_time, life_time = coroutine.yield(map[(current&0x3)|1])
-            end
+        if input_queue[current] and input_queue[current] == "next" then
+            current = current + 1
+            render_frame, birth_time, life_time = coroutine.yield(map[map_index])
+            map_index = map_index % 4 + 1
+        else
+            render_frame, birth_time, life_time = coroutine.yield(map[map_index])
         end
     end
 end
@@ -60,6 +62,7 @@ _Lua_functions = {
     end,
     input = function(render_frame, input, delta)
         positon = positon + 1
+        print("next")
         input_queue[positon] = "next"
     end
 }
