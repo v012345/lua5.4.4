@@ -102,7 +102,7 @@ int main(int argc, char const* argv[]) {
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     // ImGui::StyleColorsLight();
-    io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\simhei.ttf", 15.0f, NULL, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+    io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\simhei.ttf", 20.0f, NULL, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
 
     // Setup Platform/Renderer backends
     ImGui_ImplWin32_Init(hwnd);

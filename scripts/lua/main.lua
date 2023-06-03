@@ -24,7 +24,9 @@
 local current = 1
 local positon = 0
 local map = {
-    "a", "b", "c", "d"
+    "あ", "い", "う", "え", "お", "か", "き", "く", "け", "こ", "さ", "し", "す", "せ", "そ", "た", "ち",
+    "つ", "て", "と", "な", "に", "ぬ", "ね", "の", "は", "ひ", "ふ", "へ", "ほ", "ま", "み", "む", "め",
+    "も", "や", "ゆ", "よ", "ら", "り", "る", "れ", "ろ", "わ", "を", "ん"
 }
 local frame = 0
 local input_queue = {}
@@ -42,7 +44,7 @@ local function logic(render_frame, birth_time, life_time)
         if input_queue[current] and input_queue[current] == "next" then
             current = current + 1
             render_frame, birth_time, life_time = coroutine.yield(map[map_index])
-            map_index = map_index % 4 + 1
+            map_index = math.random(1, #map)
         else
             render_frame, birth_time, life_time = coroutine.yield(map[map_index])
         end
