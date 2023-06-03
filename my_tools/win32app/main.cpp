@@ -63,8 +63,8 @@ const char* Call_Lua(lua_State* L, size_t render_frame, const char* function_nam
     lua_remove(L, -2); // 从栈中移除表
     lua_pushinteger(L, render_frame);
     lua_call(L, 1, 1); // 调用函数，1个参数，1个返回值
-    const char* errorMsg = lua_tostring(L, -1);
-    return errorMsg;
+    const char* c = lua_tostring(L, -1);
+    return c;
 }
 
 int main(int argc, char const* argv[]) {
@@ -187,7 +187,8 @@ int main(int argc, char const* argv[]) {
             render_frame++;
             ImGui::Begin("Dear ImGui Demo1", NULL, ImGuiWindowFlags_NoTitleBar);
             ImGui::Text("我也什么不知道");
-            if (ImGui::Button("Button")) { //
+            if (ImGui::Button("下一个假名")) { //
+                Call_Lua(L, render_frame, "input");
             }
             x = (char*)Call_Lua(L, render_frame, "logic");
             if (x) { ImGui::Text(x); }
