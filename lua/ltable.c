@@ -338,7 +338,8 @@ int luaH_next(lua_State* L, Table* t, StkId key) {
 }
 
 static void freehash(lua_State* L, Table* t) {
-    if (!isdummy(t)) luaM_freearray(L, t->node, cast_sizet(sizenode(t)));
+    if (!isdummy(t)) //
+        luaM_freearray(L, t->node, cast_sizet(sizenode(t)));
 }
 
 /*
