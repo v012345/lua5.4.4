@@ -235,7 +235,8 @@ Udata* luaS_newudata(lua_State* L, size_t s, int nuvalue) {
     Udata* u;
     int i;
     GCObject* o;
-    if (l_unlikely(s > MAX_SIZE - udatamemoffset(nuvalue))) luaM_toobig(L);
+    if (l_unlikely(s > MAX_SIZE - udatamemoffset(nuvalue))) //
+        luaM_toobig(L);
     o = luaC_newobj(L, LUA_VUSERDATA, sizeudata(nuvalue, s));
     u = gco2u(o);
     u->len = s;
