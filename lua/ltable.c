@@ -505,16 +505,17 @@ static void exchangehashpart(Table* t1, Table* t2) {
 void luaH_resize(lua_State* L, Table* t, unsigned int newasize, unsigned int nhsize) {
     unsigned int i;
     Table newt; /* to keep the new hash part */
-    unsigned int oldasize = setlimittosize(t);
+    unsigned int oldasize = setlimittosize(t); // 返回原来数组部分的大小, 同时把边界扩至最大
     TValue* newarray;
     /* create new hash part with appropriate size into 'newt' */
-    setnodevector(L, &newt, nhsize);
+    setnodevector(L, &newt, nhsize); // 给表 newt 分配 hash 部分
     if (newasize < oldasize) { /* will array shrink? */
         t->alimit = newasize; /* pretend array has new size... */
         exchangehashpart(t, &newt); /* and new hash */
         /* re-insert into the new hash the elements from vanishing slice */
         for (i = newasize; i < oldasize; i++) {
-            if (!isempty(&t->array[i])) luaH_setint(L, t, i + 1, &t->array[i]);
+            if (!isempty(&t->array[i])) //
+                luaH_setint(L, t, i + 1, &t->array[i]);
         }
         t->alimit = oldasize; /* restore current size... */
         exchangehashpart(t, &newt); /* and hash (in case of errors) */
