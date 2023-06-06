@@ -138,7 +138,7 @@ static int l_hashfloat(lua_Number n) {
 ** returns the 'main' position of an element in a table (that is,
 ** the index of its hash value).
 */
-static Node* mainpositionTV(const Table* t, const TValue* key) {
+static Node* mainpositionTV(const Table* t, const TValue* key) { // 😊
     switch (ttypetag(key)) {
         case LUA_VNUMINT: {
             lua_Integer i = ivalue(key);
@@ -175,7 +175,7 @@ static Node* mainpositionTV(const Table* t, const TValue* key) {
     }
 }
 
-l_sinline Node* mainpositionfromnode(const Table* t, Node* nd) {
+l_sinline Node* mainpositionfromnode(const Table* t, Node* nd) { // 😊
     TValue key;
     getnodekey(cast(lua_State*, NULL), &key, nd);
     return mainpositionTV(t, &key);
@@ -201,7 +201,7 @@ l_sinline Node* mainpositionfromnode(const Table* t, Node* nd) {
 ** positive does not break anything.  (In particular, 'next' will return
 ** some other valid item on the table or nil.)
 */
-static int equalkey(const TValue* k1, const Node* n2, int deadok) {
+static int equalkey(const TValue* k1, const Node* n2, int deadok) { // 😊
     if ((rawtt(k1) != keytt(n2)) && /* not the same variants? */
         !(deadok && keyisdead(n2) && iscollectable(k1)))
         return 0; /* cannot be same key */
@@ -228,7 +228,7 @@ static int equalkey(const TValue* k1, const Node* n2, int deadok) {
 /*
 ** Returns the real size of the 'array' array
 */
-LUAI_FUNC unsigned int luaH_realasize(const Table* t) {
+LUAI_FUNC unsigned int luaH_realasize(const Table* t) { // 😊
     if (limitequalsasize(t))
         return t->alimit; /* this is the size */
     else {
@@ -255,11 +255,11 @@ LUAI_FUNC unsigned int luaH_realasize(const Table* t) {
 ** (If it is not, 'alimit' cannot be changed to any other value
 ** without changing the real size.)
 */
-static int ispow2realasize(const Table* t) { //
+static int ispow2realasize(const Table* t) { // 😊
     return (!isrealasize(t) || ispow2(t->alimit));
 }
 
-static unsigned int setlimittosize(Table* t) {
+static unsigned int setlimittosize(Table* t) { // 😊
     t->alimit = luaH_realasize(t);
     setrealasize(t);
     return t->alimit;
@@ -272,7 +272,7 @@ static unsigned int setlimittosize(Table* t) {
 ** which may be in array part, nor for floats with integral values.)
 ** See explanation about 'deadok' in function 'equalkey'.
 */
-static const TValue* getgeneric(Table* t, const TValue* key, int deadok) {
+static const TValue* getgeneric(Table* t, const TValue* key, int deadok) { // 😊
     Node* n = mainpositionTV(t, key);
     for (;;) { /* check whether 'key' is somewhere in the chain */
         if (equalkey(key, n, deadok))
@@ -289,7 +289,7 @@ static const TValue* getgeneric(Table* t, const TValue* key, int deadok) {
 ** returns the index for 'k' if 'k' is an appropriate key to live in
 ** the array part of a table, 0 otherwise.
 */
-static unsigned int arrayindex(lua_Integer k) {
+static unsigned int arrayindex(lua_Integer k) { // 😊
     if (l_castS2U(k) - 1u < MAXASIZE) /* 'k' in [1, MAXASIZE]? */
         return cast_uint(k); /* 'key' is an appropriate array index */
     else
@@ -301,7 +301,7 @@ static unsigned int arrayindex(lua_Integer k) {
 ** elements in the array part, then elements in the hash part. The
 ** beginning of a traversal is signaled by 0.
 */
-static unsigned int findindex(lua_State* L, Table* t, TValue* key, unsigned int asize) {
+static unsigned int findindex(lua_State* L, Table* t, TValue* key, unsigned int asize) { // 😊
     unsigned int i;
     if (ttisnil(key)) return 0; /* first iteration */
     i = ttisinteger(key) ? arrayindex(ivalue(key)) : 0;
@@ -316,7 +316,7 @@ static unsigned int findindex(lua_State* L, Table* t, TValue* key, unsigned int 
     }
 }
 
-int luaH_next(lua_State* L, Table* t, StkId key) {
+int luaH_next(lua_State* L, Table* t, StkId key) { // 😊
     unsigned int asize = luaH_realasize(t);
     unsigned int i = findindex(L, t, s2v(key), asize); /* find original key */
     for (; i < asize; i++) { /* try first array part */
