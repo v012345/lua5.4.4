@@ -98,7 +98,7 @@ static const TValue absentkey = {ABSTKEYCONSTANT};
 ** remainder, which is faster. Otherwise, use an unsigned-integer
 ** remainder, which uses all bits and ensures a non-negative result.
 */
-static Node* hashint(const Table* t, lua_Integer i) {
+static Node* hashint(const Table* t, lua_Integer i) { // 😊
     lua_Unsigned ui = l_castS2U(i);
     if (ui <= cast_uint(INT_MAX))
         return hashmod(t, cast_int(ui));
@@ -337,7 +337,7 @@ int luaH_next(lua_State* L, Table* t, StkId key) {
     return 0; /* no more elements */
 }
 
-static void freehash(lua_State* L, Table* t) {
+static void freehash(lua_State* L, Table* t) { // 😊
     if (!isdummy(t)) //
         luaM_freearray(L, t->node, cast_sizet(sizenode(t)));
 }
@@ -435,7 +435,7 @@ static int numusehash(const Table* t, unsigned int* nums, unsigned int* pna) {
 ** comparison ensures that the shift in the second one does not
 ** overflow.
 */
-static void setnodevector(lua_State* L, Table* t, unsigned int size) {
+static void setnodevector(lua_State* L, Table* t, unsigned int size) { // 😊
     if (size == 0) { /* no elements to hash part? */
         t->node = cast(Node*, dummynode); /* use common 'dummynode' */
         t->lsizenode = 0;
@@ -570,7 +570,7 @@ static void rehash(lua_State* L, Table* t, const TValue* ek) {
 ** }=============================================================
 */
 
-Table* luaH_new(lua_State* L) {
+Table* luaH_new(lua_State* L) { // 😊
     GCObject* o = luaC_newobj(L, LUA_VTABLE, sizeof(Table));
     Table* t = gco2t(o);
     t->metatable = NULL;
@@ -581,7 +581,7 @@ Table* luaH_new(lua_State* L) {
     return t;
 }
 
-void luaH_free(lua_State* L, Table* t) {
+void luaH_free(lua_State* L, Table* t) { // 😊
     freehash(L, t);
     luaM_freearray(L, t->array, luaH_realasize(t));
     luaM_free(L, t);
@@ -666,7 +666,7 @@ void luaH_newkey(lua_State* L, Table* t, const TValue* key, TValue* value) {
 ** one more than the limit (so that it can be incremented without
 ** changing the real size of the array).
 */
-const TValue* luaH_getint(Table* t, lua_Integer key) {
+const TValue* luaH_getint(Table* t, lua_Integer key) { // 😊
     if (l_castS2U(key) - 1u < t->alimit) /* 'key' in [1, t->alimit]? */
         return &t->array[key - 1];
     else if (

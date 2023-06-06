@@ -726,7 +726,7 @@ typedef union Node {
 */
 
 #define BITRAS (1 << 7)
-#define isrealasize(t) (!((t)->flags & BITRAS))
+#define isrealasize(t) (!((t)->flags & BITRAS)) // alimit 是否为数组部分实际大小
 #define setrealasize(t) ((t)->flags &= cast_byte(~BITRAS))
 #define setnorealasize(t) ((t)->flags |= BITRAS)
 
