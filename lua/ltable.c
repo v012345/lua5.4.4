@@ -375,7 +375,7 @@ static unsigned int computesizes(unsigned int nums[], unsigned int* pna) {
     return optimal;
 }
 
-static int countint(lua_Integer key, unsigned int* nums) {
+static int countint(lua_Integer key, unsigned int* nums) { // 😊
     unsigned int k = arrayindex(key);
     if (k != 0) { /* is 'key' an appropriate array index? */
         nums[luaO_ceillog2(k)]++; /* count as such */
@@ -478,7 +478,7 @@ static void reinsert(lua_State* L, Table* ot, Table* t) {
 /*
 ** Exchange the hash part of 't1' and 't2'.
 */
-static void exchangehashpart(Table* t1, Table* t2) {
+static void exchangehashpart(Table* t1, Table* t2) { // 😊
     lu_byte lsizenode = t1->lsizenode;
     Node* node = t1->node;
     Node* lastfree = t1->lastfree;
@@ -607,7 +607,7 @@ static Node* getfreepos(Table* t) {
 void luaH_newkey(lua_State* L, Table* t, const TValue* key, TValue* value) {
     Node* mp;
     TValue aux;
-    if (l_unlikely(ttisnil(key)))
+    if (l_unlikely(ttisnil(key))) // 不支持 nil 为键
         luaG_runerror(L, "table index is nil");
     else if (ttisfloat(key)) {
         lua_Number f = fltvalue(key);
@@ -618,7 +618,8 @@ void luaH_newkey(lua_State* L, Table* t, const TValue* key, TValue* value) {
         } else if (l_unlikely(luai_numisnan(f)))
             luaG_runerror(L, "table index is NaN");
     }
-    if (ttisnil(value)) return; /* do not insert nil values */
+    if (ttisnil(value)) // 值是 nil 就不插入了
+        return; /* do not insert nil values */
     mp = mainpositionTV(t, key);
     if (!isempty(gval(mp)) || isdummy(t)) { /* main position is taken? */
         Node* othern;
