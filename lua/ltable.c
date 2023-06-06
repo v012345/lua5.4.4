@@ -390,7 +390,7 @@ static int countint(lua_Integer key, unsigned int* nums) { // 😊
 ** total number of non-nil keys.
 */
 static unsigned int numusearray(const Table* t, unsigned int* nums) {
-    int lg;
+    int lg; //
     unsigned int ttlg; /* 2^lg */
     unsigned int ause = 0; /* summation of 'nums' */
     unsigned int i = 1; /* count to traverse all array keys */
@@ -405,9 +405,10 @@ static unsigned int numusearray(const Table* t, unsigned int* nums) {
         }
         /* count elements in range (2^(lg - 1), 2^lg] */
         for (; i <= lim; i++) {
-            if (!isempty(&t->array[i - 1])) lc++;
+            if (!isempty(&t->array[i - 1])) // array 大小为 2 的指数, 所以不会越界
+                lc++;
         }
-        nums[lg] += lc;
+        nums[lg] += lc; // 给 nums 填充数据
         ause += lc;
     }
     return ause;
@@ -549,11 +550,12 @@ void luaH_resizearray(lua_State* L, Table* t, unsigned int nasize) {
 static void rehash(lua_State* L, Table* t, const TValue* ek) {
     unsigned int asize; /* optimal size for array part */
     unsigned int na; /* number of keys in the array part */
-    unsigned int nums[MAXABITS + 1];
+    unsigned int nums[MAXABITS + 1]; // nums[32]
     int i;
     int totaluse;
-    for (i = 0; i <= MAXABITS; i++) nums[i] = 0; /* reset counts */
-    setlimittosize(t);
+    for (i = 0; i <= MAXABITS; i++) // 初始化一下
+        nums[i] = 0; /* reset counts */
+    setlimittosize(t); //
     na = numusearray(t, nums); /* count keys in array part */
     totaluse = na; /* all those keys are integer keys */
     totaluse += numusehash(t, nums, &na); /* count keys in hash part */
