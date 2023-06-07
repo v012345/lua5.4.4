@@ -710,7 +710,7 @@ const TValue* luaH_getshortstr(Table* t, TString* key) { // 😊
     }
 }
 
-const TValue* luaH_getstr(Table* t, TString* key) {
+const TValue* luaH_getstr(Table* t, TString* key) { // 😊
     if (key->tt == LUA_VSHRSTR)
         return luaH_getshortstr(t, key);
     else { /* for long strings, use generic case */
@@ -723,7 +723,7 @@ const TValue* luaH_getstr(Table* t, TString* key) {
 /*
 ** main search function
 */
-const TValue* luaH_get(Table* t, const TValue* key) {
+const TValue* luaH_get(Table* t, const TValue* key) { // 😊
     switch (ttypetag(key)) {
         case LUA_VSHRSTR: return luaH_getshortstr(t, tsvalue(key));
         case LUA_VNUMINT: return luaH_getint(t, ivalue(key));
@@ -744,7 +744,7 @@ const TValue* luaH_get(Table* t, const TValue* key) {
 ** Beware: when using this function you probably need to check a GC
 ** barrier and invalidate the TM cache.
 */
-void luaH_finishset(lua_State* L, Table* t, const TValue* key, const TValue* slot, TValue* value) {
+void luaH_finishset(lua_State* L, Table* t, const TValue* key, const TValue* slot, TValue* value) { // 😊
     if (isabstkey(slot))
         luaH_newkey(L, t, key, value);
     else
@@ -755,12 +755,12 @@ void luaH_finishset(lua_State* L, Table* t, const TValue* key, const TValue* slo
 ** beware: when using this function you probably need to check a GC
 ** barrier and invalidate the TM cache.
 */
-void luaH_set(lua_State* L, Table* t, const TValue* key, TValue* value) {
+void luaH_set(lua_State* L, Table* t, const TValue* key, TValue* value) { // 😊
     const TValue* slot = luaH_get(t, key);
     luaH_finishset(L, t, key, slot, value);
 }
 
-void luaH_setint(lua_State* L, Table* t, lua_Integer key, TValue* value) {
+void luaH_setint(lua_State* L, Table* t, lua_Integer key, TValue* value) { // 😊
     const TValue* p = luaH_getint(t, key);
     if (isabstkey(p)) {
         TValue k;
