@@ -389,7 +389,7 @@ static int countint(lua_Integer key, unsigned int* nums) { // 😊
 ** number of keys that will go into corresponding slice and return
 ** total number of non-nil keys.
 */
-static unsigned int numusearray(const Table* t, unsigned int* nums) {
+static unsigned int numusearray(const Table* t, unsigned int* nums) { // 😊
     int lg; //
     unsigned int ttlg; /* 2^lg */
     unsigned int ause = 0; /* summation of 'nums' */
@@ -405,7 +405,7 @@ static unsigned int numusearray(const Table* t, unsigned int* nums) {
         }
         /* count elements in range (2^(lg - 1), 2^lg] */
         for (; i <= lim; i++) {
-            if (!isempty(&t->array[i - 1])) // array 大小为 2 的指数, 所以不会越界
+            if (!isempty(&t->array[i - 1])) //
                 lc++;
         }
         nums[lg] += lc; // 给 nums 填充数据
