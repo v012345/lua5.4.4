@@ -590,7 +590,7 @@ void luaH_free(lua_State* L, Table* t) { // 😊
     luaM_free(L, t);
 }
 
-static Node* getfreepos(Table* t) {
+static Node* getfreepos(Table* t) { // 😊
     if (!isdummy(t)) {
         while (t->lastfree > t->node) {
             t->lastfree--;
