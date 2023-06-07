@@ -539,7 +539,7 @@ void luaH_resize(lua_State* L, Table* t, unsigned int newasize, unsigned int nhs
     freehash(L, &newt); /* free old hash part */
 }
 
-void luaH_resizearray(lua_State* L, Table* t, unsigned int nasize) {
+void luaH_resizearray(lua_State* L, Table* t, unsigned int nasize) { // 😊
     int nsize = allocsizenode(t);
     luaH_resize(L, t, nasize, nsize);
 }
