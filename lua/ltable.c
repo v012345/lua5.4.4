@@ -356,7 +356,7 @@ static void freehash(lua_State* L, Table* t) { // 😊
 ** will go to the array part; return the optimal size.  (The condition
 ** 'twotoi > 0' in the for loop stops the loop if 'twotoi' overflows.)
 */
-static unsigned int computesizes(unsigned int nums[], unsigned int* pna) {
+static unsigned int computesizes(unsigned int nums[], unsigned int* pna) { // 😊
     int i;
     unsigned int twotoi; /* 2^i (candidate for optimal size) */
     unsigned int a = 0; /* number of elements smaller than 2^i */
@@ -414,10 +414,10 @@ static unsigned int numusearray(const Table* t, unsigned int* nums) { // 😊
     return ause;
 }
 
-static int numusehash(const Table* t, unsigned int* nums, unsigned int* pna) {
+static int numusehash(const Table* t, unsigned int* nums, unsigned int* pna) { // 😊
     int totaluse = 0; /* total number of elements */
     int ause = 0; /* elements added to 'nums' (can go to array part) */
-    int i = sizenode(t);
+    int i = sizenode(t); // node 部分大小是 2 的指数
     while (i--) {
         Node* n = &t->node[i];
         if (!isempty(gval(n))) {
@@ -461,7 +461,7 @@ static void setnodevector(lua_State* L, Table* t, unsigned int size) { // 😊
 /*
 ** (Re)insert all elements from the hash part of 'ot' into table 't'.
 */
-static void reinsert(lua_State* L, Table* ot, Table* t) {
+static void reinsert(lua_State* L, Table* ot, Table* t) { // 😊
     int j;
     int size = sizenode(ot);
     for (j = 0; j < size; j++) {
@@ -560,7 +560,8 @@ static void rehash(lua_State* L, Table* t, const TValue* ek) {
     totaluse = na; /* all those keys are integer keys */
     totaluse += numusehash(t, nums, &na); /* count keys in hash part */
     /* count extra key */
-    if (ttisinteger(ek)) na += countint(ivalue(ek), nums);
+    if (ttisinteger(ek)) //
+        na += countint(ivalue(ek), nums);
     totaluse++;
     /* compute new size for array part */
     asize = computesizes(nums, &na);
@@ -695,7 +696,7 @@ const TValue* luaH_getint(Table* t, lua_Integer key) { // 😊
 /*
 ** search function for short strings
 */
-const TValue* luaH_getshortstr(Table* t, TString* key) {
+const TValue* luaH_getshortstr(Table* t, TString* key) { // 😊
     Node* n = hashstr(t, key);
     lua_assert(key->tt == LUA_VSHRSTR);
     for (;;) { /* check whether 'key' is somewhere in the chain */
