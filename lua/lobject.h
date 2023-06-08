@@ -745,14 +745,14 @@ typedef struct Table {
 /*
 ** Macros to manipulate keys inserted in nodes
 */
-#define keytt(node) ((node)->u.key_tt)
-#define keyval(node) ((node)->u.key_val)
+#define keytt(node) ((node)->u.key_tt) // 返回 Node 的键类型
+#define keyval(node) ((node)->u.key_val) // 返回 Node 的键的值
 
-#define keyisnil(node) (keytt(node) == LUA_TNIL)
-#define keyisinteger(node) (keytt(node) == LUA_VNUMINT)
-#define keyival(node) (keyval(node).i)
-#define keyisshrstr(node) (keytt(node) == ctb(LUA_VSHRSTR))
-#define keystrval(node) (gco2ts(keyval(node).gc))
+#define keyisnil(node) (keytt(node) == LUA_TNIL) // Node 的键类型是否为 nil
+#define keyisinteger(node) (keytt(node) == LUA_VNUMINT) // Node 的键类型是否为整数
+#define keyival(node) (keyval(node).i) // Node 的键值作为整数返回 lua_Integer
+#define keyisshrstr(node) (keytt(node) == ctb(LUA_VSHRSTR)) // Node 的键类型是否为短串
+#define keystrval(node) (gco2ts(keyval(node).gc)) // Node 的键值作为短串返回 TString
 
 #define setnilkey(node) (keytt(node) = LUA_TNIL)
 

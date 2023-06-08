@@ -764,7 +764,7 @@ void luaH_set(lua_State* L, Table* t, const TValue* key, TValue* value) { // �
 
 void luaH_setint(lua_State* L, Table* t, lua_Integer key, TValue* value) { // 😊
     const TValue* p = luaH_getint(t, key);
-    if (isabstkey(p)) {
+    if (isabstkey(p)) { // key 不在 t 的数组大小范围
         TValue k;
         setivalue(&k, key);
         luaH_newkey(L, t, &k, value);
