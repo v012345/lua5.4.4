@@ -41,7 +41,7 @@
 ** MAXABITS is the largest integer such that MAXASIZE fits in an
 ** unsigned int.
 */
-#define MAXABITS cast_int(sizeof(int) * CHAR_BIT - 1)
+#define MAXABITS cast_int(sizeof(int) * CHAR_BIT - 1) // 31
 
 /*
 ** MAXASIZE is the maximum size of the array part. It is the minimum
@@ -54,7 +54,7 @@
 ** MAXHBITS is the largest integer such that 2^MAXHBITS fits in a
 ** signed int.
 */
-#define MAXHBITS (MAXABITS - 1)
+#define MAXHBITS (MAXABITS - 1) // 30
 
 /*
 ** MAXHSIZE is the maximum size of the hash part. It is the minimum
@@ -274,7 +274,7 @@ static unsigned int setlimittosize(Table* t) { // 😊
 ** which may be in array part, nor for floats with integral values.)
 ** See explanation about 'deadok' in function 'equalkey'.
 */
-static const TValue* getgeneric(Table* t, const TValue* key, int deadok) { // 😊
+static const TValue* getgeneric(Table* t, const TValue* key, int deadok) { // 😊 hash 部分的通用 get 方法
     Node* n = mainpositionTV(t, key);
     for (;;) { /* check whether 'key' is somewhere in the chain */
         if (equalkey(key, n, deadok))
@@ -319,16 +319,18 @@ static unsigned int findindex(lua_State* L, Table* t, TValue* key, unsigned int 
 }
 
 int luaH_next(lua_State* L, Table* t, StkId key) { // 😊
-    unsigned int asize = luaH_realasize(t);
+    unsigned int asize = luaH_realasize(t); // 数组部分的大小
+    // 如果 key 在数组部分, i 的
     unsigned int i = findindex(L, t, s2v(key), asize); /* find original key */
     for (; i < asize; i++) { /* try first array part */
         if (!isempty(&t->array[i])) { /* a non-empty entry? */
-            setivalue(s2v(key), i + 1);
-            setobj2s(L, key + 1, &t->array[i]);
+            setivalue(s2v(key), i + 1); // key 里存数组部分的 lua 索引
+            setobj2s(L, key + 1, &t->array[i]); // key 的下一个寄存器(就是 top 的位置)存 value 值
             return 1;
         }
     }
     for (i -= asize; cast_int(i) < sizenode(t); i++) { /* hash part */
+        // 如果 Node 中的值为 nil, 直接顺序下去, 因为是顺序读取的 hash 部分, 所以每次 key 出现的时机都不确定
         if (!isempty(gval(gnode(t, i)))) { /* a non-empty entry? */
             Node* n = gnode(t, i);
             getnodekey(L, s2v(key), n);
@@ -509,11 +511,12 @@ static void exchangehashpart(Table* t1, Table* t2) { // 😊
 void luaH_resize(lua_State* L, Table* t, unsigned int newasize, unsigned int nhsize) {
     unsigned int i;
     Table newt; /* to keep the new hash part */
-    unsigned int oldasize = setlimittosize(t); // 返回原来数组部分的大小, 同时把边界扩至最大
+    unsigned int oldasize = setlimittosize(t); // 返回原来数组部分的大小, 同时把边界扩至最大, 最大就是数组的大小
     TValue* newarray;
     /* create new hash part with appropriate size into 'newt' */
-    setnodevector(L, &newt, nhsize); // 给表 newt 分配 hash 部分
+    setnodevector(L, &newt, nhsize); // 给表 newt 分配 hash 部分, 不管 nhsize 为多少, 都会 2^luaO_ceillog2(nhsize), 做为 hash 部分的大小
     if (newasize < oldasize) { /* will array shrink? */
+        // 把 t 的数组边界限制成 newasize 大小, 之后 luaH_setint 会把 [newasize, oldasize] 插入到 hash 部分
         t->alimit = newasize; /* pretend array has new size... */
         exchangehashpart(t, &newt); /* and new hash */
         /* re-insert into the new hash the elements from vanishing slice */
@@ -523,6 +526,7 @@ void luaH_resize(lua_State* L, Table* t, unsigned int newasize, unsigned int nhs
         }
         t->alimit = oldasize; /* restore current size... */
         exchangehashpart(t, &newt); /* and hash (in case of errors) */
+        // 现在 newt 的 hash 部分保留着 [newasize, oldasize] 部分的值
     }
     /* allocate new array */
     newarray = luaM_reallocvector(L, t->array, oldasize, newasize, TValue);
@@ -532,12 +536,16 @@ void luaH_resize(lua_State* L, Table* t, unsigned int newasize, unsigned int nhs
     }
     /* allocation ok; initialize new part of the array */
     exchangehashpart(t, &newt); /* 't' has the new hash ('newt' has the old) */
+    // t 与 newt 的 hash 相换了, newt 里保留着老的 hash 部分
     t->array = newarray; /* set new array part */
     t->alimit = newasize;
+    // t 的数组部分缩放完成, 数据在 luaM_reallocvector 中就复制完成了, 如果是缩小了, 那么多出来数据已经在现在 t 的 hash 部分了
     for (i = oldasize; i < newasize; i++) /* clear new slice of the array */
         setempty(&t->array[i]);
+    // 把 newt 中的老的 hash 部分插回到 t 的 hash 部分
     /* re-insert elements from old hash part into new parts */
     reinsert(L, &newt, t); /* 'newt' now has the old hash */
+    // 释放老的 hash 部分, newt 没有数组部分, 所以不用管数组部分
     freehash(L, &newt); /* free old hash part */
 }
 
@@ -636,25 +644,28 @@ void luaH_newkey(lua_State* L, Table* t, const TValue* key, TValue* value) {
             return;
         }
         lua_assert(!isdummy(t));
-        othern = mainpositionfromnode(t, mp);
+        othern = mainpositionfromnode(t, mp); // 如果 othern != mp, 那么 othern 就是当前链的链头
         if (othern != mp) { /* is colliding node out of its main position? */
             /* yes; move colliding node into free position */
             while (othern + gnext(othern) != mp) /* find previous */
                 othern += gnext(othern);
+            // while 结束之后, othern 的后继是 mp
+            // 把 othern 的后续调整为 f
             gnext(othern) = cast_int(f - othern); /* rechain to point to 'f' */
+            // 把 mp 的内容 copy 到 f 中
             *f = *mp; /* copy colliding node into free pos. (mp->next also goes) */
-            if (gnext(mp) != 0) {
+            if (gnext(mp) != 0) { // 如果 mp 还有后继的话, 要修正 f 的后继
                 gnext(f) += cast_int(mp - f); /* correct 'next' */
                 gnext(mp) = 0; /* now 'mp' is free */
             }
-            setempty(gval(mp));
+            setempty(gval(mp)); // 释放也 mp 位置的 Node
         } else { /* colliding node is in its own main position */
             /* new node will go into free position */
-            if (gnext(mp) != 0)
+            if (gnext(mp) != 0) // 在这里调整 f , 使 f 的后继 Node 也为 mp 的后继 Node
                 gnext(f) = cast_int((mp + gnext(mp)) - f); /* chain new position */
             else
                 lua_assert(gnext(f) == 0);
-            gnext(mp) = cast_int(f - mp);
+            gnext(mp) = cast_int(f - mp); // 在这里调整 mp, 使用 f 成为 mp 后继 Node
             mp = f;
         }
     }
