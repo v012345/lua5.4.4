@@ -64,7 +64,7 @@ typedef struct LG {
         p += sizeof(t);                                                                                                                                                                                \
     }
 
-static unsigned int luai_makeseed(lua_State* L) {
+static unsigned int luai_makeseed(lua_State* L) { // 😊
     char buff[3 * sizeof(size_t)];
     unsigned int h = cast_uint(time(NULL));
     int p = 0;
@@ -227,7 +227,7 @@ static void f_luaopen(lua_State* L, void* ud) {
 ** preinitialize a thread with consistent values without allocating
 ** any memory (to avoid errors)
 */
-static void preinit_thread(lua_State* L, global_State* g) {
+static void preinit_thread(lua_State* L, global_State* g) { // 😊
     G(L) = g;
     L->stack.p = NULL;
     L->ci = NULL;
@@ -373,7 +373,8 @@ LUA_API lua_State* lua_newstate(lua_Alloc f, void* ud) {
     g->gcstepsize = LUAI_GCSTEPSIZE;
     setgcparam(g->genmajormul, LUAI_GENMAJORMUL);
     g->genminormul = LUAI_GENMINORMUL;
-    for (i = 0; i < LUA_NUMTAGS; i++) g->mt[i] = NULL;
+    for (i = 0; i < LUA_NUMTAGS; i++) //
+        g->mt[i] = NULL;
     if (luaD_rawrunprotected(L, f_luaopen, NULL) != LUA_OK) {
         /* memory allocation error: free partial state */
         close_state(L);

@@ -130,12 +130,13 @@ l_noret luaD_throw(lua_State* L, int errcode) {
     }
 }
 
-int luaD_rawrunprotected(lua_State* L, Pfunc f, void* ud) {
+int luaD_rawrunprotected(lua_State* L, Pfunc f, void* ud) { // 😊
     l_uint32 oldnCcalls = L->nCcalls;
     struct lua_longjmp lj;
     lj.status = LUA_OK;
     lj.previous = L->errorJmp; /* chain new error handler */
     L->errorJmp = &lj;
+    // 从 setjmp 直接调用返回值为0. 从 longjmp 恢复 setjmp 返回非零值
     LUAI_TRY(L, &lj, (*f)(L, ud););
     L->errorJmp = lj.previous; /* restore old error handler */
     L->nCcalls = oldnCcalls;
@@ -859,7 +860,7 @@ int luaD_pcall(lua_State* L, Pfunc func, void* u, ptrdiff_t old_top, ptrdiff_t e
     L->errfunc = ef;
     status = luaD_rawrunprotected(L, func, u);
     if (l_unlikely(status != LUA_OK)) { /* an error occurred? */
-        L->ci = old_ci;
+        L->ci = old_ci; // 在哪进行的最后一次保护,在哪还原
         L->allowhook = old_allowhooks;
         status = luaD_closeprotected(L, old_top, status);
         luaD_seterrorobj(L, status, restorestack(L, old_top));
