@@ -70,7 +70,7 @@ const char* Call_Lua(lua_State* L, size_t render_frame, const char* function_nam
 
 int main(int argc, char const* argv[]) {
     lua_State* Ltest = luaL_newstate();
-    // luaL_openlibs(Ltest);
+    luaL_openlibs(Ltest);
     // luaopen_lfs(Ltest);
     luaL_dofile(Ltest, LUA_TEST_SCRIPT);
     lua_State* L = luaL_newstate();
