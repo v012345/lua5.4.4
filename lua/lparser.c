@@ -684,7 +684,7 @@ static void close_func(LexState* ls) {
 ** 'until' closes syntactical blocks, but do not close scope,
 ** so it is handled in separate.
 */
-static int block_follow(LexState* ls, int withuntil) {
+static int block_follow(LexState* ls, int withuntil) { // 😊
     switch (ls->t.token) {
         case TK_ELSE:
         case TK_ELSEIF:
@@ -695,7 +695,7 @@ static int block_follow(LexState* ls, int withuntil) {
     }
 }
 
-static void statlist(LexState* ls) {
+static void statlist(LexState* ls) { // 😊
     /* statlist -> { stat [';'] } */
     while (!block_follow(ls, 1)) {
         if (ls->t.token == TK_RETURN) {

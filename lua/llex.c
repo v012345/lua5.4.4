@@ -32,8 +32,44 @@
 
 /* ORDER RESERVED */
 static const char* const luaX_tokens[] = {
-    "and",  "break", "do",    "else", "elseif", "end", "false", "for", "function", "goto", "if", "in", "local", "nil",   "not",      "or",        "repeat", "return",  "then",
-    "true", "until", "while", "//",   "..",     "...", "==",    ">=",  "<=",       "~=",   "<<", ">>", "::",    "<eof>", "<number>", "<integer>", "<name>", "<string>"};
+    "and",
+    "break",
+    "do",
+    "else",
+    "elseif",
+    "end",
+    "false",
+    "for",
+    "function",
+    "goto",
+    "if",
+    "in",
+    "local",
+    "nil",
+    "not",
+    "or",
+    "repeat",
+    "return",
+    "then",
+    "true",
+    "until",
+    "while",
+    "//",
+    "..",
+    "...",
+    "==",
+    ">=",
+    "<=",
+    "~=",
+    "<<",
+    ">>",
+    "::",
+    "<eof>",
+    "<number>",
+    "<integer>",
+    "<name>",
+    "<string>",
+};
 
 #define save_and_next(ls) (save(ls, ls->current), next(ls))
 

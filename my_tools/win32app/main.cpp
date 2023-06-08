@@ -57,6 +57,7 @@ FrameContext* WaitForNextFrameResources();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 #define LUA_MAIN_SCRIPT "./main.lua"
+#define LUA_TEST_SCRIPT "./test.lua"
 const char* Call_Lua(lua_State* L, size_t render_frame, const char* function_name) {
     lua_getglobal(L, "_Lua_functions"); // 获取函数引用
     lua_getfield(L, -1, function_name);
@@ -68,6 +69,10 @@ const char* Call_Lua(lua_State* L, size_t render_frame, const char* function_nam
 }
 
 int main(int argc, char const* argv[]) {
+    lua_State* Ltest = luaL_newstate();
+    // luaL_openlibs(Ltest);
+    // luaopen_lfs(Ltest);
+    luaL_dofile(Ltest, LUA_TEST_SCRIPT);
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
     luaopen_lfs(L);
