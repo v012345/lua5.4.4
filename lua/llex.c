@@ -54,6 +54,7 @@ static const char* const luaX_tokens[] = {
     "true",
     "until",
     "while",
+    // 其他终止符
     "//",
     "..",
     "...",
