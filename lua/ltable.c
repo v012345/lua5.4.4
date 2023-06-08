@@ -809,7 +809,7 @@ static lua_Unsigned hash_search(Table* t, lua_Unsigned j) {
     return i;
 }
 
-static unsigned int binsearch(const TValue* array, unsigned int i, unsigned int j) {
+static unsigned int binsearch(const TValue* array, unsigned int i, unsigned int j) { // 😊
     while (j - i > 1u) { /* binary search */
         unsigned int m = (i + j) / 2;
         if (isempty(&array[m - 1]))
