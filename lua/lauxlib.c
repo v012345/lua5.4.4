@@ -773,14 +773,16 @@ LUALIB_API int luaL_callmeta(lua_State* L, int obj, const char* event) {
     return 1;
 }
 
-LUALIB_API lua_Integer luaL_len(lua_State* L, int idx) {
+LUALIB_API lua_Integer luaL_len(lua_State* L, int idx) { // 😊
     lua_Integer l;
     int isnum;
-    lua_len(L, idx);
-    l = lua_tointegerx(L, -1, &isnum);
+    lua_len(L, idx); // 求出 S[idx] 的长度(优先使用元表的__len), 把长度放到栈顶
+    l = lua_tointegerx(L, -1, &isnum); // 从栈顶取回长度, isnum 记录是否成功取到长度
+    // 这里需要检查一下, 不然就算失败了, lua_tointegerx 也会返回 0
     if (l_unlikely(!isnum)) luaL_error(L, "object length is not an integer");
+    // 把上面 lua_len 放到栈顶的 TValue* 移除
     lua_pop(L, 1); /* remove object */
-    return l;
+    return l; // 返回长度
 }
 
 LUALIB_API const char* luaL_tolstring(lua_State* L, int idx, size_t* len) {

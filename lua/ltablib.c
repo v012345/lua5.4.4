@@ -29,7 +29,7 @@
 
 #define aux_getn(L, n, w) (checktab(L, n, (w) | TAB_L), luaL_len(L, n))
 
-static int checkfield(lua_State* L, const char* key, int n) {
+static int checkfield(lua_State* L, const char* key, int n) { // 😊
     lua_pushstring(L, key);
     return (lua_rawget(L, -n) != LUA_TNIL);
 }
@@ -42,7 +42,11 @@ static void checktab(lua_State* L, int arg, int what) { // 😊
     if (lua_type(L, arg) != LUA_TTABLE) { /* is it not a table? */
         int n = 1; /* number of elements to pop */
         if (lua_getmetatable(L, arg) && /* must have metatable */
-            (!(what & TAB_R) || checkfield(L, "__index", ++n)) && (!(what & TAB_W) || checkfield(L, "__newindex", ++n)) && (!(what & TAB_L) || checkfield(L, "__len", ++n))) {
+            (!(what & TAB_R) || checkfield(L, "__index", ++n)) && // 如果要读, 看元表有无 __index
+            (!(what & TAB_W) || checkfield(L, "__newindex", ++n)) && // 如果要写, 看元表有无 __newindex
+            (!(what & TAB_L) || checkfield(L, "__len", ++n)) // 如果要看长度, 看元表有无 __len
+            //
+        ) {
             lua_pop(L, n); /* pop metatable and tested metamethods */
         } else
             luaL_checktype(L, arg, LUA_TTABLE); /* force an error */
@@ -359,11 +363,13 @@ static void auxsort(lua_State* L, IdxT lo, IdxT up, unsigned int rnd) {
 }
 
 static int sort(lua_State* L) {
-    lua_Integer n = aux_getn(L, 1, TAB_RW);
+    lua_Integer n = aux_getn(L, 1, TAB_RW); // n 为第一个参数的长度(一般就是表的长度)
+    // 如果长度是 0 或 1 就不用 sort 了, 直接返回
     if (n > 1) { /* non-trivial interval? */
         luaL_argcheck(L, n < INT_MAX, 1, "array too big");
         if (!lua_isnoneornil(L, 2)) /* is there a 2nd argument? */
             luaL_checktype(L, 2, LUA_TFUNCTION); /* must be a function */
+        // 就两个参数, 多删少补
         lua_settop(L, 2); /* make sure there are two arguments */
         auxsort(L, 1, (IdxT)n, 0);
     }

@@ -602,6 +602,7 @@ LUA_API int lua_getfield(lua_State* L, int idx, const char* k) {
     return auxgetstr(L, index2value(L, idx), k);
 }
 
+// 会触发元表 __index
 LUA_API int lua_geti(lua_State* L, int idx, lua_Integer n) {
     TValue* t;
     const TValue* slot;
@@ -619,7 +620,7 @@ LUA_API int lua_geti(lua_State* L, int idx, lua_Integer n) {
     return ttype(s2v(L->top.p - 1));
 }
 
-l_sinline int finishrawget(lua_State* L, const TValue* val) {
+l_sinline int finishrawget(lua_State* L, const TValue* val) { // 😊
     if (isempty(val)) /* avoid copying empty items to the stack */
         setnilvalue(s2v(L->top.p));
     else
@@ -629,13 +630,14 @@ l_sinline int finishrawget(lua_State* L, const TValue* val) {
     return ttype(s2v(L->top.p - 1));
 }
 
-static Table* gettable(lua_State* L, int idx) {
+static Table* gettable(lua_State* L, int idx) { // 😊
     TValue* t = index2value(L, idx);
     api_check(L, ttistable(t), "table expected");
     return hvalue(t);
 }
 
-LUA_API int lua_rawget(lua_State* L, int idx) {
+// 把栈最上值做为 key, 把 value 放到 key 的位置上, 返回 value 的类型
+LUA_API int lua_rawget(lua_State* L, int idx) { // 😊
     Table* t;
     const TValue* val;
     lua_lock(L);
