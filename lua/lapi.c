@@ -239,7 +239,7 @@ LUA_API void lua_pushvalue(lua_State* L, int idx) {
 ** access functions (stack -> C)
 */
 
-LUA_API int lua_type(lua_State* L, int idx) {
+LUA_API int lua_type(lua_State* L, int idx) { // 😊
     const TValue* o = index2value(L, idx);
     return (isvalid(L, o) ? ttype(o) : LUA_TNONE);
 }
@@ -673,7 +673,8 @@ LUA_API void lua_createtable(lua_State* L, int narray, int nrec) {
     lua_unlock(L);
 }
 
-LUA_API int lua_getmetatable(lua_State* L, int objindex) {
+// 如果 objindex 有元表, 把元表放到栈顶, 返回 1, 否则返回 0
+LUA_API int lua_getmetatable(lua_State* L, int objindex) { // 😊
     const TValue* obj;
     Table* mt;
     int res = 0;

@@ -154,7 +154,8 @@
         "*.rh": "c",
         "luaconf.h": "c",
         "lualib.h": "c",
-        "lfs.h": "c"
+        "lfs.h": "c",
+        "lapi.h": "c"
     },
     "Lua.diagnostics.globals": [
         "lfs"
