@@ -185,7 +185,7 @@ LUALIB_API int luaL_typeerror(lua_State* L, int arg, const char* tname) {
     return luaL_argerror(L, arg, msg);
 }
 
-static void tag_error(lua_State* L, int arg, int tag) { // 😊
+static void tag_error(lua_State* L, int arg, int tag) { //
     luaL_typeerror(L, arg, lua_typename(L, tag));
 }
 
@@ -354,7 +354,7 @@ LUALIB_API void luaL_checkstack(lua_State* L, int space, const char* msg) {
     }
 }
 
-LUALIB_API void luaL_checktype(lua_State* L, int arg, int t) { // 😊
+LUALIB_API void luaL_checktype(lua_State* L, int arg, int t) {
     if (l_unlikely(lua_type(L, arg) != t)) //
         tag_error(L, arg, t);
 }
