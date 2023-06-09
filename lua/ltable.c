@@ -545,6 +545,7 @@ void luaH_resize(lua_State* L, Table* t, unsigned int newasize, unsigned int nhs
     // 把 newt 中的老的 hash 部分插回到 t 的 hash 部分
     /* re-insert elements from old hash part into new parts */
     reinsert(L, &newt, t); /* 'newt' now has the old hash */
+    // reinsert 可能会把之前存在 hash 里的整数索引放回到数组部分
     // 释放老的 hash 部分, newt 没有数组部分, 所以不用管数组部分
     freehash(L, &newt); /* free old hash part */
 }
