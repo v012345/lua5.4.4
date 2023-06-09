@@ -1,11 +1,30 @@
-local a = { 1, [3] = 2, 3, 4, 5, 6, 7, 8, 9, 10 }
-a[1] = 1
-a[2] = 2
-a[3] = 3
+local a = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }
+print(#a)
+a[8] = nil
+a[9] = nil
+a[1] = nil
+print(#a)
 a[4] = nil
-a[5] = 5
-a[6] = 6
-a[7] = 7
-a[8] = 8
+print(#a)
+a[4] = 4
+print(#a)
+a[5] = nil
+print(#a)
+
+local a = { 1, 2, 3, 4, 5, 6, 7, 8, a = "a", [15] = 18 }
+print(#a)
+-- a.a = nil
 a[9] = 9
-return #a
+print(#a)
+
+local a = { 1, 2, 3, 4, 5, 6, 7, 8, a = "a", [16] = 18 }
+print(#a)
+-- a.a = nil
+a[9] = 9
+print(#a)
+
+local a = { 1, 2, 3, 4, 5, 6, 7, 8, [17] = 18 }
+print(#a)
+-- a.a = nil
+a[9] = 9
+print(#a)

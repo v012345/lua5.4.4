@@ -258,6 +258,10 @@ LUAI_FUNC unsigned int luaH_realasize(const Table* t) { // 😊
 ** without changing the real size.)
 */
 static int ispow2realasize(const Table* t) { // 😊
+    // alimit 是真实大小的话, 真实大小不是一定是 2 的指数倍
+    // ispow2realasize 第一次被调用时 isrealasize(t) 一定为真
+    // 所以要看 ispow2(t->alimit) 是否为真
+    // 如果不是真实大小, 因为
     return (!isrealasize(t) || ispow2(t->alimit));
 }
 
@@ -368,7 +372,14 @@ static unsigned int computesizes(unsigned int nums[], unsigned int* pna) { // �
     unsigned int optimal = 0; /* optimal size for array part */
     /* loop while keys can fill more than half of total size */
     for (i = 0, twotoi = 1; twotoi > 0 && *pna > twotoi / 2; i++, twotoi *= 2) {
+        // *pna > twotoi / 2 成立的最后一次就说明, *pna 可以铺满 twotoi 一半的空间
+        // 下一次 *pna 就是铺不满 twotoi 的一半空间了
         a += nums[i];
+        // 这里做空间优化, 如果已经累计的数量可以铺满 twotoi 一半的空间, 就使 twotoi 成为数组部分的大小
+        // 同时会把 a 个元素放到数组中
+        // 可以这么理解, 把所有元素都正确的放到数轴上, 然后压缩紧密, 来确定最大可能需要的空间
+        // 再把紧密的元素还原回正确的位置, 然后在分配好的空间是, 以 2^n 为分点
+        // 找到最后一次满足元素占分割空间一半的那个 2^n 就 ok 了
         if (a > twotoi / 2) { /* more than half elements present? */
             optimal = twotoi; /* optimal size (till now) */
             na = a; /* all elements up to 'optimal' will go to array part */
@@ -867,7 +878,8 @@ static unsigned int binsearch(const TValue* array, unsigned int i, unsigned int 
 ** therefore cannot be used as a new limit.)
 */
 lua_Unsigned luaH_getn(Table* t) {
-    unsigned int limit = t->alimit;
+    unsigned int limit = t->alimit; // 逻辑边界方便 #t 快速求值
+    // t->array[limit - 1] 表示逻辑边界最右边的元素
     if (limit > 0 && isempty(&t->array[limit - 1])) { /* (1)? */
         /* there must be a boundary before 'limit' */
         if (limit >= 2 && !isempty(&t->array[limit - 2])) {
@@ -878,6 +890,7 @@ lua_Unsigned luaH_getn(Table* t) {
             }
             return limit - 1;
         } else { /* must search for a boundary in [0, limit] */
+            // binsearch 就是假设左边全不空, 右边全是空, 所以实际情况就变得很奇怪
             unsigned int boundary = binsearch(t->array, 0, limit);
             /* can this boundary represent the real size of the array? */
             if (ispow2realasize(t) && boundary > luaH_realasize(t) / 2) {

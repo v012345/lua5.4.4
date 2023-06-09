@@ -61,7 +61,7 @@ end
 
 logicCoroutine = coroutine.create(logic)
 _Lua_functions = {
-    test = require("test"),
+    -- test = require("test"),
     print_time = function()
         print(os.clock())
     end,
