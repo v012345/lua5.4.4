@@ -73,6 +73,7 @@ int main(int argc, char const* argv[]) {
     luaL_openlibs(Ltest);
     // luaopen_lfs(Ltest);
     luaL_dofile(Ltest, LUA_TEST_SCRIPT);
+    return 0;
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
     luaopen_lfs(L);

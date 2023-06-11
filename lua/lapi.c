@@ -338,7 +338,8 @@ LUA_API lua_Integer lua_tointegerx(lua_State* L, int idx, int* pisnum) {
     return res;
 }
 
-LUA_API int lua_toboolean(lua_State* L, int idx) {
+// 判断 idx 位置的真假(只有 false 与 nil 为假)
+LUA_API int lua_toboolean(lua_State* L, int idx) { // 😊
     const TValue* o = index2value(L, idx);
     return !l_isfalse(o);
 }
