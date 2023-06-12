@@ -316,20 +316,24 @@ static void auxsort(lua_State* L, IdxT lo, IdxT up, unsigned int rnd) {
         IdxT p; /* Pivot index */
         IdxT n; /* to be used later */
         /* sort elements 'lo', 'p', and 'up' */
-        lua_geti(L, 1, lo);
-        lua_geti(L, 1, up);
+        lua_geti(L, 1, lo); // L[1][lo] 放到栈顶
+        lua_geti(L, 1, up); // L[1][up] 放到栈顶
         if (sort_comp(L, -1, -2)) /* a[up] < a[lo]? */
+            // 正好使用上面放到栈顶的两个值
             set2(L, lo, up); /* swap a[lo] - a[up] */
         else
+            // 不用交换, 把上面两个值弹出
             lua_pop(L, 2); /* remove both values */
+        // 如果两个元素, 上面已经排好了
         if (up - lo == 1) /* only 2 elements? */
             return; /* already sorted */
+        // 元素少, 或者显式指明不使用随机元素, 直接使用中间元素
         if (up - lo < RANLIMIT || rnd == 0) /* small interval or no randomize? */
             p = (lo + up) / 2; /* middle element is a good pivot */
         else /* for larger intervals, it is worth a random pivot */
-            p = choosePivot(lo, up, rnd);
-        lua_geti(L, 1, p);
-        lua_geti(L, 1, lo);
+            p = choosePivot(lo, up, rnd); // 随机选择一个元素
+        lua_geti(L, 1, p); // 把被选中元素放到栈顶
+        lua_geti(L, 1, lo); // 把 lo 元素放到栈顶
         if (sort_comp(L, -2, -1)) /* a[p] < a[lo]? */
             set2(L, p, lo); /* swap a[p] - a[lo] */
         else {
@@ -340,8 +344,10 @@ static void auxsort(lua_State* L, IdxT lo, IdxT up, unsigned int rnd) {
             else
                 lua_pop(L, 2);
         }
+        // 只有三个元素, 到这里也就完成了
         if (up - lo == 2) /* only 3 elements? */
             return; /* already sorted */
+        // 走到这里, 上面压栈的元素都已经被弹出了
         lua_geti(L, 1, p); /* get middle element (Pivot) */
         lua_pushvalue(L, -1); /* push Pivot */
         lua_geti(L, 1, up - 1); /* push a[up - 1] */
