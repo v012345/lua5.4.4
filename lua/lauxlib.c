@@ -437,13 +437,15 @@ static int boxgc(lua_State* L) {
     return 0;
 }
 
-static const luaL_Reg boxmt[] = {/* box metamethods */
-                                 {"__gc", boxgc},
-                                 {"__close", boxgc},
-                                 {NULL, NULL}};
+static const luaL_Reg boxmt[] = {
+    /* box metamethods */
+    {"__gc", boxgc},
+    {"__close", boxgc},
+    {NULL, NULL},
+};
 
 static void newbox(lua_State* L) {
-    UBox* box = (UBox*)lua_newuserdatauv(L, sizeof(UBox), 0);
+    UBox* box = (UBox*)lua_newuserdatauv(L, sizeof(UBox), 0); // 把 userdata 锚到栈顶
     box->box = NULL;
     box->bsize = 0;
     if (luaL_newmetatable(L, "_UBOX*")) /* creating metatable? */
@@ -484,16 +486,18 @@ static size_t newbuffsize(luaL_Buffer* B, size_t sz) {
 */
 static char* prepbuffsize(luaL_Buffer* B, size_t sz, int boxidx) {
     checkbufferlevel(B, boxidx);
+    // 如果还有足够的空间
     if (B->size - B->n >= sz) /* enough space? */
-        return B->b + B->n;
+        return B->b + B->n; // 返回空闲空间的首地址
     else {
         lua_State* L = B->L;
         char* newbuff;
-        size_t newsize = newbuffsize(B, sz);
+        size_t newsize = newbuffsize(B, sz); // 以当前的 B 为基础算出一个合理的新大小
         /* create larger buffer */
         if (buffonstack(B)) /* buffer already has a box? */
             newbuff = (char*)resizebox(L, boxidx, newsize); /* resize it */
         else { /* no box yet */
+            // 把 B 的地址从栈上移除
             lua_remove(L, boxidx); /* remove placeholder */
             newbox(L); /* create a new box */
             lua_insert(L, boxidx); /* move box to its intended position */
@@ -547,8 +551,8 @@ LUALIB_API void luaL_pushresultsize(luaL_Buffer* B, size_t sz) {
 LUALIB_API void luaL_addvalue(luaL_Buffer* B) {
     lua_State* L = B->L;
     size_t len;
-    const char* s = lua_tolstring(L, -1, &len);
-    char* b = prepbuffsize(B, len, -2);
+    const char* s = lua_tolstring(L, -1, &len); // 把栈顶元素转化为字符串
+    char* b = prepbuffsize(B, len, -2); // -2 为 B 的地址
     memcpy(b, s, len * sizeof(char));
     luaL_addsize(B, len);
     lua_pop(L, 1); /* pop string */

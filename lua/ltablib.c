@@ -45,8 +45,8 @@ static void checktab(lua_State* L, int arg, int what) { // 😊
             (!(what & TAB_R) || checkfield(L, "__index", ++n)) && // 如果要读, 看元表有无 __index
             (!(what & TAB_W) || checkfield(L, "__newindex", ++n)) && // 如果要写, 看元表有无 __newindex
             (!(what & TAB_L) || checkfield(L, "__len", ++n)) // 如果要看长度, 看元表有无 __len
-            //
-        ) {
+            ) //
+        {
             lua_pop(L, n); /* pop metatable and tested metamethods */
         } else
             luaL_checktype(L, arg, LUA_TTABLE); /* force an error */
@@ -132,8 +132,8 @@ static int tmove(lua_State* L) {
 }
 
 static void addfield(lua_State* L, luaL_Buffer* b, lua_Integer i) {
-    lua_geti(L, 1, i);
-    if (l_unlikely(!lua_isstring(L, -1))) //
+    lua_geti(L, 1, i); // 把表的值放到栈顶
+    if (l_unlikely(!lua_isstring(L, -1))) // 如果不是字符串或数字就报错
         luaL_error(L, "invalid value (%s) at index %I in table for 'concat'", luaL_typename(L, -1), (LUAI_UACINT)i);
     luaL_addvalue(b);
 }
@@ -145,7 +145,7 @@ static int tconcat(lua_State* L) {
     const char* sep = luaL_optlstring(L, 2, "", &lsep); // 取第二个参数, 没有就使用 ""
     lua_Integer i = luaL_optinteger(L, 3, 1); // 取第三个参数, 没有就使用 1
     last = luaL_optinteger(L, 4, last); // 取第四个参数, 没有就使用表长
-    luaL_buffinit(L, &b);
+    luaL_buffinit(L, &b); // 把 b 锚到栈顶
     for (; i < last; i++) {
         addfield(L, &b, i);
         luaL_addlstring(&b, sep, lsep);
