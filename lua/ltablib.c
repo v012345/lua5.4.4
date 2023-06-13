@@ -27,7 +27,7 @@
 #define TAB_L 4 /* length */
 #define TAB_RW (TAB_R | TAB_W) /* read/write */
 
-#define aux_getn(L, n, w) (checktab(L, n, (w) | TAB_L), luaL_len(L, n))
+#define aux_getn(L, n, w) (checktab(L, n, (w) | TAB_L), luaL_len(L, n)) // 返回表 L[n] 的长度
 
 static int checkfield(lua_State* L, const char* key, int n) { // 😊
     lua_pushstring(L, key);
@@ -133,17 +133,18 @@ static int tmove(lua_State* L) {
 
 static void addfield(lua_State* L, luaL_Buffer* b, lua_Integer i) {
     lua_geti(L, 1, i);
-    if (l_unlikely(!lua_isstring(L, -1))) luaL_error(L, "invalid value (%s) at index %I in table for 'concat'", luaL_typename(L, -1), (LUAI_UACINT)i);
+    if (l_unlikely(!lua_isstring(L, -1))) //
+        luaL_error(L, "invalid value (%s) at index %I in table for 'concat'", luaL_typename(L, -1), (LUAI_UACINT)i);
     luaL_addvalue(b);
 }
 
 static int tconcat(lua_State* L) {
     luaL_Buffer b;
-    lua_Integer last = aux_getn(L, 1, TAB_R);
-    size_t lsep;
-    const char* sep = luaL_optlstring(L, 2, "", &lsep);
-    lua_Integer i = luaL_optinteger(L, 3, 1);
-    last = luaL_optinteger(L, 4, last);
+    lua_Integer last = aux_getn(L, 1, TAB_R); // 读出表的长度
+    size_t lsep; // 保存第二参数(字符串)的长度
+    const char* sep = luaL_optlstring(L, 2, "", &lsep); // 取第二个参数, 没有就使用 ""
+    lua_Integer i = luaL_optinteger(L, 3, 1); // 取第三个参数, 没有就使用 1
+    last = luaL_optinteger(L, 4, last); // 取第四个参数, 没有就使用表长
     luaL_buffinit(L, &b);
     for (; i < last; i++) {
         addfield(L, &b, i);
@@ -349,6 +350,7 @@ static void auxsort(lua_State* L, IdxT lo, IdxT up, unsigned int rnd) {
             return; /* already sorted */
         // 走到这里, 上面压栈的元素都已经被弹出了
         lua_geti(L, 1, p); /* get middle element (Pivot) */
+        // 这里保存一下 p 的值
         lua_pushvalue(L, -1); /* push Pivot */
         lua_geti(L, 1, up - 1); /* push a[up - 1] */
         set2(L, p, up - 1); /* swap Pivot (a[p]) with a[up - 1] */
