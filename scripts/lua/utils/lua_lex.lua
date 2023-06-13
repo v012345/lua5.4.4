@@ -10,7 +10,8 @@ local Lex = {
         string = 1,
         number = 2,
         other = 5,
-    }
+    },
+    END_OF_FILE = "\n==END_OF_FILE==\n",
 }
 local END_OF_FILE = "\n==END_OF_FILE==\n"
 
