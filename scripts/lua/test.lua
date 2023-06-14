@@ -1,14 +1,17 @@
 local lLex = require("utils.lua_lex")
 lLex:load("utils/json_lex.lua")
-local lParser = require("utils.lua_parser")
-xpcall(lParser.init, function(a)
-    print("\n")
-    print(a)
-end, lParser, lLex)
--- lParser:init(lLex)
 -- debug.sethook(function(a, b)
 --     print(a, b)
 -- end, "l", 0)
+-- xpcall(lLex.test, function(a)
+--     print("\n")
+--     print(a)
+-- end, lLex)
+-- do
+--     return
+-- end
+local lParser = require("utils.lua_parser")
+lParser:init(lLex)
 xpcall(lParser.test, function(a)
     print("\n")
     print(a)

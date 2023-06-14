@@ -41,6 +41,7 @@ function LexState:load(file_path)
     end
 end
 
+---@private
 function LexState:get_a_char()
     if self.char_pointer >= self.stream_len then
         self.current_char = self.type.end_of_file
