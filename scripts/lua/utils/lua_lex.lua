@@ -12,6 +12,7 @@ local Lex = {
         other = 5,
     },
     END_OF_FILE = "\n==END_OF_FILE==\n",
+    t = {}
 }
 local END_OF_FILE = "\n==END_OF_FILE==\n"
 
@@ -132,10 +133,12 @@ function Lex:next()
                 return self:token(":")
             end
         elseif c == "\"" or c == "'" then
-            return {
+            self.t = {
                 token = self.type.string,
-                value = self:read_string(c)
+                value = self:read_string(c),
+                line = self.linenumber
             }
+            return self.t
         elseif c == "." then
             c = self:get_a_char()
             if c == "." then
@@ -150,24 +153,30 @@ function Lex:next()
                 return self:token(".") -- 不支持 .122 这么定义小数
             end
         elseif c == "0" or c == "1" or c == "2" or c == "3" or c == "4" or c == "5" or c == "6" or c == "7" or c == "8" or c == "9" then
-            return {
+            self.t = {
                 token = self.type.number,
-                value = self:read_number()
+                value = self:read_number(),
+                line = self.linenumber
             }
+            return self.t
         else
             local b = string.byte(c)
             if b >= 65 and b <= 90 or b >= 97 and b <= 122 then
                 local type, value = self:read_name()
                 if type then
-                    return {
+                    self.t = {
                         token = self.type.reserved,
-                        value = value
+                        value = value,
+                        line = self.linenumber
                     }
+                    return self.t
                 else
-                    return {
+                    self.t = {
                         token = self.type.other,
-                        value = value
+                        value = value,
+                        line = self.linenumber
                     }
+                    return self.t
                 end
             else
                 local t = c
@@ -180,10 +189,12 @@ function Lex:next()
 end
 
 function Lex:token(c)
-    return {
+    self.t = {
         token = c,
-        value = c
+        value = c,
+        line = self.linenumber
     }
+    return self.t
 end
 
 function Lex:read_number() -- 只支持 10 进制小数
