@@ -8,7 +8,6 @@ local Parser = {
         value = "-1",
     },
     tokens = {},
-    chunk = {},
     ast = {}
 }
 function Parser:init(lex)
@@ -214,7 +213,10 @@ function Parser:block()
             block[#block + 1] = self:retstat()
             return block
         end
-        block[#block + 1] = self:stat()
+        local r = self:stat()
+        if r then
+            block[#block + 1] = r
+        end
     end
     return block
 end
@@ -233,10 +235,6 @@ function Parser:stat(block)
     local token = self.token
     if token.type == self.LexState.type.other and token.value == ";" then
         self:next_token()
-        return {
-            __name = "stat",
-            __value = ";"
-        }
     elseif token.type == self.LexState.type.other and token.value == "::" then
         return self:label()
     elseif token.type == self.LexState.type.reserved and token.value == "break" then
@@ -262,7 +260,11 @@ function Parser:stat(block)
     elseif token.type == self.LexState.type.reserved and token.value == "while" then
         return self:while_()
     elseif token.type == self.LexState.type.reserved and token.value == "local" then
-        if self.LexState:test_next_token(self.LexState.type.reserved, "function") then
+        local r = {
+            __name = "local"
+        }
+        local next = self.tokens[self.position + 1]
+        if next.type == self.LexState.type.reserved and next.value == "function" then
         else
             token = self.LexState:get_next_token()
             self:localstat(block)
@@ -278,7 +280,7 @@ end
 
 function Parser:test()
     self:mainfunc()
-    self:write_to_lua_file("C:\\Users\\Meteor\\Desktop\\configs\\ast.lua", "ast", self.chunk)
+    self:write_to_lua_file("C:\\Users\\Meteor\\Desktop\\configs\\ast.lua", "ast", self.ast)
 end
 
 function Parser:write_to_lua_file(toLua, table_name, data)
