@@ -67,7 +67,8 @@ function Parser:localstat(block)
     block[#block + 1] = stat
     self:attnamelist(stat)
     if self.LexState:test_next_token(self.LexState.type.other, "=") then
-
+        self.LexState:get_next_token()
+        self:explist(stat)
     end
 end
 
@@ -111,6 +112,20 @@ function Parser:attrib(var)
     attr.__name = "name"
     attr.__value = token.value
     var.attrib = attr
+end
+
+function Parser:explist(stat)
+    local explist = {}
+    explist.__name = "explist"
+    repeat
+        local bye = self.LexState:test_next_token(self.LexState.type.other, ",")
+        print(bye)
+        if bye then
+            self.LexState:get_next_token()
+            self.LexState:get_next_token()
+        end
+    until not bye
+    self:test_then_block()
 end
 
 function Parser:ifstat()
