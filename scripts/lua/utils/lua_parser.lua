@@ -24,16 +24,6 @@ function Parser:init(lex)
     self.tokens_len = #self.tokens
 end
 
-function Parser:statlist(block)
-    while not self:block_follow(true) do
-        if self.LexState.token.value == "return" and self.LexState.token.type == self.LexState.type.reserved then
-            self:statement(block)
-            return
-        end
-        self:statement(block)
-    end
-end
-
 function Parser:block_follow(withuntil)
     if self.token.type == self.LexState.type.reserved then
         local v = self.token.value
@@ -49,37 +39,9 @@ function Parser:block_follow(withuntil)
     return false
 end
 
-function Parser:statement(block)
-    local token = self.LexState.token
-    if token then
-        if token.type == self.LexState.type.other and token.value == ";" then
-            token = self.LexState:get_next_token()
-            goto end_switch
-        elseif token.type == self.LexState.type.reserved and token.value == "if" then
-            self:ifstat()
-            goto end_switch
-        elseif token.type == self.LexState.type.reserved and token.value == "local" then
-            if self.LexState:test_next_token(self.LexState.type.reserved, "function") then
-            else
-                token = self.LexState:get_next_token()
-                self:localstat(block)
-            end
-            goto end_switch
-        end
-    end
-    ::end_switch::
-end
-
-function Parser:buildAST()
-    if self.token.token == ";" then
-    elseif self.token.token == 0 and self.token.value == "if" then
-
-    end
-end
-
 function Parser:localstat(block)
     local stat = {}
-    stat.__name = "local"
+    stat.__type = "local"
     block[#block + 1] = stat
     self:attnamelist(stat)
     if self.LexState:test_next_token(self.LexState.type.other, "=") then
@@ -92,11 +54,11 @@ end
 function Parser:attnamelist(stat)
     local attnamelist = {}
     stat.attnamelist = attnamelist
-    attnamelist.__name = "attnamelist"
+    attnamelist.__type = "attnamelist"
     print(">>>>>>>>>>>>")
     repeat
         local var = {}
-        var.__name = "name"
+        var.__type = "name"
         print("++++++")
         local token = self.LexState.token
         print(self.LexState.token.value)
@@ -126,14 +88,14 @@ function Parser:attrib(var)
     local token = self.LexState.token
     print(token.value)
     local attr = {}
-    attr.__name = "name"
+    attr.__type = "name"
     attr.__value = token.value
     var.attrib = attr
 end
 
 function Parser:explist(stat)
     local explist = {}
-    explist.__name = "explist"
+    explist.__type = "explist"
     repeat
         explist[#explist + 1] = self:expr()
         local bye = self.LexState:test_next_token(self.LexState.type.other, ",")
@@ -146,18 +108,9 @@ function Parser:explist(stat)
     stat.explist = explist
 end
 
-function Parser:ifstat()
-    self:test_then_block()
-end
-
-function Parser:test_then_block()
-    local token = self.LexState:get_next_token() -- 跳过 if or elseif
-    self:expr()
-end
-
 function Parser:expr()
     local expr = {}
-    expr.__name = "exp"
+    expr.__type = "exp"
     self:subexpr(expr, 0)
     return expr
 end
@@ -189,9 +142,9 @@ function Parser:mainfunc()
     for index, value in ipairs(self.tokens) do
         print(value.type, value.value)
     end
-    -- self.chunk.__name = "chunk"
+    -- self.chunk.__type = "chunk"
     -- local block = {}
-    -- block.__name = "block"
+    -- block.__type = "block"
     -- self.LexState:get_next_token()
     -- self:statlist(block)
     -- self.chunk.block = block
@@ -200,14 +153,14 @@ end
 function Parser:chunk()
     -- chunk ::= block
     local chunk = {}
-    chunk.__name = "chunk"
+    chunk.__type = "chunk"
     chunk[#chunk + 1] = self:block()
 end
 
 function Parser:block()
     -- block ::= {stat} [retstat]
     local block = {}
-    block.__name = "block"
+    block.__type = "block"
     while not self:block_follow(true) do
         if self.token.value == "return" and self.token.type == self.LexState.type.reserved then
             block[#block + 1] = self:retstat()
@@ -261,7 +214,7 @@ function Parser:stat(block)
         return self:while_()
     elseif token.type == self.LexState.type.reserved and token.value == "local" then
         local r = {
-            __name = "local"
+            __type = "stat"
         }
         local next = self.tokens[self.position + 1]
         if next.type == self.LexState.type.reserved and next.value == "function" then
@@ -270,12 +223,31 @@ function Parser:stat(block)
             self:localstat(block)
         end
     else
-        self:exp()
+        self:prefixexp()
+        if 1 then --stat -> assignment
+            
+        else      --stat -> func
+
+        end
     end
 end
 
-function Parser:exp()
+function Parser:prefixexp()
 
+end
+
+function Parser:exp()
+    if self.token.type == self.LexState.type.other and self.token.value == "(" then
+        self:next_token() -- skip (
+        local r = self:exp()
+        if not (self.token.type == self.LexState.type.other and self.token.value == ")") then
+            error("( miss )")
+        end
+        self:next_token() -- skip )
+        return r
+    elseif self.token.type == self.LexState.type.name then
+
+    end
 end
 
 function Parser:test()
