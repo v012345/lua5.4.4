@@ -68,6 +68,7 @@ function Parser:localstat(block)
     self:attnamelist(stat)
     if self.LexState:test_next_token(self.LexState.type.other, "=") then
         self.LexState:get_next_token()
+        self.LexState:get_next_token()
         self:explist(stat)
     end
 end
@@ -118,6 +119,7 @@ function Parser:explist(stat)
     local explist = {}
     explist.__name = "explist"
     repeat
+        explist[#explist + 1] = self:expr()
         local bye = self.LexState:test_next_token(self.LexState.type.other, ",")
         print(bye)
         if bye then
@@ -125,7 +127,7 @@ function Parser:explist(stat)
             self.LexState:get_next_token()
         end
     until not bye
-    self:test_then_block()
+    stat.explist = explist
 end
 
 function Parser:ifstat()
@@ -138,15 +140,32 @@ function Parser:test_then_block()
 end
 
 function Parser:expr()
-    self:subexpr(0)
+    local expr = {}
+    expr.__name = "exp"
+    self:subexpr(expr, 0)
+    return expr
 end
 
-function Parser:subexpr(limit)
-    self:subexpr()
+function Parser:subexpr(expr, limit)
+    local token = self.LexState.token
+    local uop = self:getunopr(token);
+    if uop then
+    else
+        self:simpleexp();
+    end
 end
 
-function Parser:getunopr()
-
+function Parser:getunopr(token)
+    if token.type == self.LexState.type.reserved and token.value == "not" then
+        return true
+    end
+    if token.type == self.LexState.type.other then
+        if token.value == "-" or token.value == "~" or token.value == "#"
+        then
+            return true
+        end
+    end
+    return false
 end
 
 function Parser:mainfunc()
