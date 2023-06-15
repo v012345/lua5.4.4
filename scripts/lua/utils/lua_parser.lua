@@ -43,7 +43,11 @@ function Parser:statement(block)
             self:ifstat()
             goto end_switch
         elseif token.type == self.LexState.type.reserved and token.value == "local" then
-            token = self.LexState:get_next_token()
+            if self.LexState:test_next_token_and_skip(self.LexState.type.reserved, "function") then
+            else
+                token = self.LexState:get_next_token()
+                self:localstat(block)
+            end
             goto end_switch
         end
     end
@@ -55,6 +59,44 @@ function Parser:buildAST()
     elseif self.token.token == 0 and self.token.value == "if" then
 
     end
+end
+
+function Parser:localstat(block)
+    local stat = {}
+    stat.__name = "local"
+    block[#block + 1] = stat
+    self:attnamelist(stat)
+    if self.LexState:test_next_token(self.LexState.type.other, "=") then
+
+    end
+end
+
+function Parser:attnamelist(stat)
+    local attnamelist = {}
+    stat.attnamelist = attnamelist
+    attnamelist.__name = "attnamelist"
+    repeat
+        local var = {}
+        var.__name = "name"
+        local token = self.LexState.token
+        if token.type ~= self.LexState.type.name then
+            self.LexState:error("not a local var")
+        end
+        var.__value = token.value
+        if self.LexState:test_next_token_and_skip(self.LexState.type.other, "<") then
+            print("999")
+            print(self.LexState.token.value)
+            print(self.LexState.token.type)
+            local attri = self.LexState:get_next_token()
+            self:attrib(var)
+        end
+        attnamelist[#attnamelist + 1] = var
+    until self.LexState:test_next_token_and_skip(self.LexState.type.other, ",")
+    -- self:attnamelist(block)
+end
+
+function Parser:attrib(var)
+    self:test_then_block()
 end
 
 function Parser:ifstat()
@@ -79,14 +121,63 @@ function Parser:getunopr()
 end
 
 function Parser:mainfunc()
-    local block = {}
-    self:statlist(block)
     self.chunk.__name = "chunk"
+    local block = {}
+    block.__name = "block"
+    self.LexState:get_next_token()
+    self:statlist(block)
     self.chunk.block = block
 end
 
 function Parser:test()
     self:mainfunc()
+    self:write_to_lua_file("C:\\Users\\Meteor\\Desktop\\configs\\ast.lua", "ast", self.chunk)
+end
+
+function Parser:write_to_lua_file(toLua, table_name, data)
+    local j = 0
+    local function dump(t, o, q)
+        if type(t) == 'table' then
+            j = j + 1
+            o:write('{\n')
+            for k, v in pairs(t) do
+                for i = 1, j, 1 do
+                    o:write("    ")
+                end
+                if tonumber(k) then
+                    o:write(string.format("[%s] = ", k))
+                else
+                    o:write(string.format("%s = ", k))
+                end
+                dump(v, o, true)
+            end
+            j = j - 1
+            for i = 1, j, 1 do
+                o:write("    ")
+            end
+
+            if q then
+                o:write('},\n')
+            else
+                o:write('}\n')
+            end
+        elseif type(t) == "string" then
+            local n = tonumber(t)
+            if n then
+                o:write(n)
+            else
+                o:write(string.format('"%s"', t))
+            end
+            o:write(",")
+            o:write("\n")
+        end
+    end
+    local o = io.open(toLua, "w") or error("can't write")
+    o:write(string.format("local %s = ", table_name))
+    dump(data, o, false)
+    o:write("\n")
+    o:write("return " .. table_name)
+    o:close()
 end
 
 return Parser

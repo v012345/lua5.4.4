@@ -268,6 +268,20 @@ function LexState:error(what)
     error(string.format("line:%s, %s", self.line_number, what))
 end
 
+function LexState:test_next_token_and_skip(type, value)
+    local char_pointer = self.char_pointer
+    local current_char = self.current_char
+    local line_number = self.line_number
+    local token = self:get_next_token()
+    if token.type == type and token.value == value then
+        return true
+    end
+    self.char_pointer = char_pointer
+    self.current_char = current_char
+    self.line_number = line_number
+    return false
+end
+
 function LexState:test_next_token(type, value)
     local char_pointer = self.char_pointer
     local current_char = self.current_char
