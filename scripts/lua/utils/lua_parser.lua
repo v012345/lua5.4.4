@@ -1,11 +1,28 @@
 local Parser = {
     ---@type LexState
     LexState = nil,
+    position = 1,
+    tokens_len = 1,
+    token = {
+        type = -1,
+        value = "-1",
+    },
+    tokens = {},
     chunk = {},
     ast = {}
 }
 function Parser:init(lex)
     self.LexState = lex
+    local t = lex:get_next_token()
+    local e = self.LexState.type.end_of_file
+    while t.type ~= e do
+        self.tokens[#self.tokens + 1] = t
+        t = lex:get_next_token()
+    end
+    self.tokens[#self.tokens + 1] = t
+    self.position = 1
+    self.token = self.tokens[self.position]
+    self.tokens_len = #self.tokens
 end
 
 function Parser:statlist(block)
@@ -169,12 +186,61 @@ function Parser:getunopr(token)
 end
 
 function Parser:mainfunc()
-    self.chunk.__name = "chunk"
+    print(self.tokens_len)
+    for index, value in ipairs(self.tokens) do
+        print(value.type, value.value)
+    end
+    -- self.chunk.__name = "chunk"
+    -- local block = {}
+    -- block.__name = "block"
+    -- self.LexState:get_next_token()
+    -- self:statlist(block)
+    -- self.chunk.block = block
+end
+
+function Parser:chunk()
+    -- chunk ::= block
+    local chunk = {}
+    chunk.__name = "chunk"
+    chunk[#chunk + 1] = self:block()
+end
+
+function Parser:block()
+    -- block ::= {stat} [retstat]
     local block = {}
     block.__name = "block"
-    self.LexState:get_next_token()
-    self:statlist(block)
-    self.chunk.block = block
+    while not self:block_follow(true) do
+        if self.token.value == "return" and self.token.type == self.LexState.type.reserved then
+            block[#block + 1] = self:retstat()
+            return block
+        end
+        block[#block + 1] = self:stat()
+    end
+    return block
+end
+
+function Parser:next_token()
+    self.position = self.position + 1
+    self.token = self.tokens[self.position]
+    return self.token
+end
+
+function Parser:stat(block)
+    local token = self.token
+    if token.type == self.LexState.type.other and token.value == ";" then
+        self:next_token()
+    elseif token.type == self.LexState.type.reserved and token.value == "if" then
+        self:ifstat()
+        goto end_switch
+    elseif token.type == self.LexState.type.reserved and token.value == "local" then
+        if self.LexState:test_next_token(self.LexState.type.reserved, "function") then
+        else
+            token = self.LexState:get_next_token()
+            self:localstat(block)
+        end
+        goto end_switch
+    end
+    ::end_switch::
 end
 
 function Parser:test()
