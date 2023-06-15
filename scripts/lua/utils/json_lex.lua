@@ -1,6 +1,6 @@
 ---comment
 ---@param data any
-local PrintTableToJson,PrintTableToJson1
+local PrintTableToJson, PrintTableToJson1 <const>
 
 -- function PrintTableToJson(data)
 --     local function dump(t)

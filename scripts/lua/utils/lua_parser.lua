@@ -43,7 +43,7 @@ function Parser:statement(block)
             self:ifstat()
             goto end_switch
         elseif token.type == self.LexState.type.reserved and token.value == "local" then
-            if self.LexState:test_next_token_and_skip(self.LexState.type.reserved, "function") then
+            if self.LexState:test_next_token(self.LexState.type.reserved, "function") then
             else
                 token = self.LexState:get_next_token()
                 self:localstat(block)
@@ -75,28 +75,42 @@ function Parser:attnamelist(stat)
     local attnamelist = {}
     stat.attnamelist = attnamelist
     attnamelist.__name = "attnamelist"
+    print(">>>>>>>>>>>>")
     repeat
         local var = {}
         var.__name = "name"
+        print("++++++")
         local token = self.LexState.token
+        print(self.LexState.token.value)
         if token.type ~= self.LexState.type.name then
             self.LexState:error("not a local var")
         end
         var.__value = token.value
-        if self.LexState:test_next_token_and_skip(self.LexState.type.other, "<") then
-            print("999")
-            print(self.LexState.token.value)
-            print(self.LexState.token.type)
-            local attri = self.LexState:get_next_token()
+        if self.LexState:test_next_token(self.LexState.type.other, "<") then
+            self.LexState:get_next_token()
+            self.LexState:get_next_token()
             self:attrib(var)
+            self.LexState:get_next_token()
         end
         attnamelist[#attnamelist + 1] = var
-    until self.LexState:test_next_token_and_skip(self.LexState.type.other, ",")
+        local bye = self.LexState:test_next_token(self.LexState.type.other, ",")
+        print(bye)
+        if bye then
+            self.LexState:get_next_token()
+            self.LexState:get_next_token()
+        end
+    until not bye
+    print("<<<<<<<<<<<<<<")
     -- self:attnamelist(block)
 end
 
 function Parser:attrib(var)
-    self:test_then_block()
+    local token = self.LexState.token
+    print(token.value)
+    local attr = {}
+    attr.__name = "name"
+    attr.__value = token.value
+    var.attrib = attr
 end
 
 function Parser:ifstat()
