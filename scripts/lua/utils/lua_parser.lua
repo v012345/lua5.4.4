@@ -139,6 +139,20 @@ function Parser:mainfunc()
     -- self.chunk.block = block
 end
 
+function Parser:statlist(block)
+    while not self:block_follow(true) do
+        if self.token.value == "return" and self.token.type == self.LexState.type.reserved then
+            block[#block + 1] = self:statement()
+            return block
+        end
+        local r = self:statement()
+        if r then
+            block[#block + 1] = r
+        end
+    end
+    return block
+end
+
 function Parser:chunk()
     -- chunk ::= block
     local chunk = {}
@@ -173,16 +187,15 @@ function Parser:next_token()
     return self.token
 end
 
-function Parser:stat(block)
+function Parser:statement()
     local token = self.token
     if token.type == self.LexState.type.other and token.value == ";" then
         self:next_token()
-    elseif token.type == self.LexState.type.other and token.value == "::" then
-        return self:label()
-    elseif token.type == self.LexState.type.reserved and token.value == "break" then
-        return self:break_()
-    elseif token.type == self.LexState.type.reserved and token.value == "goto" then
-        return self:goto_()
+        return nil
+    elseif token.type == self.LexState.type.reserved and token.value == "if" then
+        return self:ifstat()
+    elseif token.type == self.LexState.type.reserved and token.value == "while" then
+        return self:whilestat()
     elseif token.type == self.LexState.type.reserved and token.value == "do" then
         self:next_token() -- skip do
         local r = self:block()
@@ -192,32 +205,32 @@ function Parser:stat(block)
         self:next_token() -- skip end
         return r
     elseif token.type == self.LexState.type.reserved and token.value == "for" then
-        return self:for_()
+        return self:forstat()
     elseif token.type == self.LexState.type.reserved and token.value == "repeat" then
-        return self:repeat_()
+        return self:repeatstat()
     elseif token.type == self.LexState.type.reserved and token.value == "function" then
-        return self:function_()
-    elseif token.type == self.LexState.type.reserved and token.value == "if" then
-        return self:if_()
-    elseif token.type == self.LexState.type.reserved and token.value == "while" then
-        return self:while_()
+        return self:funcstat()
     elseif token.type == self.LexState.type.reserved and token.value == "local" then
         local r = {
             __type = "stat"
         }
         local next = self.tokens[self.position + 1]
         if next.type == self.LexState.type.reserved and next.value == "function" then
+            self:localfunc()
         else
             token = self.LexState:get_next_token()
-            self:localstat(block)
+            self:localstat()
         end
+    elseif token.type == self.LexState.type.other and token.value == "::" then
+        return self:labelstat()
+    elseif token.type == self.LexState.type.reserved and token.value == "return" then
+        return self:retstat()
+    elseif token.type == self.LexState.type.reserved and token.value == "break" then
+        return self:breakstat()
+    elseif token.type == self.LexState.type.reserved and token.value == "goto" then
+        return self:gotostat()
     else
-        self:prefixexp()
-        if 1 then --stat -> assignment
-
-        else      --stat -> func
-
-        end
+        self:exprstat()
     end
 end
 
