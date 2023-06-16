@@ -74,7 +74,7 @@ static void checklimit(FuncState* fs, int v, int l, const char* what) {
 /*
 ** Test whether next token is 'c'; if so, skip it.
 */
-static int testnext(LexState* ls, int c) {
+static int testnext(LexState* ls, int c) { // 😊
     if (ls->t.token == c) {
         luaX_next(ls);
         return 1;
@@ -107,7 +107,7 @@ static void checknext(LexState* ls, int c) {
 ** raise an error that the expected 'what' should match a 'who'
 ** in line 'where' (if that is not the current line).
 */
-static void check_match(LexState* ls, int what, int who, int where) {
+static void check_match(LexState* ls, int what, int who, int where) { // 😊
     if (l_unlikely(!testnext(ls, what))) {
         if (where == ls->linenumber) /* all in the same line? */
             error_expected(ls, what); /* do not need a complex message */
@@ -178,7 +178,9 @@ static int new_localvar(LexState* ls, TString* name) {
 ** (Unless noted otherwise, all variables are referred to by their
 ** compiler indices.)
 */
-static Vardesc* getlocalvardesc(FuncState* fs, int vidx) { return &fs->ls->dyd->actvar.arr[fs->firstlocal + vidx]; }
+static Vardesc* getlocalvardesc(FuncState* fs, int vidx) { //
+    return &fs->ls->dyd->actvar.arr[fs->firstlocal + vidx];
+}
 
 /*
 ** Convert 'nvar', a compiler index level, to its corresponding
@@ -198,7 +200,9 @@ static int reglevel(FuncState* fs, int nvar) {
 ** Return the number of variables in the register stack for the given
 ** function.
 */
-int luaY_nvarstack(FuncState* fs) { return reglevel(fs, fs->nactvar); }
+int luaY_nvarstack(FuncState* fs) { //
+    return reglevel(fs, fs->nactvar);
+}
 
 /*
 ** Get the debug-information entry for current variable 'vidx'.
@@ -1047,7 +1051,9 @@ static void simpleexp(LexState* ls, expdesc* v) {
             init_exp(v, VVARARG, luaK_codeABC(fs, OP_VARARG, 0, 0, 1));
             break;
         }
-        case '{': { /* constructor */ constructor(ls, v); return;
+        case '{': { /* constructor */
+            constructor(ls, v); //
+            return;
         }
         case TK_FUNCTION: {
             luaX_next(ls);
@@ -1166,7 +1172,7 @@ static void expr(LexState* ls, expdesc* v) { //
 ** =======================================================================
 */
 
-static void block(LexState* ls) {
+static void block(LexState* ls) { // 😊
     /* block -> statlist */
     FuncState* fs = ls->fs;
     BlockCnt bl;
@@ -1511,7 +1517,7 @@ static void test_then_block(LexState* ls, int* escapelist) {
     luaK_patchtohere(fs, jf);
 }
 
-static void ifstat(LexState* ls, int line) {
+static void ifstat(LexState* ls, int line) { // 😊
     /* ifstat -> IF cond THEN block {ELSEIF cond THEN block} [ELSE block] END */
     FuncState* fs = ls->fs;
     int escapelist = NO_JUMP; /* exit list for finished parts */
@@ -1667,7 +1673,7 @@ static void retstat(LexState* ls) {
     testnext(ls, ';'); /* skip optional semicolon */
 }
 
-static void statement(LexState* ls) {
+static void statement(LexState* ls) { // 😊
     int line = ls->linenumber; /* may be needed for error messages */
     enterlevel(ls);
     switch (ls->t.token) {

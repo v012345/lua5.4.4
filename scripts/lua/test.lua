@@ -1,10 +1,8 @@
-local t = { 1, 2, 3 }
-for key, value, a, b, c in pairs(t) do
-    print(key, value, a, b, c)
+local a = 1
+local b = 2
+if a + b > 1 then
+    print(1)
 end
-function t.jiii()
-    
-end 
 -- local lLex = require("utils.lua_lex")
 -- lLex:load("utils/json_lex.lua")
 -- -- debug.sethook(function(a, b)

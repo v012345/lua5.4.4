@@ -453,7 +453,8 @@ static void freeregs(FuncState* fs, int r1, int r2) {
 ** Free register used by expression 'e' (if any)
 */
 static void freeexp(FuncState* fs, expdesc* e) {
-    if (e->k == VNONRELOC) freereg(fs, e->u.info);
+    if (e->k == VNONRELOC) //
+        freereg(fs, e->u.info);
 }
 
 /*
