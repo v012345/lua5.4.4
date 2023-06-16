@@ -51,44 +51,11 @@ function Parser:localstat(block)
     end
 end
 
-function Parser:attnamelist(stat)
-    local attnamelist = {}
-    stat.attnamelist = attnamelist
-    attnamelist.__type = "attnamelist"
-    print(">>>>>>>>>>>>")
-    repeat
-        local var = {}
-        var.__type = "name"
-        print("++++++")
-        local token = self.LexState.token
-        print(self.LexState.token.value)
-        if token.type ~= self.LexState.type.name then
-            self.LexState:error("not a local var")
-        end
-        var.__value = token.value
-        if self.LexState:test_next_token(self.LexState.type.other, "<") then
-            self.LexState:get_next_token()
-            self.LexState:get_next_token()
-            self:attrib(var)
-            self.LexState:get_next_token()
-        end
-        attnamelist[#attnamelist + 1] = var
-        local bye = self.LexState:test_next_token(self.LexState.type.other, ",")
-        print(bye)
-        if bye then
-            self.LexState:get_next_token()
-            self.LexState:get_next_token()
-        end
-    until not bye
-    print("<<<<<<<<<<<<<<")
-    -- self:attnamelist(block)
-end
-
 function Parser:attrib(var)
     local token = self.LexState.token
     print(token.value)
     local attr = {}
-    attr.__type = "name"
+    attr.__type = "Name"
     attr.__value = token.value
     var.attrib = attr
 end
@@ -106,6 +73,28 @@ function Parser:explist(stat)
         end
     until not bye
     stat.explist = explist
+end
+
+function Parser:varlist()
+    local varlist = {}
+    varlist.__type = "varlist"
+    varlist[#varlist + 1] = self:var()
+    while self.token.type == self.LexState.type.other and self.token.value == "," do
+        self:next_token()
+        varlist[#varlist + 1] = self:var()
+    end
+    return varlist
+end
+
+function Parser:var()
+    local var = {}
+    var.__type = "var"
+    varlist[#varlist + 1] = self:var()
+    while self.token.type == self.LexState.type.other and self.token.value == "," do
+        self:next_token()
+        varlist[#varlist + 1] = self:var()
+    end
+    return varlist
 end
 
 function Parser:expr()
@@ -225,11 +214,48 @@ function Parser:stat(block)
     else
         self:prefixexp()
         if 1 then --stat -> assignment
-            
+
         else      --stat -> func
 
         end
     end
+end
+
+function Parser:attnamelist(stat)
+    local attnamelist = {}
+    stat.attnamelist = attnamelist
+    attnamelist.__type = "attnamelist"
+    repeat
+        local child = {}
+        local Name = {}
+
+        child.__type = "Name"
+        local token = self.token
+        if token.type ~= self.LexState.type.name then
+            self.LexState:error("not a local var")
+        end
+        child.__value = token.value
+        local next = self.tokens[self.position + 1]
+        if next.type == self.LexState.type.other and next.value == "<" then
+            local attrib = {}
+            self:next_token()
+            self:next_token()
+            self:attrib(var)
+            self:next_token()
+        end
+
+
+        attnamelist[#attnamelist + 1] = var
+        local bye = false
+        next = self.tokens[self.position + 1]
+        if next.type == self.LexState.type.other and next.value == "," then
+            bye = true
+        end
+        if bye then
+            self:next_token()
+            self:next_token()
+        end
+    until not bye
 end
 
 function Parser:prefixexp()
