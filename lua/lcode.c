@@ -74,9 +74,15 @@ static TValue* const2val(FuncState* fs, const expdesc* e) {
 int luaK_exp2const(FuncState* fs, const expdesc* e, TValue* v) {
     if (hasjumps(e)) return 0; /* not a constant */
     switch (e->k) {
-        case VFALSE: setbfvalue(v); return 1;
-        case VTRUE: setbtvalue(v); return 1;
-        case VNIL: setnilvalue(v); return 1;
+        case VFALSE: //
+            setbfvalue(v);
+            return 1;
+        case VTRUE: //
+            setbtvalue(v);
+            return 1;
+        case VNIL: //
+            setnilvalue(v);
+            return 1;
         case VKSTR: {
             setsvalue(fs->ls->L, v, e->u.strval);
             return 1;
@@ -1343,7 +1349,8 @@ static void swapexps(expdesc* e1, expdesc* e2) {
 ** Code binary operators with no constant operand.
 */
 static void codebinNoK(FuncState* fs, BinOpr opr, expdesc* e1, expdesc* e2, int flip, int line) {
-    if (flip) swapexps(e1, e2); /* back to original order */
+    if (flip) //
+        swapexps(e1, e2); /* back to original order */
     codebinexpval(fs, opr, e1, e2, line); /* use standard operators */
 }
 
@@ -1497,7 +1504,8 @@ void luaK_infix(FuncState* fs, BinOpr op, expdesc* v) {
         case OPR_BXOR:
         case OPR_SHL:
         case OPR_SHR: {
-            if (!tonumeral(v, NULL)) luaK_exp2anyreg(fs, v);
+            if (!tonumeral(v, NULL)) //
+                luaK_exp2anyreg(fs, v);
             /* else keep numeral, which may be folded or used as an immediate
                operand */
             break;

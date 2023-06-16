@@ -379,7 +379,8 @@ static void singlevaraux(FuncState* fs, TString* n, expdesc* var, int base) {
     else {
         int v = searchvar(fs, n, var); /* look up locals at current level */
         if (v >= 0) { /* found? */
-            if (v == VLOCAL && !base) markupval(fs, var->u.var.vidx); /* local will be used as an upval */
+            if (v == VLOCAL && !base) //
+                markupval(fs, var->u.var.vidx); /* local will be used as an upval */
         } else { /* not found as local at current level; try upvalues */
             int idx = searchupvalue(fs, n); /* try existing upvalues */
             if (idx < 0) { /* not found? */
