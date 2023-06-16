@@ -234,6 +234,29 @@ function Parser:statement()
     end
 end
 
+function Parser:exprstat()
+    self:suffixedexp()
+end
+
+function Parser:suffixedexp()
+    self:primaryexp();
+end
+
+function Parser:primaryexp()
+    if self.token.type == self.LexState.type.other and self.token.value == "(" then
+        self:next_token() -- skip (
+        self:expr()
+        self:next_token() -- skip )
+    elseif self.token.type == self.LexState.type.name then
+        return {
+            __type = "Name",
+            __value = self.token.value
+        }
+    else
+        error("not a primaryexp")
+    end
+end
+
 function Parser:attnamelist(stat)
     local attnamelist = {}
     stat.attnamelist = attnamelist

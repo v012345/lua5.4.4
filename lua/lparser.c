@@ -135,7 +135,9 @@ static void codestring(expdesc* e, TString* s) {
     e->u.strval = s;
 }
 
-static void codename(LexState* ls, expdesc* e) { codestring(e, str_checkname(ls)); }
+static void codename(LexState* ls, expdesc* e) { //
+    codestring(e, str_checkname(ls));
+}
 
 /*
 ** Register a new local variable in the active 'Proto' (for debug
@@ -978,7 +980,9 @@ static void suffixedexp(LexState* ls, expdesc* v) {
     primaryexp(ls, v);
     for (;;) {
         switch (ls->t.token) {
-            case '.': { /* fieldsel */ fieldsel(ls, v); break;
+            case '.': { /* fieldsel */
+                fieldsel(ls, v); //
+                break;
             }
             case '[': { /* '[' exp ']' */
                 expdesc key;
@@ -1490,7 +1494,7 @@ static void test_then_block(LexState* ls, int* escapelist) {
         newgotoentry(ls, luaS_newliteral(ls->L, "break"), line, v.t);
         while (testnext(ls, ';')) {} /* skip semicolons */
         if (block_follow(ls, 0)) { /* jump is the entire block? */
-            leaveblock(fs);
+            leaveblock(fs); // 离开外部循环
             return; /* and that is it */
         } else /* must skip over 'then' part if condition is false */
             jf = luaK_jump(fs);
@@ -1511,8 +1515,10 @@ static void ifstat(LexState* ls, int line) {
     FuncState* fs = ls->fs;
     int escapelist = NO_JUMP; /* exit list for finished parts */
     test_then_block(ls, &escapelist); /* IF cond THEN block */
-    while (ls->t.token == TK_ELSEIF) test_then_block(ls, &escapelist); /* ELSEIF cond THEN block */
-    if (testnext(ls, TK_ELSE)) block(ls); /* 'else' part */
+    while (ls->t.token == TK_ELSEIF) //
+        test_then_block(ls, &escapelist); /* ELSEIF cond THEN block */
+    if (testnext(ls, TK_ELSE)) //
+        block(ls); /* 'else' part */
     check_match(ls, TK_END, TK_IF, line);
     luaK_patchtohere(fs, escapelist); /* patch escape list to 'if' end */
 }
