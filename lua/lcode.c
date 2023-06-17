@@ -72,8 +72,9 @@ static TValue* const2val(FuncState* fs, const expdesc* e) { // ok
 ** If expression is a constant, fills 'v' with its value
 ** and returns 1. Otherwise, returns 0.
 */
-int luaK_exp2const(FuncState* fs, const expdesc* e, TValue* v) {
-    if (hasjumps(e)) return 0; /* not a constant */
+int luaK_exp2const(FuncState* fs, const expdesc* e, TValue* v) { // ok
+    if (hasjumps(e)) //
+        return 0; /* not a constant */
     switch (e->k) {
         case VFALSE: //
             setbfvalue(v);
@@ -102,7 +103,7 @@ int luaK_exp2const(FuncState* fs, const expdesc* e, TValue* v) {
 ** previous one, return an invalid instruction (to avoid wrong
 ** optimizations).
 */
-static Instruction* previousinstruction(FuncState* fs) {
+static Instruction* previousinstruction(FuncState* fs) { // ok
     static const Instruction invalidinstruction = ~(Instruction)0;
     if (fs->pc > fs->lasttarget)
         return &fs->f->code[fs->pc - 1]; /* previous instruction */
@@ -116,15 +117,17 @@ static Instruction* previousinstruction(FuncState* fs) {
 ** range of previous instruction instead of emitting a new one. (For
 ** instance, 'local a; local b' will generate a single opcode.)
 */
-void luaK_nil(FuncState* fs, int from, int n) {
+void luaK_nil(FuncState* fs, int from, int n) { // ok
     int l = from + n - 1; /* last register to set nil */
     Instruction* previous = previousinstruction(fs);
     if (GET_OPCODE(*previous) == OP_LOADNIL) { /* previous is LOADNIL? */
         int pfrom = GETARG_A(*previous); /* get previous range */
         int pl = pfrom + GETARG_B(*previous);
         if ((pfrom <= from && from <= pl + 1) || (from <= pfrom && pfrom <= l + 1)) { /* can connect both? */
-            if (pfrom < from) from = pfrom; /* from = min(from, pfrom) */
-            if (pl > l) l = pl; /* l = max(l, pl) */
+            if (pfrom < from) //
+                from = pfrom; /* from = min(from, pfrom) */
+            if (pl > l) //
+                l = pl; /* l = max(l, pl) */
             SETARG_A(*previous, from);
             SETARG_B(*previous, l - from);
             return;
