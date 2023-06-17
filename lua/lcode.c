@@ -46,8 +46,9 @@ l_noret luaK_semerror(LexState* ls, const char* msg) {
 ** If expression is a numeric constant, fills 'v' with its value
 ** and returns 1. Otherwise, returns 0.
 */
-static int tonumeral(const expdesc* e, TValue* v) {
-    if (hasjumps(e)) return 0; /* not a numeral */
+static int tonumeral(const expdesc* e, TValue* v) { // ok
+    if (hasjumps(e)) //
+        return 0; /* not a numeral */
     switch (e->k) {
         case VKINT:
             if (v) setivalue(v, e->u.ival);
@@ -62,7 +63,7 @@ static int tonumeral(const expdesc* e, TValue* v) {
 /*
 ** Get the constant value from a constant expression
 */
-static TValue* const2val(FuncState* fs, const expdesc* e) {
+static TValue* const2val(FuncState* fs, const expdesc* e) { // ok
     lua_assert(e->k == VCONST);
     return &fs->ls->dyd->actvar.arr[e->u.info].k;
 }
@@ -1137,13 +1138,17 @@ int luaK_isKint(expdesc* e) { return (e->k == VKINT && !hasjumps(e)); }
 ** Check whether expression 'e' is a literal integer in
 ** proper range to fit in register C
 */
-static int isCint(expdesc* e) { return luaK_isKint(e) && (l_castS2U(e->u.ival) <= l_castS2U(MAXARG_C)); }
+static int isCint(expdesc* e) { //
+    return luaK_isKint(e) && (l_castS2U(e->u.ival) <= l_castS2U(MAXARG_C));
+}
 
 /*
 ** Check whether expression 'e' is a literal integer in
 ** proper range to fit in register sC
 */
-static int isSCint(expdesc* e) { return luaK_isKint(e) && fitsC(e->u.ival); }
+static int isSCint(expdesc* e) { //
+    return luaK_isKint(e) && fitsC(e->u.ival);
+}
 
 /*
 ** Check whether expression 'e' is a literal integer or float in
