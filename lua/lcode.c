@@ -694,15 +694,18 @@ void luaK_setoneret(FuncState* fs, expdesc* e) {
 void luaK_dischargevars(FuncState* fs, expdesc* e) {
     switch (e->k) {
         case VCONST: {
+            // 因为是编译时常量, 所以就那么几种, 布尔, 数字, 字符串, nil
             const2exp(const2val(fs, e), e);
             break;
         }
         case VLOCAL: { /* already in a register */
+            // 表达式是局部变量的话, 在局部变量声名就分部了寄存器, 这里真的使用
             e->u.info = e->u.var.ridx;
             e->k = VNONRELOC; /* becomes a non-relocatable value */
             break;
         }
         case VUPVAL: { /* move value to some (pending) register */
+            // 表达式是一个 UpValue, 那么拿到这个 UpValue 后, 要再分配寄存器
             e->u.info = luaK_codeABC(fs, OP_GETUPVAL, 0, e->u.info, 0);
             e->k = VRELOC;
             break;
@@ -888,7 +891,8 @@ int luaK_exp2anyreg(FuncState* fs, expdesc* e) {
 ** or in an upvalue.
 */
 void luaK_exp2anyregup(FuncState* fs, expdesc* e) {
-    if (e->k != VUPVAL || hasjumps(e)) luaK_exp2anyreg(fs, e);
+    if (e->k != VUPVAL || hasjumps(e)) //
+        luaK_exp2anyreg(fs, e);
 }
 
 /*

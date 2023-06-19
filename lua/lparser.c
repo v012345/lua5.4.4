@@ -992,7 +992,7 @@ static void suffixedexp(LexState* ls, expdesc* v) {
             case '[': { /* '[' exp ']' */
                 expdesc key;
                 luaK_exp2anyregup(fs, v);
-                yindex(ls, &key);
+                yindex(ls, &key); // 解析 key 的内容
                 luaK_indexed(fs, v, &key);
                 break;
             }
