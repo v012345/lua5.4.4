@@ -1148,7 +1148,7 @@ static BinOpr subexpr(LexState* ls, expdesc* v, int limit) {
     op = getbinopr(ls->t.token);
     while (op != OPR_NOBINOPR && priority[op].left > limit) {
         expdesc v2;
-        BinOpr nextop;
+        BinOpr nextop; // 下一个两元操作符
         int line = ls->linenumber;
         luaX_next(ls); /* skip operator */
         luaK_infix(ls->fs, op, v);

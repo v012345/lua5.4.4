@@ -738,7 +738,8 @@ void luaK_dischargevars(FuncState* fs, expdesc* e) {
             luaK_setoneret(fs, e);
             break;
         }
-        default: break; /* there is one value available (somewhere) */
+        default: //
+            break; /* there is one value available (somewhere) */
     }
 }
 
@@ -748,6 +749,7 @@ void luaK_dischargevars(FuncState* fs, expdesc* e) {
 ** (Expression still may have jump lists.)
 */
 static void discharge2reg(FuncState* fs, expdesc* e, int reg) {
+    // 把除了 VJMP 都要放到寄存器里
     luaK_dischargevars(fs, e);
     switch (e->k) {
         case VNIL: {
@@ -783,7 +785,8 @@ static void discharge2reg(FuncState* fs, expdesc* e, int reg) {
             break;
         }
         case VNONRELOC: {
-            if (reg != e->u.info) luaK_codeABC(fs, OP_MOVE, reg, e->u.info, 0);
+            if (reg != e->u.info) //
+                luaK_codeABC(fs, OP_MOVE, reg, e->u.info, 0);
             break;
         }
         default: {
@@ -1183,7 +1186,8 @@ static int isSCnumber(expdesc* e, int* pi, int* isfloat) {
 ** values in registers.
 */
 void luaK_indexed(FuncState* fs, expdesc* t, expdesc* k) {
-    if (k->k == VKSTR) str2K(fs, k);
+    if (k->k == VKSTR) // 如果键是字符串, 把字符串放到常量表里
+        str2K(fs, k);
     lua_assert(!hasjumps(t) && (t->k == VLOCAL || t->k == VNONRELOC || t->k == VUPVAL));
     if (t->k == VUPVAL && !isKstr(fs, k)) /* upvalue indexed by non 'Kstr'? */
         luaK_exp2anyreg(fs, t); /* put it in a register */
@@ -1566,7 +1570,8 @@ static void codeconcat(FuncState* fs, expdesc* e1, expdesc* e2, int line) {
 */
 void luaK_posfix(FuncState* fs, BinOpr opr, expdesc* e1, expdesc* e2, int line) {
     luaK_dischargevars(fs, e2);
-    if (foldbinop(opr) && constfolding(fs, opr + LUA_OPADD, e1, e2)) return; /* done by folding */
+    if (foldbinop(opr) && constfolding(fs, opr + LUA_OPADD, e1, e2)) //
+        return; /* done by folding */
     switch (opr) {
         case OPR_AND: {
             lua_assert(e1->t == NO_JUMP); /* list closed by 'luaK_infix' */
