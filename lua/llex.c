@@ -436,12 +436,16 @@ static int llex(LexState* ls, SemInfo* seminfo) {
     for (;;) {
         switch (ls->current) {
             case '\n':
-            case '\r': { /* line breaks */ inclinenumber(ls); break;
+            case '\r': { /* line breaks */
+                inclinenumber(ls); //
+                break;
             }
             case ' ':
             case '\f':
             case '\t':
-            case '\v': { /* spaces */ next(ls); break;
+            case '\v': { /* spaces */
+                next(ls); //
+                break;
             }
             case '-': { /* '-' or '--' (comment) */
                 next(ls);

@@ -1,7 +1,10 @@
+---comment
+---@param struct any
+---@return table
 ---@diagnostic disable-next-line
 function new(struct)
     if type(struct) ~= "table" then
-        error(debug.traceback("must a table"))
+        error(debug.traceback("must a table given a " .. type(struct)))
     end
     ---@diagnostic disable-next-line
     local function clone(struct)

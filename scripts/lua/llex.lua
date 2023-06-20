@@ -113,8 +113,12 @@ LexState = {
     fs = nil,               -- current function (parser)
     L = nil,
     ---@type Zio
-    z = nil,        --input stream
-    buff = nil,     -- buffer for tokens
+    z = nil, --input stream
+    ---@type Mbuffer
+    buff = {
+        buffer = {},
+        n = 0
+    },              -- buffer for tokens
     ---@type Table
     h = new(Table), --to avoid collection/reuse strings
     dyd = nil,      -- dynamic structures used by the parser
@@ -131,7 +135,68 @@ local function next(ls)
     ls.current = zgetc(ls.z)
 end
 
+---comment
+---@param ls LexState
+---@param c integer
 local function save(ls, c)
+    local b = ls.buff
+    b.buffer[#b.buffer + 1] = c
+    b.n = #b.buffer
+end
+
+---comment
+---@param ls LexState
+local function save_and_next(ls)
+    save(ls, ls.current)
+    next(ls)
+end
+
+local function currIsNewline(ls)
+    if ls.current == string.byte('\n') or ls.current == string.byte('\r') then
+        return true
+    else
+        return false
+    end
+end
+
+---comment
+---@param ls LexState
+local function inclinenumber(ls)
+    local old = ls.current;
+    next(ls)     -- skip '\n' or '\r'
+    if currIsNewline(ls) and ls.current ~= old then
+        next(ls) -- skip '\n\r' or '\r\n'
+    end
+    ls.linenumber = ls.linenumber + 1
+end
+
+---comment
+---@param ls LexState
+---@return integer
+local function skip_sep(ls)
+    local count = 0
+    local s = ls.current
+    save_and_next(ls)
+    while ls.current == string.byte("=") do
+        save_and_next(ls)
+        count = count + 1
+    end
+    if ls.current == s then
+        return count + 2
+    else
+        if count == 0 then
+            return 1
+        else
+            return 0
+        end
+    end
+end
+
+---comment
+---@param ls LexState
+---@param seminfo SemInfo | nil
+---@param sep integer
+local function read_long_string(ls, seminfo, sep)
 
 end
 
@@ -150,10 +215,36 @@ end
 ---@return integer
 local function llex(ls, seminfo)
     while true do
-        if ls.current == string.byte("\n") or ls.current == string.byte("\r") then
+        ::start::
+        if
+            ls.current == string.byte("\n") or
+            ls.current == string.byte("\r")
+        then
+            inclinenumber(ls)
+            goto start
+        elseif
+            ls.current == string.byte(" ") or
+            ls.current == string.byte("\f") or
+            ls.current == string.byte("\t") or
+            ls.current == string.byte("\v")
+        then
             next(ls)
-        elseif ls.current == "=" then
+            goto start
+        elseif ls.current == string.byte("-") then
             next(ls)
+            if ls.current ~= string.byte("-") then
+                return string.byte("-")
+            end
+            next(ls)
+            if ls.current == string.byte("[") then
+                local sep = skip_sep(ls)
+                luaZ_resetbuffer(ls.buff)
+                if sep >= 2 then
+                    read_long_string(ls, nil, sep);
+                    luaZ_resetbuffer(ls.buff)
+                    goto start
+                end
+            end
         elseif ls.current == EOZ then
             return RESERVED.TK_EOS;
         else
@@ -177,6 +268,7 @@ function luaX_next(ls)
     else
         ls.t.token = llex(ls, ls.t.seminfo)
     end
+    print(string.char(ls.t.token))
 end
 
 ---comment

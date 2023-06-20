@@ -6,7 +6,7 @@ function main()
     ---@type Zio
     local z = new(Zio)
     local firstchar = zgetc(z)
-    luaY_parser(nil, z, nil, nil, "test.lua", firstchar)
+    luaY_parser(nil, z, new(Mbuffer), nil, "test.lua", firstchar)
 end
 
 xpcall(main, function(msg)

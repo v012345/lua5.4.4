@@ -10,6 +10,19 @@ Zio = {
     L = nil,      -- Lua state (for reader)
 };
 
+---@class Mbuffer
+Mbuffer = {
+    buffer = {},
+    n = 0
+}
+
+---comment
+---@param buff Mbuffer
+---@diagnostic disable-next-line
+function luaZ_resetbuffer(buff)
+    buff.buffer = {}
+    buff.n = 0
+end
 
 ---comment
 ---@param z Zio

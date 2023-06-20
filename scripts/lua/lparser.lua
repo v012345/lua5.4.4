@@ -24,14 +24,82 @@ FuncState = {
     iwthabs = 0,      -- instructions issued since last absolute line info
     needclose = 0,    -- function needs to close upvalues when returning
 }
-local function statlist(ls)
 
+---comment
+---@param ls LexState
+---@param withuntil boolean
+local function block_follow(ls, withuntil)
+    if
+        ls.t.token == RESERVED["TK_ELSE"] or
+        ls.t.token == RESERVED["TK_ELSEIF"] or
+        ls.t.token == RESERVED["TK_END"] or
+        ls.t.token == RESERVED["TK_EOS"]
+    then
+        return true
+    elseif ls.t.token == RESERVED["TK_UNTIL"] then
+        return withuntil
+    else
+        return false
+    end
+end
+
+---comment
+---@param ls LexState
+local function statement(ls)
+    local line = ls.linenumber
+    if ls.t.token == string.byte(";") then
+        luaX_next(ls)
+    elseif ls.t.token == RESERVED["TK_IF"] then
+        luaX_next(ls)
+    elseif ls.t.token == RESERVED["TK_WHILE"] then
+        luaX_next(ls)
+    elseif ls.t.token == RESERVED["TK_DO"] then
+        luaX_next(ls)
+    elseif ls.t.token == RESERVED["TK_FOR"] then
+        luaX_next(ls)
+    elseif ls.t.token == RESERVED["TK_REPEAT"] then
+        luaX_next(ls)
+    elseif ls.t.token == RESERVED["TK_FUNCTION"] then
+        luaX_next(ls)
+    elseif ls.t.token == RESERVED["TK_LOCAL"] then
+        luaX_next(ls)
+    elseif ls.t.token == RESERVED["TK_DBCOLON"] then
+        luaX_next(ls)
+    elseif ls.t.token == RESERVED["TK_RETURN"] then
+        luaX_next(ls)
+    elseif ls.t.token == RESERVED["TK_BREAK"] then
+        luaX_next(ls)
+    elseif ls.t.token == RESERVED["TK_GOTO"] then
+        luaX_next(ls)
+    else
+        luaX_next(ls)
+    end
+end
+
+---comment
+---@param ls LexState
+local function statlist(ls)
+    while block_follow(ls, true) do
+        if ls.t.token == RESERVED["TK_RETURN"] then
+            statement(ls)
+            return
+        end
+        statement(ls)
+    end
 end
 local function mainfunc(ls, fs)
     luaX_next(ls);
     statlist(ls);
 end
 
+---comment
+---@param L any
+---@param z Zio
+---@param buff Mbuffer
+---@param dyd any
+---@param name string
+---@param firstchar integer
+---@diagnostic disable-next-line
 function luaY_parser(L, z, buff, dyd, name, firstchar)
     ---@type LexState
     local lexstate = new(LexState)
@@ -42,6 +110,8 @@ function luaY_parser(L, z, buff, dyd, name, firstchar)
     ---@type Proto
     funcstate.f = new(Proto)
     funcstate.f.source = name
+
+    lexstate.buff = buff
     luaX_setinput(L, lexstate, z, funcstate.f.source, firstchar);
     mainfunc(lexstate, funcstate);
 end

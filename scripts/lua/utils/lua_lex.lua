@@ -1,4 +1,4 @@
----@class LexState
+---@class LexState1
 local LexState = {
     line_number = 0,
     char_pointer = 1,
