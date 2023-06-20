@@ -169,7 +169,8 @@ static void stack_init(lua_State* L1, lua_State* L) {
     /* initialize stack array */
     L1->stack.p = luaM_newvector(L, BASIC_STACK_SIZE + EXTRA_STACK, StackValue);
     L1->tbclist.p = L1->stack.p;
-    for (i = 0; i < BASIC_STACK_SIZE + EXTRA_STACK; i++) setnilvalue(s2v(L1->stack.p + i)); /* erase new stack */
+    for (i = 0; i < BASIC_STACK_SIZE + EXTRA_STACK; i++) //
+        setnilvalue(s2v(L1->stack.p + i)); /* erase new stack */
     L1->top.p = L1->stack.p;
     L1->stack_last.p = L1->stack.p + BASIC_STACK_SIZE;
     /* initialize first ci */
@@ -179,6 +180,7 @@ static void stack_init(lua_State* L1, lua_State* L) {
     ci->func.p = L1->top.p;
     ci->u.c.k = NULL;
     ci->nresults = 0;
+    // 第一个栈元素就是 nil
     setnilvalue(s2v(L1->top.p)); /* 'function' entry for this 'ci' */
     L1->top.p++;
     ci->top.p = L1->top.p + LUA_MINSTACK;
