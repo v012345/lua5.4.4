@@ -1,8 +1,23 @@
-local b = 1
-while b < 2 do
-    local a = 1
-    b = b + 1
-end
+require "clua"
+
+local a = {
+    aa = {
+        dd = 3
+    },
+    bb = 1,
+    cc = 1,
+}
+local c = new(a)
+print(a.aa.dd)
+print(c.aa.dd)
+c.aa.dd = 4
+print(a.aa.dd)
+print(c.aa.dd)
+-- local b = 1
+-- while b < 2 do
+--     local a = 1
+--     b = b + 1
+-- end
 -- if 3 < 1 then
 --     local a = 1
 -- end

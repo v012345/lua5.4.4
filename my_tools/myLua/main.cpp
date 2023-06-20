@@ -34,5 +34,6 @@ int main(int argc, char const* argv[]) {
     lua_pushstring(L1, LUA_MAIN_SCRIPT);
     lua_settable(L1, -3);
     lua_pcall(L1, 2, 0, 0);
+    luaL_dofile(L1, LUA_MAIN_SCRIPT);
     return 0;
 }
