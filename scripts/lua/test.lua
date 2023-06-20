@@ -1,8 +1,11 @@
-local a = 1
-local b = 2
-if a + b > 1 then
-    print(1)
+local b = 1
+while b < 2 do
+    local a = 1
+    b = b + 1
 end
+-- if 3 < 1 then
+--     local a = 1
+-- end
 -- local lLex = require("utils.lua_lex")
 -- lLex:load("utils/json_lex.lua")
 -- -- debug.sethook(function(a, b)

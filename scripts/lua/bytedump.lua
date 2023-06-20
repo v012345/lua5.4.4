@@ -822,12 +822,11 @@ local OP_ACT = {
     OP_LTI = function(index, code)
         -- if ((R[A] < sB) ~= k) then pc++
         local name = OP_CODE[(code & 0x7F) + 1]
-        local f = "if (R[%s] < sB:%s) != %s goto %s else goto %s"
+        local f = "if (R[%s] < sB:%s) != %s goto %s"
         local A = Bytedump:A(code)
         local k = Bytedump:k(code)
         local sB = Bytedump:sB(code)
-        local sJ = Bytedump:sJ(Bytedump.codes[index + 1])
-        print(index, name, "", getMode(code), string.format(f, A, sB, k, index + 2, index + sJ + 2))
+        print(index, name, "", getMode(code), string.format(f, A, sB, k, index + 2))
     end,
     OP_LEI = function(index, code)
         -- if ((R[A] <= sB) ~= k) then pc++

@@ -1040,6 +1040,7 @@ static int jumponcond(FuncState* fs, expdesc* e, int cond) {
 ** Emit code to go through if 'e' is true, jump otherwise.
 */
 void luaK_goiftrue(FuncState* fs, expdesc* e) {
+    // 让我们看看这个做了什么东西
     int pc; /* pc of new jump */
     luaK_dischargevars(fs, e);
     switch (e->k) {
