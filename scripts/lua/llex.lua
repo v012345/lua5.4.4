@@ -1,4 +1,6 @@
 require "lobject"
+require "lctype"
+require "lstring"
 
 FIRST_RESERVED = 256
 RESERVED = {
@@ -214,6 +216,16 @@ local function check_next1(ls, c)
 end
 
 ---comment
+---@param ls any
+---@param str any
+---@param l any
+---@diagnostic disable-next-line
+function luaX_newstring(ls, str, l)
+    print(string.char(table.unpack(str)))
+    return "return"
+end
+
+---comment
 ---@param ls LexState
 ---@param seminfo SemInfo
 ---@return integer
@@ -272,7 +284,22 @@ local function llex(ls, seminfo)
         elseif ls.current == EOZ then
             return RESERVED.TK_EOS;
         else
-            next(ls)
+            if lislalpha(ls.current) then
+                repeat
+                    save_and_next(ls)
+                until not lislalnum(ls.current)
+                local ts = luaX_newstring(ls, luaZ_buffer(ls.buff), luaZ_bufflen(ls.buff))
+                seminfo.ts = ts
+                if isreserved(ts) then
+                    return RESERVED["TK_RETURN"]
+                else
+                    return RESERVED["TK_NAME"]
+                end
+            else
+                local c = ls.current
+                next(ls)
+                return c
+            end
         end
     end
     return 1

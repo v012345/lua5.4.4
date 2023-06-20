@@ -558,7 +558,9 @@ static int llex(LexState* ls, SemInfo* seminfo) {
                     seminfo->ts = ts;
                     if (isreserved(ts)) /* reserved word? */
                         return ts->extra - 1 + FIRST_RESERVED;
-                    else { return TK_NAME; }
+                    else { //
+                        return TK_NAME;
+                    }
                 } else { /* single-char tokens ('+', '*', '%', '{', '}', ...) */
                     int c = ls->current;
                     next(ls);

@@ -25,6 +25,22 @@ function luaZ_resetbuffer(buff)
 end
 
 ---comment
+---@param buff Mbuffer
+---@return table
+---@diagnostic disable-next-line
+function luaZ_buffer(buff)
+    return buff.buffer
+end
+
+---comment
+---@param buff Mbuffer
+---@return integer
+---@diagnostic disable-next-line
+function luaZ_bufflen(buff)
+    return buff.n
+end
+
+---comment
 ---@param z Zio
 ---@return integer
 ---@diagnostic disable-next-line

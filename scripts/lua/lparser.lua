@@ -80,7 +80,7 @@ end
 ---comment
 ---@param ls LexState
 local function statlist(ls)
-    while block_follow(ls, true) do
+    while not block_follow(ls, true) do
         if ls.t.token == RESERVED["TK_RETURN"] then
             statement(ls)
             return
