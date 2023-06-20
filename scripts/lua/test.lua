@@ -1,18 +1,34 @@
-require "clua"
+function main()
+    print(1)
+    require "clua"
+    print(1)
+    require "lparser"
+    print(1)
+    ---@type Zio
+    local z = new(Zio)
+    print(1)
+    local firstchar = zgetc(z)
+    luaY_parser(nil, z, nil, nil, "test.lua", firstchar)
 
-local a = {
-    aa = {
-        dd = 3
-    },
-    bb = 1,
-    cc = 1,
-}
-local c = new(a)
-print(a.aa.dd)
-print(c.aa.dd)
-c.aa.dd = 4
-print(a.aa.dd)
-print(c.aa.dd)
+    local a = {
+        aa = {
+            dd = 3
+        },
+        bb = 1,
+        cc = 1,
+    }
+    local c = new(a)
+    print(a.aa.dd)
+    print(c.aa.dd)
+    c.aa.dd = 4
+    print(a.aa.dd)
+    print(c.aa.dd)
+end
+
+xpcall(main, function(msg)
+    print(msg)
+end)
+
 -- local b = 1
 -- while b < 2 do
 --     local a = 1
