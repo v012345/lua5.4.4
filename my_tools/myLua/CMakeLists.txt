@@ -1,9 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 project(myLua)
 
-add_executable(${PROJECT_NAME} WIN32 main.cpp)
+add_executable(${PROJECT_NAME} main.cpp)
 
-# add_executable(${PROJECT_NAME}  main.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lua)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/modules)
