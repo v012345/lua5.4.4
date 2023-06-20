@@ -1,5 +1,5 @@
 require "lobject"
-print(3)
+
 FIRST_RESERVED = 256
 RESERVED = {
     -- terminal symbols denoted by reserved words
@@ -41,7 +41,7 @@ RESERVED = {
     ["TK_NAME"] = 291,
     ["TK_STRING"] = 292,
 }
-print(3)
+
 ---@diagnostic disable-next-line
 luaX_tokens = {
     ["and"] = true,
@@ -83,7 +83,7 @@ luaX_tokens = {
     ["<name>"] = true,
     ["<string>"] = true,
 };
-print(3)
+
 
 NUM_RESERVED = RESERVED.TK_WHILE - FIRST_RESERVED + 1
 
@@ -93,13 +93,13 @@ SemInfo = {
     i = 0,
     ts = "",
 }
-print(4)
+
 ---@class Token
 Token = {
     token = 0,
     seminfo = SemInfo
 }
-print(3)
+
 
 ---@class LexState
 LexState = {
@@ -150,9 +150,15 @@ end
 ---@return integer
 local function llex(ls, seminfo)
     while true do
-        if ls.current == "\n" then
+        if ls.current == string.byte("\n") or ls.current == string.byte("\r") then
+            next(ls)
         elseif ls.current == "=" then
-            next(ls);
+            next(ls)
+        elseif ls.current == EOZ then
+            return RESERVED.TK_EOS;
+        else
+            print(string.char(ls.current))
+            next(ls)
         end
     end
     return 1

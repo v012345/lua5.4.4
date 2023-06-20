@@ -21,6 +21,7 @@ function luaZ_fill(z)
     z.n = #z.data
     z.p = 0
     z.p = z.p + 1
+    z.n = z.n - 1
     return string.byte(z.data, z.p, z.p)
 end
 
@@ -35,6 +36,8 @@ function zgetc(z)
             return luaZ_fill(z)
         end
     else
+        z.p = z.p + 1
+        z.n = z.n - 1
         return string.byte(z.data, z.p, z.p)
     end
 end

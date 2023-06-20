@@ -1,8 +1,5 @@
-print(2)
 require "lobject"
-print(2)
 require "llex"
-print(2)
 
 
 ---@class FuncState
@@ -27,9 +24,12 @@ FuncState = {
     iwthabs = 0,      -- instructions issued since last absolute line info
     needclose = 0,    -- function needs to close upvalues when returning
 }
+local function statlist(ls)
 
+end
 local function mainfunc(ls, fs)
-
+    luaX_next(ls);
+    statlist(ls);
 end
 
 function luaY_parser(L, z, buff, dyd, name, firstchar)
@@ -41,6 +41,7 @@ function luaY_parser(L, z, buff, dyd, name, firstchar)
     lexstate.h = new(Table)
     ---@type Proto
     funcstate.f = new(Proto)
+    funcstate.f.source = name
     luaX_setinput(L, lexstate, z, funcstate.f.source, firstchar);
     mainfunc(lexstate, funcstate);
 end
