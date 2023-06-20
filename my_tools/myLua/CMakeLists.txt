@@ -2,13 +2,12 @@ cmake_minimum_required(VERSION 3.20)
 project(myLua)
 
 add_executable(${PROJECT_NAME} WIN32 main.cpp)
+
 # add_executable(${PROJECT_NAME}  main.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lua)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/modules)
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/libs/DearImGui)
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/libs/DearImGui/backends)
-target_link_libraries(${PROJECT_NAME} lualib lfs DearImGuiLib DearImGuiBackendsLib d3d12.lib dxgi.lib)
+target_link_libraries(${PROJECT_NAME} lualib lfs lno)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 message("------------------- ${CMAKE_SOURCE_DIR} -------------------")
@@ -22,4 +21,5 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
     "${CMAKE_SOURCE_DIR}/build/lua/${CMAKE_BUILD_TYPE}/lualib.dll"
     "${CMAKE_SOURCE_DIR}/build/modules/${CMAKE_BUILD_TYPE}/lfs.dll"
+    "${CMAKE_SOURCE_DIR}/build/modules/${CMAKE_BUILD_TYPE}/lno.dll"
     ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE})
