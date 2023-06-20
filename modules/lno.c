@@ -6,6 +6,7 @@
 
 #include "lno.h"
 LNO_EXPORT int luaopen_lno(lua_State* L) { return 1; }
+LNO_EXPORT int lua_no_print_code(lua_State* L) { return 1; }
 LNO_EXPORT int lua_no_print_stack(lua_State* L) {
     StkId current_stack = L->stack.p;
     int i = 1;
