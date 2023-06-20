@@ -200,12 +200,16 @@ local function read_long_string(ls, seminfo, sep)
 
 end
 
+---comment
+---@param ls LexState
+---@param c integer
+---@return boolean
 local function check_next1(ls, c)
     if ls.current == c then
         next(ls)
-        return 1
+        return true
     else
-        return 0
+        return false
     end
 end
 
@@ -245,10 +249,29 @@ local function llex(ls, seminfo)
                     goto start
                 end
             end
+            while not currIsNewline(ls) and ls.current ~= EOZ do
+                next(ls)
+            end
+            goto start
+        elseif ls.current == string.byte("[") then -- long string or simply '['
+            local sep = skip_sep(ls)
+            if sep >= 2 then
+                read_long_string(ls, seminfo, sep)
+                return RESERVED["TK_STRING"]
+            elseif sep == 0 then
+                error(debug.traceback("invalid long string delimiter"))
+            end
+            return string.byte("[")
+        elseif ls.current == string.byte("=") then
+            next(ls)
+            if check_next1(ls, string.byte("=")) then
+                return RESERVED["TK_EQ"]
+            else
+                return string.byte("=")
+            end
         elseif ls.current == EOZ then
             return RESERVED.TK_EOS;
         else
-            print(string.char(ls.current))
             next(ls)
         end
     end
@@ -268,7 +291,7 @@ function luaX_next(ls)
     else
         ls.t.token = llex(ls, ls.t.seminfo)
     end
-    print(string.char(ls.t.token))
+    print(ls.t.token)
 end
 
 ---comment

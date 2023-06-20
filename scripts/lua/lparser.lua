@@ -46,6 +46,7 @@ end
 ---comment
 ---@param ls LexState
 local function statement(ls)
+    print("local function statement(ls)")
     local line = ls.linenumber
     if ls.t.token == string.byte(";") then
         luaX_next(ls)
