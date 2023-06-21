@@ -46,28 +46,28 @@ RESERVED = {
 
 ---@diagnostic disable-next-line
 luaX_tokens = {
-    ["and"] = true,
-    ["break"] = true,
-    ["do"] = true,
-    ["else"] = true,
-    ["elseif"] = true,
-    ["end"] = true,
-    ["false"] = true,
-    ["for"] = true,
-    ["function"] = true,
-    ["goto"] = true,
-    ["if"] = true,
-    ["in"] = true,
-    ["local"] = true,
-    ["nil"] = true,
-    ["not"] = true,
-    ["or"] = true,
-    ["repeat"] = true,
-    ["return"] = true,
-    ["then"] = true,
-    ["true"] = true,
-    ["until"] = true,
-    ["while"] = true,
+    ["and"] = 1,
+    ["break"] = 2,
+    ["do"] = 3,
+    ["else"] = 4,
+    ["elseif"] = 5,
+    ["end"] = 6,
+    ["false"] = 7,
+    ["for"] = 8,
+    ["function"] = 9,
+    ["goto"] = 10,
+    ["if"] = 11,
+    ["in"] = 12,
+    ["local"] = 13,
+    ["nil"] = 14,
+    ["not"] = 15,
+    ["or"] = 16,
+    ["repeat"] = 17,
+    ["return"] = 18,
+    ["then"] = 19,
+    ["true"] = 20,
+    ["until"] = 21,
+    ["while"] = 22,
     -- 其他终止符
     ["//"] = true,
     [".."] = true,
@@ -221,8 +221,7 @@ end
 ---@param l any
 ---@diagnostic disable-next-line
 function luaX_newstring(ls, str, l)
-    print(string.char(table.unpack(str)))
-    return "return"
+    return string.char(table.unpack(str))
 end
 
 ---comment
@@ -230,6 +229,7 @@ end
 ---@param seminfo SemInfo
 ---@return integer
 local function llex(ls, seminfo)
+    luaZ_resetbuffer(ls.buff)
     while true do
         ::start::
         if
@@ -291,7 +291,7 @@ local function llex(ls, seminfo)
                 local ts = luaX_newstring(ls, luaZ_buffer(ls.buff), luaZ_bufflen(ls.buff))
                 seminfo.ts = ts
                 if isreserved(ts) then
-                    return RESERVED["TK_RETURN"]
+                    return luaX_tokens[ts] + FIRST_RESERVED - 1
                 else
                     return RESERVED["TK_NAME"]
                 end
@@ -316,9 +316,9 @@ function luaX_next(ls)
         ls.t = new(ls.lookahead);                 -- use this one
         ls.lookahead.token = RESERVED.TK_EOS;     -- and discharge it --
     else
+
         ls.t.token = llex(ls, ls.t.seminfo)
     end
-    print(ls.t.token)
 end
 
 ---comment

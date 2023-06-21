@@ -27,7 +27,7 @@ function isreserved(s)
         ["until"] = true,
         ["while"] = true,
     }
-    if luaX_tokens[s] then
+    if reserved[s] then
         return true
     else
         return false
