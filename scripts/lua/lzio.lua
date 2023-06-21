@@ -45,7 +45,7 @@ end
 ---@return integer
 ---@diagnostic disable-next-line
 function luaZ_fill(z)
-    local file = io.open("./test.lua", "r") or error("can't open ./test.lua")
+    local file = io.open("./lparser.lua", "r") or error("can't open ./lparser.lua")
     z.data = file:read("a")
     z.n = #z.data
     z.p = 0
