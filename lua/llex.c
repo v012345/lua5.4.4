@@ -521,7 +521,9 @@ static int llex(LexState* ls, SemInfo* seminfo) {
                     return ':';
             }
             case '"':
-            case '\'': { /* short literal strings */ read_string(ls, ls->current, seminfo); return TK_STRING;
+            case '\'': { /* short literal strings */
+                read_string(ls, ls->current, seminfo); //
+                return TK_STRING;
             }
             case '.': { /* '.', '..', '...', or number */
                 save_and_next(ls);
