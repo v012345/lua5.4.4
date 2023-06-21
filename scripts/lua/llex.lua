@@ -3,45 +3,46 @@ require "lctype"
 require "lstring"
 
 FIRST_RESERVED = 256
+---@enum
 RESERVED = {
     -- terminal symbols denoted by reserved words
-    ["TK_AND"] = 256,
-    ["TK_BREAK"] = 257,
-    ["TK_DO"] = 258,
-    ["TK_ELSE"] = 259,
-    ["TK_ELSEIF"] = 260,
-    ["TK_END"] = 261,
-    ["TK_FALSE"] = 262,
-    ["TK_FOR"] = 263,
-    ["TK_FUNCTION"] = 264,
-    ["TK_GOTO"] = 265,
-    ["TK_IF"] = 266,
-    ["TK_IN"] = 267,
-    ["TK_LOCAL"] = 268,
-    ["TK_NIL"] = 269,
-    ["TK_NOT"] = 270,
-    ["TK_OR"] = 271,
-    ["TK_REPEAT"] = 272,
-    ["TK_RETURN"] = 273,
-    ["TK_THEN"] = 274,
-    ["TK_TRUE"] = 275,
-    ["TK_UNTIL"] = 276,
-    ["TK_WHILE"] = 277,
-    ["TK_IDIV"] = 278,
-    ["TK_CONCAT"] = 279,
-    ["TK_DOTS"] = 280,
-    ["TK_EQ"] = 281,
-    ["TK_GE"] = 282,
-    ["TK_LE"] = 283,
-    ["TK_NE"] = 284,
-    ["TK_SHL"] = 285,
-    ["TK_SHR"] = 286,
-    ["TK_DBCOLON"] = 287,
-    ["TK_EOS"] = 288,
-    ["TK_FLT"] = 289,
-    ["TK_INT"] = 290,
-    ["TK_NAME"] = 291,
-    ["TK_STRING"] = 292,
+    TK_AND = 256,
+    TK_BREAK = 257,
+    TK_DO = 258,
+    TK_ELSE = 259,
+    TK_ELSEIF = 260,
+    TK_END = 261,
+    TK_FALSE = 262,
+    TK_FOR = 263,
+    TK_FUNCTION = 264,
+    TK_GOTO = 265,
+    TK_IF = 266,
+    TK_IN = 267,
+    TK_LOCAL = 268,
+    TK_NIL = 269,
+    TK_NOT = 270,
+    TK_OR = 271,
+    TK_REPEAT = 272,
+    TK_RETURN = 273,
+    TK_THEN = 274,
+    TK_TRUE = 275,
+    TK_UNTIL = 276,
+    TK_WHILE = 277,
+    TK_IDIV = 278,
+    TK_CONCAT = 279,
+    TK_DOTS = 280,
+    TK_EQ = 281,
+    TK_GE = 282,
+    TK_LE = 283,
+    TK_NE = 284,
+    TK_SHL = 285,
+    TK_SHR = 286,
+    TK_DBCOLON = 287,
+    TK_EOS = 288,
+    TK_FLT = 289,
+    TK_INT = 290,
+    TK_NAME = 291,
+    TK_STRING = 292,
 }
 
 ---@diagnostic disable-next-line
@@ -244,10 +245,10 @@ local function read_numeral(ls, seminfo)
     if n then
         if math.type(n) == "integer" then
             seminfo.i = n
-            return RESERVED["TK_INT"]
+            return RESERVED.TK_INT
         else
             seminfo.r = n
-            return RESERVED["TK_FLT"]
+            return RESERVED.TK_FLT
         end
     else
         error(debug.traceback("can't parser a number"))
@@ -323,7 +324,7 @@ local function llex(ls, seminfo)
             local sep = skip_sep(ls)
             if sep >= 2 then
                 read_long_string(ls, seminfo, sep)
-                return RESERVED["TK_STRING"]
+                return RESERVED.TK_STRING
             elseif sep == 0 then
                 error(debug.traceback("invalid long string delimiter"))
             end
@@ -331,46 +332,46 @@ local function llex(ls, seminfo)
         elseif ls.current == string.byte("=") then
             next(ls)
             if check_next1(ls, string.byte("=")) then
-                return RESERVED["TK_EQ"]
+                return RESERVED.TK_EQ
             else
                 return string.byte("=")
             end
         elseif ls.current == string.byte("<") then
             next(ls)
             if check_next1(ls, string.byte("=")) then
-                return RESERVED["TK_LE"]
+                return RESERVED.TK_LE
             elseif check_next1(ls, string.byte("<")) then
-                return RESERVED["TK_SHL"]
+                return RESERVED.TK_SHL
             else
                 return string.byte("<")
             end
         elseif ls.current == string.byte(">") then
             next(ls)
             if check_next1(ls, string.byte("=")) then
-                return RESERVED["TK_GE"]
+                return RESERVED.TK_GE
             elseif check_next1(ls, string.byte(">")) then
-                return RESERVED["TK_SHR"]
+                return RESERVED.TK_SHR
             else
                 return string.byte(">")
             end
         elseif ls.current == string.byte("/") then
             next(ls)
             if check_next1(ls, string.byte("/")) then
-                return RESERVED["TK_IDIV"]
+                return RESERVED.TK_IDIV
             else
                 return string.byte("/")
             end
         elseif ls.current == string.byte("~") then
             next(ls)
             if check_next1(ls, string.byte("=")) then
-                return RESERVED["TK_NE"]
+                return RESERVED.TK_NE
             else
                 return string.byte("~")
             end
         elseif ls.current == string.byte(":") then
             next(ls)
             if check_next1(ls, string.byte(":")) then
-                return RESERVED["TK_DBCOLON"]
+                return RESERVED.TK_DBCOLON
             else
                 return string.byte(":")
             end
@@ -379,14 +380,14 @@ local function llex(ls, seminfo)
             ls.current == string.byte("'")
         then
             read_string(ls, ls.current, seminfo)
-            return RESERVED["TK_STRING"]
+            return RESERVED.TK_STRING
         elseif ls.current == string.byte(".") then
             save_and_next(ls)
             if check_next1(ls, string.byte(".")) then
                 if check_next1(ls, string.byte(".")) then
-                    return RESERVED["TK_DOTS"]
+                    return RESERVED.TK_DOTS
                 else
-                    return RESERVED["TK_CONCAT"]
+                    return RESERVED.TK_CONCAT
                 end
             elseif not lisdigit(ls.current) then
                 return string.byte(".")
@@ -418,7 +419,7 @@ local function llex(ls, seminfo)
                 if isreserved(ts) then
                     return luaX_tokens[ts] + FIRST_RESERVED - 1
                 else
-                    return RESERVED["TK_NAME"]
+                    return RESERVED.TK_NAME
                 end
             else
                 local c = ls.current
