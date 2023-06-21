@@ -438,12 +438,20 @@ end
 ---@diagnostic disable-next-line
 function luaX_next(ls)
     ls.lastline = ls.linenumber
-    if ls.lookahead.token ~= RESERVED.TK_EOS then --  is there a look-ahead token?
+    if ls.lookahead.token ~= RESERVED.TK_EOS then -- is there a look-ahead token?
         ls.t = new(ls.lookahead);                 -- use this one
         ls.lookahead.token = RESERVED.TK_EOS;     -- and discharge it --
     else
         ls.t.token = llex(ls, ls.t.seminfo)
     end
+end
+
+---comment
+---@param ls LexState
+---@diagnostic disable-next-line
+function luaX_lookahead(ls)
+    ls.lookahead.token = llex(ls, ls.lookahead.seminfo);
+    return ls.lookahead.token;
 end
 
 ---comment

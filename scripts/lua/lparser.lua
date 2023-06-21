@@ -77,6 +77,25 @@ local statement = function(ls) end
 local expr = function(ls, v) end
 
 ---comment
+---@param e expdesc
+---@param k expkind
+---@param i integer
+local function init_exp(e, k, i)
+    e.f, e.t = NO_JUMP, NO_JUMP
+    e.k = k;
+    e.u.info = i;
+end
+
+---comment
+---@param e expdesc
+---@param s string
+local function codestring(e, s)
+    e.f, e.t = NO_JUMP, NO_JUMP
+    e.k = expkind.VKSTR;
+    e.u.strval = s;
+end
+
+---comment
 ---@param ls LexState
 ---@param withuntil boolean
 local function block_follow(ls, withuntil)
@@ -125,6 +144,17 @@ end
 
 ---comment
 ---@param ls LexState
+---@param what integer
+---@param who integer
+---@param where integer
+local function check_match(ls, what, who, where)
+    if not testnext(ls, what) then
+        error("check_match(ls, what, who, where)")
+    end
+end
+
+---comment
+---@param ls LexState
 local function statlist(ls)
     while not block_follow(ls, true) do
         if ls.t.token == RESERVED.TK_RETURN then
@@ -150,10 +180,134 @@ local function test_then_block(ls, escapelist)
     statlist(ls)
 end
 
+local function str_checkname(ls)
+    check(ls, RESERVED.TK_NAME)
+    local ts = ls.t.seminfo.ts
+    luaX_next(ls)
+    return ts
+end
+
+local function yindex(ls, v)
+    luaX_next(ls)
+    expr(ls, v)
+    checknext(ls, string.byte(']'))
+end
+
+local function codename(ls, e)
+    codestring(e, str_checkname(ls))
+end
+
+local function recfield(ls, cc)
+    ---@type expdesc
+    local tab = new(expdesc)
+    ---@type expdesc
+    local key = new(expdesc)
+    ---@type expdesc
+    local val = new(expdesc)
+    if ls.t.token == RESERVED.TK_NAME then
+        codename(ls, key)
+    else
+        yindex(ls, key)
+    end
+    checknext(ls, string.byte('='))
+    expr(ls, val)
+end
+
+local function listfield(ls, cc)
+    expr(ls, cc.v)
+end
+
+---comment
+---@param ls LexState
+---@param cc table
+local function field(ls, cc)
+    if ls.t.token == RESERVED.TK_NAME then
+        if luaX_lookahead(ls) ~= string.byte("=") then
+            listfield(ls, cc)
+        else
+            recfield(ls, cc)
+        end
+    elseif ls.t.token == string.byte("[") then
+        recfield(ls, cc)
+    else
+        listfield(ls, cc)
+    end
+end
+
+---comment
+---@param ls LexState
+---@param t expdesc
+local function constructor(ls, t)
+    local cc
+    local line = ls.linenumber;
+    checknext(ls, string.byte('{'))
+    repeat
+        if ls.t.token == string.byte("}") then
+            break
+        end
+        field(ls, cc)
+    until not (testnext(ls, string.byte(",") or testnext(ls, string.byte(";"))))
+    check_match(ls, string.byte('}'), string.byte('{'), line)
+end
+local function new_localvar(ls, name)
+
+end
+local function parlist(ls)
+    local isvararg = false
+    if ls.t.token ~= string.byte(")") then
+        repeat
+            if ls.t.token == RESERVED.TK_NAME then
+                new_localvar(ls, str_checkname(ls))
+            elseif ls.t.token == RESERVED.TK_DOTS then
+                luaX_next(ls)
+                isvararg = true
+            else
+                error(debug.traceback("<name> or '...' expected"))
+            end
+        until isvararg or not testnext(ls, string.byte(","))
+    end
+end
+
+local function body(ls, e, ismethod, line)
+    checknext(ls, string.byte('('))
+    parlist(ls)
+    checknext(ls, string.byte(')'))
+    statlist(ls)
+    check_match(ls, RESERVED.TK_END, RESERVED.TK_FUNCTION, line)
+end
+
+---comment
+---@param ls LexState
+---@param v expdesc
 local function simpleexp(ls, v)
     if ls.t.token == RESERVED.TK_FLT then
-
+        init_exp(v, expkind.VKFLT, 0)
+        v.u.nval = ls.t.seminfo.r
+    elseif ls.t.token == RESERVED.TK_INT then
+        init_exp(v, expkind.VKINT, 0)
+        v.u.ival = ls.t.seminfo.i
+    elseif ls.t.token == RESERVED.TK_STRING then
+        codestring(v, ls.t.seminfo.ts)
+    elseif ls.t.token == RESERVED.TK_NIL then
+        init_exp(v, expkind.VNIL, 0)
+    elseif ls.t.token == RESERVED.TK_TRUE then
+        init_exp(v, expkind.VTRUE, 0)
+    elseif ls.t.token == RESERVED.TK_FALSE then
+        init_exp(v, expkind.VFALSE, 0)
+    elseif ls.t.token == RESERVED.TK_DOTS then
+        init_exp(v, expkind.VVARARG, 0)
+    elseif ls.t.token == string.byte("{") then
+        constructor(ls, v)
+        return
+    elseif ls.t.token == RESERVED.TK_FUNCTION then
+        luaX_next(ls)
+        body(ls, v, 0, ls.linenumber)
+        return
+    else
+        suffixedexp(ls, v)
+        return
     end
+    luaX_next(ls)
 end
 
 ---comment
@@ -175,7 +329,7 @@ end
 UNARY_PRIORITY = 12
 ---comment
 ---@param ls LexState
----@param v table
+---@param v expdesc
 ---@param limit integer
 local function subexpr(ls, v, limit)
     local uop = getunopr(ls.t.token)
@@ -216,6 +370,7 @@ local function ifstat(ls, line)
     if testnext(ls, RESERVED.TK_ELSE) then
         block(ls)
     end
+    check_match(ls, RESERVED.TK_END, RESERVED.TK_IF, line)
 end
 ---comment
 ---@param ls LexState
