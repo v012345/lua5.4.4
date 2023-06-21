@@ -372,9 +372,13 @@ static void read_string(LexState* ls, int del, SemInfo* seminfo) {
     save_and_next(ls); /* keep delimiter (for error messages) */
     while (ls->current != del) {
         switch (ls->current) {
-            case EOZ: lexerror(ls, "unfinished string", TK_EOS); break; /* to avoid warnings */
+            case EOZ: //
+                lexerror(ls, "unfinished string", TK_EOS);
+                break; /* to avoid warnings */
             case '\n':
-            case '\r': lexerror(ls, "unfinished string", TK_STRING); break; /* to avoid warnings */
+            case '\r': //
+                lexerror(ls, "unfinished string", TK_STRING);
+                break; /* to avoid warnings */
             case '\\': { /* escape sequences */
                 int c; /* final character to be saved */
                 save_and_next(ls); /* keep '\\' for error messages */
