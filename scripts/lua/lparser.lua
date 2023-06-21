@@ -182,7 +182,12 @@ local function test_then_block(ls, escapelist)
     expr(ls, v)
     checknext(ls, RESERVED.TK_THEN)
     if ls.t.token == RESERVED.TK_BREAK then
-        error(debug.traceback("unimplented if x then break"))
+        luaX_next(ls)
+        while testnext(ls, string.byte(';')) do end
+        if block_follow(ls, false) then
+            return
+        else
+        end
     else
     end
     statlist(ls)
