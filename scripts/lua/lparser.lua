@@ -73,6 +73,14 @@ expdesc = {
     f = NO_JUMP,
 }
 
+---@class LHS_assign
+LHS_assign = {
+    ---@type LHS_assign
+    prev = nil,
+    ---@type expdesc
+    v = new(expdesc)
+}
+
 local statement = function(ls) end
 local expr = function(ls, v) end
 
@@ -185,6 +193,10 @@ local function str_checkname(ls)
     local ts = ls.t.seminfo.ts
     luaX_next(ls)
     return ts
+end
+
+local function adjust_assign(ls, nvars, nexps, e)
+
 end
 
 local function yindex(ls, v)
@@ -443,6 +455,31 @@ local function getbinopr(op)
     return t[op]
 end
 
+---@diagnostic disable-next-line
+priority = {
+    [BinOpr.OPR_ADD] = { left = 10, right = 10 },
+    [BinOpr.OPR_SUB] = { left = 10, right = 10 },
+    [BinOpr.OPR_MUL] = { left = 11, right = 11 },
+    [BinOpr.OPR_MOD] = { left = 11, right = 11 },
+    [BinOpr.OPR_POW] = { left = 14, right = 13 },
+    [BinOpr.OPR_DIV] = { left = 11, right = 11 },
+    [BinOpr.OPR_IDIV] = { left = 11, right = 11 },
+    [BinOpr.OPR_BAND] = { left = 6, right = 6 },
+    [BinOpr.OPR_BOR] = { left = 4, right = 4 },
+    [BinOpr.OPR_BXOR] = { left = 5, right = 5 },
+    [BinOpr.OPR_SHL] = { left = 7, right = 7 },
+    [BinOpr.OPR_SHR] = { left = 7, right = 7 },
+    [BinOpr.OPR_CONCAT] = { left = 9, right = 8 },
+    [BinOpr.OPR_EQ] = { left = 3, right = 3 },
+    [BinOpr.OPR_LT] = { left = 3, right = 3 },
+    [BinOpr.OPR_LE] = { left = 3, right = 3 },
+    [BinOpr.OPR_NE] = { left = 3, right = 3 },
+    [BinOpr.OPR_GT] = { left = 3, right = 3 },
+    [BinOpr.OPR_GE] = { left = 3, right = 3 },
+    [BinOpr.OPR_AND] = { left = 2, right = 2 },
+    [BinOpr.OPR_OR] = { left = 1, right = 1 },
+}
+
 UNARY_PRIORITY = 12
 ---comment
 ---@param ls LexState
@@ -451,12 +488,19 @@ UNARY_PRIORITY = 12
 local function subexpr(ls, v, limit)
     local uop = getunopr(ls.t.token)
     if uop ~= UnOpr.OPR_NOUNOPR then
-        local line = ls.linenumber
         luaX_next(ls)
         subexpr(ls, v, UNARY_PRIORITY)
     else
         simpleexp(ls, v)
     end
+    local op = getbinopr(ls.t.token)
+    while op ~= BinOpr.OPR_NOBINOPR and priority[op].left > limit do
+        local v2 = new(expdesc)
+        luaX_next(ls)
+        local nextop = subexpr(ls, v2, priority[op].right)
+        op = nextop
+    end
+    return op
 end
 
 ---comment
@@ -489,6 +533,188 @@ local function ifstat(ls, line)
     end
     check_match(ls, RESERVED.TK_END, RESERVED.TK_IF, line)
 end
+
+local function cond(ls)
+    ---@type expdesc
+    local v = new(expdesc)
+    expr(ls, v)
+    return v.f
+end
+
+local function whilestat(ls, line)
+    luaX_next(ls)
+    local condexit = cond(ls)
+    checknext(ls, RESERVED.TK_DO)
+    block(ls)
+    check_match(ls, RESERVED.TK_END, RESERVED.TK_WHILE, line)
+end
+
+local function exp1(ls)
+    local e = new(expdesc)
+    expr(ls, e)
+end
+
+local function forbody(ls, base, line, nvars, isgen)
+    checknext(ls, RESERVED.TK_DO)
+    block(ls)
+end
+
+local function fornum(ls, varname, line)
+    local base = 0
+    checknext(ls, string.byte('='))
+    exp1(ls)
+    checknext(ls, string.byte(','))
+    exp1(ls)
+    if testnext(ls, string.byte(",")) then
+        exp1(ls)
+    else
+    end
+    forbody(ls, base, line, 1, 0)
+end
+
+local function forlist(ls, indexname)
+    local nvars = 5
+    local base = 0
+    local e = new(expdesc)
+    while testnext(ls, string.byte(",")) do
+        new_localvar(ls, str_checkname(ls))
+        nvars = nvars + 1
+    end
+    checknext(ls, RESERVED.TK_IN)
+    local line = ls.linenumber
+    adjust_assign(ls, 4, explist(ls, e), e)
+    forbody(ls, base, line, nvars - 4, 1)
+end
+
+local function forstat(ls, line)
+    luaX_next(ls)
+    local varname = str_checkname(ls)
+    if ls.t.token == string.byte("=") then
+        fornum(ls, varname, line)
+    elseif
+        ls.t.token == string.byte("=") or
+        ls.t.token == string.byte("=")
+    then
+        forlist(ls, varname)
+    else
+        error(debug.traceback("'=' or 'in' expected"))
+    end
+    check_match(ls, RESERVED.TK_END, RESERVED.TK_FOR, line)
+end
+
+local function repeatstat(ls, line)
+    luaX_next(ls)
+    statlist(ls)
+    check_match(ls, RESERVED.TK_UNTIL, RESERVED.TK_REPEAT, line)
+    local condexit = cond(ls)
+end
+
+local function funcname(ls, v)
+    local ismethod = false
+    singlevar(ls, v)
+    while ls.t.token == string.byte(".") do
+        fieldsel(ls, v)
+    end
+    if ls.t.token == ":" then
+        ismethod = true
+        fieldsel(ls, v)
+    end
+    return ismethod
+end
+
+local function funcstat(ls, line)
+    local v = new(expdesc)
+    local b = new(expdesc)
+    luaX_next(ls)
+    local ismethod = funcname(ls, v)
+    body(ls, b, ismethod, line)
+end
+local function localfunc(ls)
+    local b = new(expdesc)
+    new_localvar(ls, str_checkname(ls))
+    body(ls, b, 0, ls.linenumber)
+end
+local function localstat(ls)
+    local nvars = 0
+    local nexps = 0
+    local e = new(expdesc)
+    repeat
+        local vidx = new_localvar(ls, str_checkname(ls))
+        nvars = nvars + 1
+    until not testnext(ls, string.byte(","))
+    if testnext(ls, string.byte("=")) then
+        nexps = explist(ls, e)
+    else
+        nexps = 0
+    end
+end
+---comment
+---@param ls LexState
+---@param name string
+---@param line integer
+local function labelstat(ls, name, line)
+    checknext(ls, RESERVED.TK_DBCOLON)
+    while ls.t.token == string.byte(";") or ls.t.token == RESERVED.TK_DBCOLON do
+        statement(ls)
+    end
+end
+
+---comment
+---@param ls LexState
+local function retstat(ls)
+    local nret = 0
+    local e = new(expdesc)
+    if block_follow(ls, true) or ls.t.token == string.byte(";") then
+        nret = 0
+    else
+        nret = explist(ls, e)
+    end
+    testnext(ls, string.byte(';'))
+end
+
+local function breakstat(ls)
+    luaX_next(ls)
+end
+
+local function gotostat(ls)
+    local name = str_checkname(ls)
+end
+
+---comment
+---@param ls LexState
+---@param lh LHS_assign
+---@param nvars integer
+local function restassign(ls, lh, nvars)
+    local e = new(expdesc)
+    if testnext(ls, string.byte(",")) then
+        ---@type LHS_assign
+        local nv = new(LHS_assign)
+        nv.prev = lh
+        suffixedexp(ls, nv.v)
+        restassign(ls, nv, nvars + 1)
+    else
+        checknext(ls, string.byte('='))
+        local nexps = explist(ls, e)
+        if nexps ~= nvars then
+        else
+            return
+        end
+    end
+end
+
+---comment
+---@param ls LexState
+local function exprstat(ls)
+    ---@type LHS_assign
+    local v = new(LHS_assign)
+    suffixedexp(ls, v.v)
+    if ls.t.token == string.byte("=") or ls.t.token == string.byte(",") then
+        v.prev = nil
+        restassign(ls, v, 1)
+    else
+    end
+end
+
 ---comment
 ---@param ls LexState
 function statement(ls)
@@ -498,27 +724,37 @@ function statement(ls)
     elseif ls.t.token == RESERVED.TK_IF then
         ifstat(ls, line)
     elseif ls.t.token == RESERVED.TK_WHILE then
-        luaX_next(ls)
+        whilestat(ls, line)
     elseif ls.t.token == RESERVED.TK_DO then
         luaX_next(ls)
+        block(ls)
+        check_match(ls, RESERVED.TK_END, RESERVED.TK_DO, line)
     elseif ls.t.token == RESERVED.TK_FOR then
-        luaX_next(ls)
+        forstat(ls, line)
     elseif ls.t.token == RESERVED.TK_REPEAT then
-        luaX_next(ls)
+        repeatstat(ls, line)
     elseif ls.t.token == RESERVED.TK_FUNCTION then
-        luaX_next(ls)
+        funcstat(ls, line)
     elseif ls.t.token == RESERVED.TK_LOCAL then
         luaX_next(ls)
+        if testnext(ls, RESERVED.TK_FUNCTION) then
+            localfunc(ls)
+        else
+            localstat(ls)
+        end
     elseif ls.t.token == RESERVED.TK_DBCOLON then
         luaX_next(ls)
+        labelstat(ls, str_checkname(ls), line)
     elseif ls.t.token == RESERVED.TK_RETURN then
         luaX_next(ls)
+        retstat(ls)
     elseif ls.t.token == RESERVED.TK_BREAK then
-        luaX_next(ls)
+        breakstat(ls)
     elseif ls.t.token == RESERVED.TK_GOTO then
         luaX_next(ls)
+        gotostat(ls)
     else
-        luaX_next(ls)
+        exprstat(ls)
     end
 end
 
