@@ -227,6 +227,33 @@ local function read_string(ls, del, seminfo)
     seminfo.ts = luaX_newstring(ls, luaZ_buffer(ls.buff), luaZ_bufflen(ls.buff) - 1)
 end
 
+---comment
+---@param ls LexState
+---@param seminfo SemInfo
+local function read_numeral(ls, seminfo)
+    local first = ls.current
+    save_and_next(ls)
+    while lisdigit(ls.current) or ls.current == string.byte(".") do
+        save_and_next(ls)
+    end
+    if lislalpha(ls.current) then
+        save_and_next(ls)
+    end
+    local number_string = luaX_newstring(ls, luaZ_buffer(ls.buff), luaZ_bufflen(ls.buff))
+    local n = tonumber(number_string)
+    if n then
+        if math.type(n) == "integer" then
+            seminfo.i = n
+            return RESERVED["TK_INT"]
+        else
+            seminfo.r = n
+            return RESERVED["TK_FLT"]
+        end
+    else
+        error(debug.traceback("can't parser a number"))
+    end
+end
+
 
 
 ---comment
@@ -354,6 +381,32 @@ local function llex(ls, seminfo)
             read_string(ls, ls.current, seminfo)
             print(seminfo.ts)
             return RESERVED["TK_STRING"]
+        elseif ls.current == string.byte(".") then
+            save_and_next(ls)
+            if check_next1(ls, string.byte(".")) then
+                if check_next1(ls, string.byte(".")) then
+                    return RESERVED["TK_DOTS"]
+                else
+                    return RESERVED["TK_CONCAT"]
+                end
+            elseif not lisdigit(ls.current) then
+                return string.byte(".")
+            else
+                return read_numeral(ls, seminfo)
+            end
+        elseif
+            ls.current == string.byte("0") or
+            ls.current == string.byte("1") or
+            ls.current == string.byte("2") or
+            ls.current == string.byte("3") or
+            ls.current == string.byte("4") or
+            ls.current == string.byte("5") or
+            ls.current == string.byte("6") or
+            ls.current == string.byte("7") or
+            ls.current == string.byte("8") or
+            ls.current == string.byte("9")
+        then
+            return read_numeral(ls, seminfo)
         elseif ls.current == EOZ then
             return RESERVED.TK_EOS;
         else

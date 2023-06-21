@@ -12,14 +12,19 @@ function lislalpha(c)
 end
 
 ---@diagnostic disable-next-line
+function lisdigit(c)
+    if 48 <= c and c <= 57 then
+        return true
+    else
+        return false
+    end
+end
+
+---@diagnostic disable-next-line
 function lislalnum(c)
     if lislalpha(c) then
         return true
     else
-        if 48 <= c and c <= 57 then
-            return true
-        else
-            return false
-        end
+        return lisdigit(c)
     end
 end
