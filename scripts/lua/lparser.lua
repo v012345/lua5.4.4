@@ -276,6 +276,27 @@ local function body(ls, e, ismethod, line)
     check_match(ls, RESERVED.TK_END, RESERVED.TK_FUNCTION, line)
 end
 
+local function singlevar(ls, var)
+    str_checkname(ls)
+end
+
+local function primaryexp(ls, v)
+    if ls.t.token == string.byte("(") then
+        local line = ls.linenumber
+        luaX_next(ls)
+        expr(ls, v)
+        check_match(ls, string.byte(')'), string.byte('('), line)
+        return
+    elseif ls.t.token == RESERVED.TK_NAME then
+        singlevar(ls, v)
+    end
+end
+
+local function suffixedexp(ls, v)
+    local line = ls.linenumber
+    primaryexp(ls, v)
+end
+
 ---comment
 ---@param ls LexState
 ---@param v expdesc
