@@ -26,6 +26,53 @@ FuncState = {
     needclose = 0,    -- function needs to close upvalues when returning
 }
 
+---@enum expkind
+---@diagnostic disable-next-line
+expkind = {
+    VVOID = 0,
+    VNIL = 1,
+    VTRUE = 2,
+    VFALSE = 3,
+    VK = 4,
+    VKFLT = 5,
+    VKINT = 6,
+    VKSTR = 7,
+    VNONRELOC = 8,
+    VLOCAL = 9,
+    VUPVAL = 10,
+    VCONST = 11,
+    VINDEXED = 12,
+    VINDEXUP = 13,
+    VINDEXI = 14,
+    VINDEXSTR = 15,
+    VJMP = 16,
+    VRELOC = 17,
+    VCALL = 18,
+    VVARARG = 19
+}
+
+---@class expdesc
+expdesc = {
+    ---@type expkind
+    k = expkind.VVOID,
+    u = {
+        ival = 0,
+        nval = 0,
+        strval = "",
+        info = 0,
+        ind = {
+            idx = 0,
+            t = 0
+        },
+        var = {
+            ridx = 0,
+            vidx = 0
+        }
+    },
+    t = NO_JUMP,
+    f = NO_JUMP,
+}
+
 local statement = function(ls) end
 local expr = function(ls, v) end
 
@@ -103,6 +150,15 @@ local function test_then_block(ls, escapelist)
     statlist(ls)
 end
 
+local function simpleexp(ls, v)
+    if ls.t.token == RESERVED.TK_FLT then
+
+    end
+end
+
+---comment
+---@param op integer
+---@return UnOpr
 local function getunopr(op)
     if op == RESERVED.TK_NOT then
         return UnOpr.OPR_NOT
@@ -116,13 +172,20 @@ local function getunopr(op)
         return UnOpr.OPR_NOUNOPR
     end
 end
-
+UNARY_PRIORITY = 12
 ---comment
 ---@param ls LexState
 ---@param v table
 ---@param limit integer
 local function subexpr(ls, v, limit)
     local uop = getunopr(ls.t.token)
+    if uop ~= UnOpr.OPR_NOUNOPR then
+        local line = ls.linenumber
+        luaX_next(ls)
+        subexpr(ls, v, UNARY_PRIORITY)
+    else
+        simpleexp(ls, v)
+    end
 end
 
 ---comment
