@@ -199,8 +199,35 @@ end
 ---@param seminfo SemInfo | nil
 ---@param sep integer
 local function read_long_string(ls, seminfo, sep)
-
+    error(debug.traceback("unimplented read long string"))
 end
+
+---comment
+---@param ls LexState
+---@param seminfo SemInfo
+---@param del integer
+local function read_string(ls, del, seminfo)
+    save_and_next(ls)
+    while ls.current ~= del do
+        if ls.current == EOZ then
+            error(debug.traceback("unfinished string"))
+        elseif
+            ls.current == string.byte("\n") or
+            ls.current == string.byte("\r")
+        then
+            error(debug.traceback("unfinished string"))
+        elseif ls.current == string.byte("\\") then
+            error(debug.traceback("unimplented escape string"))
+        else
+            save_and_next(ls)
+        end
+    end
+    save_and_next(ls)
+    luaZ_buffer(ls.buff)[1] = 0
+    seminfo.ts = luaX_newstring(ls, luaZ_buffer(ls.buff), luaZ_bufflen(ls.buff) - 1)
+end
+
+
 
 ---comment
 ---@param ls LexState
@@ -221,7 +248,7 @@ end
 ---@param l any
 ---@diagnostic disable-next-line
 function luaX_newstring(ls, str, l)
-    return string.char(table.unpack(str))
+    return string.char(table.unpack(str, 1, l))
 end
 
 ---comment
@@ -281,6 +308,52 @@ local function llex(ls, seminfo)
             else
                 return string.byte("=")
             end
+        elseif ls.current == string.byte("<") then
+            next(ls)
+            if check_next1(ls, string.byte("=")) then
+                return RESERVED["TK_LE"]
+            elseif check_next1(ls, string.byte("<")) then
+                return RESERVED["TK_SHL"]
+            else
+                return string.byte("<")
+            end
+        elseif ls.current == string.byte(">") then
+            next(ls)
+            if check_next1(ls, string.byte("=")) then
+                return RESERVED["TK_GE"]
+            elseif check_next1(ls, string.byte(">")) then
+                return RESERVED["TK_SHR"]
+            else
+                return string.byte(">")
+            end
+        elseif ls.current == string.byte("/") then
+            next(ls)
+            if check_next1(ls, string.byte("/")) then
+                return RESERVED["TK_IDIV"]
+            else
+                return string.byte("/")
+            end
+        elseif ls.current == string.byte("~") then
+            next(ls)
+            if check_next1(ls, string.byte("=")) then
+                return RESERVED["TK_NE"]
+            else
+                return string.byte("~")
+            end
+        elseif ls.current == string.byte(":") then
+            next(ls)
+            if check_next1(ls, string.byte(":")) then
+                return RESERVED["TK_DBCOLON"]
+            else
+                return string.byte(":")
+            end
+        elseif
+            ls.current == string.byte("\"") or
+            ls.current == string.byte("'")
+        then
+            read_string(ls, ls.current, seminfo)
+            print(seminfo.ts)
+            return RESERVED["TK_STRING"]
         elseif ls.current == EOZ then
             return RESERVED.TK_EOS;
         else
@@ -290,6 +363,7 @@ local function llex(ls, seminfo)
                 until not lislalnum(ls.current)
                 local ts = luaX_newstring(ls, luaZ_buffer(ls.buff), luaZ_bufflen(ls.buff))
                 seminfo.ts = ts
+                print(ts)
                 if isreserved(ts) then
                     return luaX_tokens[ts] + FIRST_RESERVED - 1
                 else
@@ -297,6 +371,7 @@ local function llex(ls, seminfo)
                 end
             else
                 local c = ls.current
+                print(string.char(c))
                 next(ls)
                 return c
             end
@@ -316,7 +391,6 @@ function luaX_next(ls)
         ls.t = new(ls.lookahead);                 -- use this one
         ls.lookahead.token = RESERVED.TK_EOS;     -- and discharge it --
     else
-
         ls.t.token = llex(ls, ls.t.seminfo)
     end
 end
