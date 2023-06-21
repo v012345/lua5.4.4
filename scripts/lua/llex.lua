@@ -379,7 +379,6 @@ local function llex(ls, seminfo)
             ls.current == string.byte("'")
         then
             read_string(ls, ls.current, seminfo)
-            print(seminfo.ts)
             return RESERVED["TK_STRING"]
         elseif ls.current == string.byte(".") then
             save_and_next(ls)
@@ -416,7 +415,6 @@ local function llex(ls, seminfo)
                 until not lislalnum(ls.current)
                 local ts = luaX_newstring(ls, luaZ_buffer(ls.buff), luaZ_bufflen(ls.buff))
                 seminfo.ts = ts
-                print(ts)
                 if isreserved(ts) then
                     return luaX_tokens[ts] + FIRST_RESERVED - 1
                 else
@@ -424,7 +422,6 @@ local function llex(ls, seminfo)
                 end
             else
                 local c = ls.current
-                print(string.char(c))
                 next(ls)
                 return c
             end
