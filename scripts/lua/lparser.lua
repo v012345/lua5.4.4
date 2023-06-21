@@ -289,12 +289,71 @@ local function primaryexp(ls, v)
         return
     elseif ls.t.token == RESERVED.TK_NAME then
         singlevar(ls, v)
+    else
+        error(debug.traceback("unexpected symbol"))
+    end
+end
+
+local function fieldsel(ls, v)
+    local key = new(expdesc)
+    luaX_next(ls)
+    codename(ls, key)
+end
+
+local function explist(ls, v)
+    local n = 1
+    expr(ls, v)
+
+    while testnext(ls, string.byte(',')) do
+        expr(ls, v);
+        n = n + 1
+    end
+    return n
+end
+
+local function funcargs(ls, f, line)
+    local args = new(expdesc)
+    if ls.t.token == string.byte("(") then
+        luaX_next(ls)
+        if ls.t.token == string.byte(")") then
+        else
+            explist(ls, args)
+        end
+        check_match(ls, string.byte(')'), string.byte('('), line)
+    elseif ls.t.token == string.byte("{") then
+        constructor(ls, args)
+    elseif ls.t.token == RESERVED.TK_STRING then
+        codestring(args, ls.t.seminfo.ts)
+        luaX_next(ls)
+    else
+        error(debug.traceback("function arguments expected"))
     end
 end
 
 local function suffixedexp(ls, v)
     local line = ls.linenumber
     primaryexp(ls, v)
+    while true do
+        if ls.t.token == string.byte(".") then
+            fieldsel(ls, v)
+        elseif ls.t.token == string.byte("[") then
+            local key = new(expdesc)
+            yindex(ls, key)
+        elseif ls.t.token == string.byte(":") then
+            local key = new(expdesc)
+            luaX_next(ls)
+            codename(ls, key)
+            funcargs(ls, v, line)
+        elseif
+            ls.t.token == string.byte("(") or
+            ls.t.token == RESERVED.TK_STRING or
+            ls.t.token == string.byte("{")
+        then
+            funcargs(ls, v, line)
+        else
+            return
+        end
+    end
 end
 
 ---comment
@@ -347,6 +406,43 @@ local function getunopr(op)
         return UnOpr.OPR_NOUNOPR
     end
 end
+
+---comment
+---@param op integer
+---@return BinOpr
+local function getbinopr(op)
+    local mt = {
+        __index = function()
+            return BinOpr.OPR_NOBINOPR
+        end
+    }
+    local t = {
+        [string.byte("+")] = BinOpr.OPR_ADD,
+        [string.byte("-")] = BinOpr.OPR_SUB,
+        [string.byte("*")] = BinOpr.OPR_MUL,
+        [string.byte("%")] = BinOpr.OPR_MOD,
+        [string.byte("^")] = BinOpr.OPR_POW,
+        [string.byte("/")] = BinOpr.OPR_DIV,
+        [RESERVED.TK_IDIV] = BinOpr.OPR_IDIV,
+        [string.byte("&")] = BinOpr.OPR_BAND,
+        [string.byte("|")] = BinOpr.OPR_BOR,
+        [string.byte("~")] = BinOpr.OPR_BXOR,
+        [RESERVED.TK_SHL] = BinOpr.OPR_SHL,
+        [RESERVED.TK_SHR] = BinOpr.OPR_SHR,
+        [RESERVED.TK_CONCAT] = BinOpr.OPR_CONCAT,
+        [RESERVED.TK_NE] = BinOpr.OPR_NE,
+        [RESERVED.TK_EQ] = BinOpr.OPR_EQ,
+        [string.byte("<")] = BinOpr.OPR_LT,
+        [RESERVED.TK_LE] = BinOpr.OPR_LE,
+        [string.byte(">")] = BinOpr.OPR_GT,
+        [RESERVED.TK_GE] = BinOpr.OPR_GE,
+        [RESERVED.TK_AND] = BinOpr.OPR_AND,
+        [RESERVED.TK_OR] = BinOpr.OPR_OR,
+    }
+    setmetatable(t, mt)
+    return t[op]
+end
+
 UNARY_PRIORITY = 12
 ---comment
 ---@param ls LexState
