@@ -12,3 +12,8 @@ end
 xpcall(main, function(msg)
     print(msg)
 end)
+
+local dot2machine = require "utils.dot2machine"
+local file = io.open("./dot/input.dot", "r") or error("can't open input.dot")
+local content = file:read("a")
+local NFA = dot2machine(content)
