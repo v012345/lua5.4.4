@@ -173,7 +173,7 @@ function Parser:read_states_and_matrix(Machine)
             local attr = self:read_a_attr()
             if attr.key == "label" then
                 Machine.__chars = Machine.__chars or {}
-                Machine.__chars[attr.value] = true
+                Machine.__chars[attr.value] = true -- 这里有问题
                 Machine.__matrix = Machine.__matrix or {}
                 Machine.__matrix[token1] = Machine.__matrix[token1] or {}
                 Machine.__matrix[token1][attr.value] = Machine.__matrix[token1][attr.value] or {}

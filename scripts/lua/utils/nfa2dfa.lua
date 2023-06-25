@@ -16,13 +16,14 @@ local function get_a_state()
     return tostring(x)
 end
 
-local function convert_and(matrix, from, lable, to)
+local function convert_and(NFA, matrix, from, lable, to)
     local state_next = get_a_state()
 
     matrix[from] = matrix[from] or {}
     local c = string.sub(lable, 1, 1)
     matrix[from][c] = matrix[from][c] or {}
     matrix[from][c][state_next] = true
+    NFA.__chars[c] = true
 
     for i = 2, #lable - 1, 1 do
         matrix[state_next] = matrix[state_next] or {}
@@ -31,15 +32,18 @@ local function convert_and(matrix, from, lable, to)
         local temp_p = matrix[state_next][l]
         state_next = get_a_state()
         temp_p[state_next] = true
+        NFA.__chars[l] = true
     end
     matrix[state_next] = matrix[state_next] or {}
     local l = string.sub(lable, #lable, #lable)
     matrix[state_next][l] = matrix[state_next][l] or {}
     matrix[state_next][l][to] = true
+    NFA.__chars[l] = true
 end
 
 local function basic_convert(NFA)
     local __matrix = NFA.__matrix
+    NFA.__chars = {}
     local matrix = {}
     for from, row in pairs(__matrix) do
         for lable, tos in pairs(row) do
@@ -53,8 +57,9 @@ local function basic_convert(NFA)
                 elseif string.match(lable, '*') then
                     error("nfa2dfa*")
                 elseif #lable > 1 then
-                    convert_and(matrix, from, lable, to)
+                    convert_and(NFA, matrix, from, lable, to)
                 else
+                    NFA.__chars[lable] = true
                     matrix[from] = matrix[from] or {}
                     matrix[from][lable] = matrix[from][lable] or {}
                     matrix[from][lable][to] = true
@@ -115,6 +120,10 @@ local function I(matrix, state, a)
     return r
 end
 
+local function to_dfa(NFA)
+    local convert_table = {}
+end
+
 local function nfa2dfa(NFA)
     set_temp_states(NFA)
 
@@ -136,6 +145,8 @@ local function nfa2dfa(NFA)
     NFA.__start[start_state] = true
     NFA.__end[end_state] = true
     basic_convert(NFA) -- 还没有完成
+
+    to_dfa(NFA)
 
     local a = I(NFA.__matrix, "5", "a")
     -- for key, value in pairs(a) do
