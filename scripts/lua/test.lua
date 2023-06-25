@@ -14,7 +14,7 @@ xpcall(main, function(msg)
 end)
 
 local dot2machine = require "utils.dot2machine"
-local file = io.open("./dot/input.dot", "r") or error("can't open input.dot")
+local file = io.open("./dot/NDF.dot", "r") or error("can't open NDF.dot")
 local content = file:read("a")
 file:close()
 local NFA = dot2machine(content) or {}
