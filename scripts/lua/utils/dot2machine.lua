@@ -292,8 +292,6 @@ function Parser:read_size(Machine)
     self:get_next_char()
     self:skip_space()
     local t = self:read_a_string()
-    print(t)
-    print(self.current_char)
     self:skip_space()
     Machine.__size = t
     if self.current_char ~= ";" then
@@ -313,6 +311,48 @@ function Parser:read_a_token()
     return table.concat(t)
 end
 
+function Parser:read_a_attr()
+    self:skip_space() -- 跳过文件开头空白
+    if self.current_char ~= "[" then
+        error("not an attr")
+    end
+    self:get_next_char()
+    self:skip_space()
+    local token = self:read_a_token()
+    local t = { key = token }
+    self:skip_space()
+    if self.current_char ~= "=" then
+        error("not an attr")
+    end
+    self:get_next_char()
+    self:skip_space()
+    if self.current_char == "\"" then
+        local value = self:read_a_string()
+        t.value = value
+    else
+        local value = self:read_a_token()
+        t.value = value
+    end
+    self:skip_space()
+    if self.current_char ~= ";" then
+        error("not an attr")
+    end
+    self:get_next_char()
+    self:skip_space()
+    if self.current_char ~= "]" then
+        error("not an attr")
+    end
+    self:get_next_char()
+    self:skip_space()
+
+    if self.current_char ~= ";" then
+        error("not an attr")
+    end
+    self:get_next_char()
+    self:skip_space()
+    return t
+end
+
 function Parser:read_struct(Machine)
     self:skip_space() -- 跳过文件开头空白
     if self.current_char ~= "{" then
@@ -328,6 +368,16 @@ function Parser:read_struct(Machine)
         elseif token == "size" then
             self:read_size(Machine)
             token = self:read_a_token()
+        elseif token == "node" then
+            self:skip_space()
+            if self.current_char ~= "[" then
+                error("node doesn't exist attr")
+            end
+            local attr = self:read_a_attr()
+            if attr.key == "shape" and attr.key == "doublecircle" then
+                self:read_start_and_end_states(Machine)
+            end
+            return
         else
             print(token)
             return
