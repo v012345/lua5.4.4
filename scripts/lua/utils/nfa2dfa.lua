@@ -123,7 +123,11 @@ end
 local function to_dfa(NFA, convert_table, key)
     if not convert_table then
         local x = {}
-        epsilon_close(NFA.__matrix, NFA.__start, x)
+        local start = {}
+        for key, value in pairs(NFA.__start) do
+            start[#start + 1] = key
+        end
+        epsilon_close(NFA.__matrix, start, x)
         for key, value in pairs(x) do
             print(key, value)
         end
