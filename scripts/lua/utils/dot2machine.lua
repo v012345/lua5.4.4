@@ -51,37 +51,6 @@ function Parser:get_next_char()
     return self.current_char
 end
 
-function Parser:read_a_string()
-    local s = {}
-    local _char_pointer = char_pointer
-    local char = string.sub(self.json_string, _char_pointer, _char_pointer)
-    _char_pointer = _char_pointer + 1
-
-    while char ~= '"' do
-        if char == "\\" then
-            char = string.sub(self.json_string, _char_pointer, _char_pointer)
-            _char_pointer = _char_pointer +
-                1 -- 跳过第一个 "\"
-            local escape_char = escape[char]
-            if escape_char then
-                s[#s + 1] = escape_char
-            else
-                error(tostring(char) .. " can't escape")
-            end
-        else
-            s[#s + 1] = char
-        end
-        char = string.sub(self.json_string, _char_pointer, _char_pointer)
-        _char_pointer = _char_pointer + 1
-    end
-    if char ~= '"' then
-        error("string unexcepted end")
-    end
-    char_pointer = _char_pointer
-    self:get_next_char() --跳过结尾 "
-    return table.concat(s)
-end
-
 function Parser:read_a_key()
     return self:read_a_string()
 end
@@ -284,6 +253,55 @@ function Parser:read_rankdir(Machine)
     self:get_next_char()
 end
 
+function Parser:read_a_string()
+    local s = {}
+    local _char_pointer = char_pointer
+    local char = string.sub(self.dot_string, _char_pointer, _char_pointer)
+    _char_pointer = _char_pointer + 1
+
+    while char ~= '"' do
+        if char == "\\" then
+            char = string.sub(self.dot_string, _char_pointer, _char_pointer)
+            _char_pointer = _char_pointer +
+                1 -- 跳过第一个 "\"
+            local escape_char = escape[char]
+            if escape_char then
+                s[#s + 1] = escape_char
+            else
+                error(tostring(char) .. " can't escape")
+            end
+        else
+            s[#s + 1] = char
+        end
+        char = string.sub(self.dot_string, _char_pointer, _char_pointer)
+        _char_pointer = _char_pointer + 1
+    end
+    if char ~= '"' then
+        error("string unexcepted end")
+    end
+    char_pointer = _char_pointer
+    self:get_next_char() --跳过结尾 "
+    return table.concat(s)
+end
+
+function Parser:read_size(Machine)
+    self:skip_space() -- 跳过文件开头空白
+    if self.current_char ~= "=" then
+        error("not a rankdir")
+    end
+    self:get_next_char()
+    self:skip_space()
+    local t = self:read_a_string()
+    print(t)
+    print(self.current_char)
+    self:skip_space()
+    Machine.__size = t
+    if self.current_char ~= ";" then
+        error("not a size")
+    end
+    self:get_next_char()
+end
+
 function Parser:read_a_token()
     self:skip_space() -- 跳过文件开头空白
     local t = {}
@@ -303,8 +321,17 @@ function Parser:read_struct(Machine)
     self:get_next_char()
     self:skip_space()
     local token = self:read_a_token()
-    if token == "rankdir" then
-        self:read_rankdir(Machine)
+    while true do
+        if token == "rankdir" then
+            self:read_rankdir(Machine)
+            token = self:read_a_token()
+        elseif token == "size" then
+            self:read_size(Machine)
+            token = self:read_a_token()
+        else
+            print(token)
+            return
+        end
     end
 end
 
