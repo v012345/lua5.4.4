@@ -20,13 +20,16 @@ local function convert_and(matrix, from, lable, to)
     local state_next = get_a_state()
 
     matrix[from] = matrix[from] or {}
-    matrix[from][string.sub(lable, 1, 1)] = state_next
+    local c = string.sub(lable, 1, 1)
+    matrix[from][c] = matrix[from][c] or {}
+    matrix[from][c][state_next] = true
 
     for i = 2, #lable - 1, 1 do
-        print(i)
         matrix[state_next] = matrix[state_next] or {}
         local l = string.sub(lable, i, i)
-        matrix[state_next][l] = get_a_state()
+        matrix[state_next][l] = matrix[state_next][l] or {}
+
+        matrix[from][c][state_next] get_a_state()
         state_next = matrix[state_next][l]
     end
     matrix[state_next] = matrix[state_next] or {}
@@ -37,42 +40,106 @@ local function basic_convert(NFA)
     local __matrix = NFA.__matrix
     local matrix = {}
     for from, row in pairs(__matrix) do
-        for lable, to in pairs(row) do
-            if lable == "" then -- ε
-                matrix[from] = matrix[from] or {}
-                matrix[from][lable] = to
-            elseif string.match(lable, '|') then
-                error("nfa2dfa|")
-            elseif string.match(lable, '*') then
-                error("nfa2dfa*")
-            elseif #lable > 1 then
-                convert_and(matrix, from, lable, to)
-            else
-                matrix[from] = matrix[from] or {}
-                matrix[from][lable] = to
+        for lable, tos in pairs(row) do
+            for _, to in pairs(tos) do
+                if lable == "" then -- ε
+                    matrix[from] = matrix[from] or {}
+                    matrix[from][lable] = matrix[from][lable] or {}
+                    matrix[from][lable][to] = true
+                elseif string.match(lable, '|') then
+                    error("nfa2dfa|")
+                elseif string.match(lable, '*') then
+                    error("nfa2dfa*")
+                elseif #lable > 1 then
+                    convert_and(matrix, from, lable, to)
+                else
+                    matrix[from] = matrix[from] or {}
+                    matrix[from][lable] = matrix[from][lable] or {}
+                    matrix[from][lable][to] = true
+                end
             end
         end
     end
     NFA.__matrix = matrix
 end
 
+local function epsilon_close(matrix, states, result, has_visited)
+    has_visited = has_visited or {}
+    for _, state in pairs(states) do
+        result[state] = true
+        for l, tos in pairs(matrix[state] or {}) do
+            for to, _ in pairs(tos) do
+                if l == "" then
+                    result[to] = true
+                    if has_visited[to] then
+                        goto con
+                    end
+                    has_visited[to] = true
+                    epsilon_close(matrix, { to }, result, has_visited)
+                end
+                :: con ::
+            end
+        end
+    end
+end
+
+local function getJ(matrix, states, a, result)
+    for _, state in pairs(states) do
+        for l, tos in pairs(matrix[state] or {}) do
+            if l == a then
+                for to, _ in pairs(tos) do
+                    result[to] = true
+                end
+            end
+        end
+    end
+end
+
+local function I(matrix, state, a)
+    local r = {}
+    epsilon_close(matrix, { state }, r)
+    local t = {}
+    for key, _ in pairs(r) do
+        t[#t + 1] = key
+    end
+    local r1 = {}
+    getJ(matrix, t, a, r1)
+    t = {}
+    for key, _ in pairs(r1) do
+        t[#t + 1] = key
+    end
+    r = {}
+    epsilon_close(matrix, t, r)
+    return r
+end
+
 local function nfa2dfa(NFA)
     set_temp_states(NFA)
+
     local start_state = get_a_state()
     local end_state = get_a_state()
     NFA.__matrix[start_state] = {}
     for state, value in pairs(NFA.__start) do
-        NFA.__matrix[start_state][""] = state
+        NFA.__matrix[start_state][""] = NFA.__matrix[start_state][""] or {}
+        NFA.__matrix[start_state][""][state] = true
     end
     NFA.__matrix[end_state] = {}
     for state, value in pairs(NFA.__end) do
-        NFA.__matrix[state][""] = end_state
+        NFA.__matrix[state] = NFA.__matrix[state] or {}
+        NFA.__matrix[state][""] = NFA.__matrix[state][""] or {}
+        NFA.__matrix[state][""][end_state] = true
     end
     NFA.__start = {}
     NFA.__end = {}
     NFA.__start[start_state] = true
     NFA.__end[end_state] = true
-    basic_convert(NFA)
+    basic_convert(NFA) -- 还没有完成
+
+    -- local a = I(NFA.__matrix, "9", "a")
+    -- for key, value in pairs(a) do
+    --     print(key, value)
+    -- end
+    NFA.__states = temp_states
 end
 
 return nfa2dfa
