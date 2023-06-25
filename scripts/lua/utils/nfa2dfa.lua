@@ -16,17 +16,37 @@ local function get_a_state()
     return tostring(x)
 end
 
+local function convert_and(matrix, from, lable, to)
+    local state_next = get_a_state()
+
+    matrix[from] = matrix[from] or {}
+    matrix[from][string.sub(lable, 1, 1)] = state_next
+
+    for i = 2, #lable - 1, 1 do
+        print(i)
+        matrix[state_next] = matrix[state_next] or {}
+        local l = string.sub(lable, i, i)
+        matrix[state_next][l] = get_a_state()
+        state_next = matrix[state_next][l]
+    end
+    matrix[state_next] = matrix[state_next] or {}
+    matrix[state_next][string.sub(lable, #lable, #lable)] = to
+end
+
 local function basic_convert(NFA)
     local __matrix = NFA.__matrix
     local matrix = {}
     for from, row in pairs(__matrix) do
         for lable, to in pairs(row) do
             if lable == "" then -- ε
+                matrix[from] = matrix[from] or {}
+                matrix[from][lable] = to
             elseif string.match(lable, '|') then
                 error("nfa2dfa|")
             elseif string.match(lable, '*') then
                 error("nfa2dfa*")
             elseif #lable > 1 then
+                convert_and(matrix, from, lable, to)
             else
                 matrix[from] = matrix[from] or {}
                 matrix[from][lable] = to
