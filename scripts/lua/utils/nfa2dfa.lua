@@ -28,12 +28,14 @@ local function convert_and(matrix, from, lable, to)
         matrix[state_next] = matrix[state_next] or {}
         local l = string.sub(lable, i, i)
         matrix[state_next][l] = matrix[state_next][l] or {}
-
-        matrix[from][c][state_next] get_a_state()
-        state_next = matrix[state_next][l]
+        local temp_p = matrix[state_next][l]
+        state_next = get_a_state()
+        temp_p[state_next] = true
     end
     matrix[state_next] = matrix[state_next] or {}
-    matrix[state_next][string.sub(lable, #lable, #lable)] = to
+    local l = string.sub(lable, #lable, #lable)
+    matrix[state_next][l] = matrix[state_next][l] or {}
+    matrix[state_next][l][to] = true
 end
 
 local function basic_convert(NFA)
@@ -41,7 +43,7 @@ local function basic_convert(NFA)
     local matrix = {}
     for from, row in pairs(__matrix) do
         for lable, tos in pairs(row) do
-            for _, to in pairs(tos) do
+            for to, _ in pairs(tos) do
                 if lable == "" then -- ε
                     matrix[from] = matrix[from] or {}
                     matrix[from][lable] = matrix[from][lable] or {}
