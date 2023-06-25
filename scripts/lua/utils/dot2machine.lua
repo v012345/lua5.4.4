@@ -155,6 +155,7 @@ function Parser:read_states_and_matrix(Machine)
         else
             local token1 = self:read_a_token()
 
+
             Machine.__states = Machine.__states or {}
             Machine.__states[token1] = true
             self:skip_space()
@@ -175,7 +176,8 @@ function Parser:read_states_and_matrix(Machine)
                 Machine.__chars[attr.value] = true
                 Machine.__matrix = Machine.__matrix or {}
                 Machine.__matrix[token1] = Machine.__matrix[token1] or {}
-                Machine.__matrix[token1][attr.value] = token2
+                Machine.__matrix[token1][attr.value] = Machine.__matrix[token1][attr.value] or {}
+                Machine.__matrix[token1][attr.value][token2] = true
             end
         end
     end
@@ -315,8 +317,10 @@ function Parser:output(Machine, path)
     end
     file:write(string.format("    node [shape = circle;];\n"))
     for from, row in pairs(Machine.__matrix) do
-        for lable, to in pairs(row) do
-            file:write(string.format("    %s -> %s [label = \"%s\";];\n", from, to, self:escape_string(lable)))
+        for lable, tos in pairs(row) do
+            for to, _ in pairs(tos) do
+                file:write(string.format("    %s -> %s [label = \"%s\";];\n", from, to, self:escape_string(lable)))
+            end
         end
     end
     file:write("}\n")
