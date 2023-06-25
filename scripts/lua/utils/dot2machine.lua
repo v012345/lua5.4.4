@@ -51,160 +51,6 @@ function Parser:get_next_char()
     return self.current_char
 end
 
-function Parser:read_a_key()
-    return self:read_a_string()
-end
-
-function Parser:read_a_value()
-    local value = nil
-    local current_char = self.current_char
-    if current_char == "\"" then
-        value = self:read_a_string()
-    elseif current_char == "[" then
-        value = self:read_an_array()
-    elseif current_char == "{" then
-        value = self:read_a_json_object()
-    else
-        value = self:read_a_base_type()
-    end
-    return value
-end
-
-function Parser:read_an_array()
-    self:get_next_char() -- 跳过 [
-    self:skip_space()    -- 跳过 [ 后的空白
-    local mt = {
-        is_array = true
-    }
-    local result = {}
-    local len = 1
-    setmetatable(result, mt)
-    while self.current_char do
-        if self.current_char == '"' then
-            result[len] = self:read_a_string()
-            len = len + 1
-        elseif space[self.current_char] then
-            self:get_next_char()
-        elseif self.current_char == "{" then
-            result[len] = self:read_a_json_object()
-            len = len + 1
-        elseif self.current_char == "," then
-            self:get_next_char() -- 跳过 ,
-            self:skip_space()
-            if self.current_char == "]" then
-                error("the last element has a , follow")
-            end
-        elseif self.current_char == "]" then
-            break
-        elseif self.current_char == "[" then
-            result[len] = self:read_an_array()
-            len = len + 1
-        else
-            result[len] = self:read_a_base_type()
-            len = len + 1
-        end
-    end
-    self:get_next_char() -- 跳过 ]
-    self:skip_space()    -- 跳过文件结束空白
-    if self.current_char == "," then
-        self:get_next_char()
-    end
-    return result
-end
-
-function Parser:read_a_base_type()
-    local s = {}
-    local r, i = true, 1
-    while self.current_char and string.find(self.current_char, "[0-9aeflnrstu%.%-]") do
-        s[#s + 1] = self.current_char
-        self:get_next_char()
-    end
-    local token = table.concat(s)
-    if token == "true" then
-        -- r = true
-    elseif token == "null" then
-        r = nil
-    elseif token == "false" then
-        r = false
-    else
-        local n = tonumber(token) -- todo 这里有问题, 比 json 规定的数字范围大
-        if n then
-            r = n
-        else
-            error("not a base type")
-        end
-    end
-    self:skip_space()
-    if self.current_char then
-        if self.current_char ~= "," and
-            self.current_char ~= "]" and
-            self.current_char ~= "}"
-        then
-            error("base type with wrong end")
-        end
-    end
-    return r
-end
-
-function Parser:read_a_key_value_pair()
-    local key = self:read_a_key()
-    self:skip_space()
-    if self.current_char ~= ":" then
-        error("miss \":\"")
-        return
-    end
-    self:get_next_char() -- 跳过 :
-    self:skip_space()
-    local value = self:read_a_value()
-    self:skip_space()
-    return key, value
-end
-
-function Parser:read_a_json_object()
-    self:get_next_char() -- 跳过 {
-    self:skip_space()    -- 跳过 { 后的空白
-    local len = 0
-    local result = {}
-    local key_table = {} -- 防止 key 重复
-    local key, value = nil, nil
-    local current_char = self.current_char
-    while true do
-        if current_char == '"' then
-            key, value = self:read_a_key_value_pair()
-            if key_table[key] then
-                error("duplicate key")
-            else
-                key_table[key] = true
-                result[key] = value
-                self:skip_space()
-                len = len + 1
-            end
-        elseif current_char == "," then
-            self:get_next_char() -- 跳过 ,
-            self:skip_space()
-            if self.current_char ~= "\"" then
-                error(", must follw a \" in a json object")
-            end
-        elseif current_char == "}" or current_char == "" then
-            break
-        else
-            error("wrong json object")
-        end
-        current_char = self.current_char
-    end
-    self:get_next_char() -- 跳过 }
-    self:skip_space()    -- 跳过文件结束空白
-    if self.current_char == "," then
-        self:get_next_char()
-    end
-    local mt = {
-        is_array = false,
-        len = len
-    }
-    setmetatable(result, mt)
-    return result
-end
-
 function Parser:skip_space()
     if not self.current_char then
         self:get_next_char()
@@ -300,6 +146,66 @@ function Parser:read_size(Machine)
     self:get_next_char()
 end
 
+function Parser:read_states_and_matrix(Machine)
+    self:skip_space() -- 跳过文件开头空白
+    while true do
+        self:skip_space()
+        if self.current_char == "}" then
+            return
+        else
+            local token1 = self:read_a_token()
+
+            Machine.__states = Machine.__states or {}
+            Machine.__states[token1] = true
+            self:skip_space()
+            if self.current_char ~= "-" then
+                error("not a struct")
+            end
+            self:get_next_char()
+            if self.current_char ~= ">" then
+                error("not a struct")
+            end
+            self:get_next_char()
+            self:skip_space()
+            local token2 = self:read_a_token()
+            Machine.__states[token2] = true
+            local attr = self:read_a_attr()
+            if attr.key == "label" then
+                Machine.__chars = Machine.__chars or {}
+                Machine.__chars[attr.value] = true
+                Machine.__matrix = Machine.__matrix or {}
+                Machine.__matrix[token1] = Machine.__matrix[token1] or {}
+                Machine.__matrix[token1][attr.value] = token2
+            end
+        end
+    end
+end
+
+function Parser:read_start_and_end_states(Machine)
+    self:skip_space() -- 跳过文件开头空白
+    while true do
+        local _char_pointer = char_pointer
+        local _current_char = self.current_char
+        local token = self:read_a_token()
+        if token == "node" then
+            self.current_char = _current_char
+            char_pointer = _char_pointer
+            return
+        else
+            local attr = self:read_a_attr()
+            Machine.__states = Machine.__states or {}
+            Machine.__states[token] = true
+            if attr.key == "color" and attr.value == "green" then
+                Machine.__start = Machine.__start or {}
+                Machine.__start[token] = true
+            elseif attr.key == "color" and attr.value == "red" then
+                Machine.__end = Machine.__end or {}
+                Machine.__end[token] = true
+            end
+        end
+    end
+end
+
 function Parser:read_a_token()
     self:skip_space() -- 跳过文件开头空白
     local t = {}
@@ -374,13 +280,14 @@ function Parser:read_struct(Machine)
                 error("node doesn't exist attr")
             end
             local attr = self:read_a_attr()
-            if attr.key == "shape" and attr.key == "doublecircle" then
+            if attr.key == "shape" and attr.value == "doublecircle" then
                 self:read_start_and_end_states(Machine)
+            elseif attr.key == "shape" and attr.value == "circle" then
+                self:read_states_and_matrix(Machine)
             end
-            return
+            token = self:read_a_token()
         else
-            print(token)
-            return
+            return Machine
         end
     end
 end
