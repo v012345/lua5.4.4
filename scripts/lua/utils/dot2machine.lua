@@ -301,6 +301,28 @@ function Parser:parser(Machine, dot_string)
     return Machine
 end
 
+function Parser:output(Machine, path)
+    local file = io.open(path, "w") or error("can't open file")
+    file:write("digraph " .. Machine.__name .. " {\n")
+    file:write("    rankdir = " .. Machine.__rankdir .. ";\n")
+    file:write(string.format("    size = \"%s\";\n", Machine.__size))
+    file:write(string.format("    node [shape = doublecircle;];\n"))
+    for k, _ in pairs(Machine.__start) do
+        file:write(string.format("    %s [color = green;];\n", k))
+    end
+    for k, _ in pairs(Machine.__end) do
+        file:write(string.format("    %s [color = red;];\n", k))
+    end
+    file:write(string.format("    node [shape = circle;];\n"))
+    for from, row in pairs(Machine.__matrix) do
+        for lable, to in pairs(row) do
+            file:write(string.format("    %s -> %s [label = \"%s\";];\n", from, to, self:escape_string(lable)))
+        end
+    end
+    file:write("}\n")
+    file:close()
+end
+
 return function(dot_string)
     local Machine = {}
     setmetatable(Machine, { __index = Parser })
