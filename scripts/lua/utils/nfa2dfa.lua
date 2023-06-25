@@ -137,7 +137,7 @@ local function nfa2dfa(NFA)
     NFA.__end[end_state] = true
     basic_convert(NFA) -- 还没有完成
 
-    -- local a = I(NFA.__matrix, "9", "a")
+    local a = I(NFA.__matrix, "5", "a")
     -- for key, value in pairs(a) do
     --     print(key, value)
     -- end

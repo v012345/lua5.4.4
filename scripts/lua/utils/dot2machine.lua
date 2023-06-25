@@ -318,7 +318,6 @@ function Parser:output(Machine, path)
     file:write(string.format("    node [shape = circle;];\n"))
     for from, row in pairs(Machine.__matrix) do
         for lable, tos in pairs(row) do
-            print(tos)
             for to, _ in pairs(tos) do
                 file:write(string.format("    %s -> %s [label = \"%s\";];\n", from, to, self:escape_string(lable)))
             end
