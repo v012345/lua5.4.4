@@ -34,7 +34,7 @@ local dot_string = ""
 local current_char = " "
 
 
-function mt.escape_string(str)
+function mt.escape_string(Machine, str)
     local o = {}
     for i = 1, #str do
         local char = string.sub(str, i, i)
@@ -163,8 +163,8 @@ function mt.read_states_and_matrix(Machine)
             local token1 = Machine:read_a_token()
 
 
-            Machine.__states = Machine.__states or {}
-            Machine.__states[token1] = true
+            Machine.__states = Machine.__states or set()
+            Machine.__states:insert(token1)
             Machine:skip_space()
             if current_char ~= "-" then
                 error("not a struct")
@@ -176,15 +176,15 @@ function mt.read_states_and_matrix(Machine)
             Machine:get_next_char()
             Machine:skip_space()
             local token2 = Machine:read_a_token()
-            Machine.__states[token2] = true
+            Machine.__states:insert(token2)
             local attr = Machine:read_a_attr()
             if attr.key == "label" then
-                Machine.__chars = Machine.__chars or {}
-                Machine.__chars[attr.value] = true -- 这里有问题
+                Machine.__chars = Machine.__chars or set()
+                Machine.__chars:insert(attr.value) -- 这里有问题
                 Machine.__matrix = Machine.__matrix or {}
                 Machine.__matrix[token1] = Machine.__matrix[token1] or {}
-                Machine.__matrix[token1][attr.value] = Machine.__matrix[token1][attr.value] or {}
-                Machine.__matrix[token1][attr.value][token2] = true
+                Machine.__matrix[token1][attr.value] = Machine.__matrix[token1][attr.value] or set()
+                Machine.__matrix[token1][attr.value]:insert(token2)
             end
         end
     end
@@ -202,14 +202,14 @@ function mt.read_start_and_end_states(Machine)
             return
         else
             local attr = Machine:read_a_attr()
-            Machine.__states = Machine.__states or {}
-            Machine.__states[token] = true
+            Machine.__states = Machine.__states or set()
+            Machine.__states:insert(token)
             if attr.key == "color" and attr.value == "green" then
-                Machine.__start = Machine.__start or {}
-                Machine.__start[token] = true
+                Machine.__start = Machine.__start or set()
+                Machine.__start:insert(token)
             elseif attr.key == "color" and attr.value == "red" then
-                Machine.__end = Machine.__end or {}
-                Machine.__end[token] = true
+                Machine.__end = Machine.__end or set()
+                Machine.__end:insert(token)
             end
         end
     end
@@ -322,22 +322,25 @@ function mt.parser(Machine, raw_content)
     return Machine
 end
 
+---comment
+---@param Machine Machine
+---@param path any
 function mt.output(Machine, path)
     local file = io.open(path, "w") or error("can't open file")
     file:write("digraph " .. Machine.__name .. " {\n")
     file:write("    rankdir = " .. Machine.__rankdir .. ";\n")
     file:write(string.format("    size = \"%s\";\n", Machine.__size))
     file:write(string.format("    node [shape = doublecircle;];\n"))
-    for k, _ in pairs(Machine.__start) do
+    for k in Machine.__start:generator() do
         file:write(string.format("    %s [color = green;];\n", k))
     end
-    for k, _ in pairs(Machine.__end) do
+    for k in Machine.__end:generator() do
         file:write(string.format("    %s [color = red;];\n", k))
     end
     file:write(string.format("    node [shape = circle;];\n"))
     for from, row in pairs(Machine.__matrix) do
         for lable, tos in pairs(row) do
-            for to, _ in pairs(tos) do
+            for to in tos:generator() do
                 file:write(string.format("    %s -> %s [label = \"%s\";];\n", from, to, Machine:escape_string(lable)))
             end
         end
@@ -351,7 +354,21 @@ end
 ---@return Machine
 return function(raw_content)
     ---@class Machine
-    local Machine = {}
+    local Machine = {
+        __name = "",
+        __rankdir = "",
+        __size = "",
+        ---@type set
+        __states = nil,
+        ---@type set
+        __chars = nil,
+        ---@type set[][]
+        __matrix = nil,
+        ---@type set
+        __start = nil,
+        ---@type set
+        __end = nil
+    }
     setmetatable(Machine, { __index = mt })
     return Machine:parser(raw_content)
 end

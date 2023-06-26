@@ -111,7 +111,7 @@ function mt.__eq(set1, set2)
 end
 
 ---comment
----@param list table|set
+---@param list table|set|nil
 ---@return set
 return function(list)
     ---@class set
@@ -124,6 +124,8 @@ return function(list)
         __tostring = mt.__tostring,
         __len = mt.__len,
     })
-    set:new(mt.convert_to_table(list))
+    if list then
+        set:new(mt.convert_to_table(list))
+    end
     return set
 end
