@@ -120,19 +120,24 @@ local function I(matrix, state, a)
     return r
 end
 
-local function to_dfa(NFA, convert_table, key)
-    if not convert_table then
+local function to_dfa(NFA, convert_table)
+    if convert_table then
+
+
+    else
+        convert_table = {}
         local x = {}
         local start = {}
-        for key, value in pairs(NFA.__start) do
-            start[#start + 1] = key
+
+        for k in pairs(NFA.__start) do
+            start[#start + 1] = k
         end
         epsilon_close(NFA.__matrix, start, x)
-        for key, value in pairs(x) do
-            print(key, value)
+        convert_table[x] = convert_table[x] or {}
+        for value in pairs(NFA.__chars) do
+            convert_table[x][value] = convert_table[x][value] or {}
         end
-    else
-        local convert_table = convert_table or {}
+        to_dfa(NFA, convert_table)
     end
 end
 
@@ -160,7 +165,7 @@ local function nfa2dfa(NFA)
 
     to_dfa(NFA)
 
-    local a = I(NFA.__matrix, "5", "a")
+    -- local a = I(NFA.__matrix, "5", "a")
     -- for key, value in pairs(a) do
     --     print(key, value)
     -- end
