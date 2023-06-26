@@ -177,17 +177,12 @@ local function nfa2dfa(NFA)
     basic_convert(NFA) -- 还没有完成
 
     local convert_table = get_converttable(NFA)
-    -- for key1, value in pairs(convert_table) do
-    --     for key2, v in pairs(key1) do
-    --         print(key2, v)
-    --     end
-    --     for index, value1 in pairs(value) do
-    --         print(index, value1)
-    --         for key3, value2 in pairs(value1) do
-    --             print(key3, value2)
-    --         end
-    --     end
-    -- end
+    for row_name, row in pairs(convert_table) do
+        print(row_name)
+        for i, v in pairs(row) do
+            print(v)
+        end
+    end
     --
     -- for key, value in pairs(a) do
     --     print(key, value)
