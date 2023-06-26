@@ -104,6 +104,11 @@ end
 
 local function I(matrix, state, a)
     local r = {}
+    if type(state) == "table" then
+        epsilon_close(matrix, state, r)
+    else
+        epsilon_close(matrix, { state }, r)
+    end
     epsilon_close(matrix, { state }, r)
     local t = {}
     for key, _ in pairs(r) do
@@ -120,10 +125,39 @@ local function I(matrix, state, a)
     return r
 end
 
-local function to_dfa(NFA, convert_table)
+local function is_eq(list1, list2)
+    if #list1 ~= #list2 then
+        return false
+    end
+    local r_1 = {}
+    for index, value in ipairs(list1) do
+        r_1[value] = index
+    end
+    for index, value in ipairs(list2) do
+        if not r_1[value] then
+            return false
+        end
+    end
+    return true
+end
+
+local function to_dfa(NFA, convert_table, key)
     if convert_table then
-
-
+        local row = convert_table[key]
+        for k, v in pairs(row) do
+            if not convert_table[v] then
+                convert_table[v] = {}
+                for value in pairs(NFA.__chars) do
+                    local a = I(NFA.__matrix, v, value)
+                    local b = {}
+                    for index in pairs(a) do
+                        b[#b + 1] = index
+                    end
+                    convert_table[v][value] = b
+                end
+            end
+            to_dfa(NFA, convert_table, v)
+        end
     else
         convert_table = {}
         local x = {}
@@ -132,12 +166,23 @@ local function to_dfa(NFA, convert_table)
         for k in pairs(NFA.__start) do
             start[#start + 1] = k
         end
+
         epsilon_close(NFA.__matrix, start, x)
-        convert_table[x] = convert_table[x] or {}
-        for value in pairs(NFA.__chars) do
-            convert_table[x][value] = convert_table[x][value] or {}
+        local temp = {}
+        for k in pairs(x) do
+            temp[#temp + 1] = k
         end
-        to_dfa(NFA, convert_table)
+        convert_table[temp] = convert_table[temp] or {}
+        for value in pairs(NFA.__chars) do
+            local a = I(NFA.__matrix, temp, value)
+            local b = {}
+            for index in pairs(a) do
+                b[#b + 1] = index
+            end
+            convert_table[temp][value] = b
+        end
+        to_dfa(NFA, convert_table, temp)
+        return convert_table
     end
 end
 
@@ -163,9 +208,19 @@ local function nfa2dfa(NFA)
     NFA.__end[end_state] = true
     basic_convert(NFA) -- 还没有完成
 
-    to_dfa(NFA)
-
-    -- local a = I(NFA.__matrix, "5", "a")
+    local convert_table = to_dfa(NFA)
+    for key1, value in pairs(convert_table) do
+        for key2, v in pairs(key1) do
+            print(key2, v)
+        end
+        for index, value1 in pairs(value) do
+            print(index, value1)
+            for key3, value2 in pairs(value1) do
+                print(key3, value2)
+            end
+        end
+    end
+    --
     -- for key, value in pairs(a) do
     --     print(key, value)
     -- end
