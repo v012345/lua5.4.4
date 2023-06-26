@@ -21,7 +21,7 @@ local _, NFA = xpcall(dot2machine, function(msg)
     print(msg)
 end, content)
 -- NFA = NFA or {}
--- NFA:output(NFA, "C:\\Users\\Meteor\\Desktop\\configs\\ast1.dot")
+NFA:output("C:\\Users\\Meteor\\Desktop\\configs\\ast1.dot")
 -- local nfa2dfa = require "utils.nfa2dfa"
 -- local _, DFA = xpcall(nfa2dfa, function(msg)
 --     print(msg)

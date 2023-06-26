@@ -274,6 +274,9 @@ function mt.read_a_attr(Machine)
     return t
 end
 
+---comment
+---@param Machine Machine
+---@return any
 function mt.read_struct(Machine)
     Machine:skip_space() -- 跳过文件开头空白
     if current_char ~= "{" then
@@ -284,10 +287,10 @@ function mt.read_struct(Machine)
     local token = Machine:read_a_token()
     while true do
         if token == "rankdir" then
-            Machine:read_rankdir(Machine)
+            Machine:read_rankdir()
             token = Machine:read_a_token()
         elseif token == "size" then
-            Machine:read_size(Machine)
+            Machine:read_size()
             token = Machine:read_a_token()
         elseif token == "node" then
             Machine:skip_space()
@@ -296,9 +299,9 @@ function mt.read_struct(Machine)
             end
             local attr = Machine:read_a_attr()
             if attr.key == "shape" and attr.value == "doublecircle" then
-                Machine:read_start_and_end_states(Machine)
+                Machine:read_start_and_end_states()
             elseif attr.key == "shape" and attr.value == "circle" then
-                Machine:read_states_and_matrix(Machine)
+                Machine:read_states_and_matrix()
             end
             token = Machine:read_a_token()
         else
