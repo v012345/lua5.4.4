@@ -6,10 +6,6 @@ function main()
     -- for value in a:generator() do
     --     print(value)
     -- end
-
-    print(b == c)
-    print(b)
-    print(c)
 end
 
 xpcall(main, function(msg)
