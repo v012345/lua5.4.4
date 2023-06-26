@@ -314,7 +314,6 @@ end
 function mt.parser(Machine, raw_content)
     dot_string = raw_content
     Machine:read_name()
-    -- local current_char = self.current_char
     Machine:skip_space()
     Machine:read_struct()
     return Machine
@@ -336,7 +335,7 @@ function mt.output(Machine, path)
     for from, row in pairs(Machine.__matrix) do
         for lable, tos in pairs(row) do
             for to, _ in pairs(tos) do
-                file:write(string.format("    %s -> %s [label = \"%s\";];\n", from, to, self:escape_string(lable)))
+                file:write(string.format("    %s -> %s [label = \"%s\";];\n", from, to, Machine:escape_string(lable)))
             end
         end
     end
