@@ -112,11 +112,9 @@ end
 ---@param result set
 local function getJ(matrix, states, a, result)
     for state in states:generator() do
-        for l, tos in pairs(matrix[state] or {}) do
-            if l == a then
-                for to in tos:generator() do
-                    result:insert(to)
-                end
+        for lable, tos in pairs(matrix[state] or {}) do
+            if lable == a then
+                result:insert(tos)
             end
         end
     end
@@ -125,8 +123,8 @@ end
 ---comment
 ---@param matrix set[][]
 ---@param state set
----@param a set
----@return table
+---@param a any
+---@return set
 local function I(matrix, state, a)
     local r = set()
     epsilon_close(matrix, state, r)
@@ -137,51 +135,21 @@ local function I(matrix, state, a)
     return r
 end
 
+---comment
+---@param NFA Machine
+---@return set[][]
 local function get_converttable(NFA)
     ---@type set[][]
     local convert_table = {}
-    if convert_table then
-        local row = convert_table[key]
-        for k, v in pairs(row) do
-            if not convert_table[v] then
-                convert_table[v] = {}
-                for value in pairs(NFA.__chars) do
-                    local a = I(NFA.__matrix, v, value)
-                    local b = {}
-                    for index in pairs(a) do
-                        b[#b + 1] = index
-                    end
-                    convert_table[v][value] = b
-                end
-            end
-            to_dfa(NFA, convert_table, v)
-        end
-    else
-        convert_table = {}
-        local x = {}
-        local start = {}
+    local x = set()
+    epsilon_close(NFA.__matrix, NFA.__start, x)
+    convert_table[x] = convert_table[x] or {}
 
-        for k in pairs(NFA.__start) do
-            start[#start + 1] = k
-        end
-
-        epsilon_close(NFA.__matrix, start, x)
-        local temp = {}
-        for k in pairs(x) do
-            temp[#temp + 1] = k
-        end
-        convert_table[temp] = convert_table[temp] or {}
-        for value in pairs(NFA.__chars) do
-            local a = I(NFA.__matrix, temp, value)
-            local b = {}
-            for index in pairs(a) do
-                b[#b + 1] = index
-            end
-            convert_table[temp][value] = b
-        end
-        to_dfa(NFA, convert_table, temp)
-        return convert_table
+    for label in NFA.__chars:generator() do
+        local a = I(NFA.__matrix, x, label)
+        convert_table[x][label] = a
     end
+    return convert_table
 end
 
 ---comment
