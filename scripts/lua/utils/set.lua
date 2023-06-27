@@ -12,7 +12,7 @@ end
 
 ---@private
 function mt.convert_to_table(eles)
-    if (getmetatable(eles) or {}).__index == mt then
+    if getmetatable(eles) == "set" then
         return eles.list
     elseif type(eles) == "table" then
         return eles
@@ -123,6 +123,7 @@ return function(list)
         __index = mt,
         __tostring = mt.__tostring,
         __len = mt.__len,
+        __metatable = "set"
     })
     if list then
         set:new(mt.convert_to_table(list))
