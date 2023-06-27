@@ -111,7 +111,7 @@ function mt.__eq(set1, set2)
 end
 
 ---comment
----@param list table|set|nil
+---@param list any
 ---@return set
 return function(list)
     ---@class set

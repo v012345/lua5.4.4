@@ -149,6 +149,11 @@ local function get_converttable(NFA)
         local a = I(NFA.__matrix, x, label)
         convert_table[x][label] = a
     end
+    local a = set({ set("A"), set("B") })
+    a:insert(set("C"))
+    a:insert(set("B"))
+    print(a)
+
     return convert_table
 end
 
