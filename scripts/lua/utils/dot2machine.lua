@@ -331,16 +331,16 @@ function mt.output(Machine, path)
     file:write("    rankdir = " .. Machine.__rankdir .. ";\n")
     file:write(string.format("    size = \"%s\";\n", Machine.__size))
     file:write(string.format("    node [shape = doublecircle;];\n"))
-    for k in Machine.__start:generator() do
+    for k in pairs(Machine.__start) do
         file:write(string.format("    %s [color = green;];\n", k))
     end
-    for k in Machine.__end:generator() do
+    for k in pairs(Machine.__end) do
         file:write(string.format("    %s [color = red;];\n", k))
     end
     file:write(string.format("    node [shape = circle;];\n"))
     for from, row in pairs(Machine.__matrix) do
         for lable, tos in pairs(row) do
-            for to in tos:generator() do
+            for to in pairs(tos) do
                 file:write(string.format("    %s -> %s [label = \"%s\";];\n", from, to, Machine:escape_string(lable)))
             end
         end

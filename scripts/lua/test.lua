@@ -13,20 +13,19 @@ xpcall(main, function(msg)
     print(msg)
 end)
 
-local dot2machine = require "utils.dot2machine"
-local file = io.open("./dot/NDF.dot", "r") or error("can't open NDF.dot")
-local content = file:read("a")
-file:close()
-local _, NFA = xpcall(dot2machine, function(msg)
-    print(msg)
-end, content)
--- NFA = NFA or {}
-NFA:output("C:\\Users\\Meteor\\Desktop\\configs\\ast1.dot")
-local nfa2dfa = require "utils.nfa2dfa"
-xpcall(nfa2dfa, function(msg)
-    print(msg)
-end, NFA)
 
-xpcall(NFA.output, function(msg)
-    print(msg)
-end, NFA, "C:\\Users\\Meteor\\Desktop\\configs\\ast2.dot")
+
+local set = require "utils.set"
+local matirx = require "utils.matrix"
+local a = set(set("12"))
+local b = set({ "12", "firstchar" })
+
+for key, value in pairs(b) do
+    print(key, value)
+end
+
+local m = matirx()
+m[a] = matirx()
+m[a][2] = "23412"
+print(m[a][2])
+print(m[b][2])

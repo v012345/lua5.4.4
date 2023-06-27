@@ -20,13 +20,13 @@ file:close()
 local _, NFA = xpcall(dot2machine, function(msg)
     print(msg)
 end, content)
-NFA = NFA or {}
-NFA:output(NFA, "C:\\Users\\Meteor\\Desktop\\configs\\ast1.dot")
+-- NFA = NFA or {}
+NFA:output("C:\\Users\\Meteor\\Desktop\\configs\\ast1.dot")
 local nfa2dfa = require "utils.nfa2dfa"
-local _, DFA = xpcall(nfa2dfa, function(msg)
+xpcall(nfa2dfa, function(msg)
     print(msg)
 end, NFA)
 
 xpcall(NFA.output, function(msg)
     print(msg)
-end, NFA, NFA, "C:\\Users\\Meteor\\Desktop\\configs\\ast2.dot")
+end, NFA, "C:\\Users\\Meteor\\Desktop\\configs\\ast2.dot")

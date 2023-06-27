@@ -57,7 +57,7 @@ local function basic_convert(NFA)
     local matrix = {}
     for from, row in pairs(__matrix) do
         for lable, tos in pairs(row) do
-            for to in tos:generator() do
+            for to in pairs(tos) do
                 if lable == "" then -- ε
                     matrix[from] = matrix[from] or {}
                     matrix[from][lable] = matrix[from][lable] or set()
@@ -87,10 +87,10 @@ end
 ---@param has_visited set|nil
 local function epsilon_close(matrix, states, result, has_visited)
     has_visited = has_visited or set()
-    for state in states:generator() do
+    for state in pairs(states) do
         result:insert(state)
         for l, tos in pairs(matrix[state] or {}) do
-            for to in tos:generator() do
+            for to in pairs(tos) do
                 if l == "" then
                     result:insert(to)
                     if has_visited:contain(to) then
@@ -111,7 +111,7 @@ end
 ---@param a any
 ---@param result set
 local function getJ(matrix, states, a, result)
-    for state in states:generator() do
+    for state in pairs(states) do
         for lable, tos in pairs(matrix[state] or {}) do
             if lable == a then
                 result:insert(tos)
@@ -145,7 +145,7 @@ local function get_converttable(NFA)
     epsilon_close(NFA.__matrix, NFA.__start, x)
     convert_table[x] = convert_table[x] or {}
 
-    for label in NFA.__chars:generator() do
+    for label in pairs(NFA.__chars) do
         local a = I(NFA.__matrix, x, label)
         convert_table[x][label] = a
     end
@@ -165,12 +165,12 @@ local function nfa2dfa(NFA)
     local start_state = get_a_state()
     local end_state = get_a_state()
     NFA.__matrix[start_state] = {}
-    for state in NFA.__start:generator() do
+    for state in pairs(NFA.__start) do
         NFA.__matrix[start_state][""] = NFA.__matrix[start_state][""] or set()
         NFA.__matrix[start_state][""]:insert(state)
     end
     NFA.__matrix[end_state] = {}
-    for state in NFA.__end:generator() do
+    for state in pairs(NFA.__end) do
         NFA.__matrix[state] = NFA.__matrix[state] or {}
         NFA.__matrix[state][""] = NFA.__matrix[state][""] or set()
         NFA.__matrix[state][""]:insert(end_state)

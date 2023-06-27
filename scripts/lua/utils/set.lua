@@ -1,12 +1,12 @@
 ---@class set
 local mt = {}
 
-function mt.generator(set)
+function mt.__pairs(set)
     local a = 0
     local b = set.list
     return function()
         a = a + 1
-        return b[a], a
+        return b[a]
     end
 end
 
@@ -120,6 +120,7 @@ return function(list)
         __tostring = mt.__tostring,
         __len = mt.__len,
         __eq = mt.__eq,
+        __pairs = mt.__pairs,
         __metatable = "set"
     })
     if list then
