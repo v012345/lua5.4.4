@@ -20,12 +20,16 @@ local matirx = require "utils.matrix"
 local a = set(set("12"))
 local b = set({ "12", "firstchar" })
 
-for key, value in pairs(b) do
-    print(key, value)
-end
 
 local m = matirx()
-m[a] = matirx()
-m[a][2] = "23412"
-print(m[a][2])
-print(m[b][2])
+m["a"] = "aa"
+m["b"] = "bb"
+m["c"] = "cc"
+m[set({ "a", "c" })] = "ac"
+m[set({ "a", "b" })] = "bc"
+-- print(set({ "a", "c" }) == set({ "a", "b" }))
+for key, value in pairs(m) do
+    print("key :", key, "value :", value)
+end
+-- print(m[set({ "a", "b" })])
+-- print(m[set({ "a", "c" })])

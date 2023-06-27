@@ -24,7 +24,7 @@ end
 ---@param matrix matrix
 ---@param k any
 ---@param v any
-function mt._newindex(matrix, k, v)
+function mt.__newindex(matrix, k, v)
     if getmetatable(k) == "set" then
         for key, _ in pairs(matrix.set_key_table) do
             if k == key then
@@ -38,6 +38,23 @@ function mt._newindex(matrix, k, v)
     end
 end
 
+function mt.__pairs(matrix)
+    local use_normal_key_table = true
+    return function(_, key)
+        if use_normal_key_table then
+            local k, v = next(matrix.normal_key_table, key)
+            if k then
+                return k, v
+            else
+                use_normal_key_table = false
+                return next(matrix.set_key_table, nil)
+            end
+        else
+            return next(matrix.set_key_table, key)
+        end
+    end
+end
+
 ---comment
 ---@return matrix
 return function()
@@ -48,7 +65,9 @@ return function()
     }
     setmetatable(matrix, {
         __metatable = "matrix",
-        __index = mt.__index
+        __newindex = mt.__newindex,
+        __index = mt.__index,
+        __pairs = mt.__pairs,
     })
     return matrix
 end

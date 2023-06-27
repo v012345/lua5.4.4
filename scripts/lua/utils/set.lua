@@ -101,7 +101,7 @@ end
 ---@return boolean
 function mt.__eq(set1, set2)
     if #set1 == #set2 then
-        return set1:contain(set1)
+        return set1:contain(set2)
     end
     return false
 end
