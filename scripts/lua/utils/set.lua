@@ -100,14 +100,10 @@ end
 ---@param set2 set
 ---@return boolean
 function mt.__eq(set1, set2)
-    if set1 == set2 then
-        return true
-    else
-        if #set1 == #set2 then
-            return set1:contain(set1)
-        end
-        return false
+    if #set1 == #set2 then
+        return set1:contain(set1)
     end
+    return false
 end
 
 ---comment
@@ -123,6 +119,7 @@ return function(list)
         __index = mt,
         __tostring = mt.__tostring,
         __len = mt.__len,
+        __eq = mt.__eq,
         __metatable = "set"
     })
     if list then
