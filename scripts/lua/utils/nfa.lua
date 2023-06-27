@@ -47,7 +47,6 @@ end
 ---@param states any
 function mt.remove_initial_states(NFA, states)
     NFA.initial_states:remove(states)
-    NFA.states:remove(states)
 end
 
 ---comment
@@ -63,7 +62,6 @@ end
 ---@param states any
 function mt.remove_final_states(NFA, states)
     NFA.final_states:remove(states)
-    NFA.states:remove(states)
 end
 
 ---comment

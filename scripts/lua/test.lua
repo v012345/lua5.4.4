@@ -14,22 +14,25 @@ xpcall(main, function(msg)
 end)
 
 
-
-local set = require "utils.set"
-local matirx = require "utils.matrix"
-local a = set(set("12"))
-local b = set({ "12", "firstchar" })
-
-
-local m = matirx()
-m["a"] = "aa"
-m["b"] = "bb"
-m["c"] = "cc"
-m[set({ "a", "c" })] = "ac"
-m[set({ "a", "b" })] = "bc"
--- print(set({ "a", "c" }) == set({ "a", "b" }))
-for key, value in pairs(m) do
-    print("key :", key, "value :", value)
-end
--- print(m[set({ "a", "b" })])
--- print(m[set({ "a", "c" })])
+-- io.write(tostring(a))
+local dot2machine = require "utils.dot2machine"
+local file = io.open("./dot/NDF.dot", "r") or error("can't open NDF.dot")
+local content = file:read("a")
+file:close()
+local _, NFA = xpcall(dot2machine, function(msg)
+    print(msg)
+end, content)
+-- -- NFA = NFA or {}
+file = io.open("C:\\Users\\Meteor\\Desktop\\configs\\ast1.dot", "w") or error("can't open ast1.dot")
+file:write(tostring(NFA))
+file:close()
+local nfa2dfa = require "utils.nfa2dfa"
+xpcall(nfa2dfa, function(msg)
+    print(msg)
+end, NFA)
+file = io.open("C:\\Users\\Meteor\\Desktop\\configs\\ast2.dot", "w") or error("can't open ast2.dot")
+file:write(tostring(NFA))
+file:close()
+-- xpcall(NFA.output, function(msg)
+--     print(msg)
+-- end, NFA, "C:\\Users\\Meteor\\Desktop\\configs\\ast2.dot")

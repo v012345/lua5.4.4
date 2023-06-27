@@ -1,11 +1,12 @@
 local set = require "utils.set"
+local matrix = require "utils.matrix"
 ---@type set
 local temp_states = nil
 
 ---comment
----@param NFA Machine
+---@param NFA NFA
 local function set_temp_states(NFA)
-    temp_states = set(NFA.__states)
+    temp_states = set(NFA.states)
 end
 
 local function get_a_state()
@@ -49,7 +50,7 @@ local function convert_and(NFA, matrix, from, lable, to)
 end
 
 ---comment
----@param NFA Machine
+---@param NFA NFA
 local function basic_convert(NFA)
     local __matrix = NFA.__matrix or { { set() } }
     NFA.__chars = set()
@@ -158,41 +159,39 @@ local function get_converttable(NFA)
 end
 
 ---comment
----@param NFA Machine
+---@param NFA NFA
 local function nfa2dfa(NFA)
     set_temp_states(NFA)
 
     local start_state = get_a_state()
     local end_state = get_a_state()
-    NFA.__matrix[start_state] = {}
-    for state in pairs(NFA.__start) do
-        NFA.__matrix[start_state][""] = NFA.__matrix[start_state][""] or set()
-        NFA.__matrix[start_state][""]:insert(state)
+    NFA.transition_matrix[start_state] = matrix()
+    for state in pairs(NFA.initial_states) do
+        NFA.transition_matrix[start_state][""] = NFA.transition_matrix[start_state][""] or set()
+        NFA.transition_matrix[start_state][""]:insert(state)
     end
-    NFA.__matrix[end_state] = {}
-    for state in pairs(NFA.__end) do
-        NFA.__matrix[state] = NFA.__matrix[state] or {}
-        NFA.__matrix[state][""] = NFA.__matrix[state][""] or set()
-        NFA.__matrix[state][""]:insert(end_state)
+    NFA.transition_matrix[end_state] = matrix()
+    for state in pairs(NFA.final_states) do
+        NFA.transition_matrix[state] = NFA.transition_matrix[state] or matrix()
+        NFA.transition_matrix[state][""] = NFA.transition_matrix[state][""] or set()
+        NFA.transition_matrix[state][""]:insert(end_state)
     end
-    NFA.__start = set()
-    NFA.__end = set()
-    NFA.__start:insert(start_state)
-    NFA.__end:insert(end_state)
-    basic_convert(NFA) -- 还没有完成
+    NFA.initial_states:remove(NFA.initial_states):insert(start_state)
+    NFA.final_states:remove(NFA.final_states):insert(end_state)
+    -- basic_convert(NFA) -- 还没有完成
 
-    local convert_table = get_converttable(NFA)
-    for row_name, row in pairs(convert_table) do
-        print(row_name)
-        for i, v in pairs(row) do
-            print(v)
-        end
-    end
+    -- local convert_table = get_converttable(NFA)
+    -- for row_name, row in pairs(convert_table) do
+    --     print(row_name)
+    --     for i, v in pairs(row) do
+    --         print(v)
+    --     end
+    -- end
     --
     -- for key, value in pairs(a) do
     --     print(key, value)
     -- end
-    NFA.__states = temp_states
+    -- NFA.__states = temp_states
 end
 
 return nfa2dfa
