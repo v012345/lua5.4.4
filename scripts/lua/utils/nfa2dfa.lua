@@ -52,33 +52,33 @@ end
 ---comment
 ---@param NFA NFA
 local function basic_convert(NFA)
-    local __matrix = NFA.__matrix or { { set() } }
-    NFA.__chars = set()
-    ---@type set[][]
-    local matrix = {}
-    for from, row in pairs(__matrix) do
-        for lable, tos in pairs(row) do
-            for to in pairs(tos) do
-                if lable == "" then -- ε
-                    matrix[from] = matrix[from] or {}
-                    matrix[from][lable] = matrix[from][lable] or set()
-                    matrix[from][lable]:insert(to)
-                elseif string.match(lable, '|') then
-                    error("nfa2dfa|")
-                elseif string.match(lable, '*') then
-                    error("nfa2dfa*")
-                elseif #lable > 1 then
-                    convert_and(NFA, matrix, from, lable, to)
-                else
-                    NFA.__chars:insert(lable)
-                    matrix[from] = matrix[from] or {}
-                    matrix[from][lable] = matrix[from][lable] or set()
-                    matrix[from][lable]:insert(to)
-                end
-            end
-        end
-    end
-    NFA.__matrix = matrix
+    -- local __matrix = NFA.__matrix or { { set() } }
+    -- NFA.__chars = set()
+    -- ---@type set[][]
+    -- local matrix = {}
+    -- for from, row in pairs(__matrix) do
+    --     for lable, tos in pairs(row) do
+    --         for to in pairs(tos) do
+    --             if lable == "" then -- ε
+    --                 matrix[from] = matrix[from] or {}
+    --                 matrix[from][lable] = matrix[from][lable] or set()
+    --                 matrix[from][lable]:insert(to)
+    --             elseif string.match(lable, '|') then
+    --                 error("nfa2dfa|")
+    --             elseif string.match(lable, '*') then
+    --                 error("nfa2dfa*")
+    --             elseif #lable > 1 then
+    --                 convert_and(NFA, matrix, from, lable, to)
+    --             else
+    --                 NFA.__chars:insert(lable)
+    --                 matrix[from] = matrix[from] or {}
+    --                 matrix[from][lable] = matrix[from][lable] or set()
+    --                 matrix[from][lable]:insert(to)
+    --             end
+    --         end
+    --     end
+    -- end
+    -- NFA.__matrix = matrix
 end
 
 ---comment
@@ -158,11 +158,7 @@ local function get_converttable(NFA)
     return convert_table
 end
 
----comment
----@param NFA NFA
-local function nfa2dfa(NFA)
-    set_temp_states(NFA)
-
+local function add_new_start_and_end(NFA)
     local start_state = get_a_state()
     local end_state = get_a_state()
     NFA.transition_matrix[start_state] = matrix()
@@ -178,7 +174,15 @@ local function nfa2dfa(NFA)
     end
     NFA.initial_states:remove(NFA.initial_states):insert(start_state)
     NFA.final_states:remove(NFA.final_states):insert(end_state)
-    -- basic_convert(NFA) -- 还没有完成
+end
+
+---comment
+---@param NFA NFA
+local function nfa2dfa(NFA)
+    set_temp_states(NFA)
+    add_new_start_and_end(NFA)
+
+    basic_convert(NFA) -- 还没有完成
 
     -- local convert_table = get_converttable(NFA)
     -- for row_name, row in pairs(convert_table) do
