@@ -254,6 +254,21 @@ local function deal_on_label(NFA, from_state, to_state, label)
             end
         end
     else
+        if #label > 1 then
+            NFA.transition_matrix[from_state][label] = nil
+            local new_state = {}
+            new_state[#new_state + 1] = from_state
+            for i = 1, #label - 1 do
+                new_state[#new_state + 1] = set(get_a_state())
+            end
+            new_state[#new_state + 1] = to_state
+            for i = 1, #label, 1 do
+                local new_lable = string.sub(label, i, i)
+                local transition_matrix = NFA.transition_matrix
+                transition_matrix[new_state[i]] = transition_matrix[new_state[i]] or {}
+                NFA.transition_matrix[new_state[i]][new_lable] = new_state[i + 1]
+            end
+        end
         return
     end
 end
