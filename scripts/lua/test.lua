@@ -18,14 +18,14 @@ function main()
         print(msg)
     end, content)
     -- -- NFA = NFA or {}
-    file = io.open("C:\\Users\\Meteor\\Desktop\\configs\\ast1.dot", "w") or error("can't open ast1.dot")
+    file = io.open("../../../ast1.dot", "w") or error("can't open ast1.dot")
     file:write(tostring(NFA))
     file:close()
     local nfa2dfa = require "utils.nfa2dfa"
     xpcall(nfa2dfa, function(msg)
         print(msg)
     end, NFA)
-    file = io.open("C:\\Users\\Meteor\\Desktop\\configs\\ast2.dot", "w") or error("can't open ast2.dot")
+    file = io.open("../../../ast2.dot", "w") or error("can't open ast2.dot")
     file:write(tostring(NFA))
     file:close()
 end

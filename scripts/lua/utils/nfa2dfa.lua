@@ -157,9 +157,9 @@ end
 
 ---comment
 ---@param NFA NFA
----@param from_state any
----@param to_state any
----@param label any
+---@param from_state string
+---@param to_state set
+---@param label string
 local function deal_on_label(NFA, from_state, to_state, label)
     if need_to_deal(label) then
         local need_or, data_or = need_to_deal_or(label)
@@ -403,10 +403,10 @@ end
 ---comment
 ---@param NFA NFA
 local function nfa2dfa(NFA)
-    -- set_temp_states(NFA)
-    -- add_new_start_and_end(NFA)
+    set_temp_states(NFA)
+    add_new_start_and_end(NFA)
 
-    -- basic_convert(NFA)
+    basic_convert(NFA)
 
     -- local convert_table = get_converttable(NFA)
 end
