@@ -355,7 +355,7 @@ end
 ---@param result set
 local function getJ(matrix, states, a, result)
     for state in pairs(states) do
-        for label, tos in pairs(matrix[state] or {}) do
+        for label, tos in pairs(matrix[state] or matrix[set(state) or {}]) do
             if label == a then
                 result:insert(tos)
             end
@@ -370,33 +370,68 @@ end
 ---@return set
 local function I(matrix, state, a)
     local r = set()
+
+
     epsilon_close(matrix, state, r)
+
     local r1 = set()
     getJ(matrix, r, a, r1)
+
     r = set()
     epsilon_close(matrix, r1, r)
     return r
 end
 
 ---comment
----@param NFA Machine
+---@param NFA NFA
 ---@return set[][]
 local function get_converttable(NFA)
+    local chars = set()
+    for _, label_states in pairs(NFA.transition_matrix) do
+        for label, _ in pairs(label_states) do
+            if label ~= "" then
+                chars:insert(label)
+            end
+        end
+    end
     ---@type set[][]
     local convert_table = {}
-    local x = set()
-    epsilon_close(NFA.__matrix, NFA.__start, x)
-    convert_table[x] = convert_table[x] or {}
+    local first_line_key = set()
+    epsilon_close(NFA.transition_matrix, NFA.initial_states, first_line_key)
 
-    for label in pairs(NFA.__chars) do
-        local a = I(NFA.__matrix, x, label)
-        convert_table[x][label] = a
+    -- for a in pairs(chars) do
+    --     local Ia = I(NFA.transition_matrix, first_line_key, a)
+    --     convert_table[first_line_key][a] = Ia
+    -- end
+    local function gg(convert_table1, line_key)
+        print(line_key)
+        print(convert_table1[line_key])
+        if convert_table1[line_key] then
+            return
+        else
+            for a in pairs(chars) do
+                -- print(line_key)
+                local Ia = I(NFA.transition_matrix, line_key, a)
+                convert_table1[line_key] = convert_table1[line_key] or {}
+                convert_table1[line_key][a] = Ia
+                -- print(Ia)
+            end
+            for key, value in pairs(convert_table1[line_key]) do
+                if #value ~= 0 then
+                    gg(convert_table1, value)
+                end
+            end
+        end
     end
-    local a = set({ set("A"), set("B") })
-    a:insert(set("C"))
-    a:insert(set("B"))
-    print(a)
-
+    -- print(NFA.transition_matrix[set("5")])
+    gg(convert_table, first_line_key)
+    for index, value in ipairs(convert_table) do
+        print(index)
+        for key, value1 in pairs(value) do
+            print(value1)
+        end
+    end
+    -- print("Ia = ", I(NFA.transition_matrix, set({ "5", "1", "9" }), "a"))
     return convert_table
 end
 
@@ -424,9 +459,9 @@ local function nfa2dfa(NFA)
     set_temp_states(NFA)
     add_new_start_and_end(NFA)
 
-    basic_convert(NFA) -- 还没有完成
+    basic_convert(NFA)
 
-    -- local convert_table = get_converttable(NFA)
+    local convert_table = get_converttable(NFA)
     -- for row_name, row in pairs(convert_table) do
     --     print(row_name)
     --     for i, v in pairs(row) do

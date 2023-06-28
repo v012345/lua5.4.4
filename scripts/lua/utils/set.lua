@@ -88,7 +88,7 @@ function mt.__tostring(set)
     for i, ele in ipairs(set.list) do
         t[#t + 1] = tostring(ele)
         t[#t + 1] = "\t"
-        if i & 0x3 == 0 then
+        if i & 0xff == 0 then
             t[#t + 1] = "\n"
         end
     end
