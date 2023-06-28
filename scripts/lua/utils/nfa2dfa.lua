@@ -22,20 +22,20 @@ end
 ---@param NFA Machine
 ---@param matrix set[][]
 ---@param from any
----@param lable any
+---@param label any
 ---@param to any
-local function convert_and(NFA, matrix, from, lable, to)
+local function convert_and(NFA, matrix, from, label, to)
     local state_next = get_a_state()
 
     matrix[from] = matrix[from] or {}
-    local c = string.sub(lable, 1, 1)
+    local c = string.sub(label, 1, 1)
     matrix[from][c] = matrix[from][c] or set()
     matrix[from][c]:insert(state_next)
     NFA.__chars:insert(c)
 
-    for i = 2, #lable - 1, 1 do
+    for i = 2, #label - 1, 1 do
         matrix[state_next] = matrix[state_next] or {}
-        local l = string.sub(lable, i, i)
+        local l = string.sub(label, i, i)
         matrix[state_next][l] = matrix[state_next][l] or set()
         local temp_p = matrix[state_next][l]
         state_next = get_a_state()
@@ -43,27 +43,27 @@ local function convert_and(NFA, matrix, from, lable, to)
         NFA.__chars:insert(l)
     end
     matrix[state_next] = matrix[state_next] or {}
-    local l = string.sub(lable, #lable, #lable)
+    local l = string.sub(label, #label, #label)
     matrix[state_next][l] = matrix[state_next][l] or set()
     matrix[state_next][l]:insert(to)
     NFA.__chars:insert(l)
 end
 
-local function need_to_deal(lable)
-    if lable == "" then
+local function need_to_deal(label)
+    if label == "" then
         return false
-    elseif string.match(lable, "^[a-zA-Z]+$") then
+    elseif string.match(label, "^[a-zA-Z]+$") then
         return false
     end
     return true
 end
 
-local function need_to_deal_or(lable)
+local function need_to_deal_or(label)
     local level = 0
     local r = {}
     local from = 1
-    for i = 1, #lable, 1 do
-        local char = string.sub(lable, i, i)
+    for i = 1, #label, 1 do
+        local char = string.sub(label, i, i)
         if char == "(" then
             level = level + 1
         end
@@ -71,24 +71,24 @@ local function need_to_deal_or(lable)
             level = level - 1
         end
         if char == "|" and level == 0 then
-            r[#r + 1] = string.sub(lable, from, i - 1)
+            r[#r + 1] = string.sub(label, from, i - 1)
             from = i + 1
         end
     end
     if #r > 0 then
-        r[#r + 1] = string.sub(lable, from, #lable)
+        r[#r + 1] = string.sub(label, from, #label)
         return true, set(r)
     end
     return false, set()
 end
 
-local function need_to_deal_parentheses(lable)
+local function need_to_deal_parentheses(label)
     local level = 0
     local r = {}
     local from = 1
     local left = 1
-    for i = 1, #lable, 1 do
-        local char = string.sub(lable, i, i)
+    for i = 1, #label, 1 do
+        local char = string.sub(label, i, i)
         if char == "(" then
             level = level + 1
             if level == 1 then
@@ -98,12 +98,12 @@ local function need_to_deal_parentheses(lable)
         if char == ")" then
             level = level - 1
             if level == 0 then
-                if string.sub(lable, i + 1, i + 1) ~= "*" then
-                    local a = string.sub(lable, from, left - 1)
+                if string.sub(label, i + 1, i + 1) ~= "*" then
+                    local a = string.sub(label, from, left - 1)
                     if a ~= "" then
                         r[#r + 1] = a
                     end
-                    a = string.sub(lable, left + 1, i - 1)
+                    a = string.sub(label, left + 1, i - 1)
                     if a ~= "" then
                         r[#r + 1] = a
                     end
@@ -113,7 +113,7 @@ local function need_to_deal_parentheses(lable)
         end
     end
     if #r > 0 then
-        local a = string.sub(lable, from, #lable)
+        local a = string.sub(label, from, #label)
         if a ~= "" then
             r[#r + 1] = a
         end
@@ -122,21 +122,73 @@ local function need_to_deal_parentheses(lable)
     return false, r
 end
 
-local function deal_or()
-
+local function need_to_deal_close(label)
+    local level = 0
+    local r = {}
+    local from = 1
+    for i = 1, #label, 1 do
+        local char = string.sub(label, i, i)
+        if char == "(" then
+            level = level + 1
+            if level == 1 then
+                local a = string.sub(label, from, i - 1)
+                if a ~= "" then
+                    r[#r + 1] = {
+                        is_close = false,
+                        label = a
+                    }
+                end
+                from = i + 1
+            end
+        end
+        if char == ")" then
+            level = level - 1
+            if level == 0 then
+                if string.sub(label, i + 1, i + 1) == "*" then
+                    local a = string.sub(label, from, i - 1)
+                    if a ~= "" then
+                        r[#r + 1] = {
+                            is_close = true,
+                            label = a
+                        }
+                    end
+                    from = i + 2
+                else
+                    error("not a close")
+                end
+            end
+        end
+        if char == "*" then
+            if string.sub(label, i - 1, i - 1) ~= ")" and level == 0 then
+                local a = string.sub(label, from, i - 2)
+                if a ~= "" then
+                    r[#r + 1] = {
+                        is_close = false,
+                        label = a
+                    }
+                end
+                from = i - 1
+                a = string.sub(label, from, i - 1)
+                if a ~= "" then
+                    r[#r + 1] = {
+                        is_close = true,
+                        label = a
+                    }
+                end
+                from = i + 1
+            end
+        end
+    end
+    if #r > 0 then
+        local a = string.sub(label, from, #label)
+        if a ~= "" then
+            r[#r + 1] = a
+        end
+        return true, r
+    end
+    return false, r
 end
 
-local function deal_close()
-
-end
-
-local function deal_and()
-
-end
-
-local function deal_parentheses()
-
-end
 
 ---comment
 ---@param NFA NFA
@@ -171,6 +223,11 @@ local function deal_on_label(NFA, from_state, to_state, label)
                         deal_on_label(NFA, new_state[key - 1], new_state[key], new_lable)
                     end
                 end
+            else
+                local need_close, data_close = need_to_deal_close(label)
+                if need_close then
+
+                end
             end
         end
     else
@@ -180,8 +237,8 @@ end
 
 local function deal_one_state(NFA, state, labels)
     local need_to_deal_states = {}
-    for lable, to_state in pairs(labels) do
-        need_to_deal_states[lable] = to_state
+    for label, to_state in pairs(labels) do
+        need_to_deal_states[label] = to_state
     end
     for label, to_state in pairs(need_to_deal_states) do
         deal_on_label(NFA, state, to_state, label)
@@ -204,23 +261,23 @@ local function basic_convert(NFA)
     -- ---@type set[][]
     -- local matrix = {}
     -- for from, row in pairs(__matrix) do
-    --     for lable, tos in pairs(row) do
+    --     for label, tos in pairs(row) do
     --         for to in pairs(tos) do
-    --             if lable == "" then -- ε
+    --             if label == "" then -- ε
     --                 matrix[from] = matrix[from] or {}
-    --                 matrix[from][lable] = matrix[from][lable] or set()
-    --                 matrix[from][lable]:insert(to)
-    --             elseif string.match(lable, '|') then
+    --                 matrix[from][label] = matrix[from][label] or set()
+    --                 matrix[from][label]:insert(to)
+    --             elseif string.match(label, '|') then
     --                 error("nfa2dfa|")
-    --             elseif string.match(lable, '*') then
+    --             elseif string.match(label, '*') then
     --                 error("nfa2dfa*")
-    --             elseif #lable > 1 then
-    --                 convert_and(NFA, matrix, from, lable, to)
+    --             elseif #label > 1 then
+    --                 convert_and(NFA, matrix, from, label, to)
     --             else
-    --                 NFA.__chars:insert(lable)
+    --                 NFA.__chars:insert(label)
     --                 matrix[from] = matrix[from] or {}
-    --                 matrix[from][lable] = matrix[from][lable] or set()
-    --                 matrix[from][lable]:insert(to)
+    --                 matrix[from][label] = matrix[from][label] or set()
+    --                 matrix[from][label]:insert(to)
     --             end
     --         end
     --     end
@@ -260,8 +317,8 @@ end
 ---@param result set
 local function getJ(matrix, states, a, result)
     for state in pairs(states) do
-        for lable, tos in pairs(matrix[state] or {}) do
-            if lable == a then
+        for label, tos in pairs(matrix[state] or {}) do
+            if label == a then
                 result:insert(tos)
             end
         end
