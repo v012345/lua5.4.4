@@ -49,9 +49,34 @@ local function convert_and(NFA, matrix, from, lable, to)
     NFA.__chars:insert(l)
 end
 
+local function ()
+    
+end
+
+local function deal_or()
+
+end
+
+local function deal_close()
+
+end
+
+local function deal_and()
+
+end
+
+local function deal_parentheses()
+
+end
+
 ---comment
 ---@param NFA NFA
 local function basic_convert(NFA)
+    local need_to_deal_states = {}
+    for key in pairs(NFA.transition_matrix) do
+        need_to_deal_states[#need_to_deal_states+1] = key
+    end
+    
     -- local __matrix = NFA.__matrix or { { set() } }
     -- NFA.__chars = set()
     -- ---@type set[][]
