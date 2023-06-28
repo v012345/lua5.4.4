@@ -112,6 +112,7 @@ local function deal_on_label(NFA, from_state, to_state, label)
                 NFA.transition_matrix[from_state][new_lable] = to_state
                 deal_on_label(NFA, from_state, to_state, new_lable)
             end
+        else
         end
     else
         return

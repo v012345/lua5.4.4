@@ -9,7 +9,7 @@ digraph NDF {
     5 -> 5 [label = "b";];
     5 -> 1 [label = "";];
     1 -> 2 [label = "aa";];
-    1 -> 2 [label = "(bb)*|c";];
+    1 -> 2 [label = "A|((bb)*)d|c";];
     2 -> 6 [label = "a|(c|d)*|bb";];
     6 -> 6 [label = "a|b";];
     6 -> 6 [label = "b";];
