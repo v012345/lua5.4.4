@@ -180,10 +180,6 @@ local function need_to_deal_close(label)
         end
     end
     if #r > 0 then
-        local a = string.sub(label, from, #label)
-        if a ~= "" then
-            r[#r + 1] = a
-        end
         return true, r
     end
     return false, r
@@ -226,7 +222,9 @@ local function deal_on_label(NFA, from_state, to_state, label)
             else
                 local need_close, data_close = need_to_deal_close(label)
                 if need_close then
-
+                    for key, value in pairs(data_close) do
+                        print(value.is_close, value.label)
+                    end
                 end
             end
         end
