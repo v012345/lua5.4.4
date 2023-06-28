@@ -4,6 +4,7 @@ digraph NDF {
     node [shape = doublecircle;];
     5 [color = green;];
     6 [color = red;];
+    2 [color = yellow;];
     node [shape = circle;];
     5 -> 5 [label = "a";];
     5 -> 5 [label = "b";];

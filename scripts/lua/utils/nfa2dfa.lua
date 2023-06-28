@@ -403,12 +403,12 @@ end
 ---comment
 ---@param NFA NFA
 local function nfa2dfa(NFA)
-    set_temp_states(NFA)
-    add_new_start_and_end(NFA)
+    -- set_temp_states(NFA)
+    -- add_new_start_and_end(NFA)
 
-    basic_convert(NFA)
+    -- basic_convert(NFA)
 
-    local convert_table = get_converttable(NFA)
+    -- local convert_table = get_converttable(NFA)
 end
 
 return nfa2dfa

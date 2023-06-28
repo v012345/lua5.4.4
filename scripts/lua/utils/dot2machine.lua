@@ -234,6 +234,9 @@ local function read_start_and_end_states(Machine)
                 Machine:add_initial_states(token)
             elseif attr.key == "color" and attr.value == "red" then
                 Machine:add_final_states(token)
+            elseif attr.key == "color" and attr.value == "yellow" then
+                Machine:add_final_states(token)
+                Machine:add_initial_states(token)
             end
         end
     end

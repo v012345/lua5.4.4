@@ -73,10 +73,16 @@ function mt.__tostring(NFA)
     t[#t + 1] = "    size = \"8,5\";\n"
     t[#t + 1] = "    node [shape = doublecircle;];\n"
     for k in pairs(NFA.initial_states) do
-        t[#t + 1] = string.format("    %s [color = green;];\n", k)
+        if NFA.final_states:contain(k) then
+            t[#t + 1] = string.format("    %s [color = yellow;];\n", k)
+        else
+            t[#t + 1] = string.format("    %s [color = green;];\n", k)
+        end
     end
     for k in pairs(NFA.final_states) do
-        t[#t + 1] = string.format("    %s [color = red;];\n", k)
+        if not NFA.initial_states:contain(k) then
+            t[#t + 1] = string.format("    %s [color = red;];\n", k)
+        end
     end
     t[#t + 1] = string.format("    node [shape = circle;];\n")
     for from_state, row in pairs(NFA.transition_matrix) do
