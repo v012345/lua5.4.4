@@ -20,34 +20,11 @@ local escape = {
     ["t"] = "\t",
     ["b"] = "\b",
 }
-local escape_r = {
-    ["\\"] = "\\\\",
-    ["\""] = "\\\"",
-    ["/"] = "\\/",
-    ["\r"] = "\\r",
-    ["\f"] = "\\f",
-    ["\n"] = "\\n",
-    ["\t"] = "\\t",
-    ["\b"] = "\\b",
-}
 
 local char_pointer = 1
 local dot_string = ""
 local current_char = " "
 
-
-local function escape_string(str)
-    local o = {}
-    for i = 1, #str do
-        local char = string.sub(str, i, i)
-        if escape_r[char] then
-            o[i] = escape_r[char]
-        else
-            o[i] = char
-        end
-    end
-    return table.concat(o)
-end
 
 local function get_next_char()
     local _char_pointer = char_pointer

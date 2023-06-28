@@ -18,37 +18,6 @@ local function get_a_state()
     return tostring(x)
 end
 
----comment
----@param NFA Machine
----@param matrix set[][]
----@param from any
----@param label any
----@param to any
-local function convert_and(NFA, matrix, from, label, to)
-    local state_next = get_a_state()
-
-    matrix[from] = matrix[from] or {}
-    local c = string.sub(label, 1, 1)
-    matrix[from][c] = matrix[from][c] or set()
-    matrix[from][c]:insert(state_next)
-    NFA.__chars:insert(c)
-
-    for i = 2, #label - 1, 1 do
-        matrix[state_next] = matrix[state_next] or {}
-        local l = string.sub(label, i, i)
-        matrix[state_next][l] = matrix[state_next][l] or set()
-        local temp_p = matrix[state_next][l]
-        state_next = get_a_state()
-        temp_p:insert(state_next)
-        NFA.__chars:insert(l)
-    end
-    matrix[state_next] = matrix[state_next] or {}
-    local l = string.sub(label, #label, #label)
-    matrix[state_next][l] = matrix[state_next][l] or set()
-    matrix[state_next][l]:insert(to)
-    NFA.__chars:insert(l)
-end
-
 local function need_to_deal(label)
     if label == "" then
         return false
@@ -206,7 +175,7 @@ local function deal_on_label(NFA, from_state, to_state, label)
                 NFA.transition_matrix[from_state][label] = nil
                 local new_state = {}
                 for i = 1, #data_parentheses - 1 do
-                    new_state[i] = set(get_a_state())
+                    new_state[i] = get_a_state()
                 end
                 new_state[#new_state + 1] = to_state
                 for key, new_lable in pairs(data_parentheses) do
@@ -227,7 +196,7 @@ local function deal_on_label(NFA, from_state, to_state, label)
                         local new_state = {}
                         new_state[#new_state + 1] = from_state
                         for i = 1, #data_close - 1 do
-                            new_state[#new_state + 1] = set(get_a_state())
+                            new_state[#new_state + 1] = get_a_state()
                         end
                         new_state[#new_state + 1] = to_state
                         for key, value in pairs(data_close) do
@@ -239,7 +208,7 @@ local function deal_on_label(NFA, from_state, to_state, label)
                         end
                     else
                         NFA.transition_matrix[from_state][label] = nil
-                        local new_state = set(get_a_state())
+                        local new_state = get_a_state()
                         for key, value in pairs(data_close) do
                             local new_lable = value.label
                             local transition_matrix = NFA.transition_matrix
@@ -259,7 +228,7 @@ local function deal_on_label(NFA, from_state, to_state, label)
             local new_state = {}
             new_state[#new_state + 1] = from_state
             for i = 1, #label - 1 do
-                new_state[#new_state + 1] = set(get_a_state())
+                new_state[#new_state + 1] = get_a_state()
             end
             new_state[#new_state + 1] = to_state
             for i = 1, #label, 1 do
@@ -294,33 +263,6 @@ local function basic_convert(NFA)
     for _, state in pairs(need_to_deal_states) do
         deal_one_state(NFA, state, NFA.transition_matrix[state])
     end
-    -- local __matrix = NFA.__matrix or { { set() } }
-    -- NFA.__chars = set()
-    -- ---@type set[][]
-    -- local matrix = {}
-    -- for from, row in pairs(__matrix) do
-    --     for label, tos in pairs(row) do
-    --         for to in pairs(tos) do
-    --             if label == "" then -- ε
-    --                 matrix[from] = matrix[from] or {}
-    --                 matrix[from][label] = matrix[from][label] or set()
-    --                 matrix[from][label]:insert(to)
-    --             elseif string.match(label, '|') then
-    --                 error("nfa2dfa|")
-    --             elseif string.match(label, '*') then
-    --                 error("nfa2dfa*")
-    --             elseif #label > 1 then
-    --                 convert_and(NFA, matrix, from, label, to)
-    --             else
-    --                 NFA.__chars:insert(label)
-    --                 matrix[from] = matrix[from] or {}
-    --                 matrix[from][label] = matrix[from][label] or set()
-    --                 matrix[from][label]:insert(to)
-    --             end
-    --         end
-    --     end
-    -- end
-    -- NFA.__matrix = matrix
 end
 
 ---comment
@@ -333,16 +275,25 @@ local function epsilon_close(matrix, states, result, has_visited)
     for state in pairs(states) do
         result:insert(state)
         for l, tos in pairs(matrix[state] or {}) do
-            for to in pairs(tos) do
+            if type(tos) == "table" then
+                for to in pairs(tos) do
+                    if l == "" then
+                        result:insert(to)
+                        if has_visited:contain(to) then
+                            goto con
+                        end
+                        has_visited:insert(to)
+                        epsilon_close(matrix, set(to), result, has_visited)
+                    end
+                    :: con ::
+                end
+            else
+                local to = tos
                 if l == "" then
                     result:insert(to)
-                    if has_visited:contain(to) then
-                        goto con
-                    end
                     has_visited:insert(to)
                     epsilon_close(matrix, set(to), result, has_visited)
                 end
-                :: con ::
             end
         end
     end
@@ -355,7 +306,7 @@ end
 ---@param result set
 local function getJ(matrix, states, a, result)
     for state in pairs(states) do
-        for label, tos in pairs(matrix[state] or matrix[set(state) or {}]) do
+        for label, tos in pairs(matrix[state] or {}) do
             if label == a then
                 result:insert(tos)
             end
@@ -364,21 +315,21 @@ local function getJ(matrix, states, a, result)
 end
 
 ---comment
----@param matrix set[][]
+---@param matrix_ set[][]
 ---@param state set
 ---@param a any
 ---@return set
-local function I(matrix, state, a)
+local function I(matrix_, state, a)
     local r = set()
 
 
-    epsilon_close(matrix, state, r)
+    epsilon_close(matrix_, state, r)
 
     local r1 = set()
-    getJ(matrix, r, a, r1)
+    getJ(matrix_, r, a, r1)
 
     r = set()
-    epsilon_close(matrix, r1, r)
+    epsilon_close(matrix_, r1, r)
     return r
 end
 
@@ -399,10 +350,6 @@ local function get_converttable(NFA)
     local first_line_key = set()
     epsilon_close(NFA.transition_matrix, NFA.initial_states, first_line_key)
 
-    -- for a in pairs(chars) do
-    --     local Ia = I(NFA.transition_matrix, first_line_key, a)
-    --     convert_table[first_line_key][a] = Ia
-    -- end
     local function gg(convert_table1, line_key)
         print(line_key)
         print(convert_table1[line_key])
@@ -462,17 +409,6 @@ local function nfa2dfa(NFA)
     basic_convert(NFA)
 
     local convert_table = get_converttable(NFA)
-    -- for row_name, row in pairs(convert_table) do
-    --     print(row_name)
-    --     for i, v in pairs(row) do
-    --         print(v)
-    --     end
-    -- end
-    --
-    -- for key, value in pairs(a) do
-    --     print(key, value)
-    -- end
-    -- NFA.__states = temp_states
 end
 
 return nfa2dfa
