@@ -5,7 +5,12 @@ digraph NDF {
     5 [color = green;];
     6 [color = red;];
     node [shape = circle;];
-    5 -> 1 [label = "(vv)v*vA*b(c)*e*|c(c)(d)";];
-    1 -> 2 [label = "A";];
+    5 -> 5 [label = "a";];
+    5 -> 5 [label = "b";];
+    5 -> 1 [label = "";];
+    1 -> 2 [label = "aa";];
+    1 -> 2 [label = "bb";];
     2 -> 6 [label = "";];
+    6 -> 6 [label = "a";];
+    6 -> 6 [label = "b";];
 }
