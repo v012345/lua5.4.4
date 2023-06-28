@@ -145,7 +145,7 @@ local function need_to_deal_close(label)
             level = level - 1
             if level == 0 then
                 if string.sub(label, i + 1, i + 1) == "*" then
-                    local a = string.sub(label, from, i - 1)
+                    local a = string.sub(label, from-1, i + 1)
                     if a ~= "" then
                         r[#r + 1] = {
                             is_close = true,
@@ -168,7 +168,7 @@ local function need_to_deal_close(label)
                     }
                 end
                 from = i - 1
-                a = string.sub(label, from, i - 1)
+                a = string.sub(label, from, i)
                 if a ~= "" then
                     r[#r + 1] = {
                         is_close = true,
@@ -221,31 +221,38 @@ local function deal_on_label(NFA, from_state, to_state, label)
                 end
             else
                 local need_close, data_close = need_to_deal_close(label)
-                if false then
-                    NFA.transition_matrix[from_state][label] = nil
-                    local new_state = {}
-                    new_state[#new_state + 1] = from_state
-                    for i = 1, #data_parentheses do
-                        new_state[#new_state + 1] = set(get_a_state())
+                if need_close then
+                    for index, value in ipairs(data_close) do
+                        print(value.label)
                     end
-                    new_state[#new_state + 1] = to_state
-                    for key, value in pairs(data_close) do
-                        local new_lable = value.label
-                        if value.is_close then
-                            local transition_matrix = NFA.transition_matrix
-                            transition_matrix[new_state[key]] = transition_matrix[new_state[key]] or {}
-                            NFA.transition_matrix[new_state[key]][""] = new_state[key + 1]
-                            NFA.transition_matrix[new_state[key + 1]] = NFA.transition_matrix[new_state[key + 1]] or {}
-                            NFA.transition_matrix[new_state[key + 1]][new_lable] = new_state[key + 1]
-                            deal_on_label(NFA, new_state[key + 1], new_state[key + 1], new_lable)
-                            NFA.transition_matrix[new_state[key + 1]][""] = new_state[key + 2]
-                        else
-                            local transition_matrix = NFA.transition_matrix
-                            transition_matrix[new_state[key]] = transition_matrix[new_state[key]] or {}
-                            NFA.transition_matrix[new_state[key]][new_lable] = new_state[key + 1]
-                            deal_on_label(NFA, new_state[key], new_state[key + 1], new_lable)
-                        end
-                    end
+
+                    -- if #data_close ==1 then
+                    --     NFA.transition_matrix[from_state][label] = nil
+                    --     local new_state = {}
+                    --     new_state[#new_state + 1] = from_state
+                    --     for i = 1, #data_parentheses do
+                    --         new_state[#new_state + 1] = set(get_a_state())
+                    --     end
+                    --     new_state[#new_state + 1] = to_state
+                    --     for key, value in pairs(data_close) do
+                    --         local new_lable = value.label
+                    --         if value.is_close then
+                    --             local transition_matrix = NFA.transition_matrix
+                    --             transition_matrix[new_state[key]] = transition_matrix[new_state[key]] or {}
+                    --             NFA.transition_matrix[new_state[key]][""] = new_state[key + 1]
+                    --             NFA.transition_matrix[new_state[key + 1]] = NFA.transition_matrix[new_state[key + 1]] or {}
+                    --             NFA.transition_matrix[new_state[key + 1]][new_lable] = new_state[key + 1]
+                    --             deal_on_label(NFA, new_state[key + 1], new_state[key + 1], new_lable)
+                    --             NFA.transition_matrix[new_state[key + 1]][""] = new_state[key + 2]
+                    --         else
+                    --             local transition_matrix = NFA.transition_matrix
+                    --             transition_matrix[new_state[key]] = transition_matrix[new_state[key]] or {}
+                    --             NFA.transition_matrix[new_state[key]][new_lable] = new_state[key + 1]
+                    --             deal_on_label(NFA, new_state[key], new_state[key + 1], new_lable)
+                    --         end
+                    --     end
+                    -- else
+                    -- end
                 end
             end
         end
