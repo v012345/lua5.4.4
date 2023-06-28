@@ -49,8 +49,37 @@ local function convert_and(NFA, matrix, from, lable, to)
     NFA.__chars:insert(l)
 end
 
-local function ()
-    
+local function need_to_deal(lable)
+    if lable == "" then
+        return false
+    elseif string.match(lable, "^[a-zA-Z]+$") then
+        return false
+    end
+    return true
+end
+
+local function need_to_deal_or(lable)
+    local level = 0
+    local r = {}
+    local from = 1
+    for i = 1, #lable, 1 do
+        local char = string.sub(lable, i, i)
+        if char == "(" then
+            level = level + 1
+        end
+        if char == ")" then
+            level = level - 1
+        end
+        if char == "|" and level == 0 then
+            r[#r + 1] = string.sub(lable, from, i - 1)
+            from = i + 1
+        end
+    end
+    if #r > 0 then
+        r[#r + 1] = string.sub(lable, from, #lable)
+        return true, set(r)
+    end
+    return false, set()
 end
 
 local function deal_or()
@@ -71,12 +100,45 @@ end
 
 ---comment
 ---@param NFA NFA
+---@param from_state any
+---@param to_state any
+---@param label any
+local function deal_on_label(NFA, from_state, to_state, label)
+    if need_to_deal(label) then
+        local need, data = need_to_deal_or(label)
+        if need then
+            NFA.transition_matrix[from_state][label] = nil
+            for new_lable in pairs(data) do
+                NFA.transition_matrix[from_state][new_lable] = to_state
+                deal_on_label(NFA, from_state, to_state, new_lable)
+            end
+        end
+    else
+        return
+    end
+end
+
+local function deal_one_state(NFA, state, labels)
+    local need_to_deal_states = {}
+    for lable, to_state in pairs(labels) do
+        need_to_deal_states[lable] = to_state
+    end
+    for label, to_state in pairs(need_to_deal_states) do
+        deal_on_label(NFA, state, to_state, label)
+    end
+end
+
+---comment
+---@param NFA NFA
 local function basic_convert(NFA)
     local need_to_deal_states = {}
     for key in pairs(NFA.transition_matrix) do
-        need_to_deal_states[#need_to_deal_states+1] = key
+        need_to_deal_states[#need_to_deal_states + 1] = key
     end
-    
+
+    for _, state in pairs(need_to_deal_states) do
+        deal_one_state(NFA, state, NFA.transition_matrix[state])
+    end
     -- local __matrix = NFA.__matrix or { { set() } }
     -- NFA.__chars = set()
     -- ---@type set[][]
