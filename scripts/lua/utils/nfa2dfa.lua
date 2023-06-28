@@ -82,6 +82,46 @@ local function need_to_deal_or(lable)
     return false, set()
 end
 
+local function need_to_deal_parentheses(lable)
+    local level = 0
+    local r = {}
+    local from = 1
+    local left = 1
+    for i = 1, #lable, 1 do
+        local char = string.sub(lable, i, i)
+        if char == "(" then
+            level = level + 1
+            if level == 1 then
+                left = i
+            end
+        end
+        if char == ")" then
+            level = level - 1
+            if level == 0 then
+                if string.sub(lable, i + 1, i + 1) ~= "*" then
+                    local a = string.sub(lable, from, left - 1)
+                    if a ~= "" then
+                        r[#r + 1] = a
+                    end
+                    a = string.sub(lable, left + 1, i - 1)
+                    if a ~= "" then
+                        r[#r + 1] = a
+                    end
+                    from = i + 1
+                end
+            end
+        end
+    end
+    if #r > 0 then
+        local a = string.sub(lable, from, #lable)
+        if a ~= "" then
+            r[#r + 1] = a
+        end
+        return true, set(r)
+    end
+    return false, set()
+end
+
 local function deal_or()
 
 end
@@ -105,14 +145,18 @@ end
 ---@param label any
 local function deal_on_label(NFA, from_state, to_state, label)
     if need_to_deal(label) then
-        local need, data = need_to_deal_or(label)
-        if need then
+        local need_or, data_or = need_to_deal_or(label)
+        if need_or then
             NFA.transition_matrix[from_state][label] = nil
-            for new_lable in pairs(data) do
+            for new_lable in pairs(data_or) do
                 NFA.transition_matrix[from_state][new_lable] = to_state
                 deal_on_label(NFA, from_state, to_state, new_lable)
             end
         else
+            local need_parentheses, data_parentheses = need_to_deal_parentheses(label)
+            if need_parentheses then
+                print(data_parentheses)
+            end
         end
     else
         return
