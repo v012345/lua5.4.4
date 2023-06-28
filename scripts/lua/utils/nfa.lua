@@ -83,7 +83,7 @@ function mt.__tostring(NFA)
         for lable, to_states in pairs(row) do
             for to_state in pairs(to_states) do
                 t[#t + 1] = string.format(
-                    "    %s -> %s [label = \"%s\";];\n",
+                    "    %s -> %s [label = %s;];\n",
                     from_state,
                     to_state,
                     string.format("%q", lable)
