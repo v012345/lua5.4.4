@@ -99,6 +99,7 @@ return function()
     ---@class NFA
     local NFA = {
         alphabet = set(),
+        --- transition_matrix[set][string] = set
         transition_matrix = matrix(),
         states = set(),
         initial_states = set(),
