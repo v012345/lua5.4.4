@@ -117,9 +117,9 @@ local function need_to_deal_parentheses(lable)
         if a ~= "" then
             r[#r + 1] = a
         end
-        return true, set(r)
+        return true, r
     end
-    return false, set()
+    return false, r
 end
 
 local function deal_or()
@@ -155,7 +155,22 @@ local function deal_on_label(NFA, from_state, to_state, label)
         else
             local need_parentheses, data_parentheses = need_to_deal_parentheses(label)
             if need_parentheses then
-                print(data_parentheses)
+                NFA.transition_matrix[from_state][label] = nil
+                local new_state = {}
+                for i = 1, #data_parentheses - 1 do
+                    new_state[i] = set(get_a_state())
+                end
+                new_state[#new_state + 1] = to_state
+                for key, new_lable in pairs(data_parentheses) do
+                    if key == 1 then
+                        NFA.transition_matrix[from_state][new_lable] = new_state[key]
+                        deal_on_label(NFA, from_state, new_state[key], new_lable)
+                    else
+                        NFA.transition_matrix[new_state[key - 1]] = NFA.transition_matrix[new_state[key - 1]] or {}
+                        NFA.transition_matrix[new_state[key - 1]][new_lable] = new_state[key]
+                        deal_on_label(NFA, new_state[key - 1], new_state[key], new_lable)
+                    end
+                end
             end
         end
     else

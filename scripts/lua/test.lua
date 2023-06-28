@@ -7,6 +7,27 @@ function main()
     local z = new(Zio)
     local firstchar = zgetc(z)
     luaY_parser(nil, z, new(Mbuffer), nil, "test.lua", firstchar)
+
+
+    -- io.write(tostring(a))
+    local dot2machine = require "utils.dot2machine"
+    local file = io.open("./dot/NDF.dot", "r") or error("can't open NDF.dot")
+    local content = file:read("a")
+    file:close()
+    local _, NFA = xpcall(dot2machine, function(msg)
+        print(msg)
+    end, content)
+    -- -- NFA = NFA or {}
+    file = io.open("C:\\Users\\Meteor\\Desktop\\configs\\ast1.dot", "w") or error("can't open ast1.dot")
+    file:write(tostring(NFA))
+    file:close()
+    local nfa2dfa = require "utils.nfa2dfa"
+    xpcall(nfa2dfa, function(msg)
+        print(msg)
+    end, NFA)
+    file = io.open("C:\\Users\\Meteor\\Desktop\\configs\\ast2.dot", "w") or error("can't open ast2.dot")
+    file:write(tostring(NFA))
+    file:close()
 end
 
 xpcall(main, function(msg)
@@ -14,25 +35,7 @@ xpcall(main, function(msg)
 end)
 
 
--- io.write(tostring(a))
-local dot2machine = require "utils.dot2machine"
-local file = io.open("./dot/NDF.dot", "r") or error("can't open NDF.dot")
-local content = file:read("a")
-file:close()
-local _, NFA = xpcall(dot2machine, function(msg)
-    print(msg)
-end, content)
--- -- NFA = NFA or {}
-file = io.open("C:\\Users\\Meteor\\Desktop\\configs\\ast1.dot", "w") or error("can't open ast1.dot")
-file:write(tostring(NFA))
-file:close()
-local nfa2dfa = require "utils.nfa2dfa"
-xpcall(nfa2dfa, function(msg)
-    print(msg)
-end, NFA)
-file = io.open("C:\\Users\\Meteor\\Desktop\\configs\\ast2.dot", "w") or error("can't open ast2.dot")
-file:write(tostring(NFA))
-file:close()
+
 -- xpcall(NFA.output, function(msg)
 --     print(msg)
 -- end, NFA, "C:\\Users\\Meteor\\Desktop\\configs\\ast2.dot")
