@@ -67,29 +67,6 @@ end
 ---comment
 ---@param NFA NFA
 function mt.__tostring(NFA)
-    local escape_r = {
-        ["\\"] = "\\\\",
-        ["\""] = "\\\"",
-        ["/"] = "\\/",
-        ["\r"] = "\\r",
-        ["\f"] = "\\f",
-        ["\n"] = "\\n",
-        ["\t"] = "\\t",
-        ["\b"] = "\\b",
-    }
-
-    local function escape_string(str)
-        local o = {}
-        for i = 1, #str do
-            local char = string.sub(str, i, i)
-            if escape_r[char] then
-                o[i] = escape_r[char]
-            else
-                o[i] = char
-            end
-        end
-        return table.concat(o)
-    end
     local t = {}
     t[#t + 1] = "digraph nfa {\n"
     t[#t + 1] = "    rankdir = LR;\n"
@@ -105,7 +82,12 @@ function mt.__tostring(NFA)
     for from_state, row in pairs(NFA.transition_matrix) do
         for lable, to_states in pairs(row) do
             for to_state in pairs(to_states) do
-                t[#t + 1] = string.format("    %s -> %s [label = \"%s\";];\n", from_state, to_state, escape_string(lable))
+                t[#t + 1] = string.format(
+                    "    %s -> %s [label = \"%s\";];\n",
+                    from_state,
+                    to_state,
+                    string.format("%q", lable)
+                )
             end
         end
     end
