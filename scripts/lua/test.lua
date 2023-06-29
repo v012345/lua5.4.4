@@ -21,8 +21,8 @@ function main()
     file = io.open("../../../ast1.dot", "w") or error("can't open ast1.dot")
     file:write(tostring(NFA))
     file:close()
-    local nfa2dfa = require "utils.nfa2dfa"
-    xpcall(nfa2dfa, function(msg)
+    local t = require "utils.nfa2dfa"
+    xpcall(t.nfa2dfa, function(msg)
         print(msg)
     end, NFA)
     local minimizeDFA = require "utils.minimizeDFA"

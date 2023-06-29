@@ -430,4 +430,4 @@ local function nfa2dfa(NFA)
     end
 end
 
-return nfa2dfa
+return { nfa2dfa = nfa2dfa, I = I }
