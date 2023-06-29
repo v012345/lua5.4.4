@@ -210,7 +210,7 @@ local function deal_on_label(NFA, from_state, to_state, label)
                             transition_matrix[new_state] = transition_matrix[new_state] or matrix()
                             NFA.transition_matrix[from_state][""] = set(new_state)
                             NFA.transition_matrix[new_state][string.sub(new_lable, 1, #new_lable - 1)] = set(new_state)
-                            NFA.transition_matrix[new_state][""] = set(new_state)
+                            NFA.transition_matrix[new_state][""] = to_state
                             deal_on_label(NFA, new_state, set(new_state), string.sub(new_lable, 1, #new_lable - 1))
                         end
                     end
@@ -388,7 +388,6 @@ end
 local function nfa2dfa(NFA)
     temp_states = set(NFA.states)
     add_new_start_and_end(NFA)
-
     basic_convert(NFA)
 
     local convert_table = get_converttable(NFA)
@@ -399,6 +398,7 @@ local function nfa2dfa(NFA)
     local original_final_states = set(NFA.final_states)
     NFA.initial_states:remove(NFA.initial_states)
     NFA.final_states:remove(NFA.final_states)
+    NFA.states = set()
     local i = 1
     for value in pairs(convert_table) do
         key_set[value] = tostring(i)
@@ -409,6 +409,7 @@ local function nfa2dfa(NFA)
             NFA.final_states:insert(tostring(i))
         end
         new_mt[tostring(i)] = matrix()
+        NFA.states:insert(tostring(i))
         i = i + 1
     end
 
@@ -419,6 +420,14 @@ local function nfa2dfa(NFA)
         end
     end
     NFA.transition_matrix = new_mt
+    NFA.alphabet = set()
+    for _, label_states in pairs(NFA.transition_matrix) do
+        for label, _ in pairs(label_states) do
+            if label ~= "" then
+                NFA.alphabet:insert(label)
+            end
+        end
+    end
 end
 
 return nfa2dfa
