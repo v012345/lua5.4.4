@@ -3,11 +3,6 @@ local matrix = require "utils.matrix"
 ---@type set
 local temp_states = nil
 
----comment
----@param NFA NFA
-local function set_temp_states(NFA)
-    temp_states = set(NFA.states)
-end
 
 local function get_a_state()
     local x = #temp_states
@@ -403,7 +398,7 @@ end
 ---comment
 ---@param NFA NFA
 local function nfa2dfa(NFA)
-    set_temp_states(NFA)
+    temp_states = set(NFA.states)
     add_new_start_and_end(NFA)
 
     basic_convert(NFA)

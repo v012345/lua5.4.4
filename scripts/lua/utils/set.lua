@@ -21,6 +21,14 @@ function mt.convert_to_table(eles)
     end
 end
 
+function mt.get(set)
+    if #set.list == 1 then
+        return set.list[1]
+    else
+        return set.list
+    end
+end
+
 ---@private
 function mt.__len(set)
     return #set.list
