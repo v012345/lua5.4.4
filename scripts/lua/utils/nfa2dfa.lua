@@ -350,11 +350,9 @@ local function get_converttable(NFA)
             return
         else
             for a in pairs(chars) do
-                -- print(line_key)
                 local Ia = I(NFA.transition_matrix, line_key, a)
                 convert_table1[line_key] = convert_table1[line_key] or {}
                 convert_table1[line_key][a] = Ia
-                -- print(Ia)
             end
             for key, value in pairs(convert_table1[line_key]) do
                 if #value ~= 0 then
@@ -363,15 +361,7 @@ local function get_converttable(NFA)
             end
         end
     end
-    -- print(NFA.transition_matrix[set("5")])
     gg(convert_table, first_line_key)
-    for index, value in pairs(convert_table) do
-        print(index)
-        for key, value1 in pairs(value) do
-            print("\t", key, value1)
-        end
-    end
-    -- print("Ia = ", I(NFA.transition_matrix, set({ "5", "1", "9" }), "a"))
     return convert_table
 end
 
@@ -402,6 +392,33 @@ local function nfa2dfa(NFA)
     basic_convert(NFA)
 
     local convert_table = get_converttable(NFA)
+    local key_set = matrix()
+    local new_mt = matrix()
+
+    local original_initial_states = set(NFA.initial_states)
+    local original_final_states = set(NFA.final_states)
+    NFA.initial_states:remove(NFA.initial_states)
+    NFA.final_states:remove(NFA.final_states)
+    local i = 1
+    for value in pairs(convert_table) do
+        key_set[value] = tostring(i)
+        if value:contain(original_initial_states) then
+            NFA.initial_states:insert(tostring(i))
+        end
+        if value:contain(original_final_states) then
+            NFA.final_states:insert(tostring(i))
+        end
+        new_mt[tostring(i)] = matrix()
+        i = i + 1
+    end
+
+    for key, value in pairs(key_set) do
+        for key1, value1 in pairs(convert_table[key]) do
+            new_mt[value][key1] = new_mt[value][key1] or set()
+            new_mt[value][key1]:insert(key_set[value1])
+        end
+    end
+    NFA.transition_matrix = new_mt
 end
 
 return nfa2dfa
