@@ -1,9 +1,3 @@
-package.path =
-    table.concat({
-        package.path, ";",
-        (debug.getinfo(1, "S").short_src:gsub("[^\\/]+.lua$", "?.lua", 1))
-    })
-
 ---@diagnostic disable-next-line
 function main()
     -- require "clua"
@@ -24,7 +18,7 @@ function main()
         print(msg)
     end, content)
     -- -- NFA = NFA or {}
-    file = io.open("../../../ast1.dot", "w") or error("can't open ast1.dot")
+    file = io.open("./build/ast1.dot", "w") or error("can't open ast1.dot")
     file:write(tostring(NFA))
     file:close()
     local t = require "utils.nfa2dfa"
@@ -33,11 +27,11 @@ function main()
     end, NFA)
     local minimizeDFA = require "utils.minimizeDFA"
 
-    file = io.open("../../../ast2.dot", "w") or error("can't open ast2.dot")
+    file = io.open("./build/ast2.dot", "w") or error("can't open ast2.dot")
     file:write(tostring(NFA))
     file:close()
     minimizeDFA(NFA)
-    file = io.open("../../../ast3.dot", "w") or error("can't open ast3.dot")
+    file = io.open("./build/ast3.dot", "w") or error("can't open ast3.dot")
     file:write(tostring(NFA))
     file:close()
 end
