@@ -117,6 +117,7 @@ return function(DNA)
     end
     local new_PI = matrix()
     local convert_table_PI = matrix()
+
     for key, value in pairs(PI) do
         for state in pairs(key) do
             new_PI[set(state)] = value
@@ -126,26 +127,46 @@ return function(DNA)
             break
         end
     end
-
+    -- for key, value in pairs(convert_table_PI) do
+    --     print(key, value)
+    -- end
 
     local new_mt = matrix()
     DNA.initial_states:remove(DNA.initial_states)
     DNA.final_states:remove(DNA.final_states)
     DNA.states = set()
+    for value, label_set in pairs(DNA.transition_matrix) do
+        for label, state_set in pairs(label_set) do
+            label_set[label] = convert_table_PI[state_set]
+            print(label, state_set)
+        end
+    end
 
     for value, label_set in pairs(DNA.transition_matrix) do
         if new_PI[set(value)] then
-            new_mt[value] = new_mt[value] or matrix()
             if new_PI[set(value)].is_start then
                 DNA.initial_states:insert(value)
             end
             if new_PI[set(value)].is_end then
                 DNA.final_states:insert(value)
             end
-            for label, state_set in ipairs(label_set) do
-                new_mt[value][label] = convert_table_PI[state_set]
-            end
+            new_mt[value] = label_set
         end
     end
+
+    -- for value, label_set in pairs(DNA.transition_matrix) do
+    --     if new_PI[set(value)] then
+    --         new_mt[value] = new_mt[value] or matrix()
+    --         if new_PI[set(value)].is_start then
+    --             DNA.initial_states:insert(value)
+    --         end
+    --         if new_PI[set(value)].is_end then
+    --             DNA.final_states:insert(value)
+    --         end
+    --         for label, state_set in ipairs(label_set) do
+    --             new_mt[value][label] = convert_table_PI[state_set]
+    --         end
+    --     end
+    -- end
     DNA.transition_matrix = new_mt
 end

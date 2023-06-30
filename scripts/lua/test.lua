@@ -26,8 +26,12 @@ function main()
         print(msg)
     end, NFA)
     local minimizeDFA = require "utils.minimizeDFA"
-    minimizeDFA(NFA)
+
     file = io.open("../../../ast2.dot", "w") or error("can't open ast2.dot")
+    file:write(tostring(NFA))
+    file:close()
+    minimizeDFA(NFA)
+    file = io.open("../../../ast3.dot", "w") or error("can't open ast3.dot")
     file:write(tostring(NFA))
     file:close()
 end
