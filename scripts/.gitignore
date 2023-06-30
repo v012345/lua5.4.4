@@ -1,7 +1,1 @@
-.vs
-/obj
-*.config
-*.luaproj
-*.luaproj.user
-scripts.sln
-.vscode
+/lua/build
