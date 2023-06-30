@@ -1,12 +1,12 @@
 ---@diagnostic disable-next-line
 function main()
-    -- require "clua"
-    -- require "lparser"
-    -- require "lzio"
-    -- ---@type Zio
-    -- local z = new(Zio)
-    -- local firstchar = zgetc(z)
-    -- luaY_parser(nil, z, new(Mbuffer), nil, "test.lua", firstchar)
+    require "clua"
+    require "lparser"
+    require "lzio"
+    ---@type Zio
+    local z = new(Zio)
+    local firstchar = zgetc(z)
+    luaY_parser(nil, z, new(Mbuffer), nil, "test.lua", firstchar)
 
 
     -- io.write(tostring(a))
