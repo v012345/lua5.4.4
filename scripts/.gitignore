@@ -4,3 +4,4 @@
 *.luaproj
 *.luaproj.user
 scripts.sln
+.vscode

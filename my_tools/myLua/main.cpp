@@ -5,7 +5,7 @@ extern "C" {
 #include <lobject.h>
 #include <lstate.h>
 }
-#define LUA_MAIN_SCRIPT "./test.lua"
+#define LUA_MAIN_SCRIPT "./main.lua"
 #define LUA_CODE_SCRIPT "./bytedump.lua"
 int main(int argc, char const* argv[]) {
     lua_State* L = luaL_newstate();
