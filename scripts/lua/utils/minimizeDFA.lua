@@ -8,6 +8,7 @@ local t = require "utils.nfa2dfa"
 ---@param DNA NFA
 ---@return boolean
 ---@return string
+---@return set
 local function check_can_divide(PI, s, DNA)
     for label in pairs(DNA.alphabet) do
         local Is = t.I(DNA.transition_matrix, s, label)
@@ -19,11 +20,16 @@ local function check_can_divide(PI, s, DNA)
             end
         end
         if not is_exist then
-            return true, label
+            return true, label, s
         end
     end
-    return false, ""
+    return false, "", set()
 end
+
+local function divide(DNA, need_divide_set, PI, label)
+
+end
+
 ---comment
 ---@param DNA NFA
 return function(DNA)
@@ -34,6 +40,25 @@ return function(DNA)
     PI[s1] = true
     PI[s2] = true
     print(check_can_divide(PI, s1, DNA))
-    print("2222222")
     print(check_can_divide(PI, s2, DNA))
+    local loop = true
+    local divide_label = ""
+    local need_divide = false
+    local need_divide_set = set()
+    while loop do
+        for key, value in pairs(PI) do
+            local need_divide_, label = check_can_divide(PI, key, DNA)
+            if need_divide_ then
+                divide_label = label
+                need_divide = true
+                need_divide_set = key
+                break
+            end
+        end
+        if need_divide then
+            need_divide = false
+        else
+            loop = false
+        end
+    end
 end
