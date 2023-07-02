@@ -4,10 +4,8 @@
 ---@field private __pairs function
 ---@field private __tostring function
 ---@field private __eq function
----@field private new function
 local mt = {}
 
----comment
 ---@param FA_State FA_State
 ---@return function
 function mt.__pairs(FA_State)
@@ -19,7 +17,7 @@ function mt.__pairs(FA_State)
     end
 end
 
----@param FA_State FA_State`
+---@param FA_State FA_State
 ---@return integer
 function mt.__len(FA_State)
     return #FA_State.list
@@ -74,19 +72,6 @@ function mt.insert(FA_State, ...)
     return FA_State
 end
 
----comment
----@param FA_State FA_State
----@param list table
-function mt.new(FA_State, list)
-    for _, ele in ipairs(list) do
-        if not FA_State.pos[ele] then
-            FA_State.list[#FA_State.list + 1] = ele
-            FA_State.pos[ele] = #FA_State.list
-        end
-    end
-end
-
----comment
 ---@param FA_State FA_State
 ---@return string
 function mt.__tostring(FA_State)
@@ -150,11 +135,11 @@ return function(...)
     ---@class FA_State
     ---@field private list table
     ---@field private pos table
-    local states = {
+    local FA_State = {
         list = {},
         pos = {},
     }
-    setmetatable(states, {
+    setmetatable(FA_State, {
         __index = mt,
         __tostring = mt.__tostring,
         __len = mt.__len,
@@ -162,6 +147,11 @@ return function(...)
         __pairs = mt.__pairs,
         __metatable = "FA_State"
     })
-    states:new(mt.convert_to_list(...))
-    return states
+    for _, ele in ipairs(mt.convert_to_list(...)) do
+        if not FA_State.pos[ele] then
+            FA_State.list[#FA_State.list + 1] = ele
+            FA_State.pos[ele] = #FA_State.list
+        end
+    end
+    return FA_State
 end
