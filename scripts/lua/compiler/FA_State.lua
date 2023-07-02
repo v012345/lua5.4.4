@@ -75,7 +75,7 @@ end
 ---@param FA_State FA_State
 ---@return string
 function mt.__tostring(FA_State)
-    local t = { "state = {" }
+    local t = { "{" }
     t[#t + 1] = " "
     for _, ele in ipairs(FA_State.list) do
         t[#t + 1] = ele

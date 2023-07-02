@@ -1,7 +1,25 @@
 ---@diagnostic disable-next-line
 function main()
     local state = require "compiler.FA_State"
-    print(state(state(1, 3, 4, 6, "5")) == state(1, 3, 4, 6, "5"))
+    ---@type function, function
+    local FA_State_Matrix, FA_State_Matrix_Entry = table.unpack((require "compiler.FA_State_Matrix"))
+    ---@type FA_State_Matrix
+    local m = FA_State_Matrix()
+
+    m:addEntry(FA_State_Matrix_Entry(
+        state(1, nil, 3, 3, 4, "6"), "a", 2
+    ))
+    m:addEntry(FA_State_Matrix_Entry(
+        state(2), "a", 2
+    ))
+    m:addEntry(FA_State_Matrix_Entry(
+        state(2), "bb", 3
+    ))
+    m:addEntry(FA_State_Matrix_Entry(
+        state(3), "bcb", 3
+    ))
+    print(m)
+
     do
         return
     end
