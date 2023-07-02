@@ -1,5 +1,10 @@
 ---@class FA_State
----@field private args_convert_to_list function
+---@field private convert_to_list function
+---@field private __len function
+---@field private __pairs function
+---@field private __tostring function
+---@field private __eq function
+---@field private new function
 local mt = {}
 
 ---comment
@@ -14,25 +19,17 @@ function mt.__pairs(FA_State)
     end
 end
 
-function mt.get(set)
-    if #set.list == 1 then
-        return set.list[1]
-    else
-        return set.list
-    end
+---@param FA_State FA_State`
+---@return integer
+function mt.__len(FA_State)
+    return #FA_State.list
 end
 
----@private
-function mt.__len(set)
-    return #set.list
-end
-
----comment
 ---@param FA_State FA_State
 ---@param ... unknown
 ---@return boolean
 function mt.contain(FA_State, ...)
-    for _, ele in ipairs(mt.args_convert_to_list(...)) do
+    for _, ele in ipairs(mt.convert_to_list(...)) do
         if not FA_State.pos[ele] then
             return false
         end
@@ -40,49 +37,51 @@ function mt.contain(FA_State, ...)
     return true
 end
 
+---@param FA_State FA_State
+---@param ... unknown
+function mt.remove(FA_State, ...)
+    for _, ele in ipairs(mt.convert_to_list(...)) do
+        if FA_State.pos[ele] then
+            FA_State.pos[ele] = false
+        end
+    end
+    local list = {}
+    for ele, pos in pairs(FA_State.pos) do
+        if pos then
+            list[#list + 1] = ele
+        end
+    end
+    local pos = {}
+    for i, ele in pairs(list) do
+        pos[ele] = i
+    end
+    FA_State.list = list
+    FA_State.pos = pos
+
+    return FA_State
+end
+
+---@param FA_State FA_State
+---@param ... unknown
+---@return FA_State
+function mt.insert(FA_State, ...)
+    for _, ele in ipairs(mt.convert_to_list(...)) do
+        if not FA_State.pos[ele] then
+            FA_State.list[#FA_State.list + 1] = ele
+            FA_State.pos[ele] = #FA_State.list
+        end
+    end
+    return FA_State
+end
+
 ---comment
----@param set set
----@param eles any
-function mt.remove(set, eles)
-    if set:contain(eles) then
-        for _, ele in ipairs(mt.convert_to_table(eles)) do
-            if set.pos[ele] then
-                set.pos[ele] = false
-            end
-        end
-        local list = {}
-        for ele, pos in pairs(set.pos) do
-            if pos then
-                list[#list + 1] = ele
-            end
-        end
-        local pos = {}
-        for i, ele in pairs(list) do
-            pos[ele] = i
-        end
-        set.list = list
-        set.pos = pos
-    end
-    return set
-end
-
-function mt.insert(set, eles)
-    for _, ele in ipairs(mt.convert_to_table(eles)) do
-        if set.pos[ele] then
-            return set
-        end
-        set.list[#set.list + 1] = ele
-        set.pos[ele] = #set.list
-    end
-    return set
-end
-
----@private
-function mt.new(set, list)
+---@param FA_State FA_State
+---@param list table
+function mt.new(FA_State, list)
     for _, ele in ipairs(list) do
-        if not set.pos[ele] then
-            set.list[#set.list + 1] = ele
-            set.pos[ele] = #set.list
+        if not FA_State.pos[ele] then
+            FA_State.list[#FA_State.list + 1] = ele
+            FA_State.pos[ele] = #FA_State.list
         end
     end
 end
@@ -116,10 +115,9 @@ function mt.__eq(FA_State1, FA_State2)
     return false
 end
 
----comment
 ---@param ... unknown
 ---@return table
-function mt.args_convert_to_list(...)
+function mt.convert_to_list(...)
     local list = {}
     local input = { ... }
     local function unpack(t, l)
@@ -146,7 +144,6 @@ function mt.args_convert_to_list(...)
     return list
 end
 
----comment
 ---@param ... unknown
 ---@return FA_State
 return function(...)
@@ -165,6 +162,6 @@ return function(...)
         __pairs = mt.__pairs,
         __metatable = "FA_State"
     })
-    states:new(mt.args_convert_to_list(...))
+    states:new(mt.convert_to_list(...))
     return states
 end

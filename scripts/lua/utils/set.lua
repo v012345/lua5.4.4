@@ -71,11 +71,10 @@ end
 
 function mt.insert(set, eles)
     for _, ele in ipairs(mt.convert_to_table(eles)) do
-        if set.pos[ele] then
-            return set
+        if not set.pos[ele] then
+            set.list[#set.list + 1] = ele
+            set.pos[ele] = #set.list
         end
-        set.list[#set.list + 1] = ele
-        set.pos[ele] = #set.list
     end
     return set
 end
