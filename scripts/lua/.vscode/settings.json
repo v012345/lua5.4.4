@@ -1,5 +1,9 @@
 {
     "Lua.diagnostics.globals": [
-        "argv"
+        "argv",
+        "lfs"
+    ],
+    "Lua.workspace.library": [
+        "${3rd}/lfs/library"
     ]
 }
