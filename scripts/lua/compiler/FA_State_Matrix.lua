@@ -1,5 +1,5 @@
 local FA_State = require "compiler.FA_State"
-
+local EPSILON <const> = ""
 ---@return table<string, FA_State>
 local function label_state_map()
     ---@type table<string, FA_State>
@@ -80,6 +80,14 @@ function mt.addEntry(FA_State_Matrix, FA_State_Matrix_Entry)
     new_label_state[FA_State_Matrix_Entry.by_label] = FA_State(FA_State_Matrix_Entry.to_state)
     FA_State_Matrix.states_label_state_table[FA_State(FA_State_Matrix_Entry.from_state)] = new_label_state
     return FA_State_Matrix
+end
+
+---@param FA_State_Matrix any
+---@param from_states table<FA_State>|FA_State
+function mt.epsilon_closure(FA_State_Matrix, from_states)
+if get then
+    
+end
 end
 
 ---@param FA_State_Matrix FA_State_Matrix
