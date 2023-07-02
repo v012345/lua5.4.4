@@ -1,5 +1,10 @@
 ---@diagnostic disable-next-line
 function main()
+    local state = require "compiler.FA_State"
+    print(state(state(1, 3, 4, 6, "5")) == state(1, 3, 4, 6, "5"))
+    do
+        return
+    end
     require "clua"
     require "lparser"
     require "lzio"
@@ -30,7 +35,7 @@ function main()
     file = io.open("./build/ast2.dot", "w") or error("can't open ast2.dot")
     file:write(tostring(NFA))
     file:close()
-    minimizeDFA(NFA)
+    -- minimizeDFA(NFA)
     file = io.open("./build/ast3.dot", "w") or error("can't open ast3.dot")
     file:write(tostring(NFA))
     file:close()
