@@ -90,6 +90,7 @@ end
 ---以 from_states 中的每个元素为键
 ---@param FA_State_Matrix FA_State_Matrix
 ---@param from_states FA_State
+---@return FA_State
 function mt.epsilon_closure(FA_State_Matrix, from_states)
     local result = FA_State()
     ---@param from_state FA_State
