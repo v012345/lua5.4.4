@@ -14,10 +14,15 @@ end
 ---@param this DotParser
 ---@param FA FA
 function mt.parser_main_body(this, FA)
-    if this.stream.current_char ~= "{" then
-        error("main body must start with {")
+    this.stream:checkAndNext("{")
+    this.stream:skip_space()
+    while this.stream.current_char ~= "}" do
+        local token = mt:read_a_token()
     end
-    this.stream:next()
+    this.stream:skip_space()
+    if not this.stream.is_end then
+        error("dot file must end with }")
+    end
 end
 
 ---@param this DotParser
