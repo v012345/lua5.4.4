@@ -8,6 +8,16 @@ local mt = {}
 function mt.parser(this, FA)
     this.stream:skip_space()
     this:parser_name(FA)
+    this:parser_main_body(FA)
+end
+
+---@param this DotParser
+---@param FA FA
+function mt.parser_main_body(this, FA)
+    if this.stream.current_char ~= "{" then
+        error("main body must start with {")
+    end
+    this.stream:next()
 end
 
 ---@param this DotParser
@@ -15,7 +25,7 @@ function mt.read_a_token(this)
     local t = {}
     while
         not this.stream:is_space() and
-        string.match(this.stream.current_char, "[A-Za-z0-9]")
+        string.match(this.stream.current_char, "[A-Za-z0-9_]")
     do
         t[#t + 1] = this.stream.current_char
         this.stream:next()
@@ -30,20 +40,11 @@ function mt.parser_name(this, FA)
     if this:read_a_token() ~= "digraph" then
         error("not a dot file")
     end
-    local t = {}
-    while
-        (not this.stream:is_space()) and
-        string.match(this.stream.current_char, "[A-Za-z0-9_]")
-    do
-        t[#t + 1] = this.stream.current_char
-        this.stream:next()
-    end
-    if #t <= 0 then
+    local name = this:read_a_token()
+    if #name <= 0 then
         error("must have a name")
     end
-    local name = table.concat(t)
     FA:setName(name)
-    this.stream:skip_space()
 end
 
 ---@param path_file string
