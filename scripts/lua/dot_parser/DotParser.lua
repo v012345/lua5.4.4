@@ -42,4 +42,5 @@ return function(path_file, FA)
     setmetatable(DotParser, {
         __index = mt
     })
+    DotParser:parser(FA)
 end
