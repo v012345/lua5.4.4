@@ -17,7 +17,19 @@ function mt.parser_main_body(this, FA)
     this.stream:checkAndNext("{")
     this.stream:skip_space()
     while this.stream.current_char ~= "}" do
-        local token = mt:read_a_token()
+        local token = this:read_a_token()
+        if token == "node" then
+            break
+        elseif token == "rankdir" then
+            this.stream:skip_space()
+            this.stream:checkAndNext("=")
+            this.stream:skip_space()
+            print(this:read_a_token())
+            print(this.stream.current_char)
+            print("-----")
+        else
+            error("can only deal with node and rankdir")
+        end
     end
     this.stream:skip_space()
     if not this.stream.is_end then

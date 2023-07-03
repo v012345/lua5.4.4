@@ -18,7 +18,7 @@ end
 ---@param this InputStream
 ---@param what string
 function mt.checkAndNext(this, what)
-    if this:peek() == what then
+    if this.current_char == what then
         return this:next()
     else
         error("next char is not " .. what)
