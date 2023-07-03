@@ -87,28 +87,34 @@ function mt.addEntry(FA_State_Matrix, FA_State_Matrix_Entry)
     return FA_State_Matrix
 end
 
----如果 from_states 就是一个 FA_State, 那么就会以 from_states 为键去找 label_state_map,
----而不是以 from_states 中的每个元素为键
----@param FA_State_Matrix any
----@param from_states table<FA_State>|FA_State
+---以 from_states 中的每个元素为键
+---@param FA_State_Matrix FA_State_Matrix
+---@param from_states FA_State
 function mt.epsilon_closure(FA_State_Matrix, from_states)
-    local r = 
+    local r = FA_State()
     ---@param from_state FA_State
     local function closure(from_state)
+        local r_sub = FA_State()
         local label_state = FA_State_Matrix[from_state]
+        if label_state then
+            for label, states in pairs(label_state) do
+                if label == EPSILON then
+                    r_sub:insert(states)
+                end
+            end
+        else
+            error("nonexistent state")
+        end
+        return r_sub
     end
     if getmetatable(from_states) == "FA_State" then
-        return closure(from_states)
-    elseif type(from_states) == "table" then
-        for _, from_state in ipairs(from_states) do
-            if getmetatable(from_states) == "FA_State" then
-            else
-                error("epsilon_closure except FA_State or FA_State array")
-            end
+        for from_state in pairs(from_states) do
+            r:insert(closure(from_state))
         end
     else
-        error("epsilon_closure except FA_State or FA_State array")
+        error("epsilon_closure except FA_State")
     end
+    return r
 end
 
 ---@param FA_State_Matrix FA_State_Matrix
