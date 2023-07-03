@@ -91,30 +91,34 @@ end
 ---@param FA_State_Matrix FA_State_Matrix
 ---@param from_states FA_State
 function mt.epsilon_closure(FA_State_Matrix, from_states)
-    local r = FA_State()
+    local result = FA_State()
     ---@param from_state FA_State
     local function closure(from_state)
-        local r_sub = FA_State()
         local label_state = FA_State_Matrix[from_state]
         if label_state then
             for label, states in pairs(label_state) do
                 if label == EPSILON then
-                    r_sub:insert(states)
+                    for state in pairs(states) do
+                        if not result:contain(state) then
+                            result:insert(state)
+                            closure(state)
+                        end
+                    end
                 end
             end
         else
             error("nonexistent state")
         end
-        return r_sub
     end
     if getmetatable(from_states) == "FA_State" then
+        result:insert(from_states)
         for from_state in pairs(from_states) do
-            r:insert(closure(from_state))
+            closure(from_state)
         end
     else
         error("epsilon_closure except FA_State")
     end
-    return r
+    return result
 end
 
 ---@param FA_State_Matrix FA_State_Matrix
