@@ -1,13 +1,17 @@
 -- require "dot_parser.parser"
 ---@diagnostic disable-next-line
 function main()
-    local InputStream = require "dot_parser.InputStream"
+    -- local InputStream = require "utils.InputStream"
+    local DotParser = require "dot_parser.DotParser"
+    local FA = require "compiler.FA"
+    local nfa = FA()
+    DotParser("./dot/NDF.dot", nfa)
 
     ---@type InputStream
-    local stream = InputStream("./dot/input.dot")
-    while stream:next() do
-        print(stream.current_char)
-    end
+    -- local stream = InputStream("./dot/input.dot")
+    -- while stream:next() do
+    --     print(stream.current_char)
+    -- end
     -- local state = require "compiler.FA_State"
     -- ---@type function, function
     -- local FA_State_Matrix, FA_State_Matrix_Entry = table.unpack((require "compiler.FA_State_Matrix"))

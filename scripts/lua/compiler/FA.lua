@@ -26,7 +26,8 @@ return function()
         FA_State_Matrix = FA_State_Matrix()
     }
     setmetatable(FA, {
-        __index = mt
+        __index = mt,
+        __metatable = "FA"
     })
     return FA
 end

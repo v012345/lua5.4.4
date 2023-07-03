@@ -26,6 +26,24 @@ function mt.checkAndNext(this, what)
 end
 
 ---@param this InputStream
+---@return string
+function mt.skip_space(this)
+    while (not this.is_end) and this.space[this.current_char] do
+        this:next()
+    end
+    return this.current_char
+end
+
+---comment
+---@param this InputStream
+---@param char string|nil
+---@return boolean|nil
+function mt.is_space(this, char)
+    char = char or this.current_char
+    return this.space[char]
+end
+
+---@param this InputStream
 ---@param num integer|nil
 function mt.peek(this, num)
     num = num or 1
@@ -39,12 +57,21 @@ return function(path_file)
     ---@field private content string
     ---@field current_char string|nil
     ---@field private current_position integer
+    ---@field private space table<string|string>
     local InputStream = {
         content = "",
         current_char = "",
         current_position = 1,
         content_len = 0,
         is_end = false,
+        space = {
+            [""] = "",
+            [" "] = " ",
+            ["\t"] = "\t",
+            ["\n"] = "\n",
+            ["\f"] = "\f",
+            ["\v"] = "\v",
+        }
     }
     local file = io.open(path_file, "r") or error(string.format("can't open %s", path_file), 1)
     InputStream.content = file:read("a")
