@@ -19,14 +19,34 @@ function mt.parser_main_body(this, FA)
     while this.stream.current_char ~= "}" do
         local token = this:read_a_token()
         if token == "node" then
-            break
+            this.stream:checkAndNext("]")
+            if this:read_a_token() ~= "shape" then
+                error("node must have a shap attributte")
+            end
+            this.stream:skip_space()
+            this.stream:checkAndNext("=")
+            this.stream:skip_space()
+            local circle_type = this:read_a_token()
+            this.stream:checkAndNext(";")
+            this.stream:skip_space()
+            this.stream:checkAndNext("]")
+            this.stream:skip_space()
+            this.stream:checkAndNext(";")
+            this.stream:skip_space()
+
+            if circle_type == "doublecircle" then
+                this:parser_initial_and_final_states(FA)
+            elseif circle_type == "circle" then
+            else
+                error("node shape must be doublecircle or circle")
+            end
         elseif token == "rankdir" then
             this.stream:skip_space()
             this.stream:checkAndNext("=")
             this.stream:skip_space()
-            print(this:read_a_token())
-            print(this.stream.current_char)
-            print("-----")
+            this:read_a_token()
+            this.stream:checkAndNext(";")
+            this.stream:skip_space()
         else
             error("can only deal with node and rankdir")
         end
@@ -35,6 +55,15 @@ function mt.parser_main_body(this, FA)
     if not this.stream.is_end then
         error("dot file must end with }")
     end
+end
+
+---comment
+---@param this DotParser
+---@param FA FA
+function mt.parser_initial_and_final_states(this, FA)
+    repeat
+        local state = this:read_a_token()
+    until state ~= "node"
 end
 
 ---@param this DotParser
