@@ -1,3 +1,4 @@
+require "dot_parser.parser"
 ---@diagnostic disable-next-line
 function main()
     local state = require "compiler.FA_State"
@@ -20,9 +21,9 @@ function main()
     ))
     print(m)
 
-    do
-        return
-    end
+    -- do
+    --     return
+    -- end
     require "clua"
     require "lparser"
     require "lzio"
