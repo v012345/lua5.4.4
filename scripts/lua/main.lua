@@ -1,6 +1,13 @@
 -- require "dot_parser.parser"
 ---@diagnostic disable-next-line
 function main()
+    local InputStream = require "dot_parser.InputStream"
+
+    ---@type InputStream
+    local stream = InputStream("./dot/input.dot")
+    while stream:next() do
+        print(stream.current_char)
+    end
     -- local state = require "compiler.FA_State"
     -- ---@type function, function
     -- local FA_State_Matrix, FA_State_Matrix_Entry = table.unpack((require "compiler.FA_State_Matrix"))
@@ -65,6 +72,12 @@ xpcall(main, function(msg)
 end)
 
 
+
+-- local file = io.open("./dot/input.dot", "r") or error("can't open input.dot")
+-- local content = file:read("a")
+-- file:close()
+-- print(#content)
+-- print(string.sub(content, 3, 3))
 
 -- xpcall(NFA.output, function(msg)
 --     print(msg)
