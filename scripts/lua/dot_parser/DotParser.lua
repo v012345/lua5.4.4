@@ -20,13 +20,30 @@ function mt.read_a_token(this)
         t[#t + 1] = this.stream.current_char
         this.stream:next()
     end
+    this.stream:skip_space()
     return table.concat(t)
 end
 
 ---@param this DotParser
 ---@param FA FA
 function mt.parser_name(this, FA)
-    print(this:read_a_token())
+    if this:read_a_token() ~= "digraph" then
+        error("not a dot file")
+    end
+    local t = {}
+    while
+        (not this.stream:is_space()) and
+        string.match(this.stream.current_char, "[A-Za-z0-9_]")
+    do
+        t[#t + 1] = this.stream.current_char
+        this.stream:next()
+    end
+    if #t <= 0 then
+        error("must have a name")
+    end
+    local name = table.concat(t)
+    FA:setName(name)
+    this.stream:skip_space()
 end
 
 ---@param path_file string
