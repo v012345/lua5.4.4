@@ -12,6 +12,25 @@ function mt.load(FA, dot_file_path)
 end
 
 ---@param this FA
+---@return FA_State
+function mt.getNewState(this)
+    if #this.FA_States <= 0 then
+        for from_state, label_states in pairs(this.FA_State_Matrix) do
+            this.FA_States:insert(from_state)
+            for _, to_states in pairs(label_states) do
+                this.FA_States:insert(to_states)
+            end
+        end
+    end
+    local r = #this.FA_States
+    while not this.FA_States:contain(r) do
+        r = r + 1
+    end
+
+    return FA_State(r)
+end
+
+---@param this FA
 ---@param name string
 function mt.setName(this, name)
     this.FA_Name = name
