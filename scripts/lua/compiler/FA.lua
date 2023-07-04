@@ -17,6 +17,27 @@ function mt.setName(this, name)
     this.FA_Name = name
 end
 
+---comment
+---@param this FA
+---@param entry FA_State_Matrix_Entry
+function mt.addEntry(this, entry)
+    this.FA_State_Matrix:addEntry(entry)
+end
+
+---comment
+---@param this FA
+---@param states FA_State
+function mt.addInitialStates(this, states)
+    this.FA_Initial_States:insert(states)
+end
+
+---comment
+---@param this FA
+---@param states FA_State
+function mt.addFinalStates(this, states)
+    this.FA_Final_States:insert(states)
+end
+
 return function()
     ---@class FA
     ---@field FA_Alphabet table<string, true>

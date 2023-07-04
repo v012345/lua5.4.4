@@ -1,4 +1,7 @@
 local InputStream = require "utils.InputStream"
+local FA_State = require "compiler.FA_State"
+---@type function, function
+local _, FA_State_Matrix_Entry = table.unpack((require "compiler.FA_State_Matrix"))
 ---@class DotParser
 local mt = {}
 
@@ -11,6 +14,15 @@ function mt.parser(this, FA)
     this:parser_main_body(FA)
 end
 
+---comment
+---@param this DotParser
+---@param what string
+function mt.skip(this, what)
+    for i = 1, #what, 1 do
+        this.stream:checkAndNext(string.sub(what, i, i))
+    end
+end
+
 ---@param this DotParser
 ---@param FA FA
 function mt.parser_main_body(this, FA)
@@ -19,38 +31,32 @@ function mt.parser_main_body(this, FA)
     while this.stream.current_char ~= "}" do
         local token = this:read_a_token()
         if token == "node" then
-            this.stream:checkAndNext("]")
+            this.stream:checkAndNext("[")
             if this:read_a_token() ~= "shape" then
                 error("node must have a shap attributte")
             end
-            this.stream:skip_space()
-            this.stream:checkAndNext("=")
-            this.stream:skip_space()
+            this:skip("= ")
             local circle_type = this:read_a_token()
-            this.stream:checkAndNext(";")
-            this.stream:skip_space()
-            this.stream:checkAndNext("]")
-            this.stream:skip_space()
-            this.stream:checkAndNext(";")
-            this.stream:skip_space()
-
+            this:skip(";];")
             if circle_type == "doublecircle" then
                 this:parser_initial_and_final_states(FA)
             elseif circle_type == "circle" then
+                this:parser_states_matrix(FA)
             else
                 error("node shape must be doublecircle or circle")
             end
         elseif token == "rankdir" then
-            this.stream:skip_space()
-            this.stream:checkAndNext("=")
-            this.stream:skip_space()
+            this:skip("= ")
             this:read_a_token()
             this.stream:checkAndNext(";")
             this.stream:skip_space()
         else
+            print(token)
             error("can only deal with node and rankdir")
         end
     end
+    this.stream:skip_space()
+    this.stream:checkAndNext("}")
     this.stream:skip_space()
     if not this.stream.is_end then
         error("dot file must end with }")
@@ -60,10 +66,91 @@ end
 ---comment
 ---@param this DotParser
 ---@param FA FA
+function mt.parser_states_matrix(this, FA)
+    repeat
+        this.stream:skip_space()
+        local from = this:read_a_token()
+        this:skip("->")
+        this.stream:skip_space()
+        local to = this:read_a_token()
+        this.stream:checkAndNext("[")
+        if this:read_a_token() ~= "label" then
+            error("state must have a label")
+        end
+        this:skip("= ")
+        local label = this:read_a_string()
+        this:skip(";];")
+        this.stream:skip_space()
+        FA:addEntry(FA_State_Matrix_Entry(from, label, to))
+    until this.stream.current_char == "n" or this.stream.current_char == "}"
+end
+
+---comment
+---@param this DotParser
+---@return string
+function mt.read_a_string(this)
+    local escape = {
+        ["\\"] = "\\",
+        ["\""] = "\"",
+        ["/"] = "/",
+        ["r"] = "\r",
+        ["f"] = "\f",
+        ["n"] = "\n",
+        ["t"] = "\t",
+        ["b"] = "\b",
+    }
+    local s = {}
+    if this.stream.current_char ~= '"' then
+        error("string must start with \"")
+    else
+        this.stream:next()
+    end
+    while this.stream.current_char ~= '"' do
+        if this.stream.current_char == "\\" then
+            this.stream:next()
+
+            local escape_char = escape[this.stream.current_char]
+            if escape_char then
+                s[#s + 1] = escape_char
+                this.stream:next()
+            else
+                error(this.stream.current_char .. " can't escape")
+            end
+        else
+            s[#s + 1] = this.stream.current_char
+            this.stream:next()
+        end
+    end
+    this:skip("\"")
+    return table.concat(s)
+end
+
+---comment
+---@param this DotParser
+---@param FA FA
 function mt.parser_initial_and_final_states(this, FA)
     repeat
+        this.stream:skip_space()
         local state = this:read_a_token()
-    until state ~= "node"
+        this.stream:checkAndNext("[")
+        if this:read_a_token() ~= "color" then
+            error("state must have a color")
+        end
+        this:skip("= ")
+        local color = this:read_a_token()
+        this:skip(";];")
+        if color == "green" then
+            FA:addInitialStates(FA_State(state))
+        elseif color == "red" then
+            FA:addFinalStates(FA_State(state))
+        elseif color == "yellow" then
+            FA:addInitialStates(FA_State(state))
+            FA:addFinalStates(FA_State(state))
+        else
+            error("must be green red or yellow")
+        end
+        this.stream:skip_space()
+    until this.stream.current_char == "n" or this.stream.current_char == "}"
 end
 
 ---@param this DotParser

@@ -58,4 +58,12 @@ function GetFilesMd5(files) return {} end
 ---@return table
 function GetFilesLastModifiedTimestamp(files) return {} end
 
+---comment
+---@param from_state any
+---@param by_label any
+---@param to_state any
+---@param ... unknown
+---@return FA_State_Matrix_Entry
+function FA_State_Matrix_Entry(from_state, by_label, to_state, ...) end
+
 _Lua_function = {}
