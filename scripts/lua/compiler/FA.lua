@@ -94,17 +94,10 @@ function mt.insertFA(this, FA, which_label)
         which_label,
         FA.FA_Final_States
     )
-    if this:removeEntry(entry) then
-        local newEntries = FA:getAllEntry()
-        if #newEntries > 0 then
-            for _, newEntry in ipairs(newEntries) do
-                this:addEntry(newEntry)
-            end
-        else
-            error("FA can't be empty")
-        end
-    else
-        error("can't insert FA")
+    this:removeEntry(entry)
+    local newEntries = FA:getAllEntry()
+    for _, newEntry in ipairs(newEntries) do
+        this:addEntry(newEntry)
     end
 end
 
