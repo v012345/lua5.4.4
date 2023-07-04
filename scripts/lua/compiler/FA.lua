@@ -137,7 +137,7 @@ function mt.convertToDFA(this)
                     newState
                 ))
                 unfold_label(DFA, NFA, from_state, newLabelLex, newState)
-                if labelLex.current_char == "*" then
+                if labelLex:peekOne("*") then
                     labelLex:next()
                     DFA:closure(from_state, newState)
                 end
@@ -156,7 +156,7 @@ function mt.convertToDFA(this)
                     newState
                 ))
                 unfold_label(DFA, NFA, newState, labelLex, to_state)
-                if labelLex.current_char == "*" then
+                if labelLex:peekOne("*") then
                     labelLex:next()
                     DFA:closure(from_state, newState)
                 end
@@ -167,8 +167,8 @@ function mt.convertToDFA(this)
                     labelLex.current_char,
                     newState
                 ))
-                
-                if labelLex.current_char == "*" then
+
+                if labelLex:peekOne("*") then
                     labelLex:next()
                     DFA:closure(from_state, newState)
                 end
