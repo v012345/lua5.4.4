@@ -25,6 +25,23 @@ function mt.checkAndNext(this, what)
     end
 end
 
+---@param this FA_Lable_Lex
+---@return string
+function mt.readAlias(this)
+    local t = {}
+    if this.current_char ~= "$" then
+        error("alias must start with $")
+    end
+    t[#t + 1] = this.current_char
+    repeat
+        t[#t + 1] = this:next()
+        if not this.current_char then
+            error("alias must end with $")
+        end
+    until this.current_char == "$"
+    return table.concat(t)
+end
+
 ---@param label string
 ---@return FA_Lable_Lex
 return function(label)

@@ -109,9 +109,11 @@ function mt.convertToDFA(this)
     local function unfold_label(DFA, NFA, from_state, by_label, to_state)
         ---@type FA_Lable_Lex
         local labelLex = FA_Lable_Lex(by_label)
-        repeat
-            print(labelLex:next())
-        until labelLex.is_end
+        labelLex:next()
+        local function ()
+            
+        end
+        
     end
     for from_state, label_states in pairs(this.FA_State_Matrix) do
         for label, to_states in pairs(label_states) do
