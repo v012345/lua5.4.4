@@ -102,6 +102,18 @@ function mt.insertFA(this, FA, which_label)
     end
 end
 
+---comment
+---@param this FA
+---@param from_state FA_State
+---@param to_state FA_State
+function mt.closure(this, from_state, to_state)
+    if #from_state == 1 and #to_state == 1 then
+        this:addEntry(FA_State_Matrix_Entry(from_state, "", to_state))
+    else
+        error("only can closure one state to one state")
+    end
+end
+
 ---@param this FA
 ---@return FA
 function mt.convertToDFA(this)
@@ -109,7 +121,7 @@ function mt.convertToDFA(this)
 
     ---comment
     ---@param DFA FA
-    ---@param NFA FA
+    ---@param NFA FA 获状态用
     ---@param from_state FA_State
     ---@param by_label string
     ---@param to_state FA_State
@@ -122,11 +134,19 @@ function mt.convertToDFA(this)
                 labelLex:checkAndNext(")")
                 if labelLex.current_char == "*" then
                     labelLex:next()
+                    DFA:closure(from_state, to_state)
                 end
             elseif labelLex.current_char == "|" then
             elseif labelLex.current_char == "$" then
+                if labelLex.current_char == "*" then
+                    labelLex:next()
+                    DFA:closure(from_state, to_state)
+                end
             else
-
+                if labelLex.current_char == "*" then
+                    labelLex:next()
+                    DFA:closure(from_state, to_state)
+                end
             end
         end
     end
