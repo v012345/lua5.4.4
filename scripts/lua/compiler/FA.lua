@@ -58,6 +58,12 @@ function mt.addFinalStates(this, states)
 end
 
 ---@param this FA
+---@return FA
+function mt.convertToDFA(this)
+
+end
+
+---@param this FA
 function mt.toDot(this, file_path)
     local t = {}
     t[#t + 1] = "digraph " .. this.FA_Name .. " {\n"
@@ -103,7 +109,7 @@ return function()
     ---@field FA_Final_States FA_State
     ---@field FA_States FA_State
     ---@field FA_State_Matrix FA_State_Matrix
-    FA = {
+    local FA = {
         FA_Name = "no_name",
         FA_Alphabet = {},
         FA_Initial_States = FA_State(),
