@@ -71,13 +71,14 @@ function mt.addEntry(FA_State_Matrix, FA_State_Matrix_Entry)
     end
     local from_state = FA_State_Matrix_Entry.from_state
     for state, label_state in pairs(FA_State_Matrix.states_label_state_table) do
-        if state == from_state then
+        if from_state == state then
             local to_state = label_state[FA_State_Matrix_Entry.by_label]
             if to_state then
                 to_state:insert(FA_State_Matrix_Entry.to_state)
                 return FA_State_Matrix
             else
                 label_state[FA_State_Matrix_Entry.by_label] = FA_State(FA_State_Matrix_Entry.to_state)
+                return FA_State_Matrix
             end
         end
     end

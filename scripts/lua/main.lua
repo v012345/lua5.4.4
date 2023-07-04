@@ -7,6 +7,7 @@ function main()
     local nfa = FA()
     DotParser("./dot/NDF.dot", nfa)
     nfa:toDot("./build/dot.dot")
+    print(nfa.FA_State_Matrix)
 
     ---@type InputStream
     -- local stream = InputStream("./dot/input.dot")
