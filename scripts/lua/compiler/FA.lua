@@ -45,6 +45,15 @@ end
 
 ---comment
 ---@param this FA
+---@param entry FA_State_Matrix_Entry
+---@return boolean
+function mt.removeEntry(this, entry)
+    local _, r = this.FA_State_Matrix:removeEntry(entry)
+    return r
+end
+
+---comment
+---@param this FA
 ---@param states FA_State
 function mt.addInitialStates(this, states)
     this.FA_Initial_States:insert(states)
@@ -57,11 +66,62 @@ function mt.addFinalStates(this, states)
     this.FA_Final_States:insert(states)
 end
 
+---comment
+---@param this FA
+---@return table<FA_State_Matrix_Entry>
+function mt.getAllEntry(this)
+    local r = {}
+    for from_state, label_states in pairs(this.FA_State_Matrix) do
+        for label, to_states in pairs(label_states) do
+            for to_state in pairs(to_states) do
+                r[#r + 1] = FA_State_Matrix_Entry(
+                    FA_State(from_state),
+                    label,
+                    FA_State(to_state)
+                )
+            end
+        end
+    end
+    return r
+end
+
+---@param this FA
+---@param FA FA
+---@param which_label string
+function mt.insertFA(this, FA, which_label)
+    local entry = FA_State_Matrix_Entry(
+        FA.FA_Initial_States,
+        which_label,
+        FA.FA_Final_States
+    )
+    if this:removeEntry(entry) then
+        local newEntries = FA:getAllEntry()
+        if #newEntries > 0 then
+            for _, newEntry in ipairs(newEntries) do
+                this:addEntry(newEntry)
+            end
+        else
+            error("FA can't be empty")
+        end
+    else
+        error("can't insert FA")
+    end
+end
+
 ---@param this FA
 ---@return FA
 function mt.convertToDFA(this)
-    ---@type FA
     local FA = (require "compiler.FA")()
+    local function unfold_label(DFA, NFA, from_state, by_label, to_state)
+        print(by_label)
+    end
+    for from_state, label_states in pairs(this.FA_State_Matrix) do
+        for label, to_states in pairs(label_states) do
+            for to_state in pairs(to_states) do
+                unfold_label(FA, this, FA_State(from_state), label, FA_State(to_state))
+            end
+        end
+    end
     return FA
 end
 
@@ -86,13 +146,13 @@ function mt.toDot(this, file_path)
     t[#t + 1] = string.format("    node [shape = circle;];\n")
     for from_states, label_states in pairs(this.FA_State_Matrix) do
         for from_state in pairs(from_states) do
-            for lable, to_states in pairs(label_states) do
+            for label, to_states in pairs(label_states) do
                 for to_state in pairs(to_states) do
                     t[#t + 1] = string.format(
                         "    %s -> %s [label = %s;];\n",
                         from_state,
                         to_state,
-                        string.gsub(string.format("%q", lable), "\\\n", "\\n")
+                        string.gsub(string.format("%q", label), "\\\n", "\\n")
                     )
                 end
             end

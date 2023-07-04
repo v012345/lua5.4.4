@@ -88,6 +88,28 @@ function mt.addEntry(FA_State_Matrix, FA_State_Matrix_Entry)
     return FA_State_Matrix
 end
 
+---comment
+---@param FA_State_Matrix FA_State_Matrix
+---@param FA_State_Matrix_Entry FA_State_Matrix_Entry
+---@return FA_State_Matrix
+---@return boolean
+function mt.removeEntry(FA_State_Matrix, FA_State_Matrix_Entry)
+    if getmetatable(FA_State_Matrix_Entry) ~= "FA_State_Matrix_Entry" then
+        error("arg #2 must be a FA_State_Matrix_Entry")
+    end
+    local from_state = FA_State_Matrix_Entry.from_state
+    for state, label_state in pairs(FA_State_Matrix.states_label_state_table) do
+        if from_state == state then
+            local to_state = label_state[FA_State_Matrix_Entry.by_label]
+            if to_state then
+                to_state:remove(FA_State_Matrix_Entry.to_state)
+                return FA_State_Matrix, true
+            end
+        end
+    end
+    return FA_State_Matrix, false
+end
+
 ---以 from_states 中的每个元素为键
 ---@param FA_State_Matrix FA_State_Matrix
 ---@param from_states FA_State
