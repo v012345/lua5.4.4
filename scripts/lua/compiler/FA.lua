@@ -1,6 +1,7 @@
 ---@type function, function
 local FA_State_Matrix, FA_State_Matrix_Entry = table.unpack((require "compiler.FA_State_Matrix"))
 local FA_State = require "compiler.FA_State"
+local FA_Lable_Lex = require "compiler.FA_Lable_Lex"
 ---@class FA
 local mt = {}
 
@@ -105,11 +106,12 @@ end
 ---@return FA
 function mt.convertToDFA(this)
     local FA = (require "compiler.FA")()
-    local function label_lex(label)
-        local len = #label
-    end
     local function unfold_label(DFA, NFA, from_state, by_label, to_state)
-
+        ---@type FA_Lable_Lex
+        local labelLex = FA_Lable_Lex(by_label)
+        repeat
+            print(labelLex:next())
+        until labelLex.is_end
     end
     for from_state, label_states in pairs(this.FA_State_Matrix) do
         for label, to_states in pairs(label_states) do
