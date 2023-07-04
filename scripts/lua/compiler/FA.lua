@@ -39,9 +39,7 @@ function mt.addFinalStates(this, states)
 end
 
 ---@param this FA
----@param file_path string
 function mt.toDot(this, file_path)
-    local file = io.open(file_path, "w") or error("can't open " .. file_path)
     local t = {}
     t[#t + 1] = "digraph " .. this.FA_Name .. " {\n"
     t[#t + 1] = "    rankdir = LR;\n"
@@ -59,8 +57,8 @@ function mt.toDot(this, file_path)
         end
     end
     t[#t + 1] = string.format("    node [shape = circle;];\n")
-    for from_state, row in pairs(NFA.transition_matrix) do
-        for lable, to_states in pairs(row) do
+    for from_state, label_states in pairs(this.FA_State_Matrix) do
+        for lable, to_states in pairs(label_states) do
             for to_state in pairs(to_states) do
                 t[#t + 1] = string.format(
                     "    %s -> %s [label = %s;];\n",
@@ -72,7 +70,9 @@ function mt.toDot(this, file_path)
         end
     end
     t[#t + 1] = "}\n"
-    return table.concat(t)
+    local file = io.open(file_path, "w") or error("can't open " .. file_path)
+    file:write(table.concat(t))
+    file:close()
 end
 
 return function()

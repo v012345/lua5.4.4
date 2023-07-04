@@ -139,6 +139,16 @@ function mt.__tostring(FA_State_Matrix)
     return table.concat(t)
 end
 
+--comment
+---@param FA_State_Matrix FA_State_Matrix
+---@return function
+function mt.__pairs(FA_State_Matrix)
+    return function(_, key)
+        ---@diagnostic disable-next-line
+        return next(FA_State_Matrix.states_label_state_table, key)
+    end
+end
+
 ---@return table<function>
 return {
     ---@return FA_State_Matrix
