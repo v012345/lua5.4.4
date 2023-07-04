@@ -132,7 +132,8 @@ function mt.__tostring(FA_State_Matrix)
         local sub_t = {}
         t[#t + 1] = string.format("%s => \n", tostring(from_state))
         for label, to_state in pairs(label_state) do
-            sub_t[#sub_t + 1] = string.format("    %s -> %s\n", label, tostring(to_state))
+            sub_t[#sub_t + 1] = string.format("    %s -> %s\n", string.gsub(string.format("%q", label), "\\\n", "\\n"),
+                tostring(to_state))
         end
         t[#t + 1] = table.concat(sub_t)
     end
