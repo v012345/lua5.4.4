@@ -123,20 +123,20 @@ function mt.convertToDFA(this)
     ---@param DFA FA
     ---@param NFA FA 获状态用
     ---@param from_state FA_State
-    ---@param by_label string
+    ---@param labelLex FA_Lable_Lex
     ---@param to_state FA_State
-    local function unfold_label(DFA, NFA, from_state, by_label, to_state)
-        ---@type FA_Lable_Lex
-        local labelLex = FA_Lable_Lex(by_label)
+    local function unfold_label(DFA, NFA, from_state, labelLex, to_state)
         labelLex:next()
         while labelLex.current_char do
             if labelLex.current_char == "(" then
-                labelLex:checkAndNext(")")
                 if labelLex.current_char == "*" then
                     labelLex:next()
                     DFA:closure(from_state, to_state)
                 end
             elseif labelLex.current_char == "|" then
+            elseif labelLex.current_char == ")" then
+                labelLex:next()
+                return
             elseif labelLex.current_char == "$" then
                 if labelLex.current_char == "*" then
                     labelLex:next()
@@ -153,7 +153,7 @@ function mt.convertToDFA(this)
     for from_state, label_states in pairs(this.FA_State_Matrix) do
         for label, to_states in pairs(label_states) do
             for to_state in pairs(to_states) do
-                unfold_label(FA, this, FA_State(from_state), label, FA_State(to_state))
+                unfold_label(FA, this, FA_State(from_state), FA_Lable_Lex(label), FA_State(to_state))
             end
         end
     end
