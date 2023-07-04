@@ -6,8 +6,9 @@ function main()
     local FA = require "compiler.FA"
     local nfa = FA()
     DotParser("./dot/NDF.dot", nfa)
-    nfa:toDot("./build/dot.dot")
-    print(nfa.FA_State_Matrix)
+    local dfa = nfa:convertToDFA()
+    dfa:toDot("./build/dot.dot")
+    -- print(nfa.FA_State_Matrix)
 
     ---@type InputStream
     -- local stream = InputStream("./dot/input.dot")

@@ -60,7 +60,9 @@ end
 ---@param this FA
 ---@return FA
 function mt.convertToDFA(this)
-
+    ---@type FA
+    local FA = (require "compiler.FA")()
+    return FA
 end
 
 ---@param this FA
