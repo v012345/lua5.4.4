@@ -15,6 +15,27 @@ function mt.next(this)
     return this.current_char
 end
 
+---已经路过
+---@param this FA_Lable_Lex
+---@return FA_Lable_Lex
+function mt.getNewLabel(this)
+    this:next() -- 跳过 (
+    local level = 0
+    local t = {}
+    while
+        this.current_char ~= ")" and
+        level == 0
+    do
+        if this.current_char == "(" then level = level + 1 end
+        if this.current_char == ")" then level = level - 1 end
+        if not this.current_char then error("miss )") end
+        t[#t + 1] = this.current_char
+        this:next()
+    end
+    this:next() -- 跳过 )
+    return (require "compiler.FA_Lable_Lex")(table.concat(t))
+end
+
 ---@param this FA_Lable_Lex
 ---@param what string
 function mt.checkAndNext(this, what)
@@ -39,6 +60,7 @@ function mt.readAlias(this)
             error("alias must end with $")
         end
     until this.current_char == "$"
+    this:next()
     return table.concat(t)
 end
 

@@ -2,7 +2,7 @@ digraph NDF {
     rankdir = LR;
     node [shape = doublecircle;];
     1 [color = green;];
-    4 [color = red;];
+    2 [color = red;];
     node [shape = circle;];
-    1 -> 4 [label = "a|b|c";];
+    1 -> 2 [label = "a|b";];
 }

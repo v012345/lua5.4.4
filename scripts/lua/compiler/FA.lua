@@ -24,10 +24,10 @@ function mt.getNewState(this)
         end
     end
     local r = #this.FA_States
-    while not this.FA_States:contain(r) do
+    while this.FA_States:contain(r) do
         r = r + 1
     end
-
+    this.FA_States:insert(r)
     return FA_State(r)
 end
 
@@ -129,26 +129,49 @@ function mt.convertToDFA(this)
         labelLex:next()
         while labelLex.current_char do
             if labelLex.current_char == "(" then
-                labelLex:next()
+                local newLabelLex = labelLex:getNewLabel()
+                local newState = NFA:getNewState()
+                DFA:addEntry(FA_State_Matrix_Entry(
+                    from_state,
+                    labelLex.current_char,
+                    newState
+                ))
+                unfold_label(DFA, NFA, from_state, newLabelLex, newState)
                 if labelLex.current_char == "*" then
                     labelLex:next()
-                    DFA:closure(from_state, to_state)
+                    DFA:closure(from_state, newState)
                 end
+                unfold_label(DFA, NFA, newState, labelLex, to_state)
             elseif labelLex.current_char == "|" then
+                unfold_label(DFA, NFA, from_state, labelLex, to_state)
             elseif labelLex.current_char == "*" then
-                error("single star symbol show")
+                error("single * show")
             elseif labelLex.current_char == ")" then
-                labelLex:next()
-                return
+                error("single ) show")
             elseif labelLex.current_char == "$" then
+                local newState = NFA:getNewState()
+                DFA:addEntry(FA_State_Matrix_Entry(
+                    from_state,
+                    labelLex:readAlias(),
+                    newState
+                ))
+                unfold_label(DFA, NFA, newState, labelLex, to_state)
                 if labelLex.current_char == "*" then
                     labelLex:next()
-                    DFA:closure(from_state, to_state)
+                    DFA:closure(from_state, newState)
                 end
             else
+                local newState = NFA:getNewState()
+                DFA:addEntry(FA_State_Matrix_Entry(
+                    from_state,
+                    labelLex.current_char,
+                    newState
+                ))
+                print(labelLex.current_char)
+                unfold_label(DFA, NFA, newState, labelLex, to_state)
                 if labelLex.current_char == "*" then
                     labelLex:next()
-                    DFA:closure(from_state, to_state)
+                    DFA:closure(from_state, newState)
                 end
             end
         end
