@@ -105,8 +105,11 @@ end
 ---@return FA
 function mt.convertToDFA(this)
     local FA = (require "compiler.FA")()
+    local function label_lex(label)
+        local len = #label
+    end
     local function unfold_label(DFA, NFA, from_state, by_label, to_state)
-        print(by_label)
+
     end
     for from_state, label_states in pairs(this.FA_State_Matrix) do
         for label, to_states in pairs(label_states) do

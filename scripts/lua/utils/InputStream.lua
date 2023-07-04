@@ -43,13 +43,6 @@ function mt.is_space(this, char)
     return this.space[char]
 end
 
----@param this InputStream
----@param num integer|nil
-function mt.peek(this, num)
-    num = num or 1
-    return string.sub(this.content, this.current_position, this.current_position + num)
-end
-
 ---@param path_file string
 ---@return InputStream
 return function(path_file)
