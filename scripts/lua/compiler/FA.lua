@@ -57,15 +57,17 @@ function mt.toDot(this, file_path)
         end
     end
     t[#t + 1] = string.format("    node [shape = circle;];\n")
-    for from_state, label_states in pairs(this.FA_State_Matrix) do
-        for lable, to_states in pairs(label_states) do
-            for to_state in pairs(to_states) do
-                t[#t + 1] = string.format(
-                    "    %s -> %s [label = %s;];\n",
-                    from_state,
-                    to_state,
-                    string.format("%q", lable)
-                )
+    for from_states, label_states in pairs(this.FA_State_Matrix) do
+        for from_state in pairs(from_states) do
+            for lable, to_states in pairs(label_states) do
+                for to_state in pairs(to_states) do
+                    t[#t + 1] = string.format(
+                        "    %s -> %s [label = %s;];\n",
+                        from_state,
+                        to_state,
+                        string.format("%q", lable)
+                    )
+                end
             end
         end
     end
