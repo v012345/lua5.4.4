@@ -65,7 +65,7 @@ function mt.toDot(this, file_path)
                         "    %s -> %s [label = %s;];\n",
                         from_state,
                         to_state,
-                        string.format("%q", lable)
+                        string.gsub(string.format("%q", lable), "\\\n", "\\n")
                     )
                 end
             end
