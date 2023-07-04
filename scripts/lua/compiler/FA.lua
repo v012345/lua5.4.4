@@ -106,14 +106,29 @@ end
 ---@return FA
 function mt.convertToDFA(this)
     local FA = (require "compiler.FA")()
+
+    ---comment
+    ---@param DFA FA
+    ---@param NFA FA
+    ---@param from_state FA_State
+    ---@param by_label string
+    ---@param to_state FA_State
     local function unfold_label(DFA, NFA, from_state, by_label, to_state)
         ---@type FA_Lable_Lex
         local labelLex = FA_Lable_Lex(by_label)
         labelLex:next()
-        local function ()
-            
+        while labelLex.current_char do
+            if labelLex.current_char == "(" then
+                labelLex:checkAndNext(")")
+                if labelLex.current_char == "*" then
+                    labelLex:next()
+                end
+            elseif labelLex.current_char == "|" then
+            elseif labelLex.current_char == "$" then
+            else
+
+            end
         end
-        
     end
     for from_state, label_states in pairs(this.FA_State_Matrix) do
         for label, to_states in pairs(label_states) do
