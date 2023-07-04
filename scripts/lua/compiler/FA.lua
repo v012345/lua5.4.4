@@ -38,6 +38,43 @@ function mt.addFinalStates(this, states)
     this.FA_Final_States:insert(states)
 end
 
+---@param this FA
+---@param file_path string
+function mt.toDot(this, file_path)
+    local file = io.open(file_path, "w") or error("can't open " .. file_path)
+    local t = {}
+    t[#t + 1] = "digraph " .. this.FA_Name .. " {\n"
+    t[#t + 1] = "    rankdir = LR;\n"
+    t[#t + 1] = "    node [shape = doublecircle;];\n"
+    for k in pairs(this.FA_Initial_States) do
+        if this.FA_Final_States:contain(k) then
+            t[#t + 1] = string.format("    %s [color = yellow;];\n", k)
+        else
+            t[#t + 1] = string.format("    %s [color = green;];\n", k)
+        end
+    end
+    for k in pairs(this.FA_Final_States) do
+        if not this.FA_Initial_States:contain(k) then
+            t[#t + 1] = string.format("    %s [color = red;];\n", k)
+        end
+    end
+    t[#t + 1] = string.format("    node [shape = circle;];\n")
+    for from_state, row in pairs(NFA.transition_matrix) do
+        for lable, to_states in pairs(row) do
+            for to_state in pairs(to_states) do
+                t[#t + 1] = string.format(
+                    "    %s -> %s [label = %s;];\n",
+                    from_state,
+                    to_state,
+                    string.format("%q", lable)
+                )
+            end
+        end
+    end
+    t[#t + 1] = "}\n"
+    return table.concat(t)
+end
+
 return function()
     ---@class FA
     ---@field FA_Alphabet table<string, true>
