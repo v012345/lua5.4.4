@@ -129,11 +129,14 @@ function mt.convertToDFA(this)
         labelLex:next()
         while labelLex.current_char do
             if labelLex.current_char == "(" then
+                labelLex:next()
                 if labelLex.current_char == "*" then
                     labelLex:next()
                     DFA:closure(from_state, to_state)
                 end
             elseif labelLex.current_char == "|" then
+            elseif labelLex.current_char == "*" then
+                error("single star symbol show")
             elseif labelLex.current_char == ")" then
                 labelLex:next()
                 return
