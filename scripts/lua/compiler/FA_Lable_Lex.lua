@@ -15,6 +15,18 @@ function mt.next(this)
     return this.current_char
 end
 
+---comment
+---@param this FA_Lable_Lex
+---@param what string
+---@return boolean
+function mt.peekOne(this, what)
+    local position = this.current_position + 1
+    if string.sub(this.content, position, position) == what then
+        return true
+    end
+    return false
+end
+
 ---已经路过
 ---@param this FA_Lable_Lex
 ---@return FA_Lable_Lex

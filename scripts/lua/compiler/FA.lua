@@ -167,12 +167,12 @@ function mt.convertToDFA(this)
                     labelLex.current_char,
                     newState
                 ))
-                print(labelLex.current_char)
-                unfold_label(DFA, NFA, newState, labelLex, to_state)
+                
                 if labelLex.current_char == "*" then
                     labelLex:next()
                     DFA:closure(from_state, newState)
                 end
+                unfold_label(DFA, NFA, newState, labelLex, to_state)
             end
         end
     end
