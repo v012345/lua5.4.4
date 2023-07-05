@@ -48,6 +48,18 @@ function mt.getNewLabel(this)
     return (require "compiler.FA_Lable_Lex")(table.concat(t))
 end
 
+---已经路过
+---@param this FA_Lable_Lex
+---@return FA_Lable_Lex
+function mt.createNewLabelWithRest(this)
+    local r = (require "compiler.FA_Lable_Lex")(string.sub(this.content, this.current_position, this.content_len))
+    this.current_position = this.content_len
+    while this.current_char do
+        this:next()
+    end
+    return r
+end
+
 ---@param this FA_Lable_Lex
 ---@param what string
 function mt.checkAndNext(this, what)

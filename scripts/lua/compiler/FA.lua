@@ -131,17 +131,12 @@ function mt.convertToDFA(this)
             if labelLex.current_char == "(" then
                 local newLabelLex = labelLex:getNewLabel()
                 local newState = NFA:getNewState()
-                DFA:addEntry(FA_State_Matrix_Entry(
-                    from_state,
-                    labelLex.current_char,
-                    newState
-                ))
-                unfold_label(DFA, NFA, from_state, newLabelLex, newState)
                 if labelLex:peekOne("*") then
                     labelLex:next()
                     DFA:closure(from_state, newState)
                 end
-                unfold_label(DFA, NFA, newState, labelLex, to_state)
+                unfold_label(DFA, NFA, from_state, newLabelLex, newState)
+                unfold_label(DFA, NFA, newState, labelLex:createNewLabelWithRest(), to_state)
             elseif labelLex.current_char == "|" then
                 unfold_label(DFA, NFA, from_state, labelLex, to_state)
             elseif labelLex.current_char == "*" then
