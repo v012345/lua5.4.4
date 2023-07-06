@@ -130,12 +130,13 @@ l_noret luaD_throw(lua_State* L, int errcode) {
     }
 }
 
+/// @brief 要执行的函数 f, ud 为参数
 int luaD_rawrunprotected(lua_State* L, Pfunc f, void* ud) { // 😊
     l_uint32 oldnCcalls = L->nCcalls;
     struct lua_longjmp lj;
-    lj.status = LUA_OK;
+    lj.status = LUA_OK; // 没有发生错误就返回 LUA_OK, 出现异常返回不同的状态码
     lj.previous = L->errorJmp; /* chain new error handler */
-    L->errorJmp = &lj;
+    L->errorJmp = &lj; // 执行 f 的过程中的 _longjmp
     // 从 setjmp 直接调用返回值为0. 从 longjmp 恢复 setjmp 返回非零值
     LUAI_TRY(L, &lj, (*f)(L, ud););
     L->errorJmp = lj.previous; /* restore old error handler */
