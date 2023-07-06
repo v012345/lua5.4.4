@@ -125,56 +125,59 @@ function mt.convertToDFA(this)
     ---@param from_state FA_State
     ---@param labelLex FA_Lable_Lex
     ---@param to_state FA_State
-    local function unfold_label(DFA, NFA, from_state, labelLex, to_state)
+    local function unfold_label(DFA, NFA, base_state, from_state, labelLex, to_state)
         labelLex:next()
-        while labelLex.current_char do
-            if labelLex.current_char == "(" then
-                local newLabelLex = labelLex:getNewLabel()
-                local newState = NFA:getNewState()
-                if labelLex:peekOne("*") then
-                    labelLex:next()
-                    DFA:closure(from_state, newState)
-                end
-                unfold_label(DFA, NFA, from_state, newLabelLex, newState)
-                unfold_label(DFA, NFA, newState, labelLex:createNewLabelWithRest(), to_state)
-            elseif labelLex.current_char == "|" then
-                unfold_label(DFA, NFA, from_state, labelLex, to_state)
-            elseif labelLex.current_char == "*" then
-                error("single * show")
-            elseif labelLex.current_char == ")" then
-                error("single ) show")
-            elseif labelLex.current_char == "$" then
-                local newState = NFA:getNewState()
-                DFA:addEntry(FA_State_Matrix_Entry(
-                    from_state,
-                    labelLex:readAlias(),
-                    newState
-                ))
-                unfold_label(DFA, NFA, newState, labelLex, to_state)
-                if labelLex:peekOne("*") then
-                    labelLex:next()
-                    DFA:closure(from_state, newState)
-                end
-            else
-                local newState = NFA:getNewState()
-                DFA:addEntry(FA_State_Matrix_Entry(
-                    from_state,
-                    labelLex.current_char,
-                    newState
-                ))
-
-                if labelLex:peekOne("*") then
-                    labelLex:next()
-                    DFA:closure(from_state, newState)
-                end
-                unfold_label(DFA, NFA, newState, labelLex, to_state)
+        if not labelLex.current_char then
+            DFA:addEntry(FA_State_Matrix_Entry(
+                from_state,
+                "",
+                to_state
+            ))
+            return
+        end
+        if labelLex.current_char == "(" then
+            local newLabelLex = labelLex:getNewLabel()
+            local newState = NFA:getNewState()
+            unfold_label(DFA, NFA, from_state, from_state, newLabelLex, newState)
+            if labelLex:peekOne("*") then
+                labelLex:next()
+                DFA:closure(newState, from_state)
             end
+            unfold_label(DFA, NFA, newState, newState, labelLex:createNewLabelWithRest(), to_state)
+        elseif labelLex.current_char == "|" then
+            unfold_label(DFA, NFA, base_state, base_state, labelLex:createNewLabelWithRest(), to_state)
+        elseif labelLex.current_char == "*" then
+            error("single * show")
+        elseif labelLex.current_char == ")" then
+            error("single ) show")
+        else
+            local new_label = ""
+            local newState = NFA:getNewState()
+            if labelLex.current_char == "$" then
+                new_label = labelLex:readAlias()
+            else
+                new_label = labelLex.current_char
+            end
+            DFA:addEntry(FA_State_Matrix_Entry(
+                from_state,
+                new_label,
+                newState
+            ))
+            if labelLex:peekOne("*") then
+                labelLex:next()
+                DFA:closure(newState, from_state)
+            end
+            unfold_label(DFA, NFA, base_state, newState, labelLex:createNewLabelWithRest(), to_state)
         end
     end
     for from_state, label_states in pairs(this.FA_State_Matrix) do
         for label, to_states in pairs(label_states) do
             for to_state in pairs(to_states) do
-                unfold_label(FA, this, FA_State(from_state), FA_Lable_Lex(label), FA_State(to_state))
+                unfold_label(FA, this,
+                    FA_State(from_state),
+                    FA_State(from_state),
+                    FA_Lable_Lex(label),
+                    FA_State(to_state))
             end
         end
     end

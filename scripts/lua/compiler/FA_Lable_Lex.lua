@@ -20,7 +20,7 @@ end
 ---@param what string
 ---@return boolean
 function mt.peekOne(this, what)
-    local position = this.current_position + 1
+    local position = this.current_position
     if string.sub(this.content, position, position) == what then
         return true
     end

@@ -8,6 +8,7 @@ function main()
     DotParser("./dot/NDF.dot", nfa)
     local dfa = nfa:convertToDFA()
     dfa:toDot("./build/dot.dot")
+    require "compiler.FA_Lable_Parser"
     -- print(nfa.FA_State_Matrix)
 
     ---@type InputStream

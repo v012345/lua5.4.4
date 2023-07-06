@@ -4,5 +4,5 @@ digraph NDF {
     1 [color = green;];
     2 [color = red;];
     node [shape = circle;];
-    1 -> 2 [label = "ab*";];
+    1 -> 2 [label = "a|b";];
 }
