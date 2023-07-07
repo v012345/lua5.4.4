@@ -67,8 +67,10 @@ static l_noret errorlimit(FuncState* fs, int limit, const char* what) {
     luaX_syntaxerror(fs->ls, msg);
 }
 
+// v 大于 l 时报错
 static void checklimit(FuncState* fs, int v, int l, const char* what) {
-    if (v > l) errorlimit(fs, l, what);
+    if (v > l) //
+        errorlimit(fs, l, what);
 }
 
 /*
@@ -264,6 +266,7 @@ static void check_readonly(LexState* ls, expdesc* e) {
 ** Start the scope for the last 'nvars' created variables.
 */
 static void adjustlocalvars(LexState* ls, int nvars) {
+    // nvars 新增加局部变量的个数
     FuncState* fs = ls->fs;
     int reglevel = luaY_nvarstack(fs);
     int i;
