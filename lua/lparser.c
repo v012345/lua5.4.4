@@ -273,7 +273,7 @@ static void adjustlocalvars(LexState* ls, int nvars) {
     for (i = 0; i < nvars; i++) {
         int vidx = fs->nactvar++;
         Vardesc* var = getlocalvardesc(fs, vidx);
-        var->vd.ridx = reglevel++;
+        var->vd.ridx = reglevel++; // 变量在寄存器中的位置
         var->vd.pidx = registerlocalvar(ls, fs, var->vd.name);
     }
 }
