@@ -280,11 +280,12 @@ static void adjustlocalvars(LexState* ls, int nvars) {
 ** (debug info.)
 */
 static void removevars(FuncState* fs, int tolevel) {
+    // 真的是把局部变量的数变成 tolevel
     fs->ls->dyd->actvar.n -= (fs->nactvar - tolevel);
     while (fs->nactvar > tolevel) {
         LocVar* var = localdebuginfo(fs, --fs->nactvar);
         if (var) /* does it have debug information? */
-            var->endpc = fs->pc;
+            var->endpc = fs->pc; // 局部变量生命周期结束
     }
 }
 
@@ -376,6 +377,7 @@ static void marktobeclosed(FuncState* fs) {
 ** 'var' as 'void' as a flag.
 */
 static void singlevaraux(FuncState* fs, TString* n, expdesc* var, int base) {
+    // base 为 1 就是当前作用域, 为 0 就是在当前作用域的上级了
     if (fs == NULL) /* no more levels? */
         init_exp(var, VVOID, 0); /* default is global */
     else {
@@ -563,7 +565,7 @@ static void movegotosout(FuncState* fs, BlockCnt* bl) {
 
 static void enterblock(FuncState* fs, BlockCnt* bl, lu_byte isloop) {
     bl->isloop = isloop;
-    bl->nactvar = fs->nactvar;
+    bl->nactvar = fs->nactvar; // 离开 blk 后, fs->nactvar - bl->nactvar 就知道要删除多少局部变量啦
     bl->firstlabel = fs->ls->dyd->label.n;
     bl->firstgoto = fs->ls->dyd->gt.n;
     bl->upval = 0;
@@ -880,6 +882,7 @@ static void parlist(LexState* ls) {
     luaK_reserveregs(fs, fs->nactvar); /* reserve registers for parameters */
 }
 
+// 函数体解析
 static void body(LexState* ls, expdesc* e, int ismethod, int line) {
     /* body ->  '(' parlist ')' block END */
     FuncState new_fs;
@@ -1627,6 +1630,7 @@ static void funcstat(LexState* ls, int line) {
     int ismethod;
     expdesc v, b;
     luaX_next(ls); /* skip FUNCTION */
+    // 使用 function A:a() 定义的 ismethod 就为 true
     ismethod = funcname(ls, &v);
     body(ls, &b, ismethod, line);
     check_readonly(ls, &v);
