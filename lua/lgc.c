@@ -248,7 +248,7 @@ GCObject* luaC_newobjdt(lua_State* L, int tt, size_t sz, size_t offset) {
     o->marked = luaC_white(g);
     o->tt = tt;
     o->next = g->allgc;
-    g->allgc = o;
+    g->allgc = o; // 所以新对象都链到 allgc 上
     return o;
 }
 
