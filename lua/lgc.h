@@ -87,6 +87,7 @@
 #define changewhite(x) ((x)->marked ^= WHITEBITS)
 #define nw2black(x) check_exp(!iswhite(x), l_setbit((x)->marked, BLACKBIT))
 
+// 就是当前的白色
 #define luaC_white(g) cast_byte((g)->currentwhite& WHITEBITS)
 
 /* object age in generational mode */
