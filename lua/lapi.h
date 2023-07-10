@@ -14,6 +14,7 @@
 #define api_incr_top(L)                                                                                                                                                                                \
     {                                                                                                                                                                                                  \
         L->top.p++;                                                                                                                                                                                    \
+        /* 这里会检查栈溢出的问题, 尤其注意 base_ci 里栈帧大小就 20, 其他 c 函数的栈帧也是 20 */                                                                                                            \
         api_check(L, L->top.p <= L->ci->top.p, "stack overflow");                                                                                                                                      \
     }
 

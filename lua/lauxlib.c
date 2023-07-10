@@ -900,13 +900,14 @@ LUALIB_API const char* luaL_gsub(lua_State* L, const char* s, const char* p, con
     return lua_tostring(L, -1);
 }
 
-static void* l_alloc(void* ud, void* ptr, size_t osize, size_t nsize) { // 😊
+static void* l_alloc(void* ud, void* ptr, size_t osize, size_t nsize) { // ok
     (void)ud;
     (void)osize; /* not used */
     if (nsize == 0) {
         free(ptr);
         return NULL;
     } else
+        // ptr 为 NULL 直接开辟, 否则开辟完成后会再复制原来数据
         return realloc(ptr, nsize);
 }
 
@@ -968,6 +969,7 @@ static void warnfon(void* ud, const char* message, int tocont) {
 }
 
 LUALIB_API lua_State* luaL_newstate(void) {
+    // NULL 会赋值给 g->ud, 只要使用自定义的 frealloc 分配器才可能使用到 ud
     lua_State* L = lua_newstate(l_alloc, NULL);
     if (l_likely(L)) {
         lua_atpanic(L, &panic);

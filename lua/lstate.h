@@ -233,6 +233,7 @@ struct CallInfo {
 */
 typedef struct global_State {
     lua_Alloc frealloc; /* function to reallocate memory */
+    // 如果使用官方默认的 l_alloc 函数, ud 是使用不到的
     void* ud; /* auxiliary data to 'frealloc' */
     l_mem totalbytes; /* number of bytes currently allocated - GCdebt */
     l_mem GCdebt; /* bytes allocated not yet compensated by the collector */
@@ -293,7 +294,9 @@ struct lua_State {
     StkIdRel top; /* first free slot in the stack */
     global_State* l_G;
     CallInfo* ci; /* call info for current function */
+    // 始终指向栈的结束地址
     StkIdRel stack_last; /* end of stack (last element + 1) */
+    // 始终指向栈的起始地址
     StkIdRel stack; /* stack base */
     UpVal* openupval; /* list of open upvalues in this stack */
     StkIdRel tbclist; /* list of to-be-closed variables */

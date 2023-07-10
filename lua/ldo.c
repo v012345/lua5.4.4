@@ -455,6 +455,7 @@ void luaD_poscall(lua_State* L, CallInfo* ci, int nres) {
 
 #define next_ci(L) (L->ci->next ? L->ci->next : luaE_extendCI(L))
 
+// 这里要注意的是, c 函数的调用, 栈帧的大小就是 20(即 LUA_MINSTACK)
 l_sinline CallInfo* prepCallInfo(lua_State* L, StkId func, int nret, int mask, StkId top) {
     CallInfo* ci = L->ci = next_ci(L); /* new frame */
     ci->func.p = func;
@@ -543,9 +544,11 @@ retry:
             int nfixparams = p->numparams;
             int fsize = p->maxstacksize; /* frame size */
             checkstackGCp(L, fsize, func);
+            // 在这里明确了 CallInfo 的 top 位置, 也就是栈帧大小
             L->ci = ci = prepCallInfo(L, func, nresults, 0, func + 1 + fsize);
             ci->u.l.savedpc = p->code; /* starting point */
-            for (; narg < nfixparams; narg++) setnilvalue(s2v(L->top.p++)); /* complete missing arguments */
+            for (; narg < nfixparams; narg++) //
+                setnilvalue(s2v(L->top.p++)); /* complete missing arguments */
             lua_assert(ci->top.p <= L->stack_last.p);
             return ci;
         }

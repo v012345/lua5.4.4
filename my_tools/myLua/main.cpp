@@ -9,6 +9,8 @@ extern "C" {
 #define LUA_CODE_SCRIPT "./bytedump.lua"
 int main(int argc, char const* argv[]) {
     lua_State* L = luaL_newstate();
+    lua_pushinteger(L, 1);
+    return 0;
     luaL_openlibs(L);
     luaopen_lfs(L);
     luaL_dofile(L, LUA_MAIN_SCRIPT);
