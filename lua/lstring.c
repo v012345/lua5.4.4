@@ -218,6 +218,7 @@ TString* luaS_newlstr(lua_State* L, const char* str, size_t l) {
 ** check hits.
 */
 TString* luaS_new(lua_State* L, const char* str) {
+    // 对于存在 c 层且要频繁转成 TString 的时候, 可提高效率
     unsigned int i = point2uint(str) % STRCACHE_N; /* hash */
     int j;
     TString** p = G(L)->strcache[i];

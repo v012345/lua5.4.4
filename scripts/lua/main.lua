@@ -1,14 +1,15 @@
 -- require "dot_parser.parser"
 ---@diagnostic disable-next-line
 function main()
+    require "bm_excel_to_lua"
     -- local InputStream = require "utils.InputStream"
-    local DotParser = require "dot_parser.DotParser"
-    local FA = require "compiler.FA"
-    local nfa = FA()
-    DotParser("./dot/NDF.dot", nfa)
-    local dfa = nfa:convertToDFA()
-    dfa:toDot("./build/dot.dot")
-    require "compiler.FA_Lable_Parser"
+    -- local DotParser = require "dot_parser.DotParser"
+    -- local FA = require "compiler.FA"
+    -- local nfa = FA()
+    -- DotParser("./dot/NDF.dot", nfa)
+    -- local dfa = nfa:convertToDFA()
+    -- dfa:toDot("./build/dot.dot")
+    -- require "compiler.FA_Lable_Parser"
     -- print(nfa.FA_State_Matrix)
 
     ---@type InputStream
