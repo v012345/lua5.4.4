@@ -1,15 +1,3 @@
-local function hexstring2number(hexstring, len)
-    if not len or len > 8 then return end
-
-    local hexbyte = {}
-    for i = 1, len do
-        hexbyte[i] = string.byte(hexstring, i)
-    end
-
-    local num = tonumber(string.format("0x%x%x%x%x", hexbyte[1], hexbyte[2], hexbyte[3], hexbyte[4]))
-    return num
-end
-
 local function get_png_size(path)
     local png_file = io.open(path, "rb") or error("can't read " .. path)
     local data = png_file:read(64) -- 读入 64 bytes 就可以包含头部了
@@ -31,8 +19,6 @@ local function get_png_size(path)
             error("can't parser " .. path)
         end
     end
-
-
 
 
     local sizeData = string.sub(data, 17, 24)
