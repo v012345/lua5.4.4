@@ -1,7 +1,17 @@
 -- require "dot_parser.parser"
 ---@diagnostic disable-next-line
 function main()
-    require "bm_excel_to_lua"
+    local t = ChunkDump("./llex.lua")
+    for key, value in pairs(t) do
+        if key == "k" then
+            for k, v in ipairs(value) do
+                print(v)
+            end
+        else
+            print(key, value)
+        end
+    end
+    -- require "bm_excel_to_lua"
     -- local InputStream = require "utils.InputStream"
     -- local DotParser = require "dot_parser.DotParser"
     -- local FA = require "compiler.FA"

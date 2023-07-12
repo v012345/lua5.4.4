@@ -66,4 +66,9 @@ function GetFilesLastModifiedTimestamp(files) return {} end
 ---@return FA_State_Matrix_Entry
 function FA_State_Matrix_Entry(from_state, by_label, to_state, ...) end
 
+---comment
+---@param files string
+---@return table
+function ChunkDump(files) return {} end
+
 _Lua_function = {}
