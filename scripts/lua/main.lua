@@ -1,16 +1,73 @@
 -- require "dot_parser.parser"
 ---@diagnostic disable-next-line
 function main()
-    local t = ChunkDump("./llex.lua")
-    for key, value in pairs(t) do
-        if key == "k" then
-            for k, v in ipairs(value) do
-                print(v)
+    -- local t = ChunkDump("./llex.lua")
+    -- for key, value in pairs(t) do
+    --     if key == "k" then
+    --         for k, v in ipairs(value) do
+    --             print(v)
+    --         end
+    --     else
+    --         print(key, value)
+    --     end
+    -- end
+    local get_png_size = require "utils.getPngSize"
+    local lfs = require("lfs")
+    local images_map = {}
+    local function traverseDirectory(path, root, prefix)
+        local map = images_map
+        for entry in lfs.dir(path) do
+            if entry ~= "." and entry ~= ".." then
+                local filePath = path .. "/" .. entry
+                local fileAttributes = lfs.attributes(filePath)
+
+                if fileAttributes.mode == "directory" then
+                    traverseDirectory(filePath, root, prefix)
+                elseif fileAttributes.mode == "file" then
+                    map[entry] = string.gsub(filePath, root, prefix)
+                end
             end
-        else
-            print(key, value)
         end
     end
+    local sea_root_path = "D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\en\\cocosstudio\\image\\"
+    traverseDirectory(sea_root_path, sea_root_path .. "/", "")
+    local online_root_path =
+    "D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\zhcn\\cocosstudio\\image"
+    local out = io.open("differ.txt", "w")
+
+    for key, value in pairs(images_map) do
+        if string.match(value, ".+%.png$") then
+            -- print(get_png_size(string.format("%s/%s", sea_root_path, value)))
+        else
+            print(value)
+        end
+
+        -- local x = io.open(string.format("%s/%s", online_root_path, value), "r")
+        -- if not x then
+        --     print(value)
+        -- else
+        --     x:close()
+        -- end
+        -- local w1, h1 = get_png_size(string.format("%s/%s", sea_root_path, value))
+        -- local w2, h2 = get_png_size(string.format("%s/%s", online_root_path, value))
+        -- if w1 ~= w2 or h1 ~= h2 then
+        --     out:write(value)
+        --     out:write("\n")
+        --     print(value)
+        -- end
+        -- local handle = io.popen(string.format("py ./imagesize.py \"%s\"", string.format("%s/%s", sea_root_path, value))) or
+        --     error()
+        -- local result1 = handle:read("*a")
+        -- handle:close()
+        -- handle = io.popen(string.format("py ./imagesize.py \"%s\"", string.format("%s/%s", online_root_path, value))) or
+        --     error()
+        -- local result2 = handle:read("*a")
+        -- handle:close()
+        -- if result2 ~= result1 then
+
+        -- end
+    end
+    out:close()
     -- require "bm_excel_to_lua"
     -- local InputStream = require "utils.InputStream"
     -- local DotParser = require "dot_parser.DotParser"
