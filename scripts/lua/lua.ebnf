@@ -1,0 +1,21 @@
+exprstat ::= func | assignment
+assignment ::= suffixedexp {, suffixedexp} ['=' explist]
+func ::= suffixedexp
+suffixedexp ::= primaryexp {'.' Name |'[' expr ']' ':' Name funcargs | funcargs}
+primaryexp ::= Name |'(' expr ')'
+
+explist ::= expr {',' expr}
+expr ::= (simpleexp |unop expr) {binop expr}
+simpleexp::=Numeral | Literalstring |'nil'|'true'|' false'|'...'|constructor |'function' body |suffixedexp
+body ::='('parlist')' statlist 'end'
+parlist ::= {param[','param]}
+param ::= Name |'...'
+constructor ::='{'[field { sep field} ][sep]'}'
+field ::= listfield | recfield
+listfield ::= expr
+recfield ::= (Name |'[' expr ']') '=' expr
+sep ::= ',' | ';'
+funcargs ::= '('[explist]')' | constructor | LiteralString
+
+unop ::= '-' | 'not'| '#' | '~'
+binop ::= '+'| '-' | '*' | '%' | '^' | '/'|'//'|'&'|'|'|'~'|'<<'|'>>'|'..'|'~='|'=='|'<'|'<='|'>''>='|'and'|'or'
