@@ -1,5 +1,7 @@
 -- require "dot_parser.parser"
 ---@diagnostic disable-next-line
+local a = 1
+local b = not a
 function main()
     -- local t = ChunkDump("./llex.lua")
     -- for key, value in pairs(t) do
