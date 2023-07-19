@@ -4,7 +4,6 @@
         "D:\\Closers.cocos\\client\\branches\\yougubt_test\\Resources\\res",
         "D:\\Closers.cocos\\client\\branches\\yougubt_test\\Resources\\res_zhcn"
     ],
-    "result_output_to": "C:\\Users\\Meteor\\Desktop\\configs\\log.txt",
     "xls2xlsx_cmd": "C:\\Users\\Meteor\\Desktop\\configs\\xls2xlsx_worker.exe \"%s\" \"%s\"",
     "xls_path": "D:\\Closers.cocos\\resource\\data\\branches\\yougubt_test\\excel",
     "temp": "C:\\Users\\Meteor\\Desktop\\configs",
