@@ -140,7 +140,7 @@ void luaK_nil(FuncState* fs, int from, int n) { // ok
 ** Gets the destination address of a jump instruction. Used to traverse
 ** a list of jumps.
 */
-static int getjump(FuncState* fs, int pc) {
+static int getjump(FuncState* fs, int pc) { // 获取跳转指令的目标地址
     int offset = GETARG_sJ(fs->f->code[pc]);
     if (offset == NO_JUMP) /* point to itself represents end of list */
         return NO_JUMP; /* end of list */
@@ -166,6 +166,7 @@ static void fixjump(FuncState* fs, int pc, int dest) {
 ** Concatenate jump-list 'l2' into jump-list 'l1'
 */
 void luaK_concat(FuncState* fs, int* l1, int l2) {
+    // l2 可以理解成目标地址
     if (l2 == NO_JUMP)
         return; /* nothing to concatenate? */
     else if (*l1 == NO_JUMP) /* no original list? */
@@ -175,6 +176,7 @@ void luaK_concat(FuncState* fs, int* l1, int l2) {
         int next;
         while ((next = getjump(fs, list)) != NO_JUMP) /* find last element */
             list = next;
+        // list 现在是跳转链的最后一个指令的索引
         fixjump(fs, list, l2); /* last element links to 'l2' */
     }
 }
@@ -242,10 +244,11 @@ static Instruction* getjumpcontrol(FuncState* fs, int pc) {
 */
 static int patchtestreg(FuncState* fs, int node, int reg) {
     Instruction* i = getjumpcontrol(fs, node);
-    if (GET_OPCODE(*i) != OP_TESTSET) return 0; /* cannot patch other instructions */
+    if (GET_OPCODE(*i) != OP_TESTSET) //
+        return 0; /* cannot patch other instructions */
     if (reg != NO_REG && reg != GETARG_B(*i))
         SETARG_A(*i, reg);
-    else {
+    else { // NO_REG 意味着不须要 SET, 所以把 OP_TESTSET 优化成 OP_TEST
         /* no register to put value or register already has the value;
            change instruction to simple test */
         *i = CREATE_ABCk(OP_TEST, GETARG_B(*i), 0, 0, GETARG_k(*i));
