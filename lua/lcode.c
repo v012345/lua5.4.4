@@ -1138,7 +1138,14 @@ static void codenot(FuncState* fs, expdesc* e) {
 /*
 ** Check whether expression 'e' is a small literal string
 */
-static int isKstr(FuncState* fs, expdesc* e) { return (e->k == VK && !hasjumps(e) && e->u.info <= MAXARG_B && ttisshrstring(&fs->f->k[e->u.info])); }
+static int isKstr(FuncState* fs, expdesc* e) { //
+    return (
+        e->k == VK && // 已经在常量表中
+        !hasjumps(e) && // 不包含指令跳转
+        e->u.info <= MAXARG_B && // B 段可以表示位置
+        ttisshrstring(&fs->f->k[e->u.info]) // 常量值是短字符串
+    );
+}
 
 /*
 ** Check whether expression 'e' is a literal integer.

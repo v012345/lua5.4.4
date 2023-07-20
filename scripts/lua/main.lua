@@ -1,5 +1,6 @@
 -- require "dot_parser.parser"
 ---@diagnostic disable-next-line
+local x = a and b and c or d and e or f
 local a = 1
 local b = not a
 function main()
@@ -8,7 +9,7 @@ function main()
     --     if key == "k" then
     --         for k, v in ipairs(value) do
     --             print(v)
-    --         end
+    --         endh
     --     else
     --         print(key, value)
     --     end

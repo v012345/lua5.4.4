@@ -1687,7 +1687,7 @@ static void retstat(LexState* ls) {
     testnext(ls, ';'); /* skip optional semicolon */
 }
 
-static void statement(LexState* ls) { // 😊
+static void statement(LexState* ls) {
     int line = ls->linenumber; /* may be needed for error messages */
     enterlevel(ls);
     switch (ls->t.token) {
