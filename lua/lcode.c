@@ -1548,7 +1548,8 @@ void luaK_infix(FuncState* fs, BinOpr op, expdesc* v) {
         }
         case OPR_EQ:
         case OPR_NE: {
-            if (!tonumeral(v, NULL)) luaK_exp2RK(fs, v);
+            if (!tonumeral(v, NULL)) //
+                luaK_exp2RK(fs, v);
             /* else keep numeral, which may be an immediate operand */
             break;
         }
@@ -1557,7 +1558,8 @@ void luaK_infix(FuncState* fs, BinOpr op, expdesc* v) {
         case OPR_GT:
         case OPR_GE: {
             int dummy, dummy2;
-            if (!isSCnumber(v, &dummy, &dummy2)) luaK_exp2anyreg(fs, v);
+            if (!isSCnumber(v, &dummy, &dummy2)) //
+                luaK_exp2anyreg(fs, v);
             /* else keep numeral, which may be an immediate operand */
             break;
         }
