@@ -246,7 +246,8 @@ static int patchtestreg(FuncState* fs, int node, int reg) {
     Instruction* i = getjumpcontrol(fs, node);
     if (GET_OPCODE(*i) != OP_TESTSET) //
         return 0; /* cannot patch other instructions */
-    if (reg != NO_REG && reg != GETARG_B(*i))
+    if (reg != NO_REG && // 需要 SET
+        reg != GETARG_B(*i)) // SET 的寄存器不是要测试的寄存器
         SETARG_A(*i, reg);
     else { // NO_REG 意味着不须要 SET, 所以把 OP_TESTSET 优化成 OP_TEST
         /* no register to put value or register already has the value;
