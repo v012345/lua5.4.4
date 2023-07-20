@@ -167,7 +167,7 @@ static void fixjump(FuncState* fs, int pc, int dest) {
 */
 void luaK_concat(FuncState* fs, int* l1, int l2) {
     // l2 可以理解成目标地址
-    if (l2 == NO_JUMP)
+    if (l2 == NO_JUMP) // 就是没有生成要跳的地址, 所以什么也不用做
         return; /* nothing to concatenate? */
     else if (*l1 == NO_JUMP) /* no original list? */
         *l1 = l2; /* 'l1' points to 'l2' */
@@ -1071,6 +1071,7 @@ void luaK_goiftrue(FuncState* fs, expdesc* e) {
             break;
         }
     }
+    // 明确一点, e->t 与 e->f 指的是跳转指令的地址
     luaK_concat(fs, &e->f, pc); /* insert new jump in false list */
     luaK_patchtohere(fs, e->t); /* true list jumps to here (to go through) */
     e->t = NO_JUMP;
