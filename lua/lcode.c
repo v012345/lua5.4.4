@@ -153,12 +153,13 @@ static int getjump(FuncState* fs, int pc) {
 ** (Jump addresses are relative in Lua)
 */
 static void fixjump(FuncState* fs, int pc, int dest) {
-    Instruction* jmp = &fs->f->code[pc];
-    int offset = dest - (pc + 1);
-    lua_assert(dest != NO_JUMP);
-    if (!(-OFFSET_sJ <= offset && offset <= MAXARG_sJ - OFFSET_sJ)) luaX_syntaxerror(fs->ls, "control structure too long");
+    Instruction* jmp = &fs->f->code[pc]; // 跳转指令
+    int offset = dest - (pc + 1); // 目标地址相对于跳转指令下一条指令的偏移度
+    lua_assert(dest != NO_JUMP); // 跳转指令不能跳到自己
+    if (!(-OFFSET_sJ <= offset && offset <= MAXARG_sJ - OFFSET_sJ)) //
+        luaX_syntaxerror(fs->ls, "control structure too long");
     lua_assert(GET_OPCODE(*jmp) == OP_JMP);
-    SETARG_sJ(*jmp, offset);
+    SETARG_sJ(*jmp, offset); // 给跳转指令设置参数
 }
 
 /*
@@ -182,7 +183,9 @@ void luaK_concat(FuncState* fs, int* l1, int l2) {
 ** Create a jump instruction and return its position, so its destination
 ** can be fixed later (with 'fixjump').
 */
-int luaK_jump(FuncState* fs) { return codesJ(fs, OP_JMP, NO_JUMP, 0); }
+int luaK_jump(FuncState* fs) { //
+    return codesJ(fs, OP_JMP, NO_JUMP, 0);
+}
 
 /*
 ** Code a 'return' instruction
@@ -202,7 +205,9 @@ void luaK_ret(FuncState* fs, int first, int nret) {
 ** followed by a jump. Return jump position.
 */
 static int condjump(FuncState* fs, OpCode op, int A, int B, int C, int k) {
+    // 生成一条测试指令
     luaK_codeABCk(fs, op, A, B, C, k);
+    // 生成跳转指令, 指令参数之后再填入, 返回指令的地址
     return luaK_jump(fs);
 }
 
@@ -1033,6 +1038,7 @@ static int jumponcond(FuncState* fs, expdesc* e, int cond) {
     }
     discharge2anyreg(fs, e);
     freeexp(fs, e);
+    // 生成 测试 与 跳转 两条指令
     return condjump(fs, OP_TESTSET, NO_REG, e->u.info, 0, cond);
 }
 
@@ -1040,7 +1046,6 @@ static int jumponcond(FuncState* fs, expdesc* e, int cond) {
 ** Emit code to go through if 'e' is true, jump otherwise.
 */
 void luaK_goiftrue(FuncState* fs, expdesc* e) {
-    // 让我们看看这个做了什么东西
     int pc; /* pc of new jump */
     luaK_dischargevars(fs, e);
     switch (e->k) {
@@ -1581,7 +1586,8 @@ static void codeconcat(FuncState* fs, expdesc* e1, expdesc* e2, int line) {
 */
 void luaK_posfix(FuncState* fs, BinOpr opr, expdesc* e1, expdesc* e2, int line) {
     luaK_dischargevars(fs, e2);
-    if (foldbinop(opr) && constfolding(fs, opr + LUA_OPADD, e1, e2)) //
+    if (foldbinop(opr) && // 算数运算 与 位运算 才可能优化
+        constfolding(fs, opr + LUA_OPADD, e1, e2)) // 进行常量优化(就是把两个常量进入运算, 结果放到 e1 中)
         return; /* done by folding */
     switch (opr) {
         case OPR_AND: {
