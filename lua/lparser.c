@@ -1530,7 +1530,7 @@ static void test_then_block(LexState* ls, int* escapelist) {
     luaK_patchtohere(fs, jf);
 }
 
-static void ifstat(LexState* ls, int line) { // 😊
+static void ifstat(LexState* ls, int line) {
     /* ifstat -> IF cond THEN block {ELSEIF cond THEN block} [ELSE block] END */
     FuncState* fs = ls->fs;
     int escapelist = NO_JUMP; /* exit list for finished parts */
