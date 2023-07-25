@@ -831,6 +831,7 @@ static int code_loadbool(FuncState* fs, int A, OpCode op) {
 ** or produce an inverted value
 */
 static int need_value(FuncState* fs, int list) {
+    // 一串跳转指令中, 只要一条跳转指令的前一条指令不是 OP_TESTSET 就返回 1, 否则返回 0
     for (; list != NO_JUMP; list = getjump(fs, list)) {
         Instruction i = *getjumpcontrol(fs, list);
         if (GET_OPCODE(i) != OP_TESTSET) //
