@@ -204,7 +204,7 @@ static int reglevel(FuncState* fs, int nvar) {
 ** Return the number of variables in the register stack for the given
 ** function.
 */
-int luaY_nvarstack(FuncState* fs) { //
+int luaY_nvarstack(FuncState* fs) { // 返回当前函数在寄存器中的变量的个数
     return reglevel(fs, fs->nactvar);
 }
 
@@ -1584,7 +1584,7 @@ static void localstat(LexState* ls) {
     int vidx, kind; /* index and kind of last variable */
     int nvars = 0;
     int nexps;
-    expdesc e;
+    expdesc e; // 接收表达式的结果
     do {
         vidx = new_localvar(ls, str_checkname(ls));
         kind = getlocalattribute(ls);

@@ -1042,7 +1042,7 @@ static int jumponcond(FuncState* fs, expdesc* e, int cond) {
     }
     discharge2anyreg(fs, e);
     freeexp(fs, e);
-    // 生成 测试 与 跳转 两条指令
+    // 生成 测试 与 跳转 两条指令, 对于 OP_TESTSET, C 是无用字段
     return condjump(fs, OP_TESTSET, NO_REG, e->u.info, 0, cond);
 }
 
