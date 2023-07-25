@@ -229,6 +229,8 @@ int luaK_getlabel(FuncState* fs) {
 */
 static Instruction* getjumpcontrol(FuncState* fs, int pc) {
     Instruction* pi = &fs->f->code[pc];
+    // 查看跳转指令的前一个指令, 看看是不是测试指令
+    // 是就返回测试指令, 不是就是返回跳转指令自己
     if (pc >= 1 && testTMode(GET_OPCODE(*(pi - 1))))
         return pi - 1;
     else
@@ -831,7 +833,8 @@ static int code_loadbool(FuncState* fs, int A, OpCode op) {
 static int need_value(FuncState* fs, int list) {
     for (; list != NO_JUMP; list = getjump(fs, list)) {
         Instruction i = *getjumpcontrol(fs, list);
-        if (GET_OPCODE(i) != OP_TESTSET) return 1;
+        if (GET_OPCODE(i) != OP_TESTSET) //
+            return 1;
     }
     return 0; /* not found */
 }
@@ -851,7 +854,8 @@ static void exp2reg(FuncState* fs, expdesc* e, int reg) {
         int final; /* position after whole expression */
         int p_f = NO_JUMP; /* position of an eventual LOAD false */
         int p_t = NO_JUMP; /* position of an eventual LOAD true */
-        if (need_value(fs, e->t) || need_value(fs, e->f)) {
+        if (need_value(fs, e->t) || //
+            need_value(fs, e->f)) {
             int fj = (e->k == VJMP) ? NO_JUMP : luaK_jump(fs);
             p_f = code_loadbool(fs, reg, OP_LFALSESKIP); /* skip next inst. */
             p_t = code_loadbool(fs, reg, OP_LOADTRUE);
