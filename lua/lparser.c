@@ -1402,8 +1402,11 @@ static void exp1(LexState* ls) {
 static void fixforjump(FuncState* fs, int pc, int dest, int back) {
     Instruction* jmp = &fs->f->code[pc];
     int offset = dest - (pc + 1);
-    if (back) offset = -offset;
-    if (l_unlikely(offset > MAXARG_Bx)) luaX_syntaxerror(fs->ls, "control structure too long");
+
+    if (back) // OP_FORLOOP 在中使用了减法都指令跳转, 所以这里负转为正
+        offset = -offset;
+    if (l_unlikely(offset > MAXARG_Bx)) //
+        luaX_syntaxerror(fs->ls, "control structure too long");
     SETARG_Bx(*jmp, offset);
 }
 
@@ -1412,18 +1415,22 @@ static void fixforjump(FuncState* fs, int pc, int dest, int back) {
 */
 static void forbody(LexState* ls, int base, int line, int nvars, int isgen) {
     /* forbody -> DO block */
+    // 使用 isgen 来判断是不是需要使用迭代器, 0 为不需要, 1 为需要
     static const OpCode forprep[2] = {OP_FORPREP, OP_TFORPREP};
     static const OpCode forloop[2] = {OP_FORLOOP, OP_TFORLOOP};
     BlockCnt bl;
     FuncState* fs = ls->fs;
     int prep, endfor;
     checknext(ls, TK_DO);
+    // 返回的是 forprep[isgen] 指令的索引
     prep = luaK_codeABx(fs, forprep[isgen], base, 0);
     enterblock(fs, &bl, 0); /* scope for declared variables */
+    // 生成临时变量, 用于计数器的复本
     adjustlocalvars(ls, nvars);
     luaK_reserveregs(fs, nvars);
     block(ls);
     leaveblock(fs); /* end of scope for declared variables */
+    // 回填 forprep 的跳转地址
     fixforjump(fs, prep, luaK_getlabel(fs), 0);
     if (isgen) { /* generic for? */
         luaK_codeABC(fs, OP_TFORCALL, base, 0, nvars);
@@ -1437,11 +1444,12 @@ static void forbody(LexState* ls, int base, int line, int nvars, int isgen) {
 static void fornum(LexState* ls, TString* varname, int line) {
     /* fornum -> NAME = exp,exp[,exp] forbody */
     FuncState* fs = ls->fs;
-    int base = fs->freereg;
+    int base = fs->freereg; // 初始值所在的寄存器
+    // 生成三个临时的局部变量, 用来存初始值, 限制与步长
     new_localvarliteral(ls, "(for state)");
     new_localvarliteral(ls, "(for state)");
     new_localvarliteral(ls, "(for state)");
-    new_localvar(ls, varname);
+    new_localvar(ls, varname); // 计数器
     checknext(ls, '=');
     exp1(ls); /* initial value */
     checknext(ls, ',');

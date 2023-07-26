@@ -1,7 +1,3 @@
--- require "dot_parser.parser"
----@diagnostic disable-next-line
-local a = 1
-local b = 2
-while a < b do
-    a = a + 1
+for i = 1, 10, 1 do
+    local j = i
 end

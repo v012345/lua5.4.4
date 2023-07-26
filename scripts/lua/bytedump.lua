@@ -908,20 +908,20 @@ local OP_ACT = {
         print(index, name, getMode(code), string.format(f, A))
     end,
     OP_FORLOOP = function(index, code)
-        local f = "for i = R[%s], R[%s], R[%s] then t = R[%s] + R[%s], R[%s] = t, R[%s] = t and goto %s else goto %s"
+        local f = "R[%s] = R[%s] , R[%s] = R[%s] + R[%s], if R[%s] <= R[%s] then goto %s else goto %s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local Bx = Bytedump:Bx(code)
         print(index, name,
-            getMode(code), string.format(f, A, A + 1, A + 2, A, A + 2, A, A + 3, index - Bx + 1, index + 1))
+            getMode(code), string.format(f, A + 3, A, A, A, A + 2, A, A + 1, index - Bx + 1, index + 1))
     end,
     OP_FORPREP = function(index, code)
-        local f = "for i = R[%s], R[%s], R[%s] then R[%s] = R[%s] if R[%s] <= R[%s] goto %s else goto %s"
+        local f = "R[%s] = R[%s] , R[%s] = R[%s] + R[%s], if R[%s] <= R[%s] then goto %s else goto %s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local Bx = Bytedump:Bx(code)
         print(index, name,
-            getMode(code), string.format(f, A, A + 1, A + 2, A + 3, A, A, A + 1, index + 1, index + Bx + 2))
+            getMode(code), string.format(f, A + 3, A, A, A, A + 2, A, A + 1, index + 1, index + Bx + 2))
     end,
     OP_TFORPREP = nil,
     OP_TFORCALL = nil,
