@@ -857,12 +857,11 @@ local OP_ACT = {
         print(index, name, "", getMode(code), string.format(f, A, sB, k, index + 2, index + sJ + 2))
     end,
     OP_TEST = function(index, code)
-        local f = "if bool(R[%s]) == %s goto %s else goto %s"
+        local f = "if bool(R[%s]) == %s goto %s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local k = Bytedump:k(code)
-        local sJ = Bytedump:sJ(Bytedump.codes[index + 1])
-        print(index, name, "", getMode(code), string.format(f, A, k, index + 2, index + sJ + 2))
+        print(index, name, "", getMode(code), string.format(f, A, k, index + 2))
     end,
     OP_TESTSET = function(index, code)
         -- if (not R[B] == k) then pc++ else R[A] := R[B]

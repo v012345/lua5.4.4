@@ -252,6 +252,7 @@ static int patchtestreg(FuncState* fs, int node, int reg) {
         reg != GETARG_B(*i)) // SET 的寄存器不是要测试的寄存器
         SETARG_A(*i, reg);
     else { // NO_REG 意味着不须要 SET, 所以把 OP_TESTSET 优化成 OP_TEST
+        // OP_TEST 中如果条件成立, 那么就跳过下一条的跳转指令, 或者执行下面的跳转指令
         /* no register to put value or register already has the value;
            change instruction to simple test */
         *i = CREATE_ABCk(OP_TEST, GETARG_B(*i), 0, 0, GETARG_k(*i));
@@ -274,6 +275,9 @@ static void removevalues(FuncState* fs, int list) {
 static void patchlistaux(FuncState* fs, int list, int vtarget, int reg, int dtarget) {
     while (list != NO_JUMP) {
         int next = getjump(fs, list);
+        // 这里重点看看跳转指令前的指令是不是 OP_TESTSET
+        // 如果是就要使用 vtarget 为目标地址
+        // 不是才使用 dtarget
         if (patchtestreg(fs, list, reg))
             fixjump(fs, list, vtarget);
         else
@@ -289,11 +293,15 @@ static void patchlistaux(FuncState* fs, int list, int vtarget, int reg, int dtar
 */
 void luaK_patchlist(FuncState* fs, int list, int target) {
     lua_assert(target <= fs->pc);
+    // 没有寄存器要被赋值, list 都要往 target 里跳
+    // list 为 -1 就无事发生
     patchlistaux(fs, list, target, NO_REG, target);
 }
 
 void luaK_patchtohere(FuncState* fs, int list) {
+    // list 为第一个跳转指令的地址或是 -1
     int hr = luaK_getlabel(fs); /* mark "here" as a jump target */
+    // list 为 -1 就无事发生
     luaK_patchlist(fs, list, hr);
 }
 
