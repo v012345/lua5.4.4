@@ -207,6 +207,7 @@ void luaK_ret(FuncState* fs, int first, int nret) {
 ** followed by a jump. Return jump position.
 */
 static int condjump(FuncState* fs, OpCode op, int A, int B, int C, int k) {
+    // 条件跳转, 就是生成一个测试指令与一个跳转指令
     // 生成一条测试指令
     luaK_codeABCk(fs, op, A, B, C, k);
     // 生成跳转指令, 指令参数之后再填入, 返回指令的地址
@@ -1036,7 +1037,9 @@ void luaK_self(FuncState* fs, expdesc* e, expdesc* key) {
 ** Negate condition 'e' (where 'e' is a comparison).
 */
 static void negatecondition(FuncState* fs, expdesc* e) {
+    // 这里就是简单的把控制指令的测试条件反转
     Instruction* pc = getjumpcontrol(fs, e->u.info);
+    // 进到这里, 就说明一定有控制指令, 且一定不是 OP_TESTSET 或 OP_TEST, 就是一个比较类的控制指令
     lua_assert(testTMode(GET_OPCODE(*pc)) && GET_OPCODE(*pc) != OP_TESTSET && GET_OPCODE(*pc) != OP_TEST);
     SETARG_k(*pc, (GETARG_k(*pc) ^ 1));
 }
@@ -1056,8 +1059,8 @@ static int jumponcond(FuncState* fs, expdesc* e, int cond) {
         }
         /* else go through */
     }
-    discharge2anyreg(fs, e);
-    freeexp(fs, e);
+    discharge2anyreg(fs, e); // 表达式值入栈
+    freeexp(fs, e); // 表达式值用后就弃
     // 生成 测试 与 跳转 两条指令, 对于 OP_TESTSET, C 是无用字段
     return condjump(fs, OP_TESTSET, NO_REG, e->u.info, 0, cond);
 }
@@ -1066,10 +1069,12 @@ static int jumponcond(FuncState* fs, expdesc* e, int cond) {
 ** Emit code to go through if 'e' is true, jump otherwise.
 */
 void luaK_goiftrue(FuncState* fs, expdesc* e) {
+    // 就是进来一个表达式 e
     int pc; /* pc of new jump */
     luaK_dischargevars(fs, e);
     switch (e->k) {
         case VJMP: { /* condition? */
+            // 一般就是比较, 大于小于等不等的表达式
             negatecondition(fs, e); /* jump when it is false */
             pc = e->u.info; /* save jump position */
             break;
@@ -1083,12 +1088,14 @@ void luaK_goiftrue(FuncState* fs, expdesc* e) {
             break;
         }
         default: {
+            // 当表达式为假时, 执行跳转指令
             pc = jumponcond(fs, e, 0); /* jump when false */
             break;
         }
     }
-    // 明确一点, e->t 与 e->f 指的是跳转指令的地址
+    // 把跳转执行加到表达式为假时的跳转列表中
     luaK_concat(fs, &e->f, pc); /* insert new jump in false list */
+    // 如果在 t 的跳转那么就跳到这里就行了, 然后清空 t 列表
     luaK_patchtohere(fs, e->t); /* true list jumps to here (to go through) */
     e->t = NO_JUMP;
 }
