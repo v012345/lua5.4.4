@@ -1540,6 +1540,7 @@ static void ifstat(LexState* ls, int line) {
     if (testnext(ls, TK_ELSE)) //
         block(ls); /* 'else' part */
     check_match(ls, TK_END, TK_IF, line);
+    // escapelist 现在是第一个跳转指令的地址
     luaK_patchtohere(fs, escapelist); /* patch escape list to 'if' end */
 }
 

@@ -302,6 +302,7 @@ void luaK_patchtohere(FuncState* fs, int list) {
     // list 为第一个跳转指令的地址或是 -1
     int hr = luaK_getlabel(fs); /* mark "here" as a jump target */
     // list 为 -1 就无事发生
+    // OP_TESTSET 全被转化为 OP_TEST
     luaK_patchlist(fs, list, hr);
 }
 
