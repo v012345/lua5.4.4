@@ -1093,7 +1093,7 @@ void luaK_goiftrue(FuncState* fs, expdesc* e) {
             break;
         }
     }
-    // 把跳转执行加到表达式为假时的跳转列表中
+    // 把跳转执行加到表达式为假时的跳转列表中, 如果表达式本身也有跳转也正常加入
     luaK_concat(fs, &e->f, pc); /* insert new jump in false list */
     // 如果在 t 的跳转那么就跳到这里就行了, 然后清空 t 列表
     luaK_patchtohere(fs, e->t); /* true list jumps to here (to go through) */

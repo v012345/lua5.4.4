@@ -1521,12 +1521,14 @@ static void test_then_block(LexState* ls, int* escapelist) {
     } else { /* regular case (not a break) */
         luaK_goiftrue(ls->fs, &v); /* skip over block if condition is false */
         enterblock(fs, &bl, 0);
-        jf = v.f;
+        jf = v.f; // 当 v 为 false 时跳转地址
     }
     statlist(ls); /* 'then' part */
     leaveblock(fs);
     if (ls->t.token == TK_ELSE || ls->t.token == TK_ELSEIF) /* followed by 'else'/'elseif'? */
+        // 这里生成不带测试指令的跳转指令, 用于在 then 后面的代码执行后, 跳过后面的 else 与 elseif 的代码块
         luaK_concat(fs, escapelist, luaK_jump(fs)); /* must jump over it */
+    // then 后面的代码块编译完成, 已经可以确定跳转的目标地址了, 所以回填跳转的目标地址
     luaK_patchtohere(fs, jf);
 }
 
@@ -1540,7 +1542,7 @@ static void ifstat(LexState* ls, int line) {
     if (testnext(ls, TK_ELSE)) //
         block(ls); /* 'else' part */
     check_match(ls, TK_END, TK_IF, line);
-    // escapelist 现在是第一个跳转指令的地址
+    // if 语句已经解析完毕, 可以回填 if 的各个分支的逃离跳转指令了
     luaK_patchtohere(fs, escapelist); /* patch escape list to 'if' end */
 }
 
