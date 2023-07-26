@@ -1283,8 +1283,10 @@ static int cond(LexState* ls) {
     /* cond -> exp */
     expdesc v;
     expr(ls, &v); /* read condition */
-    if (v.k == VNIL) v.k = VFALSE; /* 'falses' are all equal here */
+    if (v.k == VNIL) //
+        v.k = VFALSE; /* 'falses' are all equal here */
     luaK_goiftrue(ls->fs, &v);
+    // 返回当条件是 false 时, 跳转指令列表
     return v.f;
 }
 
@@ -1340,7 +1342,7 @@ static void whilestat(LexState* ls, int line) {
     /* whilestat -> WHILE cond DO block END */
     FuncState* fs = ls->fs;
     int whileinit;
-    int condexit;
+    int condexit; // 条件不满足时, 跳出指令列表
     BlockCnt bl;
     luaX_next(ls); /* skip WHILE */
     whileinit = luaK_getlabel(fs); // while 的回跳地址
@@ -1348,9 +1350,11 @@ static void whilestat(LexState* ls, int line) {
     enterblock(fs, &bl, 1);
     checknext(ls, TK_DO);
     block(ls);
+    // while 语句的最后一条指令, 是一个条跳转指令, 用于跳回到检测指令
     luaK_jumpto(fs, whileinit); // 跳回 while 再进行条件检测
     check_match(ls, TK_END, TK_WHILE, line);
     leaveblock(fs);
+    // while 语句编译完成, 回填测试条件失败后的跳出地址
     luaK_patchtohere(fs, condexit); /* false conditions finish the loop */
 }
 
