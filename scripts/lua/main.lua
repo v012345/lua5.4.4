@@ -1,3 +1,6 @@
-for i = 1, 10, 1 do
-    local j = i
-end
+local a <const>, b <const> = 1, 2
+local d <const> = 1
+print(a)
+print(d)
+print(c)
+print(x)

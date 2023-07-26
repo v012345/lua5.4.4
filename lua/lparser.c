@@ -56,7 +56,9 @@ typedef struct BlockCnt {
 static void statement(LexState* ls);
 static void expr(LexState* ls, expdesc* v);
 
-static l_noret error_expected(LexState* ls, int token) { luaX_syntaxerror(ls, luaO_pushfstring(ls->L, "%s expected", luaX_token2str(ls, token))); }
+static l_noret error_expected(LexState* ls, int token) { //
+    luaX_syntaxerror(ls, luaO_pushfstring(ls->L, "%s expected", luaX_token2str(ls, token)));
+}
 
 static l_noret errorlimit(FuncState* fs, int limit, const char* what) {
     lua_State* L = fs->ls->L;
@@ -76,7 +78,7 @@ static void checklimit(FuncState* fs, int v, int l, const char* what) {
 /*
 ** Test whether next token is 'c'; if so, skip it.
 */
-static int testnext(LexState* ls, int c) { // 😊
+static int testnext(LexState* ls, int c) {
     if (ls->t.token == c) {
         luaX_next(ls);
         return 1;
@@ -88,7 +90,8 @@ static int testnext(LexState* ls, int c) { // 😊
 ** Check that next token is 'c'.
 */
 static void check(LexState* ls, int c) {
-    if (ls->t.token != c) error_expected(ls, c);
+    if (ls->t.token != c) //
+        error_expected(ls, c);
 }
 
 /*
@@ -109,7 +112,7 @@ static void checknext(LexState* ls, int c) {
 ** raise an error that the expected 'what' should match a 'who'
 ** in line 'where' (if that is not the current line).
 */
-static void check_match(LexState* ls, int what, int who, int where) { // 😊
+static void check_match(LexState* ls, int what, int who, int where) {
     if (l_unlikely(!testnext(ls, what))) {
         if (where == ls->linenumber) /* all in the same line? */
             error_expected(ls, what); /* do not need a complex message */
@@ -135,10 +138,12 @@ static void init_exp(expdesc* e, expkind k, int i) {
 
 static void codestring(expdesc* e, TString* s) {
     e->f = e->t = NO_JUMP;
-    e->k = VKSTR;
+    e->k = VKSTR; // 说明还没有放到常量表里
     e->u.strval = s;
 }
 
+// 非常明确下一个 token 就是 TK_NAME, 直接用 e 来接收这个 TK_NAME
+// 用于表的 key
 static void codename(LexState* ls, expdesc* e) { //
     codestring(e, str_checkname(ls));
 }
@@ -163,6 +168,7 @@ static int registerlocalvar(LexState* ls, FuncState* fs, TString* varname) {
 ** in the function.
 */
 static int new_localvar(LexState* ls, TString* name) {
+    // 在 dyd->actvar 中注册一个局部变量, 变量名为 name
     lua_State* L = ls->L;
     FuncState* fs = ls->fs;
     Dyndata* dyd = ls->dyd;
@@ -183,6 +189,7 @@ static int new_localvar(LexState* ls, TString* name) {
 ** compiler indices.)
 */
 static Vardesc* getlocalvardesc(FuncState* fs, int vidx) { //
+    // 通过索引, 拿到 fs 的指定局部变量
     return &fs->ls->dyd->actvar.arr[fs->firstlocal + vidx];
 }
 
@@ -192,6 +199,7 @@ static Vardesc* getlocalvardesc(FuncState* fs, int vidx) { //
 ** that is in a register and uses its register index ('ridx') plus one.
 */
 static int reglevel(FuncState* fs, int nvar) {
+    // 还是没有理解如果处理 <const> 的
     while (nvar-- > 0) {
         Vardesc* vd = getlocalvardesc(fs, nvar); /* get previous variable */
         if (vd->vd.kind != RDKCTC) /* is in a register? */
