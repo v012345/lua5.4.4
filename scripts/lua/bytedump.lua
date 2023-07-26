@@ -778,7 +778,7 @@ local OP_ACT = {
         print(index, name, "", getMode(code), string.format(f, index + sJ + 1))
     end,
     OP_EQ = function(index, code)
-        local f = "if R[%s] == R[%s]) != %s then goto %s"
+        local f = "if (R[%s] == R[%s]) != %s then goto %s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
@@ -786,7 +786,7 @@ local OP_ACT = {
         print(index, name, "", getMode(code), string.format(f, A, B, k, index + 2))
     end,
     OP_LT = function(index, code)
-        local f = "if R[%s] < R[%s]) != %s then goto %s"
+        local f = "if (R[%s] < R[%s]) != %s then goto %s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
@@ -794,7 +794,7 @@ local OP_ACT = {
         print(index, name, "", getMode(code), string.format(f, A, B, k, index + 2))
     end,
     OP_LE = function(index, code)
-        local f = "if R[%s] <= R[%s]) != %s then goto %s"
+        local f = "if (R[%s] <= R[%s]) != %s then goto %s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)

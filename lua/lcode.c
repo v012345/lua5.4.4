@@ -858,7 +858,9 @@ static void exp2reg(FuncState* fs, expdesc* e, int reg) {
         if (need_value(fs, e->t) || //
             need_value(fs, e->f)) {
             int fj = (e->k == VJMP) ? NO_JUMP : luaK_jump(fs);
+            // OP_LFALSESKIP 就是给指令寄存器赋值为 false, 然后路过下面的 OP_LOADTRUE 指令
             p_f = code_loadbool(fs, reg, OP_LFALSESKIP); /* skip next inst. */
+            // OP_LOADTRUE 就是给指令寄存器赋值为 true
             p_t = code_loadbool(fs, reg, OP_LOADTRUE);
             /* jump around these booleans if 'e' is not a test */
             luaK_patchtohere(fs, fj);
