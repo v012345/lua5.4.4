@@ -923,7 +923,12 @@ local OP_ACT = {
         print(index, name,
             getMode(code), string.format(f, A + 3, A, A, A, A + 2, A, A + 1, index + 1, index + Bx + 2))
     end,
-    OP_TFORPREP = nil,
+    OP_TFORPREP = function(index, code)
+        local f = "------------------ %s"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local Bx = Bytedump:Bx(code)
+        print(index, name, getMode(code), string.format(f, index + Bx))
+    end,
     OP_TFORCALL = nil,
     OP_TFORLOOP = nil,
     OP_SETLIST = function(index, code)
