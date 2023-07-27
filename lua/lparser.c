@@ -212,7 +212,8 @@ static int reglevel(FuncState* fs, int nvar) {
 ** Return the number of variables in the register stack for the given
 ** function.
 */
-int luaY_nvarstack(FuncState* fs) { // 返回当前函数在寄存器中的变量的个数
+int luaY_nvarstack(FuncState* fs) {
+    // 返回当前函数在寄存器中的变量的个数
     return reglevel(fs, fs->nactvar);
 }
 
@@ -441,7 +442,8 @@ static void adjust_assign(LexState* ls, int nvars, int nexps, expdesc* e) {
     int needed = nvars - nexps; /* extra values needed */
     if (hasmultret(e->k)) { /* last expression has multiple returns? */
         int extra = needed + 1; /* discount last expression itself */
-        if (extra < 0) extra = 0;
+        if (extra < 0) // 因为不确定返回个数, 如果已经不需要返回值了
+            extra = 0; // 在这里告诉函数不要返回了
         luaK_setreturns(fs, e, extra); /* last exp. provides the difference */
     } else {
         if (e->k != VVOID) /* at least one expression? */
@@ -1197,7 +1199,7 @@ static void expr(LexState* ls, expdesc* v) { //
 ** =======================================================================
 */
 
-static void block(LexState* ls) { // 😊
+static void block(LexState* ls) {
     /* block -> statlist */
     FuncState* fs = ls->fs;
     BlockCnt bl;

@@ -873,7 +873,7 @@ local OP_ACT = {
         print(index, name, getMode(code), string.format(f, B, k, index + 2, A, B))
     end,
     OP_CALL = function(index, code)
-        local f = "R[%s](arg * %s) {return * (C:%s - 1)}"
+        local f = "call R[%s] with %s args and need %s values being returned"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
@@ -882,7 +882,7 @@ local OP_ACT = {
         if B == 0 then
             nargs = "B:0 call another func"
         end
-        print(index, name, "", getMode(code), string.format(f, A, nargs, C))
+        print(index, name, "", getMode(code), string.format(f, A, nargs, C - 1))
     end,
     OP_TAILCALL = nil,
     OP_RETURN = function(index, code)
