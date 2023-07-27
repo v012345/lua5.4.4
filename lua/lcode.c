@@ -72,7 +72,7 @@ static TValue* const2val(FuncState* fs, const expdesc* e) { // ok
 ** If expression is a constant, fills 'v' with its value
 ** and returns 1. Otherwise, returns 0.
 */
-int luaK_exp2const(FuncState* fs, const expdesc* e, TValue* v) { // ok
+int luaK_exp2const(FuncState* fs, const expdesc* e, TValue* v) {
     if (hasjumps(e)) //
         return 0; /* not a constant */
     switch (e->k) {
@@ -93,7 +93,8 @@ int luaK_exp2const(FuncState* fs, const expdesc* e, TValue* v) { // ok
             setobj(fs->ls->L, v, const2val(fs, e));
             return 1;
         }
-        default: return tonumeral(e, v);
+        default: //
+            return tonumeral(e, v);
     }
 }
 

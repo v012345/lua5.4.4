@@ -244,20 +244,24 @@ static void init_var(FuncState* fs, expdesc* e, int vidx) {
 ** Raises an error if variable described by 'e' is read only
 */
 static void check_readonly(LexState* ls, expdesc* e) {
+    // 在赋值操作中(包括定义函数)检查变量是不是只读变量
     FuncState* fs = ls->fs;
     TString* varname = NULL; /* to be set if variable is const */
     switch (e->k) {
-        case VCONST: {
+        case VCONST: { // 如果变量是 RDKCTC , 那么表达示类型就是 VCONST
             varname = ls->dyd->actvar.arr[e->u.info].vd.name;
             break;
         }
         case VLOCAL: {
+            // 如果 <const> 没有被编译为 RDKCTC, 在 searchvar 时
+            // 会被当做 VLOCAL 返回, 但是本质上是 RDKCONST, 就是常量, 所以不可被更改
             Vardesc* vardesc = getlocalvardesc(fs, e->u.var.vidx);
             if (vardesc->vd.kind != VDKREG) /* not a regular variable? */
                 varname = vardesc->vd.name;
             break;
         }
         case VUPVAL: {
+            // 如果使用外层函数的常量, 就要在这里检查一下
             Upvaldesc* up = &fs->f->upvalues[e->u.info];
             if (up->kind != VDKREG) varname = up->name;
             break;
@@ -1628,6 +1632,7 @@ static void localstat(LexState* ls) {
     var = getlocalvardesc(fs, vidx); /* get last variable */
     if (nvars == nexps && /* no adjustments? */
         var->vd.kind == RDKCONST && /* last variable is const? */
+        // 这里会尝试把变量变量运行时常量, 如果不行就是普通常量, 在赋值语句中检查写权限
         luaK_exp2const(fs, &e, &var->k)) { /* compile-time constant? */
         var->vd.kind = RDKCTC; /* variable is a compile-time constant */
         adjustlocalvars(ls, nvars - 1); /* exclude last variable */

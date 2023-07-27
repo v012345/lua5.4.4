@@ -1,6 +1,5 @@
-local a <const>, b <const> = 1, 2
-local d <const> = 1
+local a <const>, x = 1, 3
+local b <const> = a
 print(a)
-print(d)
-print(c)
-print(x)
+local c <const> = 3
+local d <const> = c
