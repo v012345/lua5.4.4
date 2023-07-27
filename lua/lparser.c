@@ -712,7 +712,7 @@ static void close_func(LexState* ls) {
 ** 'until' closes syntactical blocks, but do not close scope,
 ** so it is handled in separate.
 */
-static int block_follow(LexState* ls, int withuntil) { // 😊
+static int block_follow(LexState* ls, int withuntil) {
     switch (ls->t.token) {
         case TK_ELSE:
         case TK_ELSEIF:
@@ -723,7 +723,7 @@ static int block_follow(LexState* ls, int withuntil) { // 😊
     }
 }
 
-static void statlist(LexState* ls) { // 😊
+static void statlist(LexState* ls) {
     /* statlist -> { stat [';'] } */
     while (!block_follow(ls, 1)) {
         if (ls->t.token == TK_RETURN) {
@@ -1489,7 +1489,7 @@ static void forlist(LexState* ls, TString* indexname) {
     new_localvarliteral(ls, "(for state)");
     new_localvarliteral(ls, "(for state)");
     /* create declared variables */
-    new_localvar(ls, indexname);
+    new_localvar(ls, indexname); // for 的第一个变量, 在这里就是存 key 值的
     while (testnext(ls, ',')) {
         new_localvar(ls, str_checkname(ls));
         nvars++;

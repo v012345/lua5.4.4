@@ -73,6 +73,7 @@ static TValue* const2val(FuncState* fs, const expdesc* e) { // ok
 ** and returns 1. Otherwise, returns 0.
 */
 int luaK_exp2const(FuncState* fs, const expdesc* e, TValue* v) {
+    // 被<const>修饰的局部变量(最后一个且对齐的情况)尝试转化为常量
     if (hasjumps(e)) //
         return 0; /* not a constant */
     switch (e->k) {

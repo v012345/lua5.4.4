@@ -1,5 +1,4 @@
-local a <const>, x = 1, 3
-local b <const> = a
-print(a)
-local c <const> = 3
-local d <const> = c
+local a = { 1, 2, 3 }
+for index, value in ipairs(a) do
+
+end
