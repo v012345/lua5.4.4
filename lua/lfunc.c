@@ -57,6 +57,9 @@ void luaF_initupvals(lua_State* L, LClosure* cl) {
 ** open upvalues of 'L' after entry 'prev'.
 **/
 static UpVal* newupval(lua_State* L, StkId level, UpVal** prev) {
+    // 为什么 previous 要种向 next, 我感觉有这么几点作用
+    // 首先, 上值链本质上还是一个单链, 不需要从后结点找到前结点
+    // previous 的功能就是可以从本结点, 在不找前结点的情况下, 自己就从链上脱下来
     GCObject* o = luaC_newobj(L, LUA_VUPVAL, sizeof(UpVal));
     UpVal* uv = gco2upv(o);
     UpVal* next = *prev; // 有可能是 NULL
