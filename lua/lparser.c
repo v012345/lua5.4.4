@@ -313,7 +313,8 @@ static int searchupvalue(FuncState* fs, TString* name) {
     int i;
     Upvaldesc* up = fs->f->upvalues;
     for (i = 0; i < fs->nups; i++) {
-        if (eqstr(up[i].name, name)) return i;
+        if (eqstr(up[i].name, name)) //
+            return i;
     }
     return -1; /* not found */
 }
@@ -332,11 +333,13 @@ static int newupvalue(FuncState* fs, TString* name, expdesc* v) {
     FuncState* prev = fs->prev;
     if (v->k == VLOCAL) {
         up->instack = 1;
+        // 如果上值是外层的局部变量, idx 就是变量的寄存器
         up->idx = v->u.var.ridx;
         up->kind = getlocalvardesc(prev, v->u.var.vidx)->vd.kind;
         lua_assert(eqstr(name, getlocalvardesc(prev, v->u.var.vidx)->vd.name));
     } else {
         up->instack = 0;
+        // 如果上值是外层的上值, idx 就是上值列表的索引
         up->idx = cast_byte(v->u.info);
         up->kind = prev->f->upvalues[v->u.info].kind;
         lua_assert(eqstr(name, prev->f->upvalues[v->u.info].name));
@@ -402,6 +405,7 @@ static void singlevaraux(FuncState* fs, TString* n, expdesc* var, int base) {
             if (v == VLOCAL && !base) //
                 markupval(fs, var->u.var.vidx); /* local will be used as an upval */
         } else { /* not found as local at current level; try upvalues */
+            // 如果有就是返回上值描述的索引
             int idx = searchupvalue(fs, n); /* try existing upvalues */
             if (idx < 0) { /* not found? */
                 singlevaraux(fs->prev, n, var, 0); /* try upper levels */
@@ -636,6 +640,7 @@ static Proto* addprototype(LexState* ls) {
     Proto* clp;
     lua_State* L = ls->L;
     FuncState* fs = ls->fs; // 这里还是老的 FuncState
+    // 这个就是外层函数
     Proto* f = fs->f; /* prototype of current function */
     if (fs->np >= f->sizep) {
         int oldsize = f->sizep;
@@ -894,7 +899,7 @@ static void parlist(LexState* ls) {
             }
         } while (!isvararg && testnext(ls, ','));
     }
-    adjustlocalvars(ls, nparams);
+    adjustlocalvars(ls, nparams); // 调整完后 fs->nactvar 就是明确的参数个数
     f->numparams = cast_byte(fs->nactvar);
     if (isvararg) //
         setvararg(fs, f->numparams); /* declared vararg */
@@ -906,7 +911,7 @@ static void body(LexState* ls, expdesc* e, int ismethod, int line) {
     /* body ->  '(' parlist ')' block END */
     FuncState new_fs; // 新的 FuncState
     BlockCnt bl; // 新函数对应的 block
-    new_fs.f = addprototype(ls);
+    new_fs.f = addprototype(ls); // 给新的 FuncState 加原型
     new_fs.f->linedefined = line;
     open_func(ls, &new_fs, &bl);
     checknext(ls, '(');
@@ -919,6 +924,7 @@ static void body(LexState* ls, expdesc* e, int ismethod, int line) {
     statlist(ls);
     new_fs.f->lastlinedefined = ls->linenumber;
     check_match(ls, TK_END, TK_FUNCTION, line);
+    // 本层函数解析完毕了, 外层函数要生成创建一个闭包的指令
     codeclosure(ls, e);
     close_func(ls);
 }
@@ -1670,6 +1676,7 @@ static void funcstat(LexState* ls, int line) {
     ismethod = funcname(ls, &v);
     body(ls, &b, ismethod, line);
     check_readonly(ls, &v);
+    // b 表示一个生成闭包的指令, 这里是把生成的闭包放那到哪里去
     luaK_storevar(ls->fs, &v, &b);
     luaK_fixline(ls->fs, line); /* definition "happens" in the first line */
 }

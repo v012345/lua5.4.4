@@ -59,11 +59,13 @@ void luaF_initupvals(lua_State* L, LClosure* cl) {
 static UpVal* newupval(lua_State* L, StkId level, UpVal** prev) {
     GCObject* o = luaC_newobj(L, LUA_VUPVAL, sizeof(UpVal));
     UpVal* uv = gco2upv(o);
-    UpVal* next = *prev;
+    UpVal* next = *prev; // 有可能是 NULL
+    // 这个确实还有栈上, 直接去取就行
     uv->v.p = s2v(level); /* current value lives in the stack */
     uv->u.open.next = next; /* link it to list of open upvalues */
     uv->u.open.previous = prev;
-    if (next) next->u.open.previous = &uv->u.open.next;
+    if (next) //
+        next->u.open.previous = &uv->u.open.next;
     *prev = uv;
     if (!isintwups(L)) { /* thread not in list of threads with upvalues? */
         L->twups = G(L)->twups; /* link it to the list */

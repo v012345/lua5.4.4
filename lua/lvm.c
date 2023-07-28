@@ -730,13 +730,17 @@ lua_Integer luaV_shiftl(lua_Integer x, lua_Integer y) {
 ** its upvalues.
 */
 static void pushclosure(lua_State* L, Proto* p, UpVal** encup, StkId base, StkId ra) {
-    int nup = p->sizeupvalues;
-    Upvaldesc* uv = p->upvalues;
+    int nup = p->sizeupvalues; // 使用到的上值的数量
+    Upvaldesc* uv = p->upvalues; // 上值描述
     int i;
+    // 闭包的数据本体来了
     LClosure* ncl = luaF_newLclosure(L, nup);
+    // 指明函数
     ncl->p = p;
+    // 放到指定的寄存器上
     setclLvalue2s(L, ra, ncl); /* anchor new closure in stack */
     for (i = 0; i < nup; i++) { /* fill in its upvalues */
+        // 如果上值在栈上, 那么就去外层函数的栈上去取回来
         if (uv[i].instack) /* upvalue refers to local variable? */
             ncl->upvals[i] = luaF_findupval(L, base + uv[i].idx);
         else /* get upvalue from enclosing function */
@@ -1824,6 +1828,9 @@ returning: /* trap already set */
             vmcase(OP_CLOSURE) {
                 StkId ra = RA(i);
                 Proto* p = cl->p->p[GETARG_Bx(i)];
+                // base 就是当前函数使用栈的底(不包括函数本身)
+                // 生成的闭包那到 ra 中
+                // cl->upvals 为当前闭包的上值
                 halfProtect(pushclosure(L, p, cl->upvals, base, ra));
                 checkGC(L, ra + 1);
                 vmbreak;

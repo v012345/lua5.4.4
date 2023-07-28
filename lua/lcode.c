@@ -1017,6 +1017,7 @@ void luaK_storevar(FuncState* fs, expdesc* var, expdesc* ex) {
         }
         default: lua_assert(0); /* invalid var kind to store */
     }
+    // 表达式赋值之后就没用了
     freeexp(fs, ex);
 }
 
