@@ -635,12 +635,13 @@ static void leaveblock(FuncState* fs) {
 static Proto* addprototype(LexState* ls) {
     Proto* clp;
     lua_State* L = ls->L;
-    FuncState* fs = ls->fs;
+    FuncState* fs = ls->fs; // 这里还是老的 FuncState
     Proto* f = fs->f; /* prototype of current function */
     if (fs->np >= f->sizep) {
         int oldsize = f->sizep;
         luaM_growvector(L, f->p, fs->np, f->sizep, Proto*, MAXARG_Bx, "functions");
-        while (oldsize < f->sizep) f->p[oldsize++] = NULL;
+        while (oldsize < f->sizep) //
+            f->p[oldsize++] = NULL;
     }
     f->p[fs->np++] = clp = luaF_newproto(L);
     luaC_objbarrier(L, f, clp);
@@ -895,15 +896,16 @@ static void parlist(LexState* ls) {
     }
     adjustlocalvars(ls, nparams);
     f->numparams = cast_byte(fs->nactvar);
-    if (isvararg) setvararg(fs, f->numparams); /* declared vararg */
+    if (isvararg) //
+        setvararg(fs, f->numparams); /* declared vararg */
     luaK_reserveregs(fs, fs->nactvar); /* reserve registers for parameters */
 }
 
 // 函数体解析
 static void body(LexState* ls, expdesc* e, int ismethod, int line) {
     /* body ->  '(' parlist ')' block END */
-    FuncState new_fs;
-    BlockCnt bl;
+    FuncState new_fs; // 新的 FuncState
+    BlockCnt bl; // 新函数对应的 block
     new_fs.f = addprototype(ls);
     new_fs.f->linedefined = line;
     open_func(ls, &new_fs, &bl);
@@ -1650,7 +1652,8 @@ static int funcname(LexState* ls, expdesc* v) {
     /* funcname -> NAME {fieldsel} [':' NAME] */
     int ismethod = 0;
     singlevar(ls, v);
-    while (ls->t.token == '.') fieldsel(ls, v);
+    while (ls->t.token == '.') //
+        fieldsel(ls, v);
     if (ls->t.token == ':') {
         ismethod = 1;
         fieldsel(ls, v);

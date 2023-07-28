@@ -252,7 +252,9 @@ GCObject* luaC_newobjdt(lua_State* L, int tt, size_t sz, size_t offset) {
     return o;
 }
 
-GCObject* luaC_newobj(lua_State* L, int tt, size_t sz) { return luaC_newobjdt(L, tt, sz, 0); }
+GCObject* luaC_newobj(lua_State* L, int tt, size_t sz) { //
+    return luaC_newobjdt(L, tt, sz, 0);
+}
 
 /* }====================================================== */
 

@@ -922,7 +922,7 @@ int luaK_exp2anyreg(FuncState* fs, expdesc* e) {
 ** or in an upvalue.
 */
 void luaK_exp2anyregup(FuncState* fs, expdesc* e) {
-    if (e->k != VUPVAL || hasjumps(e)) //
+    if (e->k != VUPVAL || hasjumps(e)) // 不是上值可以理解, 再或上这个有跳转是什么意思,我就不知道为什么了
         luaK_exp2anyreg(fs, e);
 }
 
