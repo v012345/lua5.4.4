@@ -1,5 +1,1 @@
-function a()
-    return 1
-end
-
-a()
+print((Compile("./clua.lua")))

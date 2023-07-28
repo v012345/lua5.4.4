@@ -71,4 +71,9 @@ function FA_State_Matrix_Entry(from_state, by_label, to_state, ...) end
 ---@return table
 function ChunkDump(files) return {} end
 
+---comment
+---@param files string
+---@return table
+function Compile(files) return {} end
+
 _Lua_function = {}
