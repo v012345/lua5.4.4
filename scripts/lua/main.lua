@@ -1,5 +1,5 @@
 local p1 = Compile("./clua.lua")
-
+require "bytedump"
 local o = io.open("./dump.txt", "w") or error()
 o:write("top level function: \n")
 local function printP(p, output, tab)
@@ -20,6 +20,8 @@ local function printP(p, output, tab)
     end
     output:write("\n")
     output:write(string.rep("\t", tab))
+    Bytedump:dump(p.code)
+    print("--------")
     output:write("p :\n")
     for key, value in pairs(p.p) do
         printP(value, output, tab + 1)

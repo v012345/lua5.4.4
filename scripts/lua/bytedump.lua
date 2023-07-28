@@ -1006,9 +1006,8 @@ function Bytedump:sJ(code)
     return ((code & self.sJ_mask) >> self.sJ_pos) - self.sJ_offset
 end
 
-function Bytedump:dump(file)
-    print(file.script_name)
-    self.codes = file.instructions
+function Bytedump:dump(codes)
+    self.codes = codes
 
     for index, code in pairs(self.codes) do
         local act = OP_CODE[(code & 0x7F) + 1]

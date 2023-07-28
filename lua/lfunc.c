@@ -85,6 +85,7 @@ UpVal* luaF_findupval(lua_State* L, StkId level) {
     UpVal** pp = &L->openupval;
     UpVal* p;
     lua_assert(isintwups(L) || L->openupval == NULL);
+    // 这个链有个特点, 数据在栈上的位置超高, 就越位于链头, 所以如果某个 p 的 level 已经小于 level 就不用查了
     while ((p = *pp) != NULL && uplevel(p) >= level) { /* search for it */
         lua_assert(!isdead(G(L), p));
         if (uplevel(p) == level) /* corresponding upvalue? */
