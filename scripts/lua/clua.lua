@@ -4,6 +4,11 @@
 ---@diagnostic disable-next-line
 local a = 1
 local b = 1
+function c()
+    a = 1
+    print(1)
+end
+
 function new1(struct)
     if type(struct) ~= "table" then
         error(debug.traceback("must a table given a " .. type(struct)))
