@@ -2,6 +2,8 @@
 ---@param struct any
 ---@return table
 ---@diagnostic disable-next-line
+local a = 1
+local b = 1
 function new(struct)
     if type(struct) ~= "table" then
         error(debug.traceback("must a table given a " .. type(struct)))
