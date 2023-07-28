@@ -1,21 +1,29 @@
 local p1 = Compile("./clua.lua")
 
-
-local function printP(p)
+local o = io.open("./dump.txt", "w") or error()
+o:write("top level function: \n")
+local function printP(p, output, tab)
     local vars = p.locvars
-    -- print(1)
-    for index, value in ipairs(vars) do
-        print(value)
+    output:write(string.rep("\t", tab))
+    output:write("vars :\t")
+    for _, value in ipairs(vars) do
+        output:write(value)
+        output:write("\t")
     end
+    output:write("\n")
+    output:write(string.rep("\t", tab))
+    output:write("upvalues :\t")
     local vars1 = p.upvalues
-    for index, value in ipairs(vars1) do
-        print(index)
-        for index, value in pairs(value) do
-            print(index, value)
-        end
+    for _, value in ipairs(vars1) do
+        output:write(value.name)
+        output:write("\t")
     end
+    output:write("\n")
+    output:write(string.rep("\t", tab))
+    output:write("p :\n")
     for key, value in pairs(p.p) do
-        printP(value)
+        printP(value, output, tab + 1)
     end
 end
-printP(p1)
+printP(p1, o, 0)
+o:close()
