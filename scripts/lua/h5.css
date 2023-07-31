@@ -1,0 +1,33 @@
+.container {
+    padding: 0 0 0 40px;
+    border-style: solid;
+    margin: 5px;
+}
+
+.locvar-container,
+.local-var {
+    background-color: #757575;
+}
+
+.const-container,
+.const {
+    background-color: #985f5f;
+}
+
+.upvalue-container,
+.upvalue {
+    background-color: #5c995c;
+}
+
+.upvalue,
+.const,
+.local-var {
+    padding: 0 8px;
+    margin: 0 20px 0 0;
+}
+
+.tips {
+    position: fixed;
+    top: 0px;
+    left: 200px;
+}
