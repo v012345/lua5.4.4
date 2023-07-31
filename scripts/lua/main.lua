@@ -1,7 +1,37 @@
+local function div_code(file, codes)
+    file:write('<div class="code-container">')
+    for i, code in ipairs(codes) do
+        file:write('<div class="code">')
+        file:write(code)
+        file:write('</div>')
+    end
+    file:write('</div>')
+end
+
+local function div_k(file, const)
+    file:write('<div class="const-container">')
+    for i, k in ipairs(const) do
+        file:write('<div class="const">')
+        file:write(k)
+        file:write('</div>')
+    end
+    file:write('</div>')
+end
+
+local function div_upvalue(file, upvalues)
+    file:write('<div class="upvalue-container">')
+    for i, upvalue in ipairs(upvalues) do
+        file:write('<div class="upvalue">')
+        file:write(tostring(upvalue))
+        file:write('</div>')
+    end
+    file:write('</div>')
+end
+
 xpcall(function()
     local p1 = Compile("./clua.lua")
     require "bytedump"
-    local o = io.open("./dump.txt", "w") or error()
+    local o = io.open("./dump.html", "w") or error()
     o:write("top level function: \n")
     local function printP(p, output, tab)
         local vars = p.locvars
@@ -13,26 +43,9 @@ xpcall(function()
         end
         output:write("\n")
 
-        output:write(string.rep("\t", tab))
-        output:write("k :\t")
-        local k = p.k
-        for _, value in pairs(k) do
-            output:write(value)
-            output:write("\t")
-        end
-        output:write("\n")
-
-        output:write(string.rep("\t", tab))
-        output:write("upvalues :\t")
-        local vars1 = p.upvalues
-        for _, value in ipairs(vars1) do
-            output:write(value.name)
-            output:write("\t")
-        end
-        output:write("\n")
-        output:write(string.rep("\t", tab))
-        Bytedump:dump(p.code)
-        print("--------")
+        div_k(output, p.k)
+        div_upvalue(output, p.upvalues)
+        div_code(output, p.code)
         output:write("p :\n")
         for key, value in pairs(p.p) do
             printP(value, output, tab + 1)
