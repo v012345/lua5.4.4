@@ -486,6 +486,7 @@ static void solvegoto(LexState* ls, int g, Labeldesc* label) {
     Labellist* gl = &ls->dyd->gt; /* list of gotos */
     Labeldesc* gt = &gl->arr[g]; /* goto to be resolved */
     lua_assert(eqstr(gt->name, label->name));
+    // 不能跳过局部变量的定义
     if (l_unlikely(gt->nactvar < label->nactvar)) /* enter some scope? */
         jumpscopeerror(ls, gt);
     luaK_patchlist(ls->fs, gt->pc, label->pc);
@@ -518,6 +519,8 @@ static int newlabelentry(LexState* ls, Labellist* l, TString* name, int line, in
     luaM_growvector(ls->L, l->arr, n, l->size, Labeldesc, SHRT_MAX, "labels/gotos");
     l->arr[n].name = name;
     l->arr[n].line = line;
+    // 当标签出现时, 当前函数已经解析出来的局部变量的个数
+    // 标签当然只能在一个函数内跳转啦
     l->arr[n].nactvar = ls->fs->nactvar;
     l->arr[n].close = 0;
     l->arr[n].pc = pc;
@@ -561,6 +564,7 @@ static int createlabel(LexState* ls, TString* name, int line, int last) {
     Labellist* ll = &ls->dyd->label;
     int l = newlabelentry(ls, ll, name, line, luaK_getlabel(fs));
     if (last) { /* label is last no-op statement in the block? */
+        // 就是说这个 label 是不是一个 block 的最后一个语句
         /* assume that locals are already out of scope */
         ll->arr[l].nactvar = fs->bl->nactvar;
     }

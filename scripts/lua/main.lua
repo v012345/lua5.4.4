@@ -3,7 +3,6 @@ local function html_body(file)
     local function div_code(file, codes)
         file:write('<div class="code-container container">')
         local r = Bytedump:dump(codes)
-        
         for i, code in ipairs(r) do
             file:write('<div class="code">')
             file:write(code)

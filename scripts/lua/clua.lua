@@ -2,8 +2,13 @@
 ---@param struct any
 ---@return table
 ---@diagnostic disable-next-line
+
+goto acc
 local a = 1
 local b = 1
+local d = 1
+
+
 function c()
     a = 1
     print(1)
@@ -46,3 +51,5 @@ function new(struct)
     end
     return clone(struct)
 end
+
+::acc::
