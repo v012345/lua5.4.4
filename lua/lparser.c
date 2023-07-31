@@ -585,7 +585,8 @@ static void movegotosout(FuncState* fs, BlockCnt* bl) {
     for (i = bl->firstgoto; i < gl->n; i++) { /* for each pending goto */
         Labeldesc* gt = &gl->arr[i];
         /* leaving a variable scope? */
-        if (reglevel(fs, gt->nactvar) > reglevel(fs, bl->nactvar)) gt->close |= bl->upval; /* jump may need a close */
+        if (reglevel(fs, gt->nactvar) > reglevel(fs, bl->nactvar)) //
+            gt->close |= bl->upval; /* jump may need a close */
         gt->nactvar = bl->nactvar; /* update goto level */
     }
 }
@@ -621,7 +622,10 @@ static void leaveblock(FuncState* fs) {
     BlockCnt* bl = fs->bl;
     LexState* ls = fs->ls;
     int hasclose = 0;
+    // bl->nactvar 为进入此 block 时, fs 解析出来局部变量的个数
+    // block 外部的 block 的寄存使用数量
     int stklevel = reglevel(fs, bl->nactvar); /* level outside the block */
+    // 清除 dyd 中缓存的此 block 中的局部变量
     removevars(fs, bl->nactvar); /* remove block locals */
     lua_assert(bl->nactvar == fs->nactvar); /* back to level on entry */
     if (bl->isloop) /* has to fix pending breaks? */
