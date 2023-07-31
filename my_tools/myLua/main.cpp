@@ -45,10 +45,14 @@ static void praserProto(lua_State* L, Proto* p) {
         // #define LUA_TUSERDATA 7
         // #define LUA_TTHREAD 8
         printf("%d\t", ttype(o));
-        if (ttype(o) == LUA_TSTRING) { /* code */
+        if (rawtt(o) == LUA_VFALSE) { /* code */
+            lua_pushboolean(L, 0);
+        } else if (rawtt(o) == LUA_VTRUE) {
+            lua_pushboolean(L, 1);
+        } else if (ttype(o) == LUA_TSTRING) {
             lua_pushstring(L, getstr(tsvalue(o)));
         } else {
-            lua_pushinteger(L, i + 1);
+            lua_pushstring(L, "!!!!!!!!!!!");
         }
 
         lua_settable(L, -3);
