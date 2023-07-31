@@ -26,7 +26,7 @@ local function html_body(file)
         file:write('<div class="upvalue-container container">')
         for i, upvalue in ipairs(upvalues) do
             file:write('<div class="upvalue">')
-            file:write(tostring(upvalue))
+            file:write(tostring(upvalue.name))
             file:write('</div>')
         end
         file:write('</div>')
