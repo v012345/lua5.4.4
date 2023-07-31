@@ -255,7 +255,7 @@ local function getMode(code)
         "iABC", "iABx", "iAsBx", "iAx", "isJ"
     }
     local pcmode = opmodes[pc]
-    -- print((pcmode & 7) + 1)
+    -- return table.concat({(pcmode & 7) + 1},"\t")
     local mode = modes[(pcmode & 7) + 1]
     mode = mode .. "\t"
     if (pcmode & 8) == 8 then
@@ -284,7 +284,7 @@ local function getMode(code)
     else
         mode = mode .. "  "
     end
-    -- print(mode)
+    -- return table.concat({mode},"\t")
     return mode
 end
 
@@ -295,54 +295,54 @@ local OP_ACT = {
         local name = OP_CODE[(code & 0x7F) + 1]
         local B = Bytedump:B(code)
         local A = Bytedump:A(code)
-        print(index, name, "", getMode(code), string.format(f, A, B))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B) }, "\t")
     end,
     OP_LOADI = function(index, code)
         local f = "R[%s] = sBx:%s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local sBx = Bytedump:sBx(code)
         local A = Bytedump:A(code)
-        print(index, name, getMode(code), string.format(f, A, sBx))
+        return table.concat({ index, name, getMode(code), string.format(f, A, sBx) }, "\t")
     end,
     OP_LOADF = function(index, code)
         local f = "R[%s] = (double)sBx:%s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local sBx = Bytedump:sBx(code)
         local A = Bytedump:A(code)
-        print(index, name, getMode(code), string.format(f, A, sBx))
+        return table.concat({ index, name, getMode(code), string.format(f, A, sBx) }, "\t")
     end,
     OP_LOADK = function(index, code)
         local f = "R[%s] = K[%s]"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local Bx = Bytedump:Bx(code)
-        print(index, name, getMode(code), string.format(f, A, Bx))
+        return table.concat({ index, name, getMode(code), string.format(f, A, Bx) }, "\t")
     end,
     OP_LOADKX = nil, -- 常量个数大于 2^17 -1 之后, 才会用到这个指令
     OP_LOADFALSE = function(index, code)
         local f = "R[%s] = false"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
-        print(index, name, getMode(code), string.format(f, A))
+        return table.concat({ index, name, getMode(code), string.format(f, A) }, "\t")
     end,
     OP_LFALSESKIP = function(index, code)
         local f = "R[%s] = false goto %s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
-        print(index, name, getMode(code), string.format(f, A, index + 2))
+        return table.concat({ index, name, getMode(code), string.format(f, A, index + 2) }, "\t")
     end,
     OP_LOADTRUE = function(index, code)
         local f = "R[%s] = true"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
-        print(index, name, getMode(code), string.format(f, A))
+        return table.concat({ index, name, getMode(code), string.format(f, A) }, "\t")
     end,
     OP_LOADNIL = function(index, code)
         local f = "for i = 0 to %s then R[%s+i] = nil"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
-        print(index, name, getMode(code), string.format(f, B, A))
+        return table.concat({ index, name, getMode(code), string.format(f, B, A) }, "\t")
     end,
     OP_GETUPVAL = function(index, code)
         -- R[A] := UpValue[B]
@@ -350,7 +350,7 @@ local OP_ACT = {
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
-        print(index, name, getMode(code), string.format(f, A, B))
+        return table.concat({ index, name, getMode(code), string.format(f, A, B) }, "\t")
     end,
     OP_SETUPVAL = function(index, code)
         -- UpValue[B] := R[A]
@@ -358,7 +358,7 @@ local OP_ACT = {
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
-        print(index, name, getMode(code), string.format(f, B, A))
+        return table.concat({ index, name, getMode(code), string.format(f, B, A) }, "\t")
     end,
     OP_GETTABUP = function(index, code)
         local f = "R[%s] = UpValue[%s][K[%s]]"
@@ -366,7 +366,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, getMode(code), string.format(f, A, B, C))
+        return table.concat({ index, name, getMode(code), string.format(f, A, B, C) }, "\t")
     end,
     OP_GETTABLE = function(index, code)
         -- R[A] := R[B][R[C]]
@@ -375,7 +375,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, getMode(code), string.format(f, A, B, C))
+        return table.concat({ index, name, getMode(code), string.format(f, A, B, C) }, "\t")
     end,
     OP_GETI = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -383,7 +383,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C) }, "\t")
     end,
     OP_GETFIELD = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -391,7 +391,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, getMode(code), string.format(f, A, B, C))
+        return table.concat({ index, name, getMode(code), string.format(f, A, B, C) }, "\t")
     end,
     OP_SETTABUP = function(index, code)
         local f = "UpValue[%s][K[%s]] = R[%s]"
@@ -403,7 +403,7 @@ local OP_ACT = {
         if k == 1 then
             f = "UpValue[%s][K[%s]] = K[%s]"
         end
-        print(index, name, getMode(code), string.format(f, A, B, C))
+        return table.concat({ index, name, getMode(code), string.format(f, A, B, C) }, "\t")
     end,
     OP_SETTABLE = function(index, code)
         -- R[A][R[B]] := RK(C)
@@ -416,7 +416,7 @@ local OP_ACT = {
         if k == 1 then
             f = "R[%s][R[%s]] = K[%s]"
         end
-        print(index, name, getMode(code), string.format(f, A, B, C))
+        return table.concat({ index, name, getMode(code), string.format(f, A, B, C) }, "\t")
     end,
     OP_SETI = function(index, code)
         local f = "R[%s][%s] = R[%s]"
@@ -428,7 +428,7 @@ local OP_ACT = {
         if k == 1 then
             f = "R[%s][%s] = K[%s]"
         end
-        print(index, name, "", getMode(code), string.format(f, A, B, C))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C) }, "\t")
     end,
     OP_SETFIELD = function(index, code)
         local f = "R[%s][K[%s]] = R[%s]"
@@ -440,7 +440,7 @@ local OP_ACT = {
         if k == 1 then
             f = "R[%s][K[%s]] = K[%s]"
         end
-        print(index, name, getMode(code), string.format(f, A, B, C))
+        return table.concat({ index, name, getMode(code), string.format(f, A, B, C) }, "\t")
     end,
     OP_NEWTABLE = function(index, code)
         local f = "R[%s] = { hash * B:%s , array * C:%s} k = %s"
@@ -449,7 +449,7 @@ local OP_ACT = {
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
         local k = Bytedump:k(code)
-        print(index, name, getMode(code), string.format(f, A, B, C, k))
+        return table.concat({ index, name, getMode(code), string.format(f, A, B, C, k) }, "\t")
     end,
     OP_SELF = function(index, code)
         -- R[A+1] := R[B]; R[A] := R[B][RK(C):string]
@@ -462,7 +462,7 @@ local OP_ACT = {
         if k == 1 then
             f = "R[%s] = R[%s]; R[%s] = R[%s]K[%s]"
         end
-        print(index, name, "", getMode(code), string.format(f, A + 1, B, A, B, C))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A + 1, B, A, B, C) }, "\t")
     end,
     OP_ADDI = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -470,7 +470,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local sC = Bytedump:sC(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, sC, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, sC, index + 2) }, "\t")
     end,
     OP_ADDK = function(index, code)
         -- R[A] = R[B] + K[C]:number; pc++
@@ -479,7 +479,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_SUBK = function(index, code)
         -- R[A] = R[B] - K[C]:number; pc++
@@ -488,7 +488,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_MULK = function(index, code)
         -- R[A] = R[B] * K[C]:number; pc++
@@ -497,7 +497,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_MODK = function(index, code)
         -- R[A] = R[B] % K[C]:number; pc++
@@ -506,7 +506,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_POWK = function(index, code)
         -- R[A] = R[B] ^ K[C]:number; pc++
@@ -515,7 +515,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_DIVK = function(index, code)
         -- R[A] = R[B] / K[C]:number; pc++
@@ -524,7 +524,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_IDIVK = function(index, code)
         -- R[A] = R[B] // K[C]:number; pc++
@@ -533,7 +533,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_BANDK = function(index, code)
         -- R[A] = R[B] & K[C]:integer; pc++
@@ -542,7 +542,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_BORK = function(index, code)
         -- R[A] = R[B] | K[C]:integer; pc++
@@ -551,7 +551,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_BXORK = function(index, code)
         -- R[A] = R[B] ~ K[C]:integer; pc++
@@ -560,7 +560,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_SHRI = function(index, code)
         -- R[A] = R[B] >> sC; pc++
@@ -569,7 +569,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local sC = Bytedump:sC(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, sC, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, sC, index + 2) }, "\t")
     end,
     OP_SHLI = function(index, code)
         -- R[A] = sC << R[B]; pc++
@@ -578,7 +578,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local sC = Bytedump:sC(code)
-        print(index, name, "", getMode(code), string.format(f, A, sC, B, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, sC, B, index + 2) }, "\t")
     end,
     OP_ADD = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -586,7 +586,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_SUB = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -594,7 +594,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_MUL = function(index, code)
         -- R[A] = R[B] * R[C]; pc++
@@ -603,7 +603,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_MOD = function(index, code)
         -- R[A] = R[B] % R[C]; pc++
@@ -612,7 +612,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_POW = function(index, code)
         -- R[A] = R[B] ^ R[C]; pc++
@@ -621,7 +621,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_DIV = function(index, code)
         -- // R[A] = R[B] / R[C]; pc++
@@ -630,7 +630,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_IDIV = function(index, code)
         -- R[A] = R[B] // R[C]; pc++
@@ -639,7 +639,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_BAND = function(index, code)
         --  R[A] = R[B] & R[C]; pc++
@@ -648,7 +648,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_BOR = function(index, code)
         -- R[A] = R[B] | R[C]; pc++
@@ -657,7 +657,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_BXOR = function(index, code)
         -- R[A] = R[B] ~ R[C]; pc++
@@ -666,7 +666,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_SHL = function(index, code)
         -- R[A] = R[B] << R[C]; pc++
@@ -675,7 +675,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_SHR = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -683,7 +683,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, C, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, C, index + 2) }, "\t")
     end,
     OP_MMBIN = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -692,7 +692,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code) -- lua need add 1 to adopt c
-        print(index, name, getMode(code), string.format(f, oA, A, B, TM[C + 1]))
+        return table.concat({ index, name, getMode(code), string.format(f, oA, A, B, TM[C + 1]) }, "\t")
     end,
     OP_MMBINI = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -703,10 +703,10 @@ local OP_ACT = {
         local k = Bytedump:k(code)
         local C = Bytedump:C(code) -- lua need add 1 to adopt c
         if k == 0 then
-            print(index, name, getMode(code), string.format(f, oA, A, sB, TM[C + 1]))
+            return table.concat({ index, name, getMode(code), string.format(f, oA, A, sB, TM[C + 1]) }, "\t")
         else
             f = "R[%s] = call sB:%s or R[%s] %s"
-            print(index, name, getMode(code), string.format(f, oA, sB, A, TM[C + 1]))
+            return table.concat({ index, name, getMode(code), string.format(f, oA, sB, A, TM[C + 1]) }, "\t")
         end
     end,
     OP_MMBINK = function(index, code)
@@ -718,10 +718,10 @@ local OP_ACT = {
         local k = Bytedump:k(code)
         local C = Bytedump:C(code) -- lua need add 1 to adopt c
         if k == 0 then
-            print(index, name, getMode(code), string.format(f, oA, A, B, TM[C + 1]))
+            return table.concat({ index, name, getMode(code), string.format(f, oA, A, B, TM[C + 1]) }, "\t")
         else
             f = "R[%s] = call K[%s] or R[%s] %s"
-            print(index, name, getMode(code), string.format(f, oA, B, A, TM[C + 1]))
+            return table.concat({ index, name, getMode(code), string.format(f, oA, B, A, TM[C + 1]) }, "\t")
         end
     end,
     OP_UNM = function(index, code)
@@ -730,7 +730,7 @@ local OP_ACT = {
         local f = "R[%s] = -R[%s]"
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
-        print(index, name, "", getMode(code), string.format(f, A, B))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B) }, "\t")
     end,
     OP_BNOT = function(index, code)
         -- R[A] := ~R[B]
@@ -738,7 +738,7 @@ local OP_ACT = {
         local f = "R[%s] = ~R[%s]"
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
-        print(index, name, "", getMode(code), string.format(f, A, B))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B) }, "\t")
     end,
     OP_NOT = function(index, code)
         -- R[A] := not R[B]
@@ -746,7 +746,7 @@ local OP_ACT = {
         local f = "R[%s] = not R[%s]"
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
-        print(index, name, "", getMode(code), string.format(f, A, B))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B) }, "\t")
     end,
     OP_LEN = function(index, code)
         -- R[A] := #R[B]
@@ -754,7 +754,7 @@ local OP_ACT = {
         local f = "R[%s] = #R[%s]"
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
-        print(index, name, "", getMode(code), string.format(f, A, B))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B) }, "\t")
     end,
     OP_CONCAT = function(index, code)
         -- // R[A] := R[A].. ... ..R[A + B - 1]
@@ -762,20 +762,20 @@ local OP_ACT = {
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
-        print(index, name, getMode(code), string.format(f, B, A, A, A))
+        return table.concat({ index, name, getMode(code), string.format(f, B, A, A, A) }, "\t")
     end,
     OP_CLOSE = function(index, code)
         local f = "close upvalues >= level:%s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
-        print(index, name, getMode(code), string.format(f, A))
+        return table.concat({ index, name, getMode(code), string.format(f, A) }, "\t")
     end,
     OP_TBC = nil,
     OP_JMP = function(index, code)
         local f = "jump to %s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local sJ = Bytedump:sJ(code)
-        print(index, name, "", getMode(code), string.format(f, index + sJ + 1))
+        return table.concat({ index, name, "", getMode(code), string.format(f, index + sJ + 1) }, "\t")
     end,
     OP_EQ = function(index, code)
         local f = "if (R[%s] == R[%s]) != %s then goto %s"
@@ -783,7 +783,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local k = Bytedump:k(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, k, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, k, index + 2) }, "\t")
     end,
     OP_LT = function(index, code)
         local f = "if (R[%s] < R[%s]) != %s then goto %s"
@@ -791,7 +791,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local k = Bytedump:k(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, k, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, k, index + 2) }, "\t")
     end,
     OP_LE = function(index, code)
         local f = "if (R[%s] <= R[%s]) != %s then goto %s"
@@ -799,7 +799,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local k = Bytedump:k(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, k, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, k, index + 2) }, "\t")
     end,
     OP_EQK = function(index, code)
         -- if ((R[A] == K[B]) ~= k) then pc++
@@ -808,7 +808,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local k = Bytedump:k(code)
-        print(index, name, "", getMode(code), string.format(f, A, B, k, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, B, k, index + 2) }, "\t")
     end,
     OP_EQI = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -817,7 +817,8 @@ local OP_ACT = {
         local k = Bytedump:k(code)
         local sB = Bytedump:sB(code)
         local sJ = Bytedump:sJ(Bytedump.codes[index + 1])
-        print(index, name, "", getMode(code), string.format(f, A, sB, k, index + 2, index + sJ + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, sB, k, index + 2, index + sJ + 2) },
+            "\t")
     end,
     OP_LTI = function(index, code)
         -- if ((R[A] < sB) ~= k) then pc++
@@ -826,7 +827,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local k = Bytedump:k(code)
         local sB = Bytedump:sB(code)
-        print(index, name, "", getMode(code), string.format(f, A, sB, k, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, sB, k, index + 2) }, "\t")
     end,
     OP_LEI = function(index, code)
         -- if ((R[A] <= sB) ~= k) then pc++
@@ -836,7 +837,8 @@ local OP_ACT = {
         local k = Bytedump:k(code)
         local sB = Bytedump:sB(code)
         local sJ = Bytedump:sJ(Bytedump.codes[index + 1])
-        print(index, name, "", getMode(code), string.format(f, A, sB, k, index + 2, index + sJ + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, sB, k, index + 2, index + sJ + 2) },
+            "\t")
     end,
     OP_GTI = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -844,7 +846,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local k = Bytedump:k(code)
         local sB = Bytedump:sB(code)
-        print(index, name, "", getMode(code), string.format(f, A, sB, k, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, sB, k, index + 2) }, "\t")
     end,
     OP_GEI = function(index, code)
         -- if ((R[A] >= sB) ~= k) then pc++
@@ -854,14 +856,15 @@ local OP_ACT = {
         local k = Bytedump:k(code)
         local sB = Bytedump:sB(code)
         local sJ = Bytedump:sJ(Bytedump.codes[index + 1])
-        print(index, name, "", getMode(code), string.format(f, A, sB, k, index + 2, index + sJ + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, sB, k, index + 2, index + sJ + 2) },
+            "\t")
     end,
     OP_TEST = function(index, code)
         local f = "if bool(R[%s]) == %s goto %s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local k = Bytedump:k(code)
-        print(index, name, "", getMode(code), string.format(f, A, k, index + 2))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, k, index + 2) }, "\t")
     end,
     OP_TESTSET = function(index, code)
         -- if (not R[B] == k) then pc++ else R[A] := R[B]
@@ -870,7 +873,7 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local k = Bytedump:k(code)
         local B = Bytedump:B(code)
-        print(index, name, getMode(code), string.format(f, B, k, index + 2, A, B))
+        return table.concat({ index, name, getMode(code), string.format(f, B, k, index + 2, A, B) }, "\t")
     end,
     OP_CALL = function(index, code)
         local f = "call R[%s] with %s args and need %s values being returned"
@@ -882,7 +885,7 @@ local OP_ACT = {
         if B == 0 then
             nargs = "B:0 call another func"
         end
-        print(index, name, "", getMode(code), string.format(f, A, nargs, C - 1))
+        return table.concat({ index, name, "", getMode(code), string.format(f, A, nargs, C - 1) }, "\t")
     end,
     OP_TAILCALL = nil,
     OP_RETURN = function(index, code)
@@ -894,18 +897,18 @@ local OP_ACT = {
             f = f .. " with " .. n .. " return"
         end
         local name = OP_CODE[(code & 0x7F) + 1]
-        print(index, name, getMode(code), f)
+        return table.concat({ index, name, getMode(code), f }, "\t")
     end,
     OP_RETURN0 = function(index, code)
         local f = "back to caller"
         local name = OP_CODE[(code & 0x7F) + 1]
-        print(index, name, getMode(code), f)
+        return table.concat({ index, name, getMode(code), f }, "\t")
     end,
     OP_RETURN1 = function(index, code)
         local f = "return R[%s], back to caller"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
-        print(index, name, getMode(code), string.format(f, A))
+        return table.concat({ index, name, getMode(code), string.format(f, A) }, "\t")
     end,
     OP_FORLOOP = function(index, code)
         local f = "R[%s] = R[%s] , R[%s] = R[%s] + R[%s], if R[%s] <= R[%s] then goto %s else goto %s"
@@ -927,7 +930,7 @@ local OP_ACT = {
         local f = "------------------ %s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local Bx = Bytedump:Bx(code)
-        print(index, name, getMode(code), string.format(f, index + Bx))
+        return table.concat({ index, name, getMode(code), string.format(f, index + Bx) }, "\t")
     end,
     OP_TFORCALL = nil,
     OP_TFORLOOP = nil,
@@ -937,14 +940,14 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local B = Bytedump:B(code)
         local C = Bytedump:C(code)
-        print(index, name, getMode(code), string.format(f, B, A, C, A))
+        return table.concat({ index, name, getMode(code), string.format(f, B, A, C, A) }, "\t")
     end,
     OP_CLOSURE = function(index, code)
         local f = "R[%s] = closure(P[%s])"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local Bx = Bytedump:Bx(code)
-        print(index, name, getMode(code), string.format(f, A, Bx))
+        return table.concat({ index, name, getMode(code), string.format(f, A, Bx) }, "\t")
     end,
     OP_VARARG = function(index, code)
         -- // R[A], R[A+1], ..., R[A+C-2] = vararg
@@ -955,16 +958,16 @@ local OP_ACT = {
         local A = Bytedump:A(code)
         local C = Bytedump:C(code)
         if C == 0 then
-            print(index, name, getMode(code), "get all varargs")
+            return table.concat({ index, name, getMode(code), "get all varargs" }, "\t")
         else
-            print(index, name, getMode(code), string.format(f, C, A))
+            return table.concat({ index, name, getMode(code), string.format(f, C, A) }, "\t")
         end
     end,
     OP_VARARGPREP = function(index, code)
         local f = "fixed args number: A:%s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
-        print(index, name, getMode(code), string.format(f, A))
+        return table.concat({ index, name, getMode(code), string.format(f, A) }, "\t")
     end,
     OP_EXTRAARG = nil,
 }
@@ -1008,13 +1011,15 @@ end
 
 function Bytedump:dump(codes)
     self.codes = codes
+    local r = {}
 
     for index, code in pairs(self.codes) do
         local act = OP_CODE[(code & 0x7F) + 1]
         if OP_ACT[act] then
-            OP_ACT[act](index, code)
+            r[#r + 1] = OP_ACT[act](index, code)
         else
-            print(index, act)
+            r[#r + 1] = index .. " " .. act
         end
     end
+    return r
 end
