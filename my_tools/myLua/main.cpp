@@ -44,7 +44,6 @@ static void praserProto(lua_State* L, Proto* p) {
         // #define LUA_TFUNCTION 6
         // #define LUA_TUSERDATA 7
         // #define LUA_TTHREAD 8
-        printf("%d\t", ttype(o));
         if (rawtt(o) == LUA_VFALSE) { /* code */
             lua_pushboolean(L, 0);
         } else if (rawtt(o) == LUA_VTRUE) {
