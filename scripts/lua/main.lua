@@ -57,7 +57,6 @@ end
 local function html(file, h5)
     file:write("<!DOCTYPE html>")
     local function tofile(file, tag)
-        print(tag.name)
         if tag.name then
             file:write("<")
             file:write(tag.name)
