@@ -498,6 +498,7 @@ static void solvegoto(LexState* ls, int g, Labeldesc* label) {
 ** Search for an active label with the given name.
 */
 static Labeldesc* findlabel(LexState* ls, TString* name) {
+    // 看看有没有标签
     int i;
     Dyndata* dyd = ls->dyd;
     /* check labels in current function for a match */
@@ -525,6 +526,7 @@ static int newlabelentry(LexState* ls, Labellist* l, TString* name, int line, in
 }
 
 static int newgotoentry(LexState* ls, TString* name, int line, int pc) { //
+    // 待定位跳转
     return newlabelentry(ls, &ls->dyd->gt, name, line, pc);
 }
 
@@ -1318,6 +1320,7 @@ static void gotostat(LexState* ls) {
     TString* name = str_checkname(ls); /* label's name */
     Labeldesc* lb = findlabel(ls, name);
     if (lb == NULL) /* no label? */
+        // 没有已定义的标签, 在 goto 之后定义
         /* forward jump; will be resolved when the label is declared */
         newgotoentry(ls, name, line, luaK_jump(fs));
     else { /* found a label */
@@ -1356,6 +1359,7 @@ static void labelstat(LexState* ls, TString* name, int line) {
     checknext(ls, TK_DBCOLON); /* skip double colon */
     while (ls->t.token == ';' || ls->t.token == TK_DBCOLON) // 跳结束的 ::
         statement(ls); /* skip other no-op statements */
+    // 就是看看有没有重复定义的标签, 有就报错
     checkrepeated(ls, name); /* check for repeated labels */
     createlabel(ls, name, line, block_follow(ls, 0));
 }

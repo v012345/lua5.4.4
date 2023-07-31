@@ -118,6 +118,7 @@ typedef struct Labellist {
 
 /* dynamic structures used by the parser */
 typedef struct Dyndata {
+    // 在编译阶段用来存储解析出来的局部变量, 解析出来的 goto 标签和正常标签
     struct { /* list of all active local variables */
         Vardesc* arr;
         int n;
