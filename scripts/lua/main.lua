@@ -108,6 +108,8 @@ local function html(file)
 end
 
 xpcall(function()
+    local h5 = require "utils.html2table"
+    h5("./h5.html")
     local o = io.open("./dump.html", "w") or error()
     html(o)
     o:close()
