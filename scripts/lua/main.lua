@@ -46,9 +46,11 @@ local function html_body(file)
         div_k(output, p.k)
         div_upvalue(output, p.upvalues)
         div_code(output, p.code)
+        file:write('<div class="sub-closure-container container">')
         for key, value in pairs(p.p) do
             div_closure(value, output)
         end
+        file:write('</div>')
         file:write('</div>')
     end
     div_closure(p1, file)

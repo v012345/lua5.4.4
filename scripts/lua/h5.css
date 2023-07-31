@@ -19,6 +19,11 @@
     background-color: #5c995c;
 }
 
+.sub-closure-container {
+    border-style: dashed;
+}
+
+
 .upvalue,
 .const,
 .local-var {
