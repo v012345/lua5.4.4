@@ -30,6 +30,31 @@ static void praserProto(lua_State* L, Proto* p) {
     }
     lua_settable(L, -3);
 
+    lua_pushstring(L, "k");
+    lua_newtable(L);
+    for (size_t i = 0; i < p->sizek; i++) {
+        lua_pushinteger(L, i + 1);
+        TValue* o = &p->k[i];
+        // #define LUA_TNIL 0
+        // #define LUA_TBOOLEAN 1
+        // #define LUA_TLIGHTUSERDATA 2
+        // #define LUA_TNUMBER 3
+        // #define LUA_TSTRING 4
+        // #define LUA_TTABLE 5
+        // #define LUA_TFUNCTION 6
+        // #define LUA_TUSERDATA 7
+        // #define LUA_TTHREAD 8
+        printf("%d\t", ttype(o));
+        if (ttype(o) == LUA_TSTRING) { /* code */
+            lua_pushstring(L, getstr(tsvalue(o)));
+        } else {
+            lua_pushinteger(L, i + 1);
+        }
+
+        lua_settable(L, -3);
+    }
+    lua_settable(L, -3);
+
     lua_pushstring(L, "locvars");
     lua_newtable(L);
     for (size_t i = 0; i < p->sizelocvars; i++) {
