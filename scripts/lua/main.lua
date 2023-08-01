@@ -41,7 +41,7 @@ local function html_body(file)
         file:write('</div>')
     end
 
-    local p1 = Compile("./main.lua")
+    local p1 = Compile("./clua.lua")
     local function div_closure(p, output)
         file:write('<div class="closure-container container">')
         div_locvar(output, p.locvars)
