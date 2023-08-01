@@ -375,8 +375,9 @@ static int searchvar(FuncState* fs, TString* n, expdesc* var) {
 */
 static void markupval(FuncState* fs, int level) {
     BlockCnt* bl = fs->bl;
-    while (bl->nactvar > level) bl = bl->previous;
-    bl->upval = 1;
+    while (bl->nactvar > level) // 找到变量所在的 block
+        bl = bl->previous;
+    bl->upval = 1; // 把变量所在的 block 标记一下有值被引用
     fs->needclose = 1;
 }
 
@@ -565,6 +566,7 @@ static int createlabel(LexState* ls, TString* name, int line, int last) {
     int l = newlabelentry(ls, ll, name, line, luaK_getlabel(fs));
     if (last) { /* label is last no-op statement in the block? */
         // 就是说这个 label 是不是一个 block 的最后一个语句
+        // 这里就是 UNTIL 有局部变量作用域的问题
         /* assume that locals are already out of scope */
         ll->arr[l].nactvar = fs->bl->nactvar;
     }
@@ -596,9 +598,9 @@ static void movegotosout(FuncState* fs, BlockCnt* bl) {
 static void enterblock(FuncState* fs, BlockCnt* bl, lu_byte isloop) {
     bl->isloop = isloop;
     bl->nactvar = fs->nactvar; // 离开 blk 后, fs->nactvar - bl->nactvar 就知道要删除多少局部变量啦
-    bl->firstlabel = fs->ls->dyd->label.n;
-    bl->firstgoto = fs->ls->dyd->gt.n;
-    bl->upval = 0;
+    bl->firstlabel = fs->ls->dyd->label.n; // 本 block 的标签的区段起始位置
+    bl->firstgoto = fs->ls->dyd->gt.n; // 本 block 的 goto 标签的区段起始位置
+    bl->upval = 0; // 是不是有值被引用
     bl->insidetbc = (fs->bl != NULL && fs->bl->insidetbc);
     bl->previous = fs->bl;
     fs->bl = bl;
@@ -1367,8 +1369,9 @@ static void checkrepeated(LexState* ls, TString* name) {
 
 static void labelstat(LexState* ls, TString* name, int line) {
     /* label -> '::' NAME '::' */
+    // 跳结束的 ::
     checknext(ls, TK_DBCOLON); /* skip double colon */
-    while (ls->t.token == ';' || ls->t.token == TK_DBCOLON) // 跳结束的 ::
+    while (ls->t.token == ';' || ls->t.token == TK_DBCOLON) //
         statement(ls); /* skip other no-op statements */
     // 就是看看有没有重复定义的标签, 有就报错
     checkrepeated(ls, name); /* check for repeated labels */
@@ -1399,6 +1402,7 @@ static void repeatstat(LexState* ls, int line) {
     /* repeatstat -> REPEAT block UNTIL cond */
     int condexit;
     FuncState* fs = ls->fs;
+    // repeat 的跳回位置
     int repeat_init = luaK_getlabel(fs);
     BlockCnt bl1, bl2;
     enterblock(fs, &bl1, 1); /* loop block */
@@ -1406,6 +1410,7 @@ static void repeatstat(LexState* ls, int line) {
     luaX_next(ls); /* skip REPEAT */
     statlist(ls);
     check_match(ls, TK_UNTIL, TK_REPEAT, line);
+    // 条件表达式也是 bl2 中
     condexit = cond(ls); /* read condition (inside scope block) */
     leaveblock(fs); /* finish scope */
     if (bl2.upval) { /* upvalues? */
