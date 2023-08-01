@@ -646,6 +646,7 @@ typedef struct CClosure {
 typedef struct LClosure {
     ClosureHeader;
     struct Proto* p;
+    // 这是一个指针的数组啊!
     UpVal* upvals[1]; /* list of upvalues */
 } LClosure;
 

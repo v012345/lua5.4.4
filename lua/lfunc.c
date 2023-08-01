@@ -189,6 +189,7 @@ void luaF_closeupval(lua_State* L, StkId level) {
         lua_assert(uplevel(uv) < L->top.p);
         luaF_unlinkupval(uv); /* remove upvalue from 'openupval' list */
         setobj(L, slot, uv->v.p); /* move value to upvalue slot */
+        // 现在这个值已经在上值的体内了
         uv->v.p = slot; /* now current value lives here */
         if (!iswhite(uv)) { /* neither white nor dead? */
             nw2black(uv); /* closed upvalues cannot be gray */
@@ -213,6 +214,7 @@ static void poptbclist(lua_State* L) {
 ** level. Return restored 'level'.
 */
 StkId luaF_close(lua_State* L, StkId level, int status, int yy) {
+    // 这么理解, 本层关闭, 引用我的函数的上值要关闭一下
     ptrdiff_t levelrel = savestack(L, level); // 保存一下当前栈对底的 offset
     luaF_closeupval(L, level); /* first, close the upvalues */
     while (L->tbclist.p >= level) { /* traverse tbc's down to that level */
