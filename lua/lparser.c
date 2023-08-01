@@ -591,7 +591,7 @@ static void movegotosout(FuncState* fs, BlockCnt* bl) {
         /* leaving a variable scope? */
         if (reglevel(fs, gt->nactvar) > reglevel(fs, bl->nactvar)) //
             // 当前块在 goto 之后有定义新的局部变量, 那么离开前要进行上值的关闭
-            // 也佐证了上值是外层关闭的
+            // 也佐证了上值是外层关闭的, 但是这里说可能要关闭, 反正调用一个 OP_CLOSE 也没多少消耗
             gt->close |= bl->upval; /* jump may need a close */
         gt->nactvar = bl->nactvar; /* update goto level */
     }
