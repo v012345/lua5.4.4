@@ -586,6 +586,8 @@ static void movegotosout(FuncState* fs, BlockCnt* bl) {
         Labeldesc* gt = &gl->arr[i];
         /* leaving a variable scope? */
         if (reglevel(fs, gt->nactvar) > reglevel(fs, bl->nactvar)) //
+            // 当前块在 goto 之后有定义新的局部变量, 那么离开前要进行上值的关闭
+            // 也佐证了上值是外层关闭的
             gt->close |= bl->upval; /* jump may need a close */
         gt->nactvar = bl->nactvar; /* update goto level */
     }
@@ -631,6 +633,7 @@ static void leaveblock(FuncState* fs) {
     if (bl->isloop) /* has to fix pending breaks? */
         hasclose = createlabel(ls, luaS_newliteral(ls->L, "break"), 0, 0);
     if (!hasclose && bl->previous && bl->upval) /* still need a 'close'? */
+        // 本层被引用的局部变量要进行关闭
         luaK_codeABC(fs, OP_CLOSE, stklevel, 0, 0);
     fs->freereg = stklevel; /* free registers */
     ls->dyd->label.n = bl->firstlabel; /* remove local labels */
