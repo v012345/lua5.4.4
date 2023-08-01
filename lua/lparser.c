@@ -524,6 +524,8 @@ static int newlabelentry(LexState* ls, Labellist* l, TString* name, int line, in
     l->arr[n].line = line;
     // 当标签出现时, 当前函数已经解析出来的局部变量的个数
     // 标签当然只能在一个函数内跳转啦
+    // 就是用 local 修饰的变量的个数
+    // 为什么要记这个, 我也不知道
     l->arr[n].nactvar = ls->fs->nactvar;
     l->arr[n].close = 0;
     l->arr[n].pc = pc;
@@ -547,7 +549,7 @@ static int solvegotos(LexState* ls, Labeldesc* lb) {
     int needsclose = 0;
     while (i < gl->n) {
         if (eqstr(gl->arr[i].name, lb->name)) {
-            needsclose |= gl->arr[i].close;
+            needsclose |= gl->arr[i].close; // 这个只能是从内层传出来的
             solvegoto(ls, i, lb); /* will remove 'i' from the list */
         } else
             i++;
