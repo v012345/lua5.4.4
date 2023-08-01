@@ -1,5 +1,6 @@
 #include <lua.hpp>
 extern "C" {
+#include <lapi.h>
 #include <lfs.h>
 #include <lgc.h>
 #include <lno.h>
@@ -35,23 +36,11 @@ static void praserProto(lua_State* L, Proto* p) {
     for (size_t i = 0; i < p->sizek; i++) {
         lua_pushinteger(L, i + 1);
         TValue* o = &p->k[i];
-        // #define LUA_TNIL 0
-        // #define LUA_TBOOLEAN 1
-        // #define LUA_TLIGHTUSERDATA 2
-        // #define LUA_TNUMBER 3
-        // #define LUA_TSTRING 4
-        // #define LUA_TTABLE 5
-        // #define LUA_TFUNCTION 6
-        // #define LUA_TUSERDATA 7
-        // #define LUA_TTHREAD 8
-        if (rawtt(o) == LUA_VFALSE) { /* code */
-            lua_pushboolean(L, 0);
-        } else if (rawtt(o) == LUA_VTRUE) {
-            lua_pushboolean(L, 1);
-        } else if (ttype(o) == LUA_TSTRING) {
-            lua_pushstring(L, getstr(tsvalue(o)));
+        if (rawtt(o) == LUA_VNIL) { /* code */
+            lua_pushstring(L, "nil");
         } else {
-            lua_pushstring(L, "!!!!!!!!!!!");
+            setobj(L, cast(TValue*, L->top.p), o);
+            api_incr_top(L);
         }
 
         lua_settable(L, -3);

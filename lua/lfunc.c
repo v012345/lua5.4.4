@@ -181,6 +181,9 @@ void luaF_unlinkupval(UpVal* uv) {
 void luaF_closeupval(lua_State* L, StkId level) {
     UpVal* uv;
     StkId upl; /* stack index pointed by 'uv' */
+    // 新发现, L 的栈不是 StackValue* 而就是 StackValue, 也就是可以看成 TValue
+    // 因为这里的上值是开放的, 所以他们的 v.p 指向了栈
+    // 所以在这里可以可以把 v.p 换成 StkId, 再与 level 来进行大小的比较
     while ((uv = L->openupval) != NULL && (upl = uplevel(uv)) >= level) {
         TValue* slot = &uv->u.value; /* new position for value */
         lua_assert(uplevel(uv) < L->top.p);
@@ -210,7 +213,7 @@ static void poptbclist(lua_State* L) {
 ** level. Return restored 'level'.
 */
 StkId luaF_close(lua_State* L, StkId level, int status, int yy) {
-    ptrdiff_t levelrel = savestack(L, level);
+    ptrdiff_t levelrel = savestack(L, level); // 保存一下当前栈对底的 offset
     luaF_closeupval(L, level); /* first, close the upvalues */
     while (L->tbclist.p >= level) { /* traverse tbc's down to that level */
         StkId tbc = L->tbclist.p; /* get variable index */
