@@ -397,6 +397,8 @@ static void marktobeclosed(FuncState* fs) {
 ** 'var' as 'void' as a flag.
 */
 static void singlevaraux(FuncState* fs, TString* n, expdesc* var, int base) {
+    // 注意一下 base 的意思, 在当前 fs 的找值 base 就是 1, 不管有多少个 block
+    // 只有在子函数引用外层函数时, 被引用的 block 才会被标记上
     // base 为 1 就是当前作用域, 为 0 就是在当前作用域的上级了
     if (fs == NULL) /* no more levels? */
         init_exp(var, VVOID, 0); /* default is global */
@@ -630,9 +632,11 @@ static void leaveblock(FuncState* fs) {
     // block 外部的 block 的寄存使用数量
     int stklevel = reglevel(fs, bl->nactvar); /* level outside the block */
     // 清除 dyd 中缓存的此 block 中的局部变量
+    // 把 fs->nactvar 还原成了进入此 block 时的样子
     removevars(fs, bl->nactvar); /* remove block locals */
     lua_assert(bl->nactvar == fs->nactvar); /* back to level on entry */
     if (bl->isloop) /* has to fix pending breaks? */
+        // 在循环体最后加上一个 break 的标签
         hasclose = createlabel(ls, luaS_newliteral(ls->L, "break"), 0, 0);
     if (!hasclose && bl->previous && bl->upval) /* still need a 'close'? */
         // 本层被引用的局部变量要进行关闭
@@ -1352,6 +1356,8 @@ static void gotostat(LexState* ls) {
 static void breakstat(LexState* ls) {
     int line = ls->linenumber;
     luaX_next(ls); /* skip break */
+    // break 语句就相当于一个 goto ::break:: 所以在 gt 链上再续上一个
+    // 而且, 只有是循环体的 block 会在最后追加一个 break 的标签
     newgotoentry(ls, luaS_newliteral(ls->L, "break"), line, luaK_jump(ls->fs));
 }
 
@@ -1413,9 +1419,13 @@ static void repeatstat(LexState* ls, int line) {
     // 条件表达式也是 bl2 中
     condexit = cond(ls); /* read condition (inside scope block) */
     leaveblock(fs); /* finish scope */
+    // bl2 内部的的 block 在引用 bl2 中的局部变量
     if (bl2.upval) { /* upvalues? */
+        // 在最后生成一个跳转指令
         int exit = luaK_jump(fs); /* normal exit must jump over fix */
+        // 如果 condexit 条件满足, 那么 condexit 自身的跳转要跳到上面的跳转指令
         luaK_patchtohere(fs, condexit); /* repetition must close upvalues */
+        //
         luaK_codeABC(fs, OP_CLOSE, reglevel(fs, bl2.nactvar), 0, 0);
         condexit = luaK_jump(fs); /* repeat after closing upvalues */
         luaK_patchtohere(fs, exit); /* normal exit comes to here */
