@@ -74,6 +74,6 @@ function ChunkDump(files) return {} end
 ---comment
 ---@param files string
 ---@return table
-function Compile(files) return {} end
+function luac(files) return {} end
 
 _Lua_function = {}

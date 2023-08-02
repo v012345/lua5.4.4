@@ -9,17 +9,28 @@ extern "C" {
 }
 #define LUA_MAIN_SCRIPT "./main.lua"
 #define LUA_CODE_SCRIPT "./bytedump.lua"
-static int C_CompileFile(lua_State* L);
+static int luac(lua_State* L);
+static void praser(lua_State* L, Proto* p);
 int main(int argc, char const* argv[]) {
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
     luaopen_lfs(L);
-    lua_register(L, "Compile", C_CompileFile);
+    lua_register(L, "luac", luac);
     luaL_dofile(L, LUA_MAIN_SCRIPT);
     return 0;
 }
 
-static void praserProto(lua_State* L, Proto* p) {
+static int luac(lua_State* L) {
+    const char* file = lua_tostring(L, 1);
+    luaL_loadfile(L, file);
+    TValue* tv = s2v(L->top.p - 1);
+    LClosure* LC = clLvalue(tv);
+    Proto* p = LC->p;
+    praser(L, p);
+    return 1;
+}
+
+static void praser(lua_State* L, Proto* p) {
     lua_newtable(L);
 
     lua_pushstring(L, "code");
@@ -82,18 +93,8 @@ static void praserProto(lua_State* L, Proto* p) {
     lua_newtable(L);
     for (size_t i = 0; i < p->sizep; i++) {
         lua_pushinteger(L, i + 1);
-        praserProto(L, p->p[i]);
+        praser(L, p->p[i]);
         lua_settable(L, -3);
     }
     lua_settable(L, -3);
-}
-
-static int C_CompileFile(lua_State* L) {
-    const char* file = lua_tostring(L, 1);
-    luaL_loadfile(L, file);
-    TValue* tv = s2v(L->top.p - 1);
-    LClosure* LC = clLvalue(tv);
-    Proto* p = LC->p;
-    praserProto(L, p);
-    return 1;
 }

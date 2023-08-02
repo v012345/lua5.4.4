@@ -1,3 +1,4 @@
+local luafile = "./main.lua"
 require "bytedump"
 local function html_body(file)
     local function div_code(file, codes)
@@ -41,7 +42,7 @@ local function html_body(file)
         file:write('</div>')
     end
 
-    local p1 = Compile("./clua.lua")
+    local p1 = luac(luafile)
     local function div_closure(p, output)
         file:write('<div class="closure-container container">')
         div_locvar(output, p.locvars)
