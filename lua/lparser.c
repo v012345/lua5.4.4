@@ -1354,7 +1354,7 @@ static void gotostat(LexState* ls) {
         if (luaY_nvarstack(fs) > lblevel) /* leaving the scope of a variable? */
             luaK_codeABC(fs, OP_CLOSE, lblevel, 0, 0);
         /* create jump and link it to the label */
-        luaK_patchlist(fs, luaK_jump(fs), lb->pc);
+        luaK_patchlist(fs, luaK_jump(fs), lb->pc); // 往回跳
     }
 }
 
