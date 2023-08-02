@@ -158,16 +158,20 @@ static void prepcallclosemth(lua_State* L, StkId level, int status, int yy) {
 ** Insert a variable in the list of to-be-closed variables.
 */
 void luaF_newtbcupval(lua_State* L, StkId level) {
+    // 最开始的时候 L->tbclist.p 是指向栈底的
     lua_assert(level > L->tbclist.p);
     if (l_isfalse(s2v(level))) return; /* false doesn't need to be closed */
     // 看看有没有 __close 元方法, 没有就报错
     checkclosemth(L, level); /* value must have a close method */
+    // 如果 level 与 L->tbclist.p 的距离过大(就是超过了 2^16-1)
+    // 那么就链上几个 dummy node 来接上
     while (cast_uint(level - L->tbclist.p) > MAXDELTA) {
         L->tbclist.p += MAXDELTA; /* create a dummy node at maximum delta */
-        L->tbclist.p->tbclist.delta = 0;
+        L->tbclist.p->tbclist.delta = 0; // 如果 delta 为 0 就是个 dummy node
     }
+    // 记下 level 相对当前链头的偏移量
     level->tbclist.delta = cast(unsigned short, level - L->tbclist.p);
-    L->tbclist.p = level;
+    L->tbclist.p = level; // 把 level 链到链头
 }
 
 void luaF_unlinkupval(UpVal* uv) {
