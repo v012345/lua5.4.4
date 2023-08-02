@@ -1692,7 +1692,7 @@ returning: /* trap already set */
                     updatestack(ci);
                 }
                 if (nparams1) /* vararg function? */
-                    ci->func.p -= ci->u.l.nextraargs + nparams1;
+                    ci->func.p -= ci->u.l.nextraargs + nparams1; //
                 L->top.p = ra + n; /* set call for 'luaD_poscall' */
                 luaD_poscall(L, ci, n);
                 updatetrap(ci); /* 'luaD_poscall' can change hooks */

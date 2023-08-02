@@ -1,4 +1,8 @@
+local function xxxx()
+    return 1
+end
 local luafile = "./main.lua"
+
 require "bytedump"
 local function html_body(file)
     local function div_code(file, codes)
@@ -128,7 +132,6 @@ local function json(file, lua_table)
                 t[#t] = ""
                 local s = table.concat(t)
                 file:write(s)
-                print(s)
                 file:write('}')
                 if index < #lua_table.upvalues then
                     file:write(',')

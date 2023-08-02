@@ -723,6 +723,7 @@ static void close_func(LexState* ls) {
     lua_State* L = ls->L;
     FuncState* fs = ls->fs;
     Proto* f = fs->f;
+    // 每个函数最后都会加上一个没有返回值的 return 指令
     luaK_ret(fs, luaY_nvarstack(fs), 0); /* final return */
     leaveblock(fs);
     lua_assert(fs->bl == NULL);
@@ -1740,10 +1741,13 @@ static void retstat(LexState* ls) {
     FuncState* fs = ls->fs;
     expdesc e;
     int nret; /* number of values being returned */
+    // 做当前最后的局部变量的寄存器位置, 在这里就是下一个可用的寄存器
     int first = luaY_nvarstack(fs); /* first slot to be returned */
     if (block_follow(ls, 1) || ls->t.token == ';')
+        // 说明 return 后面就是或是 [;] block_follow, 所以就是没有返回值
         nret = 0; /* return no values */
     else {
+        // 这里解析一个 explist, 值的位置从 first 往上摞
         nret = explist(ls, &e); /* optional return values */
         if (hasmultret(e.k)) {
             luaK_setmultret(fs, &e);
@@ -1753,6 +1757,7 @@ static void retstat(LexState* ls) {
             }
             nret = LUA_MULTRET; /* return all values */
         } else {
+            // 返回值多少可以确定
             if (nret == 1) /* only one single value? */
                 first = luaK_exp2anyreg(fs, &e); /* can use original slot */
             else { /* values must go to the top of the stack */

@@ -201,6 +201,7 @@ void luaK_ret(FuncState* fs, int first, int nret) {
         case 1: op = OP_RETURN1; break;
         default: op = OP_RETURN; break;
     }
+    // C 用于可变参数, 这里先写成 0, 之后在 luaK_finish 里会调整为正确的值
     luaK_codeABC(fs, op, first, nret + 1, 0);
 }
 
@@ -1761,28 +1762,35 @@ static int finaltarget(Instruction* code, int i) {
 void luaK_finish(FuncState* fs) {
     int i;
     Proto* p = fs->f;
+    // 从第一个指令开始
     for (i = 0; i < fs->pc; i++) {
         Instruction* pc = &p->code[i];
         lua_assert(i == 0 || isOT(*(pc - 1)) == isIT(*pc));
         switch (GET_OPCODE(*pc)) {
             case OP_RETURN0:
             case OP_RETURN1: {
-                if (!(fs->needclose || p->is_vararg)) break; /* no extra work */
+                if (!(fs->needclose || p->is_vararg)) //
+                    break; /* no extra work */
                 /* else use OP_RETURN to do the extra work */
                 SET_OPCODE(*pc, OP_RETURN);
+                // OP_RETURN 里会根据 k 值来做 luaF_close 操作
             } /* FALLTHROUGH */
             case OP_RETURN:
             case OP_TAILCALL: {
-                if (fs->needclose) SETARG_k(*pc, 1); /* signal that it needs to close */
-                if (p->is_vararg) SETARG_C(*pc, p->numparams + 1); /* signal that it is vararg */
+                if (fs->needclose) //
+                    SETARG_k(*pc, 1); /* signal that it needs to close */
+                if (p->is_vararg) // 在分析参数列表时, 确定是不是变参函数
+                    SETARG_C(*pc, p->numparams + 1); /* signal that it is vararg */
                 break;
             }
             case OP_JMP: {
+                // 多级跳改成单级跳
                 int target = finaltarget(p->code, i);
                 fixjump(fs, i, target);
                 break;
             }
-            default: break;
+            default: //
+                break;
         }
     }
 }
