@@ -386,9 +386,9 @@ static void markupval(FuncState* fs, int level) {
 */
 static void marktobeclosed(FuncState* fs) {
     BlockCnt* bl = fs->bl;
-    bl->upval = 1;
-    bl->insidetbc = 1;
-    fs->needclose = 1;
+    bl->upval = 1; // 为什么 to-be-closed variable 发连带上值呢?
+    bl->insidetbc = 1; // 这个可以理解内部有 <close> 局部变量
+    fs->needclose = 1; // 这个函数要关闭, 会在 return 时调用一下 luaF_close
 }
 
 /*
@@ -1648,6 +1648,7 @@ static int getlocalattribute(LexState* ls) {
 static void checktoclose(FuncState* fs, int level) {
     if (level != -1) { /* is there a to-be-closed variable? */
         marktobeclosed(fs);
+        // 从是第几个局部变量来找到寄存器的位置, 因为真编译时常量真不在寄存器里
         luaK_codeABC(fs, OP_TBC, reglevel(fs, level), 0, 0);
     }
 }
@@ -1666,9 +1667,10 @@ static void localstat(LexState* ls) {
         kind = getlocalattribute(ls);
         getlocalvardesc(fs, vidx)->vd.kind = kind;
         if (kind == RDKTOCLOSE) { /* to-be-closed? */
+            // 一条 local 语句只能定义一个 <close>
             if (toclose != -1) /* one already present? */
                 luaK_semerror(ls, "multiple to-be-closed variables in local list");
-            toclose = fs->nactvar + nvars;
+            toclose = fs->nactvar + nvars; // 说明这个 <close> 是 fs 的第几个局部变量
         }
         nvars++;
     } while (testnext(ls, ','));

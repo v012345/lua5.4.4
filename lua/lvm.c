@@ -1555,7 +1555,7 @@ returning: /* trap already set */
                 vmbreak;
             }
             vmcase(OP_TBC) {
-                StkId ra = RA(i);
+                StkId ra = RA(i); // <close> 变量所在的寄存器
                 /* create new to-be-closed upvalue */
                 halfProtect(luaF_newtbcupval(L, ra));
                 vmbreak;

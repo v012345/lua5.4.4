@@ -160,6 +160,7 @@ static void prepcallclosemth(lua_State* L, StkId level, int status, int yy) {
 void luaF_newtbcupval(lua_State* L, StkId level) {
     lua_assert(level > L->tbclist.p);
     if (l_isfalse(s2v(level))) return; /* false doesn't need to be closed */
+    // 看看有没有 __close 元方法, 没有就报错
     checkclosemth(L, level); /* value must have a close method */
     while (cast_uint(level - L->tbclist.p) > MAXDELTA) {
         L->tbclist.p += MAXDELTA; /* create a dummy node at maximum delta */
