@@ -33,11 +33,11 @@ static int luac(lua_State* L) {
 static void praser(lua_State* L, Proto* p) {
     lua_newtable(L);
 
-    lua_pushstring(L, "code");
+    lua_pushstring(L, "locvars");
     lua_newtable(L);
-    for (size_t i = 0; i < p->sizecode; i++) {
+    for (size_t i = 0; i < p->sizelocvars; i++) {
         lua_pushinteger(L, i + 1);
-        lua_pushinteger(L, p->code[i]);
+        lua_pushstring(L, getstr(p->locvars[i].varname));
         lua_settable(L, -3);
     }
     lua_settable(L, -3);
@@ -53,16 +53,6 @@ static void praser(lua_State* L, Proto* p) {
             setobj(L, cast(TValue*, L->top.p), o);
             api_incr_top(L);
         }
-
-        lua_settable(L, -3);
-    }
-    lua_settable(L, -3);
-
-    lua_pushstring(L, "locvars");
-    lua_newtable(L);
-    for (size_t i = 0; i < p->sizelocvars; i++) {
-        lua_pushinteger(L, i + 1);
-        lua_pushstring(L, getstr(p->locvars[i].varname));
         lua_settable(L, -3);
     }
     lua_settable(L, -3);
@@ -76,15 +66,28 @@ static void praser(lua_State* L, Proto* p) {
         lua_pushstring(L, "name");
         lua_pushstring(L, getstr(p->upvalues[i].name));
         lua_settable(L, -3);
+
         lua_pushstring(L, "instack");
         lua_pushboolean(L, p->upvalues[i].instack);
         lua_settable(L, -3);
+
         lua_pushstring(L, "idx");
         lua_pushinteger(L, p->upvalues[i].idx);
         lua_settable(L, -3);
+
         lua_pushstring(L, "kind");
         lua_pushinteger(L, p->upvalues[i].kind);
         lua_settable(L, -3);
+
+        lua_settable(L, -3);
+    }
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "code");
+    lua_newtable(L);
+    for (size_t i = 0; i < p->sizecode; i++) {
+        lua_pushinteger(L, i + 1);
+        lua_pushinteger(L, p->code[i]);
         lua_settable(L, -3);
     }
     lua_settable(L, -3);
@@ -96,5 +99,6 @@ static void praser(lua_State* L, Proto* p) {
         praser(L, p->p[i]);
         lua_settable(L, -3);
     }
+    
     lua_settable(L, -3);
 }

@@ -1,3 +1,4 @@
+local a, bc, d
 repeat
     goto t
     local x = 1
