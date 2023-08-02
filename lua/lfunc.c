@@ -222,6 +222,7 @@ StkId luaF_close(lua_State* L, StkId level, int status, int yy) {
     // 这么理解, 本层关闭, 引用我的函数的上值要关闭一下
     ptrdiff_t levelrel = savestack(L, level); // 保存一下当前栈对底的 offset
     luaF_closeupval(L, level); /* first, close the upvalues */
+    // 如果 tbc 的链头在 level 之上, 那么明说这个 block 中有 <close> 变量
     while (L->tbclist.p >= level) { /* traverse tbc's down to that level */
         StkId tbc = L->tbclist.p; /* get variable index */
         poptbclist(L); /* remove it from list */
