@@ -16,7 +16,7 @@ local function html_body(file)
         file:write('<div class="const-container container">')
         for i, k in ipairs(const) do
             file:write('<div class="const">')
-            file:write(k)
+            file:write((string.gsub(k, string.char(60), "&lt")))
             file:write('</div>')
         end
         file:write('</div>')
