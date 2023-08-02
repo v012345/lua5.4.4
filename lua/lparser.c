@@ -491,6 +491,7 @@ static void solvegoto(LexState* ls, int g, Labeldesc* label) {
     lua_assert(eqstr(gt->name, label->name));
     // 不能跳过局部变量的定义
     if (l_unlikely(gt->nactvar < label->nactvar)) /* enter some scope? */
+        // 如果 goto 到 label 之间有新局部变量声明, 那么就报错
         jumpscopeerror(ls, gt);
     luaK_patchlist(ls->fs, gt->pc, label->pc);
     for (i = g; i < gl->n - 1; i++) /* remove goto from pending list */
@@ -507,6 +508,7 @@ static Labeldesc* findlabel(LexState* ls, TString* name) {
     Dyndata* dyd = ls->dyd;
     /* check labels in current function for a match */
     for (i = ls->fs->firstlabel; i < dyd->label.n; i++) {
+        // 找 label 是从函数开始的地方的开找
         Labeldesc* lb = &dyd->label.arr[i];
         if (eqstr(lb->name, name)) /* correct label? */
             return lb;
@@ -549,6 +551,8 @@ static int solvegotos(LexState* ls, Labeldesc* lb) {
     int needsclose = 0;
     while (i < gl->n) {
         if (eqstr(gl->arr[i].name, lb->name)) {
+            // 如果 goto 是从外层来的, 那么如果 goto 之前如果有上值出现
+            // 那么 goto 就需要加上 OP_CLOSE
             needsclose |= gl->arr[i].close; // 这个只能是从内层传出来的
             solvegoto(ls, i, lb); /* will remove 'i' from the list */
         } else
@@ -592,9 +596,11 @@ static void movegotosout(FuncState* fs, BlockCnt* bl) {
         Labeldesc* gt = &gl->arr[i];
         /* leaving a variable scope? */
         if (reglevel(fs, gt->nactvar) > reglevel(fs, bl->nactvar)) //
-            // 当前块在 goto 之后有定义新的局部变量, 那么离开前要进行上值的关闭
-            // 也佐证了上值是外层关闭的, 但是这里说可能要关闭, 反正调用一个 OP_CLOSE 也没多少消耗
+            // 如果在当前 block 中的 goto 定义之前还有声明局部变量, 因为这些 goto 的标签还没有定义
+            // 而是在 blcok 外面的下方, 所以这些 goto 在正解的情况必然会跳到外面, 从而离开当前 block
+            // 而 movegotosout 是在离开 block 时调用的, 而这个是时候已经知道了是不是有值被引用
             gt->close |= bl->upval; /* jump may need a close */
+        // 这里说明把 gt 的 level 修正为 block 之外
         gt->nactvar = bl->nactvar; /* update goto level */
     }
 }
