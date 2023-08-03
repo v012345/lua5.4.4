@@ -902,6 +902,8 @@ void luaK_exp2nextreg(FuncState* fs, expdesc* e) {
 ** and return that register.
 */
 int luaK_exp2anyreg(FuncState* fs, expdesc* e) {
+    // 举个例子, 如果 e 已经在寄存器里了, 就直接返回
+    // 而 luaK_exp2nextreg 会把 e 再 copy 到下一个可用的寄存器
     luaK_dischargevars(fs, e);
     if (e->k == VNONRELOC) { /* expression already has a register? */
         if (!hasjumps(e)) /* no jumps? */
