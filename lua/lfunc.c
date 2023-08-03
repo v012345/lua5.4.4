@@ -209,9 +209,11 @@ void luaF_closeupval(lua_State* L, StkId level) {
 static void poptbclist(lua_State* L) {
     StkId tbc = L->tbclist.p;
     lua_assert(tbc->tbclist.delta > 0); /* first element cannot be dummy */
-    tbc -= tbc->tbclist.delta;
-    while (tbc > L->stack.p && tbc->tbclist.delta == 0) tbc -= MAXDELTA; /* remove dummy nodes */
-    L->tbclist.p = tbc;
+    tbc -= tbc->tbclist.delta; // 回退一个节点
+    // 如果不是栈底, 且是 dummy nodes 进行一次大回退
+    while (tbc > L->stack.p && tbc->tbclist.delta == 0) //
+        tbc -= MAXDELTA; /* remove dummy nodes */
+    L->tbclist.p = tbc; // 修正 tbc 链头
 }
 
 /*
@@ -225,7 +227,9 @@ StkId luaF_close(lua_State* L, StkId level, int status, int yy) {
     // 如果 tbc 的链头在 level 之上, 那么明说这个 block 中有 <close> 变量
     while (L->tbclist.p >= level) { /* traverse tbc's down to that level */
         StkId tbc = L->tbclist.p; /* get variable index */
+        // 就是把 tbc 从链头拿下来
         poptbclist(L); /* remove it from list */
+        // 调用 __close, 还有做错误处理
         prepcallclosemth(L, tbc, status, yy); /* close variable */
         level = restorestack(L, levelrel);
     }
