@@ -931,10 +931,24 @@ local OP_ACT = {
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = Bytedump:A(code)
         local Bx = Bytedump:Bx(code)
-        return table.concat({ index, name, getMode(code), string.format(f, A + 3, A + 3, index + Bx) }, "    ")
+        return table.concat({ index, name, getMode(code), string.format(f, A + 3, A + 3, index + Bx + 1) }, "    ")
     end,
-    OP_TFORCALL = nil,
-    OP_TFORLOOP = nil,
+    OP_TFORCALL = function(index, code)
+        local f = "R[%s] = R[%s], R[%s] = R[%s], R[%s] = R[%s]; call R[%s] return %s values "
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        local C = Bytedump:C(code)
+        return table.concat(
+            { index, name, getMode(code), string.format(f, A + 4, A, A + 5, A + 1, A + 2, A + 6, A + 4, C) },
+            "    ")
+    end,
+    OP_TFORLOOP = function(index, code)
+        local f = "if R[%s] ~= nil then R[%s] = R[%s] and goto %s end"
+        local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
+        local Bx = Bytedump:Bx(code)
+        return table.concat({ index, name, getMode(code), string.format(f, A + 4, A + 2, A + 4, index + 1 - Bx) }, "    ")
+    end,
     OP_SETLIST = function(index, code)
         local f = "for i = 1 to %s then R[%s][%s + i] = R[%s + i]"
         local name = OP_CODE[(code & 0x7F) + 1]

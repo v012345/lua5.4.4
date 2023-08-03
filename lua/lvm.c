@@ -1776,15 +1776,16 @@ returning: /* trap already set */
             }
             vmcase(OP_TFORCALL) {
             l_tforcall : {
-                StkId ra = RA(i);
+                StkId ra = RA(i); // 从这里开始, 4 个寄存器是隐身的变量, 用于控制
                 /* 'ra' has the iterator function, 'ra + 1' has the state,
                    'ra + 2' has the control variable, and 'ra + 3' has the
                    to-be-closed variable. The call will use the stack after
                    these values (starting at 'ra + 4')
                 */
                 /* push function, state, and control variable */
-                memcpy(ra + 4, ra, 3 * sizeof(*ra));
+                memcpy(ra + 4, ra, 3 * sizeof(*ra)); // copy 一份隐身变量的复本, 只有前三个(如果是表会怎么样呢?)
                 L->top.p = ra + 4 + 3;
+                // generator 函数(一般就是 next 函数)
                 ProtectNT(luaD_call(L, ra + 4, GETARG_C(i))); /* do the call */
                 updatestack(ci); /* stack may have changed */
                 i = *(pc++); /* go to next instruction */
