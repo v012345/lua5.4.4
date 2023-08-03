@@ -166,4 +166,5 @@
     "Lua.workspace.library": [
         "${3rd}/lfs/library"
     ],
+    "liveServer.settings.port": 5501,
 }

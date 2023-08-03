@@ -94,8 +94,8 @@ end
 
 xpcall(function()
     local h5 = require "utils.html2table"
-    local lh5 = h5("./h5.html")
-    local o = io.open("./dump.html", "w") or error()
+    local lh5 = h5("./index.html")
+    local o = io.open("./index.html", "w") or error()
     html(o, lh5)
     o:close()
     local toJson = require "utils.table2json"
