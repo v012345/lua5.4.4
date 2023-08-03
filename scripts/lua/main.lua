@@ -1,4 +1,16 @@
+local toJson = require "utils.table2json"
 local luafile = "./clua.lua"
+xpcall(function()
+    local h5js = io.open("./h5.json", "w") or error()
+    h5js:write(toJson(luac(luafile)))
+    h5js:close()
+    print("done11")
+end, function(msg)
+    print(msg)
+end)
+
+
+
 
 require "bytedump"
 local function html_body(file)
@@ -169,9 +181,9 @@ xpcall(function()
     html(o, lh5)
     o:close()
 
-    local h5js = io.open("./h5.json", "w") or error()
-    json(h5js, luac(luafile))
-    h5js:close()
+    -- local h5js = io.open("./h5.json", "w") or error()
+    -- json(h5js, luac(luafile))
+    -- h5js:close()
     print("done")
 end, function(msg)
     print(msg)
