@@ -1,12 +1,3 @@
-do
-    local p <close> = setmetatable({ 2 }, {
-        __close = function()
-        end
-    })
-end
-local function xxxx()
-    return 1
-end
 local luafile = "./clua.lua"
 
 require "bytedump"

@@ -927,10 +927,11 @@ local OP_ACT = {
             getMode(code), string.format(f, A + 3, A, A, A, A + 2, A, A + 1, index + 1, index + Bx + 2))
     end,
     OP_TFORPREP = function(index, code)
-        local f = "------------------ %s"
+        local f = "if R[%s] then new_to_be_closed(R[%s]) end; goto %s"
         local name = OP_CODE[(code & 0x7F) + 1]
+        local A = Bytedump:A(code)
         local Bx = Bytedump:Bx(code)
-        return table.concat({ index, name, getMode(code), string.format(f, index + Bx) }, "    ")
+        return table.concat({ index, name, getMode(code), string.format(f, A + 3, A + 3, index + Bx) }, "    ")
     end,
     OP_TFORCALL = nil,
     OP_TFORLOOP = nil,

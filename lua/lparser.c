@@ -1489,8 +1489,8 @@ static void forbody(LexState* ls, int base, int line, int nvars, int isgen) {
     // 返回的是 forprep[isgen] 指令的索引
     prep = luaK_codeABx(fs, forprep[isgen], base, 0);
     enterblock(fs, &bl, 0); /* scope for declared variables */
-    // 生成临时变量, 用于计数器的复本
     adjustlocalvars(ls, nvars);
+    // 生成临时变量, 用于计数器的复本
     luaK_reserveregs(fs, nvars);
     block(ls);
     leaveblock(fs); /* end of scope for declared variables */
@@ -1534,9 +1534,9 @@ static void forlist(LexState* ls, TString* indexname) {
     expdesc e;
     int nvars = 5; /* gen, state, control, toclose, 'indexname' */
     int line;
-    int base = fs->freereg;
+    int base = fs->freereg; // 第一个 (for state)
     /* create control variables */
-    new_localvarliteral(ls, "(for state)");
+    new_localvarliteral(ls, "(for state)"); // 这 4 个就是 in 后面用的
     new_localvarliteral(ls, "(for state)");
     new_localvarliteral(ls, "(for state)");
     new_localvarliteral(ls, "(for state)");
@@ -1548,10 +1548,14 @@ static void forlist(LexState* ls, TString* indexname) {
     }
     checknext(ls, TK_IN);
     line = ls->linenumber;
+    // 有 4 个局部变量(for state) 要被赋值, explist(ls, &e) 返回表达式的个数, e 是表达式列表的最后一项
     adjust_assign(ls, 4, explist(ls, &e), &e);
     adjustlocalvars(ls, 4); /* control variables */
+    // 这里很有意思, 最后一个 (for state) 如果不是 nil(false) 放那么就要是 <close>
     marktobeclosed(fs); /* last control var. must be closed */
+    // 这里又看了一个是不是有 3 个多余的栈, 因为一会在循环里要用
     luaK_checkstack(fs, 3); /* extra space to call generator */
+    // nvars - 4 就是 in 前面参数的个数
     forbody(ls, base, line, nvars - 4, 1);
 }
 
