@@ -1008,6 +1008,7 @@ static void funcargs(LexState* ls, expdesc* f, int line) {
     }
     init_exp(f, VCALL, luaK_codeABC(fs, OP_CALL, base, nparams + 1, 2));
     luaK_fixline(fs, line);
+    // 根据函数位置恢复编译时栈状态, 运行时栈状态与此栈相同
     fs->freereg = base + 1; /* call remove function and arguments and leaves
                                (unless changed) one result */
 }
@@ -1064,6 +1065,7 @@ static void suffixedexp(LexState* ls, expdesc* v) {
                 luaX_next(ls);
                 codename(ls, &key); // 就是要调用的函数名
                 luaK_self(fs, v, &key);
+                // 而在 v 指向第一个寄存器, 存放着函数
                 funcargs(ls, v, line);
                 break;
             }

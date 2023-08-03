@@ -1038,6 +1038,7 @@ void luaK_self(FuncState* fs, expdesc* e, expdesc* key) {
     luaK_reserveregs(fs, 2); /* function and 'self' produced by op_self */
     // key 可能在寄存器也可能在常量表里
     // B 段是表的位置, A 第一个寄存器的位置
+    // 到时候表会放到第二个突破口, 函数放到第一个寄存器
     codeABRK(fs, OP_SELF, e->u.info, ereg, key);
     // 如果 key 在寄存器里, 当然要释放了
     freeexp(fs, key);
