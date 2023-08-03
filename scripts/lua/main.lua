@@ -1,15 +1,4 @@
-local toJson = require "utils.table2json"
-local luafile = "./clua.lua"
-xpcall(function()
-    local h5js = io.open("./h5.json", "w") or error()
-    h5js:write(toJson(luac(luafile)))
-    h5js:close()
-    print("done11")
-end, function(msg)
-    print(msg)
-end)
-
-
+local luafile = "./main.lua"
 
 
 require "bytedump"
@@ -102,77 +91,6 @@ local function html(file, h5)
     tofile(file, h5[1])
 end
 
-local function json(file, lua_table)
-    local function tofile(file, lua_table)
-        file:write("{")
-        file:write('"locvars":[')
-
-        if #lua_table.locvars > 0 then
-            local t = {}
-            for index, value in ipairs(lua_table.locvars) do
-                t[#t + 1] = string.format('"%s"', value)
-            end
-            local s = table.concat(t, ",")
-            file:write(s)
-        end
-        file:write('],')
-        file:write('"k":[')
-        if #lua_table.k > 0 then
-            local t = {}
-            for index, value in ipairs(lua_table.k) do
-                t[#t + 1] = string.format('%s', string.format("%q", value))
-            end
-            local s = table.concat(t, ",")
-            file:write(s)
-        end
-        file:write('],')
-        file:write('"upvalues":[')
-        if #lua_table.upvalues > 0 then
-            local t = {}
-            for index, value in ipairs(lua_table.upvalues) do
-                file:write('{')
-                local t = {}
-                for k, v in pairs(value) do
-                    t[#t + 1] = string.format('"%s"', k)
-                    t[#t + 1] = ":"
-                    t[#t + 1] = string.format('"%s"', v)
-                    t[#t + 1] = ","
-                end
-                t[#t] = ""
-                local s = table.concat(t)
-                file:write(s)
-                file:write('}')
-                if index < #lua_table.upvalues then
-                    file:write(',')
-                end
-            end
-        end
-        file:write('],')
-        file:write('"code":[')
-        local r = Bytedump:dump(lua_table.code)
-        for i, code in ipairs(r) do
-            file:write('"')
-            file:write(code)
-            file:write('"')
-            if i < #r then
-                file:write(',')
-            end
-        end
-        file:write('],')
-        file:write('"p":[')
-        if #lua_table.p > 0 then
-            for index, value in ipairs(lua_table.p) do
-                tofile(file, value)
-                if index < #lua_table.p then
-                    file:write(",")
-                end
-            end
-        end
-        file:write(']')
-        file:write("}")
-    end
-    tofile(file, lua_table)
-end
 
 xpcall(function()
     local h5 = require "utils.html2table"
@@ -180,10 +98,10 @@ xpcall(function()
     local o = io.open("./dump.html", "w") or error()
     html(o, lh5)
     o:close()
-
-    -- local h5js = io.open("./h5.json", "w") or error()
-    -- json(h5js, luac(luafile))
-    -- h5js:close()
+    local toJson = require "utils.table2json"
+    local h5js = io.open("./h5.json", "w") or error()
+    h5js:write(toJson(luac(luafile)))
+    h5js:close()
     print("done")
 end, function(msg)
     print(msg)
