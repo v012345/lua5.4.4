@@ -7,7 +7,7 @@ end
 local function xxxx()
     return 1
 end
-local luafile = "./main.lua"
+local luafile = "./clua.lua"
 
 require "bytedump"
 local function html_body(file)

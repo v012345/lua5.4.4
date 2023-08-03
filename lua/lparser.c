@@ -1048,20 +1048,21 @@ static void suffixedexp(LexState* ls, expdesc* v) {
     for (;;) {
         switch (ls->t.token) {
             case '.': { /* fieldsel */
-                fieldsel(ls, v); //
+                fieldsel(ls, v); // 这个比较简单, 后面就是一个字符串
                 break;
             }
             case '[': { /* '[' exp ']' */
                 expdesc key;
                 luaK_exp2anyregup(fs, v);
-                yindex(ls, &key); // 解析 key 的内容
+                yindex(ls, &key); // 解析 key 的内容, key 是一个表达式
                 luaK_indexed(fs, v, &key);
                 break;
             }
             case ':': { /* ':' NAME funcargs */
+                // 必须是一个函数调用
                 expdesc key;
                 luaX_next(ls);
-                codename(ls, &key);
+                codename(ls, &key); // 就是要调用的函数名
                 luaK_self(fs, v, &key);
                 funcargs(ls, v, line);
                 break;

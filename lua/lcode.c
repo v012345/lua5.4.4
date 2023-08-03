@@ -75,6 +75,7 @@ static TValue* const2val(FuncState* fs, const expdesc* e) { // ok
 int luaK_exp2const(FuncState* fs, const expdesc* e, TValue* v) {
     // 被<const>修饰的局部变量(最后一个且对齐的情况)尝试转化为常量
     if (hasjumps(e)) //
+        // 如果是常量, 那么跳转会被优化掉, 常量一眼真假啊
         return 0; /* not a constant */
     switch (e->k) {
         case VFALSE: //
@@ -90,7 +91,7 @@ int luaK_exp2const(FuncState* fs, const expdesc* e, TValue* v) {
             setsvalue(fs->ls->L, v, e->u.strval);
             return 1;
         }
-        case VCONST: {
+        case VCONST: { // 就是已经是 真编译时常量
             setobj(fs->ls->L, v, const2val(fs, e));
             return 1;
         }
@@ -717,8 +718,7 @@ void luaK_setoneret(FuncState* fs, expdesc* e) {
 */
 void luaK_dischargevars(FuncState* fs, expdesc* e) {
     switch (e->k) {
-        case VCONST: {
-            // 因为是编译时常量, 所以就那么几种, 布尔, 数字, 字符串, nil
+        case VCONST: { // 就是通过变量名拿到编译时
             const2exp(const2val(fs, e), e);
             break;
         }
@@ -1027,13 +1027,19 @@ void luaK_storevar(FuncState* fs, expdesc* var, expdesc* ex) {
 */
 void luaK_self(FuncState* fs, expdesc* e, expdesc* key) {
     int ereg;
-    luaK_exp2anyreg(fs, e);
+    luaK_exp2anyreg(fs, e); // 表入栈
+    // 表存放的位置
     ereg = e->u.info; /* register where 'e' was placed */
+    // 如果不是局部变量, 可以释放寄存器, 一会用来存函数
     freeexp(fs, e);
+    // 这个时候修改一上 e, 下面三行就是预留两个寄存器, 而 e 指向第第一个寄存器
     e->u.info = fs->freereg; /* base register for op_self */
     e->k = VNONRELOC; /* self expression has a fixed register */
     luaK_reserveregs(fs, 2); /* function and 'self' produced by op_self */
+    // key 可能在寄存器也可能在常量表里
+    // B 段是表的位置, A 第一个寄存器的位置
     codeABRK(fs, OP_SELF, e->u.info, ereg, key);
+    // 如果 key 在寄存器里, 当然要释放了
     freeexp(fs, key);
 }
 

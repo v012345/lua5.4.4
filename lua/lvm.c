@@ -1344,12 +1344,13 @@ returning: /* trap already set */
                 vmbreak;
             }
             vmcase(OP_SELF) {
-                StkId ra = RA(i);
+                StkId ra = RA(i); // 第一个寄存器的位置
                 const TValue* slot;
-                TValue* rb = vRB(i);
-                TValue* rc = RKC(i);
+                TValue* rb = vRB(i); // 主表的位置
+                TValue* rc = RKC(i); // 函数名
                 TString* key = tsvalue(rc); /* key must be a string */
-                setobj2s(L, ra + 1, rb);
+                setobj2s(L, ra + 1, rb); // 主表放到第二个寄存器中
+                // 函数放到第一个位置
                 if (luaV_fastget(L, rb, key, slot, luaH_getstr)) {
                     setobj2s(L, ra, slot);
                 } else
