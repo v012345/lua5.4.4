@@ -33,8 +33,5 @@ return function(lt)
         end
     end
     toJson(lt)
-    for i = 1, 10, 1 do
-        print(r[i])
-    end
     return table.concat(r)
 end
