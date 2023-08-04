@@ -373,7 +373,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C) }
     end,
     OP_GETFIELD = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -418,7 +418,7 @@ local OP_ACT = {
         if k == 1 then
             f = "R[%s][%s] = K[%s]"
         end
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C) }
     end,
     OP_SETFIELD = function(index, code)
         local f = "R[%s][K[%s]] = R[%s]"
@@ -452,7 +452,7 @@ local OP_ACT = {
         if k == 1 then
             f = "R[%s] = R[%s]; R[%s] = R[%s]K[%s]"
         end
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A + 1, B, A, B, C) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A + 1, B, A, B, C) }
     end,
     OP_ADDI = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -460,7 +460,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local sC = bytecode:sC(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, sC, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, sC, index + 2) }
     end,
     OP_ADDK = function(index, code)
         -- R[A] = R[B] + K[C]:number; pc++
@@ -469,7 +469,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
     end,
     OP_SUBK = function(index, code)
         -- R[A] = R[B] - K[C]:number; pc++
@@ -478,7 +478,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
     end,
     OP_MULK = function(index, code)
         -- R[A] = R[B] * K[C]:number; pc++
@@ -487,7 +487,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
     end,
     OP_MODK = function(index, code)
         -- R[A] = R[B] % K[C]:number; pc++
@@ -496,7 +496,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
     end,
     OP_POWK = function(index, code)
         -- R[A] = R[B] ^ K[C]:number; pc++
@@ -505,7 +505,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
     end,
     OP_DIVK = function(index, code)
         -- R[A] = R[B] / K[C]:number; pc++
@@ -514,7 +514,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
     end,
     OP_IDIVK = function(index, code)
         -- R[A] = R[B] // K[C]:number; pc++
@@ -541,7 +541,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
     end,
     OP_BXORK = function(index, code)
         -- R[A] = R[B] ~ K[C]:integer; pc++
@@ -559,7 +559,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local sC = bytecode:sC(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, sC, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, sC, index + 2) }
     end,
     OP_SHLI = function(index, code)
         -- R[A] = sC << R[B]; pc++
@@ -568,7 +568,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local sC = bytecode:sC(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, sC, B, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, sC, B, index + 2) }
     end,
     OP_ADD = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -576,7 +576,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
     end,
     OP_SUB = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -584,7 +584,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
     end,
     OP_MUL = function(index, code)
         -- R[A] = R[B] * R[C]; pc++
@@ -593,7 +593,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
     end,
     OP_MOD = function(index, code)
         -- R[A] = R[B] % R[C]; pc++
@@ -602,7 +602,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
     end,
     OP_POW = function(index, code)
         -- R[A] = R[B] ^ R[C]; pc++
@@ -611,7 +611,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
     end,
     OP_DIV = function(index, code)
         -- // R[A] = R[B] / R[C]; pc++
@@ -620,7 +620,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
     end,
     OP_IDIV = function(index, code)
         -- R[A] = R[B] // R[C]; pc++
@@ -629,7 +629,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
     end,
     OP_BAND = function(index, code)
         --  R[A] = R[B] & R[C]; pc++
@@ -638,7 +638,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
     end,
     OP_BOR = function(index, code)
         -- R[A] = R[B] | R[C]; pc++
@@ -647,7 +647,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
     end,
     OP_BXOR = function(index, code)
         -- R[A] = R[B] ~ R[C]; pc++
@@ -656,7 +656,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
     end,
     OP_SHL = function(index, code)
         -- R[A] = R[B] << R[C]; pc++
@@ -665,7 +665,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
     end,
     OP_SHR = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -673,7 +673,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local C = bytecode:C(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, C, index + 2) }
     end,
     OP_MMBIN = function(index, code)
         local name = OP_CODE[(code & 0x7F) + 1]
@@ -720,7 +720,7 @@ local OP_ACT = {
         local f = "R[%s] = -R[%s]"
         local A = bytecode:A(code)
         local B = bytecode:B(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B) }
     end,
     OP_BNOT = function(index, code)
         -- R[A] := ~R[B]
@@ -728,7 +728,7 @@ local OP_ACT = {
         local f = "R[%s] = ~R[%s]"
         local A = bytecode:A(code)
         local B = bytecode:B(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B) }
     end,
     OP_NOT = function(index, code)
         -- R[A] := not R[B]
@@ -736,7 +736,7 @@ local OP_ACT = {
         local f = "R[%s] = not R[%s]"
         local A = bytecode:A(code)
         local B = bytecode:B(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B) }
     end,
     OP_LEN = function(index, code)
         -- R[A] := #R[B]
@@ -744,7 +744,7 @@ local OP_ACT = {
         local f = "R[%s] = #R[%s]"
         local A = bytecode:A(code)
         local B = bytecode:B(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B) }
     end,
     OP_CONCAT = function(index, code)
         -- // R[A] := R[A].. ... ..R[A + B - 1]
@@ -765,7 +765,7 @@ local OP_ACT = {
         local f = "jump to %s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local sJ = bytecode:sJ(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, index + sJ + 1) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, index + sJ + 1) }
     end,
     OP_EQ = function(index, code)
         local f = "if (R[%s] == R[%s]) != %s then goto %s"
@@ -773,7 +773,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local k = bytecode:k(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, k, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, k, index + 2) }
     end,
     OP_LT = function(index, code)
         local f = "if (R[%s] < R[%s]) != %s then goto %s"
@@ -781,7 +781,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local k = bytecode:k(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, k, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, k, index + 2) }
     end,
     OP_LE = function(index, code)
         local f = "if (R[%s] <= R[%s]) != %s then goto %s"
@@ -789,7 +789,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local B = bytecode:B(code)
         local k = bytecode:k(code)
-        return { OpCode = name, "", OpMode = getOpMode(code), VmExecute = string.format(f, A, B, k, index + 2) }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, B, k, index + 2) }
     end,
     OP_EQK = function(index, code)
         -- if ((R[A] == K[B]) ~= k) then pc++
@@ -896,12 +896,12 @@ local OP_ACT = {
             f = f .. " with " .. n .. " return"
         end
         local name = OP_CODE[(code & 0x7F) + 1]
-        return { OpCode = name, OpMode = getOpMode(code), f }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = f }
     end,
     OP_RETURN0 = function(index, code)
         local f = "back to caller"
         local name = OP_CODE[(code & 0x7F) + 1]
-        return { OpCode = name, OpMode = getOpMode(code), f }
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = f }
     end,
     OP_RETURN1 = function(index, code)
         local f = "return R[%s], back to caller"
@@ -915,7 +915,6 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local Bx = bytecode:Bx(code)
         return {
-            index,
             OpCode = name,
             OpMode = getOpMode(code),
             VmExecute = string.format(f, A + 3, A, A, A, A + 2, A, A + 1, index - Bx + 1, index + 1)
@@ -927,7 +926,6 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local Bx = bytecode:Bx(code)
         return {
-            index,
             OpCode = name,
             OpMode = getOpMode(code),
             VmExecute = string.format(f, A + 3, A, A, A, A + 2, A, A + 1, index + 1, index + Bx + 2)
@@ -946,7 +944,6 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local C = bytecode:C(code)
         return {
-            index,
             OpCode = name,
             OpMode = getOpMode(code),
             VmExecute = string.format(f, A + 4, A, A + 5, A + 1, A + 2, A + 6, A + 4, C)
@@ -960,8 +957,7 @@ local OP_ACT = {
         return {
             OpCode = name,
             OpMode = getOpMode(code),
-            VmExecute = string.format(f, A + 4, A + 2, A + 4,
-                index + 1 - Bx)
+            VmExecute = string.format(f, A + 4, A + 2, A + 4, index + 1 - Bx)
         }
     end,
     OP_SETLIST = function(index, code)
@@ -988,7 +984,7 @@ local OP_ACT = {
         local A = bytecode:A(code)
         local C = bytecode:C(code)
         if C == 0 then
-            return { OpCode = name, OpMode = getOpMode(code), "get all varargs" }
+            return { OpCode = name, OpMode = getOpMode(code), VmExecute = "get all varargs" }
         else
             return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, C, A) }
         end
