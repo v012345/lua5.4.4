@@ -1,5 +1,5 @@
 const { createApp, ref } = Vue
-axios.get('./h5.json')
+axios.get('./lua.json')
     .then(res => console.log(res.data))
     .catch(err => console.log(err))
 createApp({

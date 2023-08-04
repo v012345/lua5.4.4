@@ -1,11 +1,11 @@
 local luafile = "./main.lua"
 
 
-require "bytedump"
+local bytecode = require "bytecode"
 local function html_body(file)
     local function div_code(file, codes)
         file:write('<div class="code-container container">')
-        local r = Bytedump:dump(codes)
+        local r = bytecode:show(codes)
         for i, code in ipairs(r) do
             file:write('<div class="code">')
             file:write(code)
@@ -93,14 +93,17 @@ end
 
 
 xpcall(function()
-    local h5 = require "utils.html2table"
-    local lh5 = h5("./index.html")
-    local o = io.open("./index.html", "w") or error()
-    html(o, lh5)
-    o:close()
     local toJson = require "utils.table2json"
-    local h5js = io.open("./h5.json", "w") or error()
-    h5js:write(toJson(luac(luafile)))
+    local h5js = io.open("./vue/lua.json", "w") or error()
+    local luaByteCode = luac(luafile)
+    local function trans(cl)
+        for _, value in pairs(cl.p) do
+            trans(value)
+        end
+        cl.code = bytecode:show(cl.code)
+    end
+    trans(luaByteCode)
+    h5js:write(toJson(luaByteCode))
     h5js:close()
     print("done")
 end, function(msg)
