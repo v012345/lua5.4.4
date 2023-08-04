@@ -99,6 +99,14 @@ static void praser(lua_State* L, Proto* p) {
         praser(L, p->p[i]);
         lua_settable(L, -3);
     }
-    
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "abslineinfo");
+    lua_newtable(L);
+    for (size_t i = 0; i < p->sizeabslineinfo; i++) {
+        lua_pushinteger(L, p->abslineinfo[i].pc);
+        lua_pushinteger(L, p->abslineinfo[i].line);
+        lua_settable(L, -3);
+    }
     lua_settable(L, -3);
 }
