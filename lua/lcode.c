@@ -1577,7 +1577,8 @@ void luaK_infix(FuncState* fs, BinOpr op, expdesc* v) {
         case OPR_BXOR:
         case OPR_SHL:
         case OPR_SHR: {
-            if (!tonumeral(v, NULL)) //
+            // 如果是数字字面量, 那么之后可能做为立即数处理
+            if (!tonumeral(v, NULL)) // 如果不是数字字面量, 就放到寄存器或常量数组中
                 luaK_exp2anyreg(fs, v);
             /* else keep numeral, which may be folded or used as an immediate
                operand */
