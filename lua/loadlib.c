@@ -613,9 +613,13 @@ static const luaL_Reg pk_funcs[] = {
     {"path", NULL},
     {"searchers", NULL},
     {"loaded", NULL},
-    {NULL, NULL}};
+    {NULL, NULL},
+};
 
-static const luaL_Reg ll_funcs[] = {{"require", ll_require}, {NULL, NULL}};
+static const luaL_Reg ll_funcs[] = {
+    {"require", ll_require},
+    {NULL, NULL},
+};
 
 static void createsearcherstable(lua_State* L) {
     static const lua_CFunction searchers[] = {searcher_preload, searcher_Lua, searcher_C, searcher_Croot, NULL};
