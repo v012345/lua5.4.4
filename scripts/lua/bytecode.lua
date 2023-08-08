@@ -859,11 +859,14 @@ local OP_ACT = {
         }
     end,
     OP_TEST = function(index, code)
-        local f = "if bool(R[%s]) == %s goto %s"
+        local f = "if R[%s] goto %s"
         local name = OP_CODE[(code & 0x7F) + 1]
         local A = bytecode:A(code)
         local k = bytecode:k(code)
-        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, k, index + 2) }
+        if k ~= 0 then
+            f = "if not R[%s] goto %s"
+        end
+        return { OpCode = name, OpMode = getOpMode(code), VmExecute = string.format(f, A, index + 2) }
     end,
     OP_TESTSET = function(index, code)
         -- if (not R[B] == k) then pc++ else R[A] := R[B]

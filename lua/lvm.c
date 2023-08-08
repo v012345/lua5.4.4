@@ -1620,7 +1620,7 @@ returning: /* trap already set */
             }
             vmcase(OP_TEST) {
                 StkId ra = RA(i);
-                int cond = !l_isfalse(s2v(ra));
+                int cond = !l_isfalse(s2v(ra)); // cond 同 ra
                 docondjump();
                 vmbreak;
             }
