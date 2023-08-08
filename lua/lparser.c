@@ -780,6 +780,7 @@ static void fieldsel(LexState* ls, expdesc* v) {
     luaK_indexed(fs, v, &key);
 }
 
+// 专门给 t[expr] 使用的
 static void yindex(LexState* ls, expdesc* v) {
     /* index -> '[' expr ']' */
     luaX_next(ls); /* skip the '[' */
