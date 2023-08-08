@@ -1,3 +1,5 @@
+c = x[a and b and c or d and e]
+
 xpcall(function()
     local luafile = "./test-lua.lua"
     local bytecode = require "bytecode"
