@@ -1,5 +1,5 @@
 xpcall(function()
-    local luafile = "./main.lua"
+    local luafile = "./bytecode.lua"
     local bytecode = require "bytecode"
     local toJson = require "utils.table2json"
     local h5js = io.open("./vue/lua.json", "w") or error()
