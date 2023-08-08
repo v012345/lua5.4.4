@@ -1253,7 +1253,8 @@ void luaK_indexed(FuncState* fs, expdesc* t, expdesc* k) {
         t->k = VINDEXUP;
     } else {
         /* register index of the table */
-        t->u.ind.t = (t->k == VLOCAL) ? t->u.var.ridx : t->u.info;
+        t->u.ind.t = (t->k == VLOCAL) ? t->u.var.ridx : t->u.info; // 表的位置
+        // 下面是索引位置
         if (isKstr(fs, k)) {
             t->u.ind.idx = k->u.info; /* literal string */
             t->k = VINDEXSTR;
