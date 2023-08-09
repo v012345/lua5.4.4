@@ -828,7 +828,7 @@ LUA_API int lua_yieldk(lua_State* L, int nresults, lua_KContext ctx, lua_KFuncti
     } else {
         if ((ci->u.c.k = k) != NULL) /* is there a continuation? */
             ci->u.c.ctx = ctx; /* save context */
-        luaD_throw(L, LUA_YIELD); // C 可以停吗?
+        luaD_throw(L, LUA_YIELD); //
     }
     lua_assert(ci->callstatus & CIST_HOOKED); /* must be inside a hook */
     lua_unlock(L);
