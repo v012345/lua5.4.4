@@ -50,6 +50,7 @@ const char lua_ident[] = "$LuaVersion: " LUA_COPYRIGHT " $"
 ** Non-valid indices return the special nil value 'G(L)->nilvalue'.
 */
 static TValue* index2value(lua_State* L, int idx) {
+    // 总的来说就是把 L[idx] 以 TValue* 返回
     // 如果 idx 为正数, 就是以当前函数环境为底, 往上数, 超过当前环境的栈范围报错
     // 当 idx 为负数, 但是大于 LUA_REGISTRYINDEX, 就从栈顶向下数, 但是要是一个有效索引
     // 当 idx 为 LUA_REGISTRYINDEX 时, 直接返回全局注册表
