@@ -32,6 +32,7 @@ static int auxresume(lua_State* L, lua_State* co, int narg) {
         lua_pushliteral(L, "too many arguments to resume");
         return -1; /* error flag */
     }
+    // 从当前进程 L 拿走 narg 元素, 放到 co 的栈上
     lua_xmove(L, co, narg);
     status = lua_resume(co, L, narg, &nres);
     if (l_likely(status == LUA_OK || status == LUA_YIELD)) {
@@ -64,8 +65,11 @@ static int luaB_coresume(lua_State* L) {
 }
 
 static int luaB_auxwrap(lua_State* L) {
+    // 拿到之前放到上值里的新进程
     lua_State* co = lua_tothread(L, lua_upvalueindex(1));
+    // 这里 lua_gettop(L) 返回的就是 lua 闭包调用时的参数个数
     int r = auxresume(L, co, lua_gettop(L));
+    // 如果 r < 0 , 那么就是出错了, 会返回会返回错误信息的
     if (l_unlikely(r < 0)) { /* error? */
         int stat = lua_status(co);
         if (stat != LUA_OK && stat != LUA_YIELD) { /* error in the coroutine? */
@@ -89,18 +93,25 @@ static int luaB_cocreate(lua_State* L) {
     // 第一个参数必须是一个函数
     luaL_checktype(L, 1, LUA_TFUNCTION);
     NL = lua_newthread(L); // NL 在 L 的栈顶
+    // 把函数放到 NL 之上
     lua_pushvalue(L, 1); /* move function to top */
+    // 把 L 的栈顶 1 个元素剪切走到 NL 上
     lua_xmove(L, NL, 1); /* move function from L to NL */
-    return 1;
+    // 现在 NL 已经有一份函数了
+    return 1; // 这里返回的就是 NL
 }
 
 static int luaB_cowrap(lua_State* L) {
     luaB_cocreate(L);
-    lua_pushcclosure(L, luaB_auxwrap, 1);
+    // 上面执行完成后, L 的栈顶是 NL, 栈底是函数
+    lua_pushcclosure(L, luaB_auxwrap, 1); // C 闭包带一个上值, 把栈顶 1 个元素当作上值
+    // 上面执行完后, L 的栈顶是 luaB_auxwrap 的 C 闭包, 闭馆带 1 个上值, 为 NL
     return 1;
 }
 
-static int luaB_yield(lua_State* L) { return lua_yield(L, lua_gettop(L)); }
+static int luaB_yield(lua_State* L) { //
+    return lua_yield(L, lua_gettop(L));
+}
 
 #define COS_RUN 0
 #define COS_DEAD 1

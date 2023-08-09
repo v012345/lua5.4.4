@@ -733,6 +733,7 @@ static void resume(lua_State* L, void* ud) {
     int n = *(cast(int*, ud)); /* number of arguments */
     StkId firstArg = L->top.p - n; /* first argument */
     CallInfo* ci = L->ci;
+    // 确实, 如果状态是 LUA_OK, 那就是说明是新生成的协程, 还没有运行过
     if (L->status == LUA_OK) /* starting a coroutine? */
         ccall(L, firstArg - 1, LUA_MULTRET, 0); /* just call its body */
     else { /* resuming from previous yield */
@@ -782,11 +783,13 @@ LUA_API int lua_resume(lua_State* L, lua_State* from, int nargs, int* nresults) 
             return resume_error(L, "cannot resume dead coroutine", nargs);
     } else if (L->status != LUA_YIELD) /* ended with errors? */
         return resume_error(L, "cannot resume dead coroutine", nargs);
-    L->nCcalls = (from) ? getCcalls(from) : 0;
-    if (getCcalls(L) >= LUAI_MAXCCALLS) return resume_error(L, "C stack overflow", nargs);
+    L->nCcalls = (from) ? getCcalls(from) : 0; // 共享 C 的调用深度
+    if (getCcalls(L) >= LUAI_MAXCCALLS) // C 调用栈太深了
+        return resume_error(L, "C stack overflow", nargs);
     L->nCcalls++;
     luai_userstateresume(L, nargs);
     api_checknelems(L, (L->status == LUA_OK) ? nargs + 1 : nargs);
+    // 前置检查完成, 开始启动
     status = luaD_rawrunprotected(L, resume, &nargs);
     /* continue running after recoverable errors */
     status = precover(L, status);
@@ -816,7 +819,7 @@ LUA_API int lua_yieldk(lua_State* L, int nresults, lua_KContext ctx, lua_KFuncti
         else
             luaG_runerror(L, "attempt to yield from outside a coroutine");
     }
-    L->status = LUA_YIELD;
+    L->status = LUA_YIELD; // 停了
     ci->u2.nyield = nresults; /* save number of results */
     if (isLua(ci)) { /* inside a hook? */
         lua_assert(!isLuacode(ci));
@@ -825,7 +828,7 @@ LUA_API int lua_yieldk(lua_State* L, int nresults, lua_KContext ctx, lua_KFuncti
     } else {
         if ((ci->u.c.k = k) != NULL) /* is there a continuation? */
             ci->u.c.ctx = ctx; /* save context */
-        luaD_throw(L, LUA_YIELD);
+        luaD_throw(L, LUA_YIELD); // C 可以停吗?
     }
     lua_assert(ci->callstatus & CIST_HOOKED); /* must be inside a hook */
     lua_unlock(L);

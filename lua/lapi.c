@@ -119,7 +119,8 @@ LUA_API int lua_checkstack(lua_State* L, int n) {
 
 LUA_API void lua_xmove(lua_State* from, lua_State* to, int n) {
     int i;
-    if (from == to) return;
+    if (from == to) // 同一个 lua_State 就是不动了
+        return;
     lua_lock(to);
     api_checknelems(from, n);
     api_check(from, G(from) == G(to), "moving among independent states");
@@ -157,7 +158,10 @@ LUA_API int lua_absindex(lua_State* L, int idx) { //
     return (idx > 0 || ispseudo(idx)) ? idx : cast_int(L->top.p - L->ci->func.p) + idx;
 }
 
-LUA_API int lua_gettop(lua_State* L) { return cast_int(L->top.p - (L->ci->func.p + 1)); }
+// 返回栈帧里有多少个元素
+LUA_API int lua_gettop(lua_State* L) { //
+    return cast_int(L->top.p - (L->ci->func.p + 1));
+}
 
 LUA_API void lua_settop(lua_State* L, int idx) {
     CallInfo* ci;
@@ -525,8 +529,8 @@ LUA_API void lua_pushcclosure(lua_State* L, lua_CFunction fn, int n) {
         api_check(L, n <= MAXUPVAL, "upvalue index too large");
         cl = luaF_newCclosure(L, n);
         cl->f = fn;
-        L->top.p -= n;
-        while (n--) {
+        L->top.p -= n; // 修正栈顶
+        while (n--) { // 给上值赋值
             setobj2n(L, &cl->upvalue[n], s2v(L->top.p + n));
             /* does not need barrier because closure is white */
             lua_assert(iswhite(cl));

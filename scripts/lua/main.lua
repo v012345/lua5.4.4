@@ -1,5 +1,10 @@
-c = x[a and b and c or d and e]
-
+local a = coroutine.create(function() end)
+local b = coroutine.wrap(function(p1, p2, p3)
+    print(p1, p2, p3)
+    coroutine.yield()
+    print("jjj")
+end)
+b(1, 2)
 xpcall(function()
     local luafile = "./test-lua.lua"
     local bytecode = require "bytecode"
