@@ -86,6 +86,8 @@ static TValue* index2value(lua_State* L, int idx) {
 ** Convert a valid actual index (not a pseudo-index) to its address.
 */
 l_sinline StkId index2stack(lua_State* L, int idx) {
+    // 通过栈的索引去找栈返回 StkId( 就是 StackValue* 就是栈的指针 )
+    // 不可以去找 pseudo-index, 因为就没有 pseudo-stack
     CallInfo* ci = L->ci;
     if (idx > 0) {
         StkId o = ci->func.p + idx;
@@ -108,7 +110,8 @@ LUA_API int lua_checkstack(lua_State* L, int n) {
         res = 1; /* yes; check is OK */
     else /* need to grow stack */
         res = luaD_growstack(L, n, 0);
-    if (res && ci->top.p < L->top.p + n) ci->top.p = L->top.p + n; /* adjust frame top */
+    if (res && ci->top.p < L->top.p + n) //
+        ci->top.p = L->top.p + n; /* adjust frame top */
     lua_unlock(L);
     return res;
 }
