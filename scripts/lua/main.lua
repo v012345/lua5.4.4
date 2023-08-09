@@ -5,6 +5,7 @@ local b = coroutine.wrap(function(p1, p2, p3)
     print("jjj")
 end)
 b(1, 2)
+b(1, 2)
 xpcall(function()
     local luafile = "./test-lua.lua"
     local bytecode = require "bytecode"
