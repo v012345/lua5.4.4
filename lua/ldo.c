@@ -158,9 +158,12 @@ int luaD_rawrunprotected(lua_State* L, Pfunc f, void* ud) { // 😊
 static void relstack(lua_State* L) {
     CallInfo* ci;
     UpVal* up;
+    // 切换模式, 现在 L->top.offset 为相对栈底的偏移量
     L->top.offset = savestack(L, L->top.p);
+    // 待关闭链的链头也要保存一下
     L->tbclist.offset = savestack(L, L->tbclist.p);
-    for (up = L->openupval; up != NULL; up = up->u.open.next) up->v.offset = savestack(L, uplevel(up));
+    for (up = L->openupval; up != NULL; up = up->u.open.next) //
+        up->v.offset = savestack(L, uplevel(up));
     for (ci = L->ci; ci != NULL; ci = ci->previous) {
         ci->top.offset = savestack(L, ci->top.p);
         ci->func.offset = savestack(L, ci->func.p);
@@ -175,11 +178,13 @@ static void correctstack(lua_State* L) {
     UpVal* up;
     L->top.p = restorestack(L, L->top.offset);
     L->tbclist.p = restorestack(L, L->tbclist.offset);
-    for (up = L->openupval; up != NULL; up = up->u.open.next) up->v.p = s2v(restorestack(L, up->v.offset));
+    for (up = L->openupval; up != NULL; up = up->u.open.next) //
+        up->v.p = s2v(restorestack(L, up->v.offset));
     for (ci = L->ci; ci != NULL; ci = ci->previous) {
         ci->top.p = restorestack(L, ci->top.offset);
         ci->func.p = restorestack(L, ci->func.offset);
-        if (isLua(ci)) ci->u.l.trap = 1; /* signal to update 'trap' in 'luaV_execute' */
+        if (isLua(ci)) //
+            ci->u.l.trap = 1; /* signal to update 'trap' in 'luaV_execute' */
     }
 }
 
@@ -203,10 +208,12 @@ int luaD_reallocstack(lua_State* L, int newsize, int raiseerror) {
     StkId newstack;
     int oldgcstop = G(L)->gcstopem;
     lua_assert(newsize <= LUAI_MAXSTACK || newsize == ERRORSTACKSIZE);
+    // 把绝对地址换成相对地址
     relstack(L); /* change pointers to offsets */
     G(L)->gcstopem = 1; /* stop emergency collection */
     newstack = luaM_reallocvector(L, L->stack.p, oldsize + EXTRA_STACK, newsize + EXTRA_STACK, StackValue);
     G(L)->gcstopem = oldgcstop; /* restore emergency collection */
+    // gg 了, 什么也不发生, 如果上层报错, 直接抛
     if (l_unlikely(newstack == NULL)) { /* reallocation failed? */
         correctstack(L); /* change offsets back to pointers */
         if (raiseerror)
@@ -214,10 +221,14 @@ int luaD_reallocstack(lua_State* L, int newsize, int raiseerror) {
         else
             return 0; /* do not raise an error */
     }
+    // 成功了, 调整栈底指针
     L->stack.p = newstack;
+    // 通过相对地址调整为绝对地址
     correctstack(L); /* change offsets back to pointers */
+    // 调整栈顶指针
     L->stack_last.p = L->stack.p + newsize;
-    for (i = oldsize + EXTRA_STACK; i < newsize + EXTRA_STACK; i++) setnilvalue(s2v(newstack + i)); /* erase new segment */
+    for (i = oldsize + EXTRA_STACK; i < newsize + EXTRA_STACK; i++) //
+        setnilvalue(s2v(newstack + i)); /* erase new segment */
     return 1;
 }
 
@@ -226,27 +237,32 @@ int luaD_reallocstack(lua_State* L, int newsize, int raiseerror) {
 ** is true, raises any error; otherwise, return 0 in case of errors.
 */
 int luaD_growstack(lua_State* L, int n, int raiseerror) {
-    int size = stacksize(L);
-    if (l_unlikely(size > LUAI_MAXSTACK)) {
+    int size = stacksize(L); // 当前栈的大小
+    if (l_unlikely(size > LUAI_MAXSTACK)) { // 太大了, 如果不用抛出错, 就返回 0, 不进行任何操作
         /* if stack is larger than maximum, thread is already using the
            extra space reserved for errors, that is, thread is handling
            a stack error; cannot grow further than that. */
         lua_assert(stacksize(L) == ERRORSTACKSIZE);
-        if (raiseerror) luaD_throw(L, LUA_ERRERR); /* error inside message handler */
+        if (raiseerror) //
+            luaD_throw(L, LUA_ERRERR); /* error inside message handler */
         return 0; /* if not 'raiseerror', just signal it */
     } else if (n < LUAI_MAXSTACK) { /* avoids arithmetic overflows */
+        // 这里 n 要小于 LUAI_MAXSTACK , 不然还是看 raiseerror 进行报错
         int newsize = 2 * size; /* tentative new size */
         int needed = cast_int(L->top.p - L->stack.p) + n;
         if (newsize > LUAI_MAXSTACK) /* cannot cross the limit */
             newsize = LUAI_MAXSTACK;
         if (newsize < needed) /* but must respect what was asked for */
             newsize = needed;
-        if (l_likely(newsize <= LUAI_MAXSTACK)) return luaD_reallocstack(L, newsize, raiseerror);
+        // 只要 newsize 还在有效范围内才进行正常分配
+        if (l_likely(newsize <= LUAI_MAXSTACK)) //
+            return luaD_reallocstack(L, newsize, raiseerror);
     }
     /* else stack overflow */
     /* add extra size to be able to handle the error message */
     luaD_reallocstack(L, ERRORSTACKSIZE, raiseerror);
-    if (raiseerror) luaG_runerror(L, "stack overflow");
+    if (raiseerror) //
+        luaG_runerror(L, "stack overflow");
     return 0;
 }
 
