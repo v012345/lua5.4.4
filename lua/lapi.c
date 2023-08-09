@@ -101,6 +101,7 @@ l_sinline StkId index2stack(lua_State* L, int idx) {
 }
 
 LUA_API int lua_checkstack(lua_State* L, int n) {
+    // 在栈上预留 n 个空间, 如果超过当前栈帧就调整当前栈帧的大小
     int res;
     CallInfo* ci;
     lua_lock(L);
@@ -110,7 +111,7 @@ LUA_API int lua_checkstack(lua_State* L, int n) {
         res = 1; /* yes; check is OK */
     else /* need to grow stack */
         res = luaD_growstack(L, n, 0);
-    if (res && ci->top.p < L->top.p + n) //
+    if (res && ci->top.p < L->top.p + n) // 为什么要调整 ci->top.p
         ci->top.p = L->top.p + n; /* adjust frame top */
     lua_unlock(L);
     return res;
