@@ -131,7 +131,7 @@ l_noret luaD_throw(lua_State* L, int errcode) {
 }
 
 /// @brief 要执行的函数 f, ud 为参数
-int luaD_rawrunprotected(lua_State* L, Pfunc f, void* ud) { // 😊
+int luaD_rawrunprotected(lua_State* L, Pfunc f, void* ud) {
     l_uint32 oldnCcalls = L->nCcalls;
     struct lua_longjmp lj;
     lj.status = LUA_OK; // 没有发生错误就返回 LUA_OK, 出现异常返回不同的状态码
@@ -765,6 +765,7 @@ static void resume(lua_State* L, void* ud) {
 */
 static int precover(lua_State* L, int status) {
     CallInfo* ci;
+    // status 为 LUA_OK 或 LUA_YIELD 都是正常现在, 不用处理
     while (errorstatus(status) && (ci = findpcall(L)) != NULL) {
         L->ci = ci; /* go down to recovery functions */
         setcistrecst(ci, status); /* status to finish 'pcall' */
@@ -789,7 +790,7 @@ LUA_API int lua_resume(lua_State* L, lua_State* from, int nargs, int* nresults) 
     L->nCcalls++;
     luai_userstateresume(L, nargs);
     api_checknelems(L, (L->status == LUA_OK) ? nargs + 1 : nargs);
-    // 前置检查完成, 开始启动
+    // 前置检查完成, 开始启动, 在这里如果要 yield , 就直接 throw
     status = luaD_rawrunprotected(L, resume, &nargs);
     /* continue running after recoverable errors */
     status = precover(L, status);
