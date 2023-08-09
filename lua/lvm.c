@@ -262,12 +262,14 @@ void luaV_finishget(lua_State* L, const TValue* t, TValue* key, StkId val, const
     int loop; /* counter to avoid infinite loops */
     const TValue* tm; /* metamethod */
     for (loop = 0; loop < MAXTAGLOOP; loop++) {
+        // slot 为 NULL 就是说明 t 不是表
         if (slot == NULL) { /* 't' is not a table? */
             lua_assert(!ttistable(t));
             tm = luaT_gettmbyobj(L, t, TM_INDEX);
             if (l_unlikely(notm(tm))) luaG_typeerror(L, t, "index"); /* no metamethod */
             /* else will try the metamethod */
         } else { /* 't' is a table */
+            // slot 为 nil 说明 t 是一个表, 但是没有 key 键
             lua_assert(isempty(slot));
             tm = fasttm(L, hvalue(t)->metatable, TM_INDEX); /* table's metamethod */
             if (tm == NULL) { /* no metamethod? */

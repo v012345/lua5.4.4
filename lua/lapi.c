@@ -50,6 +50,10 @@ const char lua_ident[] = "$LuaVersion: " LUA_COPYRIGHT " $"
 ** Non-valid indices return the special nil value 'G(L)->nilvalue'.
 */
 static TValue* index2value(lua_State* L, int idx) {
+    // 如果 idx 为正数, 就是以当前函数环境为底, 往上数, 超过当前环境的栈范围报错
+    // 当 idx 为负数, 但是大于 LUA_REGISTRYINDEX, 就从栈顶向下数, 但是要是一个有效索引
+    // 当 idx 为 LUA_REGISTRYINDEX 时, 直接返回全局注册表
+    // 当 idx 比 LUA_REGISTRYINDEX 还小时, 修正为 -idx+LUA_REGISTRYINDEX, 返回 c 闭包的上值
     CallInfo* ci = L->ci;
     if (idx > 0) {
         StkId o = ci->func.p + idx;
@@ -59,6 +63,7 @@ static TValue* index2value(lua_State* L, int idx) {
         else
             return s2v(o);
     } else if (!ispseudo(idx)) { /* negative index */
+        // 有一说一 , 0 也进入这里了
         api_check(L, idx != 0 && -idx <= L->top.p - (ci->func.p + 1), "invalid index");
         return s2v(L->top.p + idx);
     } else if (idx == LUA_REGISTRYINDEX)
@@ -143,7 +148,9 @@ LUA_API lua_Number lua_version(lua_State* L) {
 /*
 ** convert an acceptable stack index into an absolute index
 */
-LUA_API int lua_absindex(lua_State* L, int idx) { return (idx > 0 || ispseudo(idx)) ? idx : cast_int(L->top.p - L->ci->func.p) + idx; }
+LUA_API int lua_absindex(lua_State* L, int idx) { //
+    return (idx > 0 || ispseudo(idx)) ? idx : cast_int(L->top.p - L->ci->func.p) + idx;
+}
 
 LUA_API int lua_gettop(lua_State* L) { return cast_int(L->top.p - (L->ci->func.p + 1)); }
 
@@ -598,6 +605,7 @@ LUA_API int lua_gettable(lua_State* L, int idx) {
     return ttype(s2v(L->top.p - 1));
 }
 
+// idx 为栈的索引, k 是键值
 LUA_API int lua_getfield(lua_State* L, int idx, const char* k) {
     lua_lock(L);
     return auxgetstr(L, index2value(L, idx), k);
