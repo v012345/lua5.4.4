@@ -265,6 +265,7 @@ static void close_state(lua_State* L) {
 }
 
 LUA_API lua_State* lua_newthread(lua_State* L) {
+    // 主进程的内存空间是和全局状态机在一起的, 而这里生成的进程,就是随机分配了
     global_State* g = G(L);
     GCObject* o;
     lua_State* L1;
@@ -274,7 +275,7 @@ LUA_API lua_State* lua_newthread(lua_State* L) {
     o = luaC_newobjdt(L, LUA_TTHREAD, sizeof(LX), offsetof(LX, l));
     L1 = gco2th(o);
     /* anchor it on L stack */
-    setthvalue2s(L, L->top.p, L1);
+    setthvalue2s(L, L->top.p, L1); // 新进程放到当前进程栈顶
     api_incr_top(L);
     preinit_thread(L1, g);
     L1->hookmask = L->hookmask;
@@ -282,7 +283,7 @@ LUA_API lua_State* lua_newthread(lua_State* L) {
     L1->hook = L->hook;
     resethookcount(L1);
     /* initialize L1 extra space */
-    memcpy(lua_getextraspace(L1), lua_getextraspace(g->mainthread), LUA_EXTRASPACE);
+    memcpy(lua_getextraspace(L1), lua_getextraspace(g->mainthread), LUA_EXTRASPACE); // 所有的进程的额外空间都和主进程一样
     luai_userstatethread(L, L1);
     stack_init(L1, L); /* init stack */
     lua_unlock(L);
