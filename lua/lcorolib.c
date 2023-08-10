@@ -34,13 +34,16 @@ static int auxresume(lua_State* L, lua_State* co, int narg) {
     }
     // 从当前进程 L 拿走 narg 元素, 放到 co 的栈上
     lua_xmove(L, co, narg);
+    // 这里 resume 进去之后, 只有主动 yield 或执行完毕才会从这里出来
     status = lua_resume(co, L, narg, &nres);
     if (l_likely(status == LUA_OK || status == LUA_YIELD)) {
+        // 这里要检查一下, 看看栈够不够存返回值
         if (l_unlikely(!lua_checkstack(L, nres + 1))) {
             lua_pop(co, nres); /* remove results anyway */
             lua_pushliteral(L, "too many results to resume");
             return -1; /* error flag */
         }
+        // 又把 yield 来的值放到 L 上
         lua_xmove(co, L, nres); /* move yielded values */
         return nres;
     } else {
@@ -59,6 +62,7 @@ static int luaB_coresume(lua_State* L) {
         return 2; /* return false + error message */
     } else {
         lua_pushboolean(L, 1);
+        // 把 true 放到第一个返回值
         lua_insert(L, -(r + 1));
         return r + 1; /* return true + 'resume' returns */
     }
@@ -85,7 +89,7 @@ static int luaB_auxwrap(lua_State* L) {
         }
         return lua_error(L); /* propagate error */
     }
-    return r;
+    return r; // yield 出来的值的个数
 }
 
 static int luaB_cocreate(lua_State* L) {
@@ -118,7 +122,12 @@ static int luaB_yield(lua_State* L) { //
 #define COS_YIELD 2
 #define COS_NORM 3
 
-static const char* const statname[] = {"running", "dead", "suspended", "normal"};
+static const char* const statname[] = {
+    "running",
+    "dead",
+    "suspended",
+    "normal",
+};
 
 static int auxstatus(lua_State* L, lua_State* co) {
     if (L == co)
@@ -141,6 +150,7 @@ static int auxstatus(lua_State* L, lua_State* co) {
 }
 
 static int luaB_costatus(lua_State* L) {
+    // 查看某个进程的状态 "running", "dead", "suspended", "normal"
     lua_State* co = getco(L);
     lua_pushstring(L, statname[auxstatus(L, co)]);
     return 1;
@@ -155,10 +165,12 @@ static int luaB_yieldable(lua_State* L) {
 static int luaB_corunning(lua_State* L) {
     int ismain = lua_pushthread(L);
     lua_pushboolean(L, ismain);
+    // 返回当前进程, 和当前进程是不是主进程
     return 2;
 }
 
 static int luaB_close(lua_State* L) {
+    // 只能关闭 dead 与 yield 的进程
     lua_State* co = getco(L);
     int status = auxstatus(L, co);
     switch (status) {
@@ -174,20 +186,21 @@ static int luaB_close(lua_State* L) {
                 return 2;
             }
         }
-        default: /* normal or running coroutine */ return luaL_error(L, "cannot close a %s coroutine", statname[status]);
+        default: /* normal or running coroutine */ //
+            return luaL_error(L, "cannot close a %s coroutine", statname[status]);
     }
 }
 
 static const luaL_Reg co_funcs[] = {
-    {"create", luaB_cocreate}, //
-    {"resume", luaB_coresume}, //
-    {"running", luaB_corunning}, //
-    {"status", luaB_costatus}, //
-    {"wrap", luaB_cowrap}, //
-    {"yield", luaB_yield}, //
-    {"isyieldable", luaB_yieldable}, //
+    {"create", luaB_cocreate},
+    {"resume", luaB_coresume},
+    {"running", luaB_corunning},
+    {"status", luaB_costatus},
+    {"wrap", luaB_cowrap},
+    {"yield", luaB_yield},
+    {"isyieldable", luaB_yieldable},
     {"close", luaB_close}, //
-    {NULL, NULL} //
+    {NULL, NULL},
 };
 
 LUAMOD_API int luaopen_coroutine(lua_State* L) {
