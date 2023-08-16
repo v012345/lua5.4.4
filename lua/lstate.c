@@ -300,6 +300,7 @@ void luaE_freethread(lua_State* L, lua_State* L1) {
 }
 
 int luaE_resetthread(lua_State* L, int status) {
+    // 回滚到基础 ci
     CallInfo* ci = L->ci = &L->base_ci; /* unwind CallInfo list */
     setnilvalue(s2v(L->stack.p)); /* 'function' entry for basic 'ci' */
     ci->func.p = L->stack.p;
@@ -317,6 +318,7 @@ int luaE_resetthread(lua_State* L, int status) {
 }
 
 LUA_API int lua_closethread(lua_State* L, lua_State* from) {
+    // 运行 from 来关闭 L
     int status;
     lua_lock(L);
     L->nCcalls = (from) ? getCcalls(from) : 0;
