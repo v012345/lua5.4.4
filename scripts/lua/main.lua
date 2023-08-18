@@ -34,122 +34,50 @@ local function main()
         end
         csv:write('"csd","name","attribute","tag"\n')
 
-        local function getImagePath(node, path, node1, node2, node3, node4)
-            -- print(node1)
+        local function extract(csd_name, base_node, ...)
+            local langs_node = table.pack(...)
+            local ex_format = ',"%s","%s","%s","%s"\n'
+            local function tocsv(attribute)
+                csv:write('"', base_node.attributes[attribute], '"', ",")
+                for _, lang_node in ipairs(langs_node) do
+                    csv:write('"', lang_node.attributes[attribute], '"', ",")
+                end
+                csv:write(string.format(ex_format, csd_name, base_node.name, attribute, base_node.attributes["Tag"]))
+            end
 
-            for key, value in pairs(node.children) do
-                local node11 = node1.children[key]
-                local node21 = node2.children[key]
-                local node31 = node3.children[key]
-                local node41 = node4.children[key]
-                if value.attributes["ctype"] == "TextObjectData" then
-                    if value.attributes["LabelText"] then
-                        print(value.attributes["LabelText"])
-                        f:write(string.format('"%s","%s","%s","%s","%s","%s","%s","%s"\n',
-                            value.attributes["LabelText"],
-                            node11.attributes["LabelText"],
-                            node21.attributes["LabelText"],
-                            node31.attributes["LabelText"],
-                            node41.attributes["LabelText"],
-                            path .. "/" .. value.name, "LabelText", value.attributes["Tag"]
-                        ))
-                    end
+            if base_node.attributes["ButtonText"] then
+                tocsv("ButtonText")
+            end
+            if base_node.attributes["LabelText"] then
+                tocsv("LabelText")
+            end
+            if base_node.attributes["PlaceHolderText"] then
+                tocsv("PlaceHolderText")
+            end
+
+
+            for key, child in ipairs(base_node.children) do
+                local sub_langs_node = {}
+                for i, lang_node in ipairs(langs_node) do
+                    sub_langs_node[i] = lang_node.children[key]
                 end
-                if value.attributes["ctype"] == "TextBMFontObjectData" then
-                    if value.attributes["LabelText"] then
-                        print(value.attributes["LabelText"])
-                        f:write(string.format('"%s","%s","%s","%s","%s","%s","%s","%s"\n',
-                            value.attributes["LabelText"],
-                            node11.attributes["LabelText"],
-                            node21.attributes["LabelText"],
-                            node31.attributes["LabelText"],
-                            node41.attributes["LabelText"],
-                            path .. "/" .. value.name, "LabelText", value.attributes["Tag"]
-                        ))
-                    end
-                end
-                if value.attributes["ctype"] == "ButtonObjectData" then
-                    if value.attributes["ButtonText"] then
-                        print(value.attributes["ButtonText"])
-                        f:write(string.format('"%s","%s","%s","%s","%s","%s","%s","%s"\n',
-                            value.attributes["ButtonText"],
-                            node11.attributes["ButtonText"],
-                            node21.attributes["ButtonText"],
-                            node31.attributes["ButtonText"],
-                            node41.attributes["ButtonText"],
-                            path .. "/" .. value.name, "ButtonText", value.attributes["Tag"]
-                        ))
-                    end
-                end
-                if value.attributes["ctype"] == "TextFieldObjectData" then
-                    if value.attributes["PlaceHolderText"] then
-                        print(value.attributes["PlaceHolderText"])
-                        f:write(string.format('"%s","%s","%s","%s","%s","%s","%s","%s"\n',
-                            value.attributes["PlaceHolderText"],
-                            node11.attributes["PlaceHolderText"],
-                            node21.attributes["PlaceHolderText"],
-                            node31.attributes["PlaceHolderText"],
-                            node41.attributes["PlaceHolderText"],
-                            path .. "/" .. value.name, "PlaceHolderText", value.attributes["Tag"]
-                        ))
-                    end
-                    if value.attributes["LabelText"] then
-                        print(value.attributes["LabelText"])
-                        f:write(string.format('"%s","%s","%s","%s","%s","%s","%s","%s"\n',
-                            value.attributes["LabelText"],
-                            node11.attributes["LabelText"],
-                            node21.attributes["LabelText"],
-                            node31.attributes["LabelText"],
-                            node41.attributes["LabelText"],
-                            path .. "/" .. value.name, "LabelText", value.attributes["Tag"]
-                        ))
-                    end
-                end
-                getImagePath(value, path .. "/" .. value.name, node11, node21, node31, node41)
+                extract(csd_name, child, table.unpack(sub_langs_node))
             end
         end
         local base_ui = getFiles(base)
+        local langs_ui = {}
+        for i, lang in ipairs(langs) do
+            langs_ui[i] = getFiles(lang)
+        end
         for csd_name, csd_path in pairs(base_ui) do
-            xml(csd_path)
+            local base_node = xml(csd_path)
+            local langs_node = {}
+            for i = 1, #langs_ui, 1 do
+                langs_node[i] = xml(langs_ui[i][csd_name])
+            end
+            extract(csd_name, base_node, table.unpack(langs_node))
         end
-        -- local folder = string.format("%s\\%s\\cocosstudio\\ui", root_path, base)
-        if string.match(string.lower(filePath), "^.+%.csd$") then
-            local csd = io.open(filePath, "r") or error()
-            local xml_s = csd:read("a")
-            csd:close()
-            local t = XML(xml_s)[1]
-
-
-            csd = io.open(string.gsub(filePath, "\\en\\", "\\zhcn\\", 1), "r") or error()
-
-
-            xml_s = csd:read("a")
-            csd:close()
-            local t1 = XML(xml_s)[1]
-
-            csd = io.open(string.gsub(filePath, "\\en\\", "\\id\\", 1), "r") or error()
-            xml_s = csd:read("a")
-            csd:close()
-            local t2 = XML(xml_s)[1]
-            csd = io.open(string.gsub(filePath, "\\en\\", "\\th\\", 1), "r") or error()
-            xml_s = csd:read("a")
-            csd:close()
-            local t3 = XML(xml_s)[1]
-            csd = io.open(string.gsub(filePath, "\\en\\", "\\vi\\", 1), "r") or error()
-            xml_s = csd:read("a")
-            csd:close()
-            local t4 = XML(xml_s)[1]
-            getImagePath(t,
-                string.gsub(entry,
-                    "D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\zhcn\\cocosstudio\\ui/", "",
-                    1) ..
-                "/" .. t.name,
-                t1, t2, t3, t4
-            )
-            -- return
-            -- map[#map + 1] = filePath
-        end
-        f:close()
+        csv:close()
     elseif arg["replace"] then
     elseif arg["check"] then
         local base_ui = getFiles(base)
