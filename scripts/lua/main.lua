@@ -79,6 +79,8 @@ local function main()
         end
         csv:close()
     elseif arg["replace"] then
+        local csv = io.open("./trans.csv", "r") or error("can't open trans.csv")
+    elseif arg["update"] then
     elseif arg["check"] then
         local base_ui = getFiles(base)
         print(">>> start checking >>>")
