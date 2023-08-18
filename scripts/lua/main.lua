@@ -1,27 +1,106 @@
-local a = coroutine.create(function() end)
-local b = coroutine.wrap(function(p1, p2, p3)
-    print(p1, p2, p3)
-    coroutine.yield()
-    print("jjj")
-end)
-b(1, 2)
-b(1, 2)
-xpcall(function()
-    local luafile = "./test-lua.lua"
-    local bytecode = require "bytecode"
-    local toJson = require "utils.table2json"
-    local h5js = io.open("./vue/lua.json", "w") or error()
-    local luaByteCode = luac(luafile)
-    local function trans(cl)
-        for _, value in pairs(cl.p) do
-            trans(value)
-        end
-        cl.code = bytecode:show(cl.code)
-    end
-    trans(luaByteCode)
-    h5js:write(toJson(luaByteCode))
-    h5js:close()
-    print("done")
-end, function(msg)
+function main()
+    -- local a = coroutine.create(function() end)
+    -- local b = coroutine.wrap(function(p1, p2, p3)
+    --     print(p1, p2, p3)
+    --     coroutine.yield()
+    --     print("jjj")
+    -- end)
+    -- b(1, 2)
+    -- b(1, 2)
+    -- xpcall(function()
+    --     local luafile = "./test-lua.lua"
+    --     local bytecode = require "bytecode"
+    --     local toJson = require "utils.table2json"
+    --     local h5js = io.open("./vue/lua.json", "w") or error()
+    --     local luaByteCode = luac(luafile)
+    --     local function trans(cl)
+    --         for _, value in pairs(cl.p) do
+    --             trans(value)
+    --         end
+    --         cl.code = bytecode:show(cl.code)
+    --     end
+    --     trans(luaByteCode)
+    --     h5js:write(toJson(luaByteCode))
+    --     h5js:close()
+    --     print("done")
+    -- end, function(msg)
+    --     print(msg)
+    -- end)
+    -- local map = {}
+    -- local function traverseDirectory(path, root)
+    --     for entry in lfs.dir(path) do
+    --         if entry ~= "." and entry ~= ".." then
+    --             local filePath = path .. "/" .. entry
+    --             local fileAttributes = lfs.attributes(filePath)
+
+    --             if fileAttributes.mode == "directory" then
+    --                 traverseDirectory(filePath, root)
+    --             elseif fileAttributes.mode == "file" then
+    --                 if string.match(string.lower(filePath), "^.+%.png$") then
+    --                     map[#map + 1] = filePath
+    --                 end
+    --             end
+    --         end
+    --     end
+    -- end
+    -- traverseDirectory("D:\\Closers.resource\\dzogame_sea\\zhcn\\image", "D:\\Closers.resource\\dzogame_sea\\zhcn\\image")
+    -- traverseDirectory("D:\\Closers.resource\\dzogame_sea\\zhcn\\piece", "D:\\Closers.resource\\dzogame_sea\\zhcn\\piece")
+    -- -- local f = io.open("xxx.lua", "w")
+    -- -- f:write("t = {")
+    -- local has_c = {}
+    -- for index, value in ipairs(map) do
+    --     has_c[string.gsub(value, "D:\\Closers.resource\\dzogame_sea\\zhcn\\", "", 1)] = true
+    -- end
+    -- -- f:write("}")
+    -- local XML = require("utils.xml2table2")
+    -- local output = {}
+    -- local function getImagePath(node, path)
+    --     for key, value in pairs(node.children) do
+    --         if value.attributes["ctype"] == "ImageViewObjectData" then
+    --             for key1, value1 in pairs(value.children) do
+    --                 if value1.name == 'FileData' then
+    --                     if has_c[value1.attributes["Path"]] then
+    --                         output[path] = output[path] or {}
+    --                         output[path][value.attributes["Name"]] = value1.attributes["Path"]
+    --                     end
+    --                 end
+    --             end
+    --         end
+    --         getImagePath(value, path)
+    --     end
+    -- end
+    -- for entry in lfs.dir("D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\zhcn\\cocosstudio\\ui") do
+    --     if entry ~= "." and entry ~= ".." then
+    --         local filePath = "D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\zhcn\\cocosstudio\\ui" ..
+    --             "/" .. entry
+    --         local fileAttributes = lfs.attributes(filePath)
+
+    --         if fileAttributes.mode == "file" then
+    --             if string.match(string.lower(filePath), "^.+%.csd$") then
+    --                 local csd = io.open(filePath, "r") or error()
+    --                 local xml_s = csd:read("a")
+    --                 csd:close()
+    --                 print(filePath)
+    --                 local t = XML(xml_s)[1]
+    --                 getImagePath(t, string.gsub(entry, "%.csd", "", 1))
+    --                 -- return
+    --                 -- map[#map + 1] = filePath
+    --             end
+    --         end
+    --     end
+    -- end
+    -- local f = io.open("xxx1.lua", "w")
+    -- f:write("t = {")
+    -- for index, value in pairs(output) do
+    --     f:write(string.format('["%s"] = {', index))
+    --     for key1, value1 in pairs(value) do
+    --         f:write(string.format('["%s"] = "%s",', key1,value1))
+    --     end
+    --     f:write("},")
+    -- end
+    -- f:write("}")
+end
+
+xpcall(main, function(msg)
     print(msg)
 end)

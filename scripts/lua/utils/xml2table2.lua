@@ -11,11 +11,11 @@ function Parser:parser(root, xml_string)
     char_pointer = 1
     self.xml_string = xml_string
     local current_char = self:get_next_char()
-    char_pointer = 1
-    current_char = self:skip_space()
-    if self:get_two_chars() == "<?" then
-        self:parser_a_head()
-    end
+    -- char_pointer = 1
+    -- current_char = self:skip_space()
+    -- if self:get_two_chars() == "<?" then
+    --     self:parser_a_head()
+    -- end
     current_char = self:skip_space()
     while true do
         if space[current_char] then
@@ -72,7 +72,7 @@ function Parser:parser_a_node()
 
             if current_char == "/" then
                 self:get_next_char()
-                print(node.name)
+                -- print(node.name)
                 if node.name ~= self:parser_a_name() then
                     error("don't close tag")
                 end
@@ -176,7 +176,7 @@ function Parser:parser_a_name()
     local current_char = self:skip_space()
     local s = {}
     while current_char do
-        if space[current_char] or current_char == ">" or current_char == "=" then
+        if space[current_char] or current_char == ">" or current_char == "=" or current_char == "/" then
             return table.concat(s)
         end
         s[#s + 1] = current_char
