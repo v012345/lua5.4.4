@@ -79,7 +79,7 @@ function main()
     --     has_c[string.gsub(value, "D:\\Closers.resource\\dzogame_sea\\zhcn\\", "", 1)] = true
     -- end
     -- -- f:write("}")
-    f:write('"en","zhcn","id","th","vi"')
+    f:write('"en","zhcn","id","th","vi"\n')
     local XML = require("utils.xml2table2")
     local output = {}
     local function getImagePath(node, path, node1, node2, node3, node4)
@@ -90,6 +90,18 @@ function main()
             local node31 = node3.children[key]
             local node41 = node4.children[key]
             if value.attributes["ctype"] == "TextObjectData" then
+                if value.attributes["LabelText"] then
+                    print(value.attributes["LabelText"])
+                    f:write(string.format('"%s","%s","%s","%s","%s"\n',
+                        value.attributes["LabelText"],
+                        node11.attributes["LabelText"],
+                        node21.attributes["LabelText"],
+                        node31.attributes["LabelText"],
+                        node41.attributes["LabelText"]
+                    ))
+                end
+            end
+            if value.attributes["ctype"] == "TextBMFontObjectData" then
                 if value.attributes["LabelText"] then
                     print(value.attributes["LabelText"])
                     f:write(string.format('"%s","%s","%s","%s","%s"\n',
@@ -122,6 +134,16 @@ function main()
                         node21.attributes["PlaceHolderText"],
                         node31.attributes["PlaceHolderText"],
                         node41.attributes["PlaceHolderText"]
+                    ))
+                end
+                if value.attributes["LabelText"] then
+                    print(value.attributes["LabelText"])
+                    f:write(string.format('"%s","%s","%s","%s","%s"\n',
+                        value.attributes["LabelText"],
+                        node11.attributes["LabelText"],
+                        node21.attributes["LabelText"],
+                        node31.attributes["LabelText"],
+                        node41.attributes["LabelText"]
                     ))
                 end
             end
