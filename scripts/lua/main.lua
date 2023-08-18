@@ -26,6 +26,7 @@ function main()
     -- end, function(msg)
     --     print(msg)
     -- end)
+    -- local lfs = require "lfs"
     -- local map = {}
     -- local function traverseDirectory(path, root)
     --     for entry in lfs.dir(path) do
@@ -36,59 +37,92 @@ function main()
     --             if fileAttributes.mode == "directory" then
     --                 traverseDirectory(filePath, root)
     --             elseif fileAttributes.mode == "file" then
-    --                 if string.match(string.lower(filePath), "^.+%.png$") then
-    --                     map[#map + 1] = filePath
-    --                 end
+    --                 map[#map + 1] = filePath
     --             end
     --         end
     --     end
     -- end
-    -- traverseDirectory("D:\\Closers.resource\\dzogame_sea\\zhcn\\image", "D:\\Closers.resource\\dzogame_sea\\zhcn\\image")
-    -- traverseDirectory("D:\\Closers.resource\\dzogame_sea\\zhcn\\piece", "D:\\Closers.resource\\dzogame_sea\\zhcn\\piece")
-    -- -- local f = io.open("xxx.lua", "w")
+    -- traverseDirectory("D:\\Closers.resource\\handygame\\ko\\image", "D:\\Closers.resource\\handygame\\ko\\image")
+    -- traverseDirectory("D:\\Closers.resource\\handygame\\ko\\piece", "D:\\Closers.resource\\handygame\\ko\\piece")
+    -- -- traverseDirectory("D:\\Closers.resource\\dzogame_sea\\zhcn\\piece", "D:\\Closers.resource\\dzogame_sea\\zhcn\\piece")
+    -- print(#map)
+    -- local f = io.open("xxx.txt", "w")
+    -- for index, value in ipairs(map) do
+    --     local file1 = io.open(value, "rb") or error(value)
+    --     local content1 = file1:read("a")
+    --     file1:close()
+    --     local value2 = string.gsub(value, "D:\\Closers.resource\\handygame\\ko", "D:\\Closers.resource\\online\\zhcn", 1)
+    --     local file2 = io.open(value2, "rb")
+    --     if file2 then
+    --         local content2 = file2:read("a")
+    --         file2:close()
+    --         -- print(value, value2)
+    --         if content1 == content2 then
+    --             if not string.match(value, "ui_number") then
+    --                 local x = (string.gsub(value, "D:\\Closers.resource\\handygame\\ko\\", "", 1))
+    --                 f:write(x)
+
+    --                 f:write(string.format(' <br/><img src="%s" ><br/>', x))
+    --                 f:write("\n")
+    --                 print(value)
+    --             end
+    --         end
+    --     else
+    --         -- print(value)
+    --     end
+    -- end
+    -- f:close()
+    -- -
     -- -- f:write("t = {")
     -- local has_c = {}
     -- for index, value in ipairs(map) do
     --     has_c[string.gsub(value, "D:\\Closers.resource\\dzogame_sea\\zhcn\\", "", 1)] = true
     -- end
     -- -- f:write("}")
-    -- local XML = require("utils.xml2table2")
-    -- local output = {}
-    -- local function getImagePath(node, path)
-    --     for key, value in pairs(node.children) do
-    --         if value.attributes["ctype"] == "ImageViewObjectData" then
-    --             for key1, value1 in pairs(value.children) do
-    --                 if value1.name == 'FileData' then
-    --                     if has_c[value1.attributes["Path"]] then
-    --                         output[path] = output[path] or {}
-    --                         output[path][value.attributes["Name"]] = value1.attributes["Path"]
-    --                     end
-    --                 end
-    --             end
-    --         end
-    --         getImagePath(value, path)
-    --     end
-    -- end
-    -- for entry in lfs.dir("D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\zhcn\\cocosstudio\\ui") do
-    --     if entry ~= "." and entry ~= ".." then
-    --         local filePath = "D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\zhcn\\cocosstudio\\ui" ..
-    --             "/" .. entry
-    --         local fileAttributes = lfs.attributes(filePath)
+    local XML = require("utils.xml2table2")
+    local output = {}
+    local function getImagePath(node, path)
+        for key, value in pairs(node.children) do
+            if value.attributes["ctype"] == "TextObjectData" then
+                if value.attributes["LabelText"] then
+                    print(value.attributes["LabelText"])
+                end
+            end
+            if value.attributes["ctype"] == "ButtonObjectData" then
+                if value.attributes["ButtonText"] then
+                    print(value.attributes["ButtonText"])
+                end
+            end
+            if value.attributes["ctype"] == "TextFieldObjectData" then
+                if value.attributes["PlaceHolderText"] then
+                    print(value.attributes["PlaceHolderText"])
+                end
+            end
+            getImagePath(value, path)
+        end
+    end
+    for entry in lfs.dir("D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\en\\cocosstudio\\ui") do
+        if entry ~= "." and entry ~= ".." then
+            local filePath = "D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\en\\cocosstudio\\ui" ..
+                "/" .. entry
+            local fileAttributes = lfs.attributes(filePath)
 
-    --         if fileAttributes.mode == "file" then
-    --             if string.match(string.lower(filePath), "^.+%.csd$") then
-    --                 local csd = io.open(filePath, "r") or error()
-    --                 local xml_s = csd:read("a")
-    --                 csd:close()
-    --                 print(filePath)
-    --                 local t = XML(xml_s)[1]
-    --                 getImagePath(t, string.gsub(entry, "%.csd", "", 1))
-    --                 -- return
-    --                 -- map[#map + 1] = filePath
-    --             end
-    --         end
-    --     end
-    -- end
+            if fileAttributes.mode == "file" then
+                if string.match(string.lower(filePath), "^.+%.csd$") then
+                    local csd = io.open(filePath, "r") or error()
+                    local xml_s = csd:read("a")
+                    csd:close()
+                    -- print(filePath)
+                    local t = XML(xml_s)[1]
+                    getImagePath(t,
+                        string.gsub(entry,
+                            "D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\zhcn\\cocosstudio\\ui/", "", 1))
+                    -- return
+                    -- map[#map + 1] = filePath
+                end
+            end
+        end
+    end
     -- local f = io.open("xxx1.lua", "w")
     -- f:write("t = {")
     -- for index, value in pairs(output) do
@@ -99,6 +133,11 @@ function main()
     --     f:write("},")
     -- end
     -- f:write("}")
+    -- local md5 = require "utils.myMd5"
+    -- local file = io.open("main.lua", "r") or error("can't read")
+    -- local content = file:read("a")
+    -- file:close()
+    -- print(md5:sumhexa(content))
 end
 
 xpcall(main, function(msg)
