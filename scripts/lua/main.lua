@@ -48,7 +48,7 @@ function main()
     -- print(#map)
     local XML = require("utils.csd2table")
     local t = XML("Microsoft Edge.html")
-    for key, value in pairs(t.attributes) do
+    for key, value in pairs(t.children[1]) do
         print(key,value)
     end
     print()

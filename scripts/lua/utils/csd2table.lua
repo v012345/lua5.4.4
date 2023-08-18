@@ -22,7 +22,7 @@ function mt:parser_a_node()
         name = nil,
         ---@type table<string,string>
         attributes = {},
-        ---@type table<Node>
+        ---@type table<number,Node>
         children = {},
         content = ""
     }
@@ -157,7 +157,7 @@ end
 
 ---comment
 ---@param file_path string
----@return table|nil
+---@return Node
 return function(file_path)
     local file = io.open(file_path, "r") or error("can't open " .. file_path)
     local content = file:read("a")
@@ -169,10 +169,8 @@ return function(file_path)
         current = ""
     }
     setmetatable(XML, { __index = mt })
-    local ok, r = xpcall(XML.parser, function(msg)
+    local _, r = xpcall(XML.parser, function(msg)
         print(msg)
     end, XML)
-    if ok then
-        return r
-    end
+    return r
 end
