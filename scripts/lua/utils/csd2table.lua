@@ -22,7 +22,7 @@ function mt:parser_a_node()
         name = nil,
         ---@type table<string,string>
         attributes = {},
-        ---@type table<number,Node>
+        ---@type Node[]
         children = {},
         content = ""
     }
