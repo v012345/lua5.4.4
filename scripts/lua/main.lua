@@ -79,11 +79,12 @@ function main()
     --     has_c[string.gsub(value, "D:\\Closers.resource\\dzogame_sea\\zhcn\\", "", 1)] = true
     -- end
     -- -- f:write("}")
-    f:write('"en","zhcn","id","th","vi"\n')
+    f:write('"en","zhcn","id","th","vi","node","attribute","tag"\n')
     local XML = require("utils.xml2table2")
     local output = {}
     local function getImagePath(node, path, node1, node2, node3, node4)
         -- print(node1)
+
         for key, value in pairs(node.children) do
             local node11 = node1.children[key]
             local node21 = node2.children[key]
@@ -92,62 +93,67 @@ function main()
             if value.attributes["ctype"] == "TextObjectData" then
                 if value.attributes["LabelText"] then
                     print(value.attributes["LabelText"])
-                    f:write(string.format('"%s","%s","%s","%s","%s"\n',
+                    f:write(string.format('"%s","%s","%s","%s","%s","%s","%s","%s"\n',
                         value.attributes["LabelText"],
                         node11.attributes["LabelText"],
                         node21.attributes["LabelText"],
                         node31.attributes["LabelText"],
-                        node41.attributes["LabelText"]
+                        node41.attributes["LabelText"],
+                        path .. "/" .. value.name, "LabelText", value.attributes["Tag"]
                     ))
                 end
             end
             if value.attributes["ctype"] == "TextBMFontObjectData" then
                 if value.attributes["LabelText"] then
                     print(value.attributes["LabelText"])
-                    f:write(string.format('"%s","%s","%s","%s","%s"\n',
+                    f:write(string.format('"%s","%s","%s","%s","%s","%s","%s","%s"\n',
                         value.attributes["LabelText"],
                         node11.attributes["LabelText"],
                         node21.attributes["LabelText"],
                         node31.attributes["LabelText"],
-                        node41.attributes["LabelText"]
+                        node41.attributes["LabelText"],
+                        path .. "/" .. value.name, "LabelText", value.attributes["Tag"]
                     ))
                 end
             end
             if value.attributes["ctype"] == "ButtonObjectData" then
                 if value.attributes["ButtonText"] then
                     print(value.attributes["ButtonText"])
-                    f:write(string.format('"%s","%s","%s","%s","%s"\n',
+                    f:write(string.format('"%s","%s","%s","%s","%s","%s","%s","%s"\n',
                         value.attributes["ButtonText"],
                         node11.attributes["ButtonText"],
                         node21.attributes["ButtonText"],
                         node31.attributes["ButtonText"],
-                        node41.attributes["ButtonText"]
+                        node41.attributes["ButtonText"],
+                        path .. "/" .. value.name, "ButtonText", value.attributes["Tag"]
                     ))
                 end
             end
             if value.attributes["ctype"] == "TextFieldObjectData" then
                 if value.attributes["PlaceHolderText"] then
                     print(value.attributes["PlaceHolderText"])
-                    f:write(string.format('"%s","%s","%s","%s","%s"\n',
+                    f:write(string.format('"%s","%s","%s","%s","%s","%s","%s","%s"\n',
                         value.attributes["PlaceHolderText"],
                         node11.attributes["PlaceHolderText"],
                         node21.attributes["PlaceHolderText"],
                         node31.attributes["PlaceHolderText"],
-                        node41.attributes["PlaceHolderText"]
+                        node41.attributes["PlaceHolderText"],
+                        path .. "/" .. value.name, "PlaceHolderText", value.attributes["Tag"]
                     ))
                 end
                 if value.attributes["LabelText"] then
                     print(value.attributes["LabelText"])
-                    f:write(string.format('"%s","%s","%s","%s","%s"\n',
+                    f:write(string.format('"%s","%s","%s","%s","%s","%s","%s","%s"\n',
                         value.attributes["LabelText"],
                         node11.attributes["LabelText"],
                         node21.attributes["LabelText"],
                         node31.attributes["LabelText"],
-                        node41.attributes["LabelText"]
+                        node41.attributes["LabelText"],
+                        path .. "/" .. value.name, "LabelText", value.attributes["Tag"]
                     ))
                 end
             end
-            getImagePath(value, path, node11, node21, node31, node41)
+            getImagePath(value, path .. "/" .. value.name, node11, node21, node31, node41)
         end
     end
     for entry in lfs.dir("D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\en\\cocosstudio\\ui") do
@@ -185,7 +191,8 @@ function main()
                     local t4 = XML(xml_s)[1]
                     getImagePath(t,
                         string.gsub(entry,
-                            "D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\zhcn\\cocosstudio\\ui/", "", 1),
+                            "D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\zhcn\\cocosstudio\\ui/", "", 1) ..
+                        "/" .. t.name,
                         t1, t2, t3, t4
                     )
                     -- return
