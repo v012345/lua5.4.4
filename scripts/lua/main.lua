@@ -1,4 +1,6 @@
-function main()
+local function main()
+    local base = "en"
+    local folder = { "zhcn", "id", "th", "vi" }
     -- local a = coroutine.create(function() end)
     -- local b = coroutine.wrap(function(p1, p2, p3)
     --     print(p1, p2, p3)
@@ -46,10 +48,13 @@ function main()
     -- traverseDirectory("D:\\Closers.resource\\handygame\\ko\\piece", "D:\\Closers.resource\\handygame\\ko\\piece")
     -- -- traverseDirectory("D:\\Closers.resource\\dzogame_sea\\zhcn\\piece", "D:\\Closers.resource\\dzogame_sea\\zhcn\\piece")
     -- print(#map)
-    local XML = require("utils.csd2table")
+    for index, value in pairs(arg) do
+        print(index, value)
+    end
+    local xml = require("utils.csd2table")
     local csd = require("utils.table2csd")
-    local t = XML("Microsoft Edge.html")
-    csd(t,"Microsoft Edge.xml")
+    local t = xml("Microsoft Edge.html")
+    csd(t, "Microsoft Edge.xml")
     for key, value in pairs(t.children[1]) do
         print(key, value)
     end

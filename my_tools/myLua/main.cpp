@@ -16,6 +16,14 @@ int main(int argc, char const* argv[]) {
     luaL_openlibs(L);
     luaopen_lfs(L);
     lua_register(L, "luac", luac);
+    lua_newtable(L);
+    for (int i = 0; i < argc; i++) {
+        lua_pushstring(L, argv[i]);
+        lua_pushboolean(L, 1);
+        lua_settable(L, -3);
+    }
+    lua_setglobal(L, "arg");
+
     luaL_dofile(L, LUA_MAIN_SCRIPT);
     return 0;
 }
