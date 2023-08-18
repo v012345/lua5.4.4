@@ -47,9 +47,11 @@ function main()
     -- -- traverseDirectory("D:\\Closers.resource\\dzogame_sea\\zhcn\\piece", "D:\\Closers.resource\\dzogame_sea\\zhcn\\piece")
     -- print(#map)
     local XML = require("utils.csd2table")
+    local csd = require("utils.table2csd")
     local t = XML("Microsoft Edge.html")
+    csd(t,"Microsoft Edge.xml")
     for key, value in pairs(t.children[1]) do
-        print(key,value)
+        print(key, value)
     end
     print()
     if false then
