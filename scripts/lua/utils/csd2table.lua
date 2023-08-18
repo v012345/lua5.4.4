@@ -171,7 +171,7 @@ return function(file_path)
     setmetatable(XML, { __index = mt })
     local ok, r = xpcall(XML.parser, function(msg)
         print(msg)
-    end)
+    end, XML)
     if ok then
         return r
     end

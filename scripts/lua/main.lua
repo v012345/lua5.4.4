@@ -46,11 +46,12 @@ function main()
     -- traverseDirectory("D:\\Closers.resource\\handygame\\ko\\piece", "D:\\Closers.resource\\handygame\\ko\\piece")
     -- -- traverseDirectory("D:\\Closers.resource\\dzogame_sea\\zhcn\\piece", "D:\\Closers.resource\\dzogame_sea\\zhcn\\piece")
     -- print(#map)
-    local XML = require("utils.csd2table3")
-    local csd = io.open("Microsoft Edge.html", "r") or error()
-    local xml_s = csd:read("a")
-    csd:close()
-    local t = XML(xml_s)
+    local XML = require("utils.csd2table")
+    local t = XML("Microsoft Edge.html")
+    for key, value in pairs(t.attributes) do
+        print(key,value)
+    end
+    print()
     if false then
         local f = io.open("trans.csv", "w")
         -- for index, value in ipairs(map) do
