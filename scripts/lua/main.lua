@@ -46,7 +46,7 @@ function main()
     -- traverseDirectory("D:\\Closers.resource\\handygame\\ko\\piece", "D:\\Closers.resource\\handygame\\ko\\piece")
     -- -- traverseDirectory("D:\\Closers.resource\\dzogame_sea\\zhcn\\piece", "D:\\Closers.resource\\dzogame_sea\\zhcn\\piece")
     -- print(#map)
-    -- local f = io.open("xxx.txt", "w")
+    local f = io.open("trans.csv", "w")
     -- for index, value in ipairs(map) do
     --     local file1 = io.open(value, "rb") or error(value)
     --     local content1 = file1:read("a")
@@ -71,7 +71,7 @@ function main()
     --         -- print(value)
     --     end
     -- end
-    -- f:close()
+    --
     -- -
     -- -- f:write("t = {")
     -- local has_c = {}
@@ -79,26 +79,53 @@ function main()
     --     has_c[string.gsub(value, "D:\\Closers.resource\\dzogame_sea\\zhcn\\", "", 1)] = true
     -- end
     -- -- f:write("}")
+    f:write('"en","zhcn","id","th","vi"')
     local XML = require("utils.xml2table2")
     local output = {}
-    local function getImagePath(node, path)
+    local function getImagePath(node, path, node1, node2, node3, node4)
+        -- print(node1)
         for key, value in pairs(node.children) do
+            local node11 = node1.children[key]
+            local node21 = node2.children[key]
+            local node31 = node3.children[key]
+            local node41 = node4.children[key]
             if value.attributes["ctype"] == "TextObjectData" then
                 if value.attributes["LabelText"] then
                     print(value.attributes["LabelText"])
+                    f:write(string.format('"%s","%s","%s","%s","%s"\n',
+                        value.attributes["LabelText"],
+                        node11.attributes["LabelText"],
+                        node21.attributes["LabelText"],
+                        node31.attributes["LabelText"],
+                        node41.attributes["LabelText"]
+                    ))
                 end
             end
             if value.attributes["ctype"] == "ButtonObjectData" then
                 if value.attributes["ButtonText"] then
                     print(value.attributes["ButtonText"])
+                    f:write(string.format('"%s","%s","%s","%s","%s"\n',
+                        value.attributes["ButtonText"],
+                        node11.attributes["ButtonText"],
+                        node21.attributes["ButtonText"],
+                        node31.attributes["ButtonText"],
+                        node41.attributes["ButtonText"]
+                    ))
                 end
             end
             if value.attributes["ctype"] == "TextFieldObjectData" then
                 if value.attributes["PlaceHolderText"] then
                     print(value.attributes["PlaceHolderText"])
+                    f:write(string.format('"%s","%s","%s","%s","%s"\n',
+                        value.attributes["PlaceHolderText"],
+                        node11.attributes["PlaceHolderText"],
+                        node21.attributes["PlaceHolderText"],
+                        node31.attributes["PlaceHolderText"],
+                        node41.attributes["PlaceHolderText"]
+                    ))
                 end
             end
-            getImagePath(value, path)
+            getImagePath(value, path, node11, node21, node31, node41)
         end
     end
     for entry in lfs.dir("D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\en\\cocosstudio\\ui") do
@@ -112,17 +139,40 @@ function main()
                     local csd = io.open(filePath, "r") or error()
                     local xml_s = csd:read("a")
                     csd:close()
-                    -- print(filePath)
                     local t = XML(xml_s)[1]
+
+
+                    csd = io.open(string.gsub(filePath, "\\en\\", "\\zhcn\\", 1), "r") or error()
+
+
+                    xml_s = csd:read("a")
+                    csd:close()
+                    local t1 = XML(xml_s)[1]
+
+                    csd = io.open(string.gsub(filePath, "\\en\\", "\\id\\", 1), "r") or error()
+                    xml_s = csd:read("a")
+                    csd:close()
+                    local t2 = XML(xml_s)[1]
+                    csd = io.open(string.gsub(filePath, "\\en\\", "\\th\\", 1), "r") or error()
+                    xml_s = csd:read("a")
+                    csd:close()
+                    local t3 = XML(xml_s)[1]
+                    csd = io.open(string.gsub(filePath, "\\en\\", "\\vi\\", 1), "r") or error()
+                    xml_s = csd:read("a")
+                    csd:close()
+                    local t4 = XML(xml_s)[1]
                     getImagePath(t,
                         string.gsub(entry,
-                            "D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\zhcn\\cocosstudio\\ui/", "", 1))
+                            "D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\zhcn\\cocosstudio\\ui/", "", 1),
+                        t1, t2, t3, t4
+                    )
                     -- return
                     -- map[#map + 1] = filePath
                 end
             end
         end
     end
+    f:close()
     -- local f = io.open("xxx1.lua", "w")
     -- f:write("t = {")
     -- for index, value in pairs(output) do
