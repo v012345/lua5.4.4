@@ -24,8 +24,8 @@ local function main()
         return m
     end
 
-    local base = "en"
-    local langs = { "zhcn", "id", "th", "vi" }
+    local base = "zhcn"
+    local langs = { "en", "id", "th", "vi" }
     if arg["extract"] then
         local csv = io.open("./trans.csv", "w") or error("can't open trans.csv")
         csv:write(string.format('"%s"', base), ",")
@@ -91,10 +91,10 @@ local function main()
             ---@param node Node
             local function check(node)
                 if node.attributes["LabelText"] or node.attributes["ButtonText"] or node.attributes["PlaceHolderText"] then
-                    if name_map[node.name .. node.attributes["Tag"]] then
-                        print(csd_name, node.name, "tag", node.attributes["Tag"], "is duplicated")
+                    if name_map[node.attributes["Name"] .. node.attributes["Tag"]] then
+                        print(csd_name, node.attributes["Name"], "tag", node.attributes["Tag"], "is duplicated")
                     else
-                        name_map[node.name .. node.attributes["Tag"]] = true
+                        name_map[node.attributes["Name"] .. node.attributes["Tag"]] = true
                     end
                 end
                 for _, child in ipairs(node.children) do
@@ -152,17 +152,6 @@ local function main()
     -- traverseDirectory("D:\\Closers.resource\\handygame\\ko\\piece", "D:\\Closers.resource\\handygame\\ko\\piece")
     -- -- traverseDirectory("D:\\Closers.resource\\dzogame_sea\\zhcn\\piece", "D:\\Closers.resource\\dzogame_sea\\zhcn\\piece")
     -- print(#map)
-    for index, value in pairs(arg) do
-        print(index, value)
-    end
-
-    local t = xml("Microsoft Edge.html")
-    csd(t, "Microsoft Edge.xml")
-    for key, value in pairs(t.children[1]) do
-        print(key, value)
-    end
-    print()
-
 
     -- local f = io.open("xxx1.lua", "w")
     -- f:write("t = {")
