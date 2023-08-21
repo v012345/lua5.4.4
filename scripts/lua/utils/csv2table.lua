@@ -17,6 +17,7 @@ function mt:parser()
             self:get_next_char()
         end
     end
+    t[#t] = nil
     return t
 end
 
