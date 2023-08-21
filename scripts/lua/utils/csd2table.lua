@@ -126,6 +126,9 @@ function mt:skip_space()
         ["\v"] = "\v",
     }
     while space[self.current] do
+        if self.current == "\n" then
+            self.line_number = self.line_number + 1
+        end
         self:get_next_char()
     end
     return self.current
@@ -136,12 +139,12 @@ end
 function mt:parser_a_name()
     self:skip_space()
     local s = {}
-    while string.match(self.current, "[a-zA-Z%-]") do
+    while string.match(self.current, "[0-9a-zA-Z_%-]") do
         s[#s + 1] = self.current
         self:get_next_char()
     end
     if #s == 0 then
-        error("no name")
+        error("no name line_number: "..self.line_number)
     else
         return table.concat(s)
     end
@@ -166,7 +169,8 @@ return function(file_path)
     local XML = {
         stream = content,
         position = 0,
-        current = ""
+        current = "",
+        line_number = 1
     }
     setmetatable(XML, { __index = mt })
     local _, r = xpcall(XML.parser, function(msg)
