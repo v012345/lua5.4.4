@@ -85,7 +85,74 @@ local function main()
         print("<<< end extracting <<<")
         csv:close()
     elseif arg["replace"] then
-        local csv = io.open("./trans.csv", "r") or error("can't open trans.csv")
+        local csv = require "utils.csv2table"
+        local raw_trans = csv("./trans.csv")
+        local trans = {}
+        for i = 2, #raw_trans, 1 do
+            local row = raw_trans[i]
+            local file = row[6]
+            trans[file] = trans[file] or {}
+            local sub_trans = trans[file]
+            sub_trans[row[1]] = sub_trans[row[1]] or {}
+            local langs_trans = sub_trans[row[1]]
+            for index, _ in ipairs(langs) do
+                langs_trans[index] = row[index + 1]
+            end
+        end
+        local appended = { "", "", "", "" }
+        if nil then
+            local function replace(csd_name, base_node, ...)
+                local langs_node = table.pack(...)
+                local file_trans = trans[root_path]
+                if base_node.attributes["ButtonText"] then
+                    local sub_file_trans = file_trans[base_node.attributes["ButtonText"]] or appended
+
+                    for index, lang_node in ipairs(langs_node) do
+                        lang_node.attributes["ButtonText"] = sub_file_trans[index]
+                    end
+                end
+                if base_node.attributes["LabelText"] then
+                    local sub_file_trans = file_trans[base_node.attributes["LabelText"]] or appended
+
+                    for index, lang_node in ipairs(langs_node) do
+                        lang_node.attributes["LabelText"] = sub_file_trans[index]
+                    end
+                end
+                if base_node.attributes["PlaceHolderText"] then
+                    local sub_file_trans = file_trans[base_node.attributes["PlaceHolderText"]] or appended
+
+                    for index, lang_node in ipairs(langs_node) do
+                        lang_node.attributes["PlaceHolderText"] = sub_file_trans[index]
+                    end
+                end
+                for key, child in ipairs(base_node.children) do
+                    local sub_langs_node = {}
+                    for i, lang_node in ipairs(langs_node) do
+                        sub_langs_node[i] = lang_node.children[key]
+                    end
+                    replace(csd_name, child, table.unpack(sub_langs_node))
+                end
+            end
+            local base_ui = getFiles(base)
+            local langs_ui = {}
+            for i, lang in ipairs(langs) do
+                langs_ui[i] = getFiles(lang)
+            end
+            local index = 1
+            for csd_name, csd_path in pairs(base_ui) do
+                print(index, csd_name)
+                index = index + 1
+                local base_node = xml(csd_path)
+                local langs_node = {}
+                for i = 1, #langs_ui, 1 do
+                    langs_node[i] = xml(langs_ui[i][csd_name])
+                end
+                replace(csd_name, base_node, table.unpack(langs_node))
+                for indx, lang_node in ipairs(langs_node) do
+                    csd(lang_node, string.format("%s\\%s\\cocosstudio\\ui\\%s", root_path, langs_ui[indx], csd_name))
+                end
+            end
+        end
     elseif arg["update"] then
     elseif arg["check"] then
         local base_ui = getFiles(base)

@@ -6,7 +6,7 @@
             // "${fileWorkspaceFolder}${pathSeparator}scripts${pathSeparator}lua${pathSeparator}src${pathSeparator}gui${pathSeparator}main.lua", // only effect in debug mode
             // "${fileWorkspaceFolder}${pathSeparator}scripts${pathSeparator}lua${pathSeparator}src${pathSeparator}main.lua", // only effect in debug mode
             // "-b",
-            "extract",
+            "replace",
             // "-m",
             // "sync_svn_to_git",
             // "src",
