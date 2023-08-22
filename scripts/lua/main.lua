@@ -39,6 +39,21 @@ local function main()
     -- for key, value in pairs(base_ui) do
     --     print(key, getSha1(value), lfs.attributes(value, "modification"))
     -- end
+    local function update()
+        local json = require "utils.table2json"
+        local base_ui = getFiles(base)
+        local t = {}
+        for csd_name, csd_path in pairs(base_ui) do
+            t[csd_name] = {
+                modification = lfs.attributes(csd_path, "modification"),
+                sha1 = getSha1(csd_path)
+            }
+        end
+        local json_string = json(t)
+        local json_file = io.open("build/csd.json", "w") or error("can't open build/csd.json")
+        json_file:write(json_string)
+        json_file:close()
+    end
 
 
     if arg["extract"] then
@@ -100,6 +115,10 @@ local function main()
         print("<<< end extracting <<<")
         csv:close()
     elseif arg["replace"] then
+        local json = require "utils.json2table"
+        local json_file = io.open("build/csd.json", "r") or error("can't open build/csd.json")
+        local csd_json = json(json_file:read("a")) or {}
+        json_file:close()
         local csv = require "utils.csv2table"
         local raw_trans = csv("./trans.csv")
         local trans = {}
@@ -142,8 +161,11 @@ local function main()
             langs_ui[i] = getFiles(lang)
         end
         local index = 1
+
         for csd_name, csd_path in pairs(base_ui) do
-            if false then
+            if csd_json[csd_name].modification < lfs.attributes(csd_path, "modification") and
+                csd_json[csd_name].sha1 ~= getSha1(csd_path)
+            then
                 print(index, csd_name)
                 index = index + 1
                 local base_node = xml(csd_path)
@@ -157,20 +179,9 @@ local function main()
                 end
             end
         end
+        update()
     elseif arg["update"] then
-        local json = require "utils.table2json"
-        local base_ui = getFiles(base)
-        local t = {}
-        for csd_name, csd_path in pairs(base_ui) do
-            t[csd_name] = {
-                modification = lfs.attributes(csd_path, "modification"),
-                sha1 = getSha1(csd_path)
-            }
-        end
-        local json_string = json(t)
-        local json_file = io.open("build/csd.json", "w") or error("can't open build/csd.json")
-        json_file:write(json_string)
-        json_file:close()
+        update()
     elseif arg["check"] then
         local base_ui = getFiles(base)
         print(">>> start checking >>>")
