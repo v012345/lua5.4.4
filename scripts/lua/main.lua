@@ -11,6 +11,14 @@ local function main()
         result:close()
         return r
     end
+    local function copy(from, to)
+        local windows_from = string.gsub(from, "/", "\\")
+        local windows_to = string.gsub(to, "/", "\\")
+        local cmd = string.format('copy "%s" "%s" /Y', windows_from, windows_to)
+        if not io.popen(cmd) then
+            error("can't run " .. cmd)
+        end
+    end
 
     ---comment
     ---@param lang string
@@ -169,6 +177,11 @@ local function main()
             then
                 csd_json[csd_name].modification = lfs.attributes(csd_path, "modification")
                 csd_json[csd_name].sha1 = getSha1(csd_path)
+                for _, lang in ipairs(langs) do
+                    local target = string.format("%s\\%s\\cocosstudio\\ui\\%s", root_path, lang, csd_name)
+                    copy(csd_path, target)
+                end
+
 
                 print(index, csd_name)
                 index = index + 1
