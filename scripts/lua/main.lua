@@ -15,8 +15,12 @@ local function main()
         local windows_from = string.gsub(from, "/", "\\")
         local windows_to = string.gsub(to, "/", "\\")
         local cmd = string.format('copy "%s" "%s" /Y', windows_from, windows_to)
-        if not io.popen(cmd) then
+        local r = io.popen(cmd)
+        if not r then
             error("can't run " .. cmd)
+        else
+            print(r:read("a"))
+            r:close()
         end
     end
 

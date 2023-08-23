@@ -144,7 +144,7 @@ function mt:parser_a_name()
         self:get_next_char()
     end
     if #s == 0 then
-        error("no name line_number: "..self.line_number)
+        error("no name line_number: " .. self.line_number)
     else
         return table.concat(s)
     end
