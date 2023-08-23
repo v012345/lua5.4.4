@@ -170,6 +170,7 @@ local function main()
             langs_ui[i] = getFiles(lang)
         end
         local index = 1
+        local ccs_temp = xml("build/ccs.xml")
 
         for csd_name, csd_path in pairs(base_ui) do
             if csd_json[csd_name].modification < lfs.attributes(csd_path, "modification") and
@@ -194,6 +195,16 @@ local function main()
                 for indx, lang_node in ipairs(langs_node) do
                     csd(lang_node, string.format("%s\\%s\\cocosstudio\\ui\\%s", root_path, langs[indx], csd_name))
                 end
+                local Folder = ccs_temp.children[2].children[1].children[1].children[1]
+                Folder.children[#Folder.children + 1] = {
+                    children = {},
+                    name = "Project",
+                    attributes = {
+                        Name = csd_name,
+                        Type = "Layer"
+                    },
+                    content = "",
+                }
             end
         end
         local table2json = require "utils.table2json"
@@ -201,6 +212,14 @@ local function main()
         local table2json_file = io.open("build/csd.json", "w") or error("can't open build/csd.json")
         table2json_file:write(json_string)
         table2json_file:close()
+        csd(ccs_temp, "D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\en\\Closers_temp.ccs")
+        local css = "D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\en\\Closers_temp.ccs"
+        local game_res = "D:\\Closers.cocos\\client\\branches\\dzogame_sea\\Resources\\res_en"
+        local cocos_cmd = "\"C:\\Cocos\\Cocos Studio\\Cocos.Tool.exe\" publish -f %s -o %s -s -d Serializer_FlatBuffers"
+        print(string.format(cocos_cmd, css, game_res))
+        local exe_cmd = io.popen(string.format(cocos_cmd, css, game_res)) or error("can't execute " .. cocos_cmd)
+        print(exe_cmd:read("a"))
+        exe_cmd:close()
         print("<<< end replacing <<<")
     elseif arg["update"] then
         update()
