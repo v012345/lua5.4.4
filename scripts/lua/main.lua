@@ -42,6 +42,7 @@ local function main()
 
     local base = "zhcn"
     local langs = { "en", "id", "th", "vi" }
+    local all_langs = { "zhcn", "en", "id", "th", "vi" }
 
     -- local base_ui = getFiles(base)
     -- for key, value in pairs(base_ui) do
@@ -212,14 +213,17 @@ local function main()
         local table2json_file = io.open("build/csd.json", "w") or error("can't open build/csd.json")
         table2json_file:write(json_string)
         table2json_file:close()
-        csd(ccs_temp, "D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\en\\Closers_temp.ccs")
-        local css = "D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\en\\Closers_temp.ccs"
-        local game_res = "D:\\Closers.cocos\\client\\branches\\dzogame_sea\\Resources\\res_en"
-        local cocos_cmd = "\"C:\\Cocos\\Cocos Studio\\Cocos.Tool.exe\" publish -f %s -o %s -s -d Serializer_FlatBuffers"
-        print(string.format(cocos_cmd, css, game_res))
-        local exe_cmd = io.popen(string.format(cocos_cmd, css, game_res)) or error("can't execute " .. cocos_cmd)
-        print(exe_cmd:read("a"))
-        exe_cmd:close()
+        for _, lang in ipairs(all_langs) do
+            local css = string.format("%s\\%s\\Closers_temp.ccs", root_path, lang)
+            csd(ccs_temp, css)
+            local game_res = "D:\\Closers.cocos\\client\\branches\\dzogame_sea\\Resources\\res_" .. lang
+            local cocos_cmd =
+            "\"C:\\Cocos\\Cocos Studio\\Cocos.Tool.exe\" publish -f %s -o %s -s -d Serializer_FlatBuffers"
+            print(string.format(cocos_cmd, css, game_res))
+            local exe_cmd = io.popen(string.format(cocos_cmd, css, game_res)) or error("can't execute " .. cocos_cmd)
+            print(exe_cmd:read("a"))
+            exe_cmd:close()
+        end
         print("<<< end replacing <<<")
     elseif arg["update"] then
         update()
