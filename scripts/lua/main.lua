@@ -35,7 +35,7 @@ local function main()
                 local filePath = folder .. "/" .. entry
                 local fileAttributes = lfs.attributes(filePath)
                 if fileAttributes.mode == "file" then
-                    if string.match(string.lower(filePath), "^.+%.csd$") then
+                    if string.match(string.lower(filePath), "^.+%.csd$") and entry ~= "UiDownload.csd" then
                         m[entry] = filePath
                     end
                 end
@@ -134,7 +134,7 @@ local function main()
         local csd_json = json(json_file:read("a")) or {}
         json_file:close()
         local csv = require "utils.csv2table"
-        local raw_trans = csv("./trans.csv")
+        local raw_trans = csv("D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea\\zhcn\\trans.csv")
         local trans = {}
         for i = 2, #raw_trans, 1 do
             local row = raw_trans[i]
@@ -178,7 +178,7 @@ local function main()
         local ccs_temp = xml("build/ccs.xml")
 
         for csd_name, csd_path in pairs(base_ui) do
-            if csd_json[csd_name].modification < lfs.attributes(csd_path, "modification") and
+            if csd_name~="UiDownload.csd" and  csd_json[csd_name].modification < lfs.attributes(csd_path, "modification") and
                 csd_json[csd_name].sha1 ~= getSha1(csd_path)
             then
                 csd_json[csd_name].modification = lfs.attributes(csd_path, "modification")
@@ -254,6 +254,17 @@ local function main()
             check(xml(csd_path))
         end
         print("<<< end checking <<<")
+    elseif arg["plist"] then
+        for _, lang in ipairs(all_langs) do
+            local plist = string.format("%s\\%s\\Closers_temp_plist.ccs", root_path, lang)
+            local game_res = "D:\\Closers.cocos\\client\\branches\\dzogame_sea\\Resources\\res_" .. lang
+            local cocos_cmd =
+            "\"C:\\Cocos\\Cocos Studio\\Cocos.Tool.exe\" publish -f %s -o %s -s -d Serializer_FlatBuffers"
+            print(string.format(cocos_cmd, plist, game_res))
+            local exe_cmd = io.popen(string.format(cocos_cmd, plist, game_res)) or error("can't execute " .. cocos_cmd)
+            print(exe_cmd:read("a"))
+            exe_cmd:close()
+        end
     end
 end
 

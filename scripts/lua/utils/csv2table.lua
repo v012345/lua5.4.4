@@ -34,7 +34,12 @@ function mt:parser_a_string()
         self:get_next_char() -- 跳过 "
         return table.concat(s)
     else
-        error('miss "')
+        local s = {}
+        while self.current ~= ',' do
+            s[#s + 1] = self.current
+            self:get_next_char()
+        end
+        return table.concat(s)
     end
 end
 
