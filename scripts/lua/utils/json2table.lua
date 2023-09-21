@@ -265,6 +265,7 @@ function Parser:parser(root, json_string)
     return root
 end
 
+
 return function(json_string)
     local JSON = {
         root = {},
