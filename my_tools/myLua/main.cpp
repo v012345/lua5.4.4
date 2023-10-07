@@ -12,6 +12,7 @@ extern "C" {
 static int luac(lua_State* L);
 static void praser(lua_State* L, Proto* p);
 int main(int argc, char const* argv[]) {
+    return 0;
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
     luaopen_lfs(L);
