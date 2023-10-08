@@ -1,1 +1,1 @@
- require "scripts.csd"
+require "scripts.CSD"
