@@ -157,7 +157,8 @@
         "lfs.h": "c",
         "lapi.h": "c",
         "lno.h": "c",
-        "ldebug.h": "c"
+        "ldebug.h": "c",
+        "auxlib.h": "c"
     },
     "Lua.diagnostics.globals": [
         "lfs"

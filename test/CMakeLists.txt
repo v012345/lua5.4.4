@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
 project(test)
-# message(${CMAKE_CURRENT_SOURCE_DIR})
 add_compile_definitions(
     LUA_SCRIPTS="${CMAKE_CURRENT_SOURCE_DIR}/test.lua"
+    LUA_AUX_LIB="${CMAKE_CURRENT_SOURCE_DIR}/lib.lua"
 )
-add_executable(${PROJECT_NAME} test.c)
+add_executable(${PROJECT_NAME} test.c auxlib.c)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lua)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/modules)
