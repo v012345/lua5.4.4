@@ -26,6 +26,5 @@ int main(int argc, char const* argv[]) {
     wchar_t wc = L'\x808E';
     aux_print_wchar(L, wc);
     aux_print_wstring(L, ws, sizeof(ws));
-    printf("%s\n", "我爱上了😋");
     return 0;
 }
