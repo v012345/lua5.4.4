@@ -23,13 +23,8 @@ int main(int argc, char const* argv[]) {
     luaL_dofile(L, LUA_SCRIPTS);
 #endif
     wchar_t ws[] = L"\x6211\x7231\x4F60\x1234\x9875\xD83D\xDE0B";
-    wchar_t wc = L"\x808F";
-    // 11100110 10011000 10100101
-    // 110 011000 100101
-    // 110 011000 100101
-    // 11100110
-    // printf("%s\n", ws); // 3
-    // aux_print_wchar(L, wc);
+    wchar_t wc = L'\x808E';
+    aux_print_wchar(L, wc);
     aux_print_wstring(L, ws, sizeof(ws));
     printf("%s\n", "我爱上了😋");
     return 0;

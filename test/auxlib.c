@@ -19,21 +19,30 @@ int aux_print_wchar(lua_State* L, const wchar_t wc) {
     lua_pushinteger(L, 1);
     lua_pushinteger(L, wc);
     lua_settable(L, -3);
-    lua_pcall(L, 1, 0, 0);
+    lua_pcall(L, 1, 1, 0);
+    size_t len = lua_rawlen(L, -1);
+    char* str = malloc(sizeof(char) * (len + 1));
+    for (size_t i = 0; i < len; i++) {
+        lua_rawgeti(L, -1, i + 1);
+        char c = lua_tointeger(L, -1);
+        str[i] = c;
+        lua_pop(L, 1);
+    }
+    str[len] = '\0';
+    printf("%s", str);
+    free(str);
     return 1;
 }
 int aux_print_wstring(lua_State* L, const wchar_t* ws, size_t size) {
-    // freopen("o.txt", "w", stdout);
     lua_getglobal(L, "Global");
     lua_getfield(L, -1, "wchar_to_utf8");
     lua_newtable(L);
     int count = size / sizeof(wchar_t);
-    for (size_t i = 0; i < count; i++) { /* code */
+    for (size_t i = 0; i < count; i++) {
         lua_pushinteger(L, i + 1);
         lua_pushinteger(L, ws[i]);
         lua_settable(L, -3);
     }
-    // lua_pushinteger(L, count);
     lua_pcall(L, 1, 1, 0);
     size_t len = lua_rawlen(L, -1);
     char* str = malloc(sizeof(char) * len);
