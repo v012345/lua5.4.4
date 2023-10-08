@@ -1,6 +1,7 @@
 #include "auxlib.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 int luaopen_aux(lua_State* L, int argc, char const* argv[]) {
     lua_newtable(L);
     for (int i = 0; i < argc; i++) {
@@ -9,6 +10,19 @@ int luaopen_aux(lua_State* L, int argc, char const* argv[]) {
         lua_settable(L, -3);
     }
     lua_setglobal(L, "arg");
+    lua_getglobal(L, "package");
+    lua_getfield(L, -1, "path");
+
+    char* path = lua_tostring(L, -1);
+    char* new_path = malloc(sizeof(char) * (strlen(path) + strlen(";" LUA_SCRIPTS) + 1));
+    memcpy(new_path, path, strlen(path));
+    memcpy(new_path + strlen(path), ";" LUA_SCRIPTS, strlen(";" LUA_SCRIPTS) + 1);
+    // printf("%s\n", new_path);
+    lua_pop(L, 1);
+    lua_pushstring(L, "path");
+    lua_pushstring(L, new_path);
+    lua_settable(L, -3);
+    free(new_path);
     luaL_dofile(L, LUA_AUX_LIB);
     return 1;
 }

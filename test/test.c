@@ -19,8 +19,8 @@ int main(int argc, char const* argv[]) {
     luaopen_lfs(L);
     luaopen_aux(L, argc, argv);
 
-#ifdef LUA_SCRIPTS
-    luaL_dofile(L, LUA_SCRIPTS);
+#ifdef LUA_MAIN_ENTRY
+    luaL_dofile(L, LUA_MAIN_ENTRY);
 #endif
     wchar_t ws[] = L"\x6211\x7231\x4F60\x1234\x9875\xD83D\xDE0B";
     wchar_t wc = L'\x808E';
