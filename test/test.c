@@ -29,7 +29,8 @@ int main(int argc, char const* argv[]) {
     // 110 011000 100101
     // 11100110
     // printf("%s\n", ws); // 3
-    aux_print_wchar(L, wc);
+    // aux_print_wchar(L, wc);
     aux_print_wstring(L, ws, sizeof(ws));
+    printf("%s\n", "我爱上了😋");
     return 0;
 }

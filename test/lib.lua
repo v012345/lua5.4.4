@@ -1,7 +1,7 @@
 Global = {}
 function Global.log_2(x)
     local log_2 = {
-        0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6,
+        1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6,
         6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
         6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
         7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
@@ -12,12 +12,10 @@ function Global.log_2(x)
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8 };
     local l = 0
-    x = x - 1
     while x >= 256 do
         l = l + 8;
         x = x >> 8;
     end
-
     return l + log_2[x];
 end
 
@@ -30,11 +28,10 @@ function Global.wchar_to_utf8(ws)
         else
             unicode = value
             if 0xD800 <= value and value <= 0xDBFF then
-                local high = value - 0xD800
+                local high = ((value - 0xD800) << 10) + 0x10000
                 local low = ws[index + 1] - 0xDC00
-                unicode = (high << 10) + low
+                unicode = high + low
             end
-            -- print(index, unicode)
             if unicode < 256 then -- ascii
                 str[#str + 1] = unicode
             else
@@ -46,8 +43,6 @@ function Global.wchar_to_utf8(ws)
                 size = (size >> 16) | size;
                 size = (size >> 32) | size;
                 size = size + 1;
-                -- print(Global.log_2(size))
-                print(size, Global.log_2(size))
                 local bits = Global.log_2(size)
                 if size ~= unicode then
                     bits = bits - 1
@@ -62,13 +57,11 @@ function Global.wchar_to_utf8(ws)
                 end
                 head = head + (unicode >> (6 * (x - 1)))
                 str[#str + 1] = head
-                print(string.format("%x", head), head)
                 for i = x - 1, 1, -1 do
                     local body = 0x80
                     local mask = 0x3f << ((i - 1) * 6)
                     body = body + ((unicode & mask) >> ((i - 1) * 6))
                     str[#str + 1] = body
-                    print(string.format("%x", body), body)
                 end
             end
         end
