@@ -1,1 +1,1 @@
-require "scripts.csd2table"
+ require "scripts.csd"
