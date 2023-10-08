@@ -48,7 +48,30 @@ function Global.wchar_to_utf8(ws)
                 size = size + 1;
                 -- print(Global.log_2(size))
                 print(size, Global.log_2(size))
+                local bits = Global.log_2(size)
+                if size ~= unicode then
+                    bits = bits - 1
+                end
+                local x = math.ceil((bits - 6) / 5) + 1
+                local head = 0
+                for i = 1, x, 1 do
+                    head = (head << 1) + 1
+                end
+                for i = 1, 8 - x, 1 do
+                    head = (head << 1)
+                end
+                head = head + (unicode >> (6 * (x - 1)))
+                str[#str + 1] = head
+                print(string.format("%x", head), head)
+                for i = x - 1, 1, -1 do
+                    local body = 0x80
+                    local mask = 0x3f << ((i - 1) * 6)
+                    body = body + ((unicode & mask) >> ((i - 1) * 6))
+                    str[#str + 1] = body
+                    print(string.format("%x", body), body)
+                end
             end
         end
     end
+    return str
 end
