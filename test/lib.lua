@@ -1,22 +1,14 @@
 Global = {}
-function Global.log_2(x)
-    local log_2 = {
-        1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6,
-        6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-        6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8 };
-    local l = 0
-    while x >= 256 do
-        l = l + 8;
-        x = x >> 8;
+function Global.getBits(x)
+    if math.type(x) ~= "integer" then
+        error("must an integer")
     end
-    return l + log_2[x];
+    local bit = 1
+    while x > 1 do
+        x = x >> 1
+        bit = bit + 1
+    end
+    return bit
 end
 
 function Global.wchar_to_utf8(ws)
@@ -43,7 +35,7 @@ function Global.wchar_to_utf8(ws)
                 size = (size >> 16) | size;
                 size = (size >> 32) | size;
                 size = size + 1;
-                local bits = Global.log_2(size)
+                local bits = Global.getBits(size)
                 if size ~= unicode then
                     bits = bits - 1
                 end
