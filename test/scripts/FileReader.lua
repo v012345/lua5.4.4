@@ -39,6 +39,24 @@ local function FileReader(path)
         return self.current
     end
 
+    ---看下一个字符是不是 what
+    ---@param what string
+    ---@return boolean
+    function stream:check_next(what)
+        if self.position >= self.length then
+            return false -- 结束符和谁也不等
+        end
+        local next_position = self.position + 1
+        local head = string.byte(self.content, next_position, next_position)
+        if (head & 0x80) ~= 0 then
+            local length = stream:get_char_lenght(head) - 1
+            local char = string.sub(self.content, next_position, next_position + length)
+            return char == what
+        else
+            return string.char(head) == what
+        end
+    end
+
     ---@private
     function stream:get_a_char()
         local head = string.byte(self.content, self.position, self.position)
