@@ -1,4 +1,5 @@
 local function CSV(path)
+    local res = {}
     local parser = {
         stream = (require "scripts.FileReader")(path),
     }
@@ -57,6 +58,10 @@ local function CSV(path)
             parser.stream:next() --跳过第一个 ,
         elseif parser.stream.current == '\n' then
             t[#t + 1] = {}
+            if parser.stream:check_next(',')then
+                local col = t[#t]
+                col[#col + 1] = ""
+            end
             parser.stream:next()
         else
             if not t[#t] then
@@ -67,8 +72,21 @@ local function CSV(path)
         end
     end
     t[#t] = nil
+    res.table = t
+    function res:write_to(where)
+        local file = io.open(where, "w") or error("can't open " .. where)
+        for _, row in ipairs(t) do
+            local row_content = {}
+            for _, cell in ipairs(row) do
+                row_content[#row_content + 1] = string.format('"%s"', string.gsub(cell, '"', '""'))
+            end
+            file:write(table.concat(row_content, ","))
+            file:write("\n")
+        end
+        file:close()
+    end
 
-    return t
+    return res
 end
 
 return CSV

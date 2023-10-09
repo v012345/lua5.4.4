@@ -44,7 +44,6 @@ local function FileReader(path)
                 end
             end
         end
-        print(self.current)
         return self.current
     end
 
@@ -65,7 +64,6 @@ local function FileReader(path)
             return string.char(head) == what
         end
     end
-
     ---@private
     function stream:get_a_char()
         local head = string.byte(self.content, self.position, self.position)
