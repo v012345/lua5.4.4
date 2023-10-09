@@ -3,6 +3,14 @@
 local function FileReader(path)
     local file = io.open(path, "r") or error("can't open" .. path)
     local content = file:read("a")
+    if #content > 3 then
+        -- check bom
+        local bom = string.format("%x%x%x", string.byte(content, 1, 3))
+        if string.lower(bom) == "efbbbf" then
+            content = string.sub(content, 4, #content)
+        end
+    end
+
     file:close()
     ---@class stream
     ---@field line_number integer cur 所在的行号
@@ -36,6 +44,7 @@ local function FileReader(path)
                 end
             end
         end
+        print(self.current)
         return self.current
     end
 
