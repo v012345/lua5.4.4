@@ -6,19 +6,32 @@ let Tetris = {
     speed: 0.5,
     max: 6,
     Tetromino: {
-        "I": [],
+        "I": [
+            [[1], [1], [1], [1]],
+            [[1, 1, 1, 1]],
+            [[1], [1], [1], [1]],
+            [[1, 1, 1, 1]],
+        ],
         "L": [],
         "J": [],
-        "O": [[4, 4], [4, 4]],
+        "O": [[[4, 4], [4, 4]], [[4, 4], [4, 4]], [[4, 4], [4, 4]], [[4, 4], [4, 4]]],
         "S": [],
         "T": [],
         "Z": [],
     },
     current: {
         type: "O",
+        direction: 0,
+        // 0 <= x <= 9 , 0 <= y <= 19
         position: {
-            x: 5,
-            y: 0
+            x: 8,
+            y: 19
+        }
+    },
+    correctPosition: (current) => {
+        let currentTetromino = Tetris.Tetromino[current.type][current.direction]
+        if (current.position.x + currentTetromino[0].length > 10) {
+            current.position.x = 10 - currentTetromino[0].length
         }
     },
     start: () => {
@@ -58,23 +71,31 @@ let Tetris = {
                 }
             })
         })
-        Tetris.Tetromino[Tetris.current.type].forEach((row, row_number) => {
+        Tetris.correctPosition(Tetris.current)
+        let currentTetromino = Tetris.Tetromino[Tetris.current.type][Tetris.current.direction]
+        currentTetromino.forEach((row, row_number) => {
             row.forEach((column, column_number) => {
+                // console.log(row_number, column_number)
                 Tetris.context.fillStyle = Tetris.color[column];
-                let x = (column_number + Tetris.current.position.x) * 30
-                let y = (row_number + Tetris.current.position.y) * 30
-                Tetris.context.fillRect(x, y, 30, 30);
-                Tetris.context.beginPath();
-                Tetris.context.moveTo(x, y);
-                Tetris.context.lineTo(x + 30, y);
-                Tetris.context.lineTo(x + 30, y + 30);
-                Tetris.context.lineTo(x, y + 30);
-                Tetris.context.lineTo(x, y);
-                // // set strokecolor
-                // ctx.strokeStyle = stroke;
-                // // set lineWidht 
-                // ctx.lineWidth = width;
-                Tetris.context.stroke();
+                if (column > 0) {
+                    let vx = (column_number + Tetris.current.position.x)
+                    let x = vx * 30
+                    let vy = (Tetris.current.position.y - row_number)
+                    let y = vy * 30
+                    Tetris.context.fillRect(x, y, 30, 30);
+                    Tetris.context.beginPath();
+                    Tetris.context.moveTo(x, y);
+                    Tetris.context.lineTo(x + 30, y);
+                    Tetris.context.lineTo(x + 30, y + 30);
+                    Tetris.context.lineTo(x, y + 30);
+                    Tetris.context.lineTo(x, y);
+                    // // set strokecolor
+                    // ctx.strokeStyle = stroke;
+                    // // set lineWidht 
+                    // ctx.lineWidth = width;
+                    Tetris.context.stroke();
+                }
+
             })
         })
     },
