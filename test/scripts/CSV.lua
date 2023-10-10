@@ -75,7 +75,7 @@ local function CSV(path)
     res.table = t
     function res:write_to(where)
         local file = io.open(where, "w") or error("can't open " .. where)
-        for _, row in ipairs(t) do
+        for _, row in ipairs(self.table) do
             local row_content = {}
             for _, cell in ipairs(row) do
                 row_content[#row_content + 1] = string.format('"%s"', string.gsub(cell, '"', '""'))
