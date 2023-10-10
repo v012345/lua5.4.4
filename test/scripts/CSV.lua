@@ -1,4 +1,7 @@
 local function CSV(path)
+    ---@class CSV_table
+    ---@field table table csv 行列转成的 lua 表
+    ---@field write_to function 把 csv 输出到指定文件
     local res = {}
     local parser = {
         stream = (require "scripts.FileReader")(path),
@@ -58,7 +61,7 @@ local function CSV(path)
             parser.stream:next() --跳过第一个 ,
         elseif parser.stream.current == '\n' then
             t[#t + 1] = {}
-            if parser.stream:check_next(',')then
+            if parser.stream:check_next(',') then
                 local col = t[#t]
                 col[#col + 1] = ""
             end
