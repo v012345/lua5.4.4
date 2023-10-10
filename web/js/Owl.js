@@ -26,4 +26,4 @@ const Owl = {
 
     }
 }
-Owl.fire(1000)
+Owl.fire()
