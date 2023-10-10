@@ -1,3 +1,6 @@
+---comment
+---@param path string
+---@return CSV_table
 local function CSV(path)
     ---@class CSV_table
     ---@field table table csv 行列转成的 lua 表
