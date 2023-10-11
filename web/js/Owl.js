@@ -12,6 +12,7 @@ const Owl = {
 
     },
     fire: (fps) => {
+        Owl.KeyboardDetector()
         fps = fps ? fps : 33
         setInterval(function () {
             Owl.Entities.forEach((entity) => {
@@ -24,6 +25,20 @@ const Owl = {
     },
     stop: () => {
 
+    },
+    loadKeyBoard: (keyBoard) => {
+
+    },
+    inputQueue: [],
+    KeyboardDetector: () => {
+        document.onkeydown = function (k) {
+            Owl.inputQueue.push(k)
+            // console.log("onkeydown " + k)
+        }
+        document.onkeyup = function (k) {
+            Owl.inputQueue.push(k)
+            // console.log("onkeyup " + k)
+        }
     }
 }
 Owl.fire()

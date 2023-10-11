@@ -49,6 +49,7 @@ let Tetris = {
         }
     },
     update: (delta) => {
+
         Tetris.context.fillStyle = "rgb(255,255,255)";
         Tetris.context.fillRect(0, 0, 300, 600);
         // let x = Math.floor(Math.random() * 10) * 30
@@ -87,6 +88,18 @@ let Tetris = {
         if (Tetris.current.displacement >= 1000) {
             Tetris.current.displacement = 0
             Tetris.current.position.y += 1
+        }
+        let input = Owl.inputQueue.shift()
+        if (input) {
+            Owl.inputQueue = []
+            console.log(input)
+            if (input.keyCode == 65) {
+                Tetris.current.position.x -= 1
+            } else if (input.keyCode == 68) {
+                Tetris.current.position.x += 1
+            } else if (input.keyCode == 87) {
+                Tetris.current.direction = (Tetris.current.direction + 1) % 4
+            }
         }
         Tetris.correctPosition(Tetris.current)
         currentTetromino.forEach((row, row_number) => {
