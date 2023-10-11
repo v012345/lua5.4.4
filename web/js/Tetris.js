@@ -27,7 +27,7 @@ let Tetris = {
             x: 5,
             y: -1
         },
-        displacement: 0,
+        displacementY: 0,
     },
     correctPosition: (current) => {
         let currentTetromino = Tetris.Tetromino[current.type][current.direction]
@@ -50,10 +50,8 @@ let Tetris = {
     },
     update: (delta) => {
 
-        Tetris.context.fillStyle = "rgb(255,255,255)";
+        Tetris.context.fillStyle = Tetris.color[0]
         Tetris.context.fillRect(0, 0, 300, 600);
-        // let x = Math.floor(Math.random() * 10) * 30
-        // let y = Math.floor(Math.random() * 20) * 30
         Tetris.ground.forEach((row, row_number) => {
             row.forEach((column, column_number) => {
                 if (column > 0) {
@@ -67,10 +65,6 @@ let Tetris = {
                     Tetris.context.lineTo(x + 30, y + 30);
                     Tetris.context.lineTo(x, y + 30);
                     Tetris.context.lineTo(x, y);
-                    // // set strokecolor
-                    // ctx.strokeStyle = stroke;
-                    // // set lineWidht 
-                    // ctx.lineWidth = width;
                     Tetris.context.stroke();
                 }
                 if (row_number == 0) {
@@ -84,9 +78,9 @@ let Tetris = {
             Tetris.context.fillText(row_number, 8, row_number * 30 + 20);
         })
         let currentTetromino = Tetris.Tetromino[Tetris.current.type][Tetris.current.direction]
-        Tetris.current.displacement += delta * Tetris.speed
-        if (Tetris.current.displacement >= 1000) {
-            Tetris.current.displacement = 0
+        Tetris.current.displacementY += delta * Tetris.speed
+        if (Tetris.current.displacementY >= 1000) {
+            Tetris.current.displacementY = 0
             Tetris.current.position.y += 1
         }
         let input = Owl.inputQueue.shift()
@@ -104,7 +98,6 @@ let Tetris = {
         Tetris.correctPosition(Tetris.current)
         currentTetromino.forEach((row, row_number) => {
             row.forEach((column, column_number) => {
-                // console.log(row_number, column_number)
                 Tetris.context.fillStyle = Tetris.color[column];
                 if (column > 0) {
                     let vx = (column_number + Tetris.current.position.x)
@@ -118,10 +111,6 @@ let Tetris = {
                     Tetris.context.lineTo(x + 30, y + 30);
                     Tetris.context.lineTo(x, y + 30);
                     Tetris.context.lineTo(x, y);
-                    // // set strokecolor
-                    // ctx.strokeStyle = stroke;
-                    // // set lineWidht 
-                    // ctx.lineWidth = width;
                     Tetris.context.stroke();
                 }
 
@@ -144,4 +133,3 @@ let Tetris = {
     ground: [],
 }
 Owl.register(Tetris)
-// return Tetris
