@@ -12,7 +12,8 @@
 
 int main(int argc, char const* argv[]) {
 #ifdef _WIN32 // _WIN32 在 32 和 64 位上都有定义, _WIN64 只在 64 位上有定义
-    system("chcp 65001");
+    system("chcp 65001 > NUL");
+    system("chcp 65001 > $null");
 #endif
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
@@ -22,8 +23,8 @@ int main(int argc, char const* argv[]) {
 #ifdef LUA_MAIN_ENTRY
     luaL_dofile(L, LUA_MAIN_ENTRY);
 #endif
-    wchar_t ws[] = L"\x6211\x7231\x4F60\x1234\x9875\xD83D\xDE0B";
-    wchar_t wc = L'\x808E';
+    wchar_t wc = L'\x518D';
+    wchar_t ws[] = L"\x89C1\xD83D\xDC4B";
     aux_print_wchar(L, wc);
     aux_print_wstring(L, ws, sizeof(ws));
     return 0;
