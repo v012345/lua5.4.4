@@ -3,7 +3,7 @@ let Tetris = {
     lastUpdateAt: 0,
     canvas: null,
     context: null,
-    speed: 0.5,
+    speed: 3,
     max: 6,
     Tetromino: {
         "I": [
@@ -12,7 +12,7 @@ let Tetris = {
             [[1], [1], [1], [1]],
             [[1, 1, 1, 1]],
         ],
-        "L": [],
+        "L": [[[2, 0], [2, 0], [2, 2]], [[2, 2, 2], [2, 0, 0]], [[2, 2], [0, 2], [0, 2]], [[0, 0, 2], [2, 2, 2]]],
         "J": [],
         "O": [[[4, 4], [4, 4]], [[4, 4], [4, 4]], [[4, 4], [4, 4]], [[4, 4], [4, 4]]],
         "S": [],
@@ -20,18 +20,22 @@ let Tetris = {
         "Z": [],
     },
     current: {
-        type: "O",
-        direction: 0,
-        // 0 <= x <= 9 , 0 <= y <= 19
+        type: "L",
+        direction: 3,
+        // 0 <= x <= 9 , -1 <= y <= 19
         position: {
-            x: 8,
-            y: 19
-        }
+            x: 5,
+            y: -1
+        },
+        displacement: 0,
     },
     correctPosition: (current) => {
         let currentTetromino = Tetris.Tetromino[current.type][current.direction]
         if (current.position.x + currentTetromino[0].length > 10) {
             current.position.x = 10 - currentTetromino[0].length
+        }
+        if (current.position.y > 19) {
+            current.position.y = 19
         }
     },
     start: () => {
@@ -67,12 +71,24 @@ let Tetris = {
                     // // set lineWidht 
                     // ctx.lineWidth = width;
                     Tetris.context.stroke();
-
+                }
+                if (row_number == 0) {
+                    Tetris.context.font = '18px serif';
+                    Tetris.context.fillStyle = 'black';
+                    Tetris.context.fillText(column_number, column_number * 30 + 8, 20);
                 }
             })
+            Tetris.context.font = '18px serif';
+            Tetris.context.fillStyle = 'black';
+            Tetris.context.fillText(row_number, 8, row_number * 30 + 20);
         })
-        Tetris.correctPosition(Tetris.current)
         let currentTetromino = Tetris.Tetromino[Tetris.current.type][Tetris.current.direction]
+        Tetris.current.displacement += delta * Tetris.speed
+        if (Tetris.current.displacement >= 1000) {
+            Tetris.current.displacement = 0
+            Tetris.current.position.y += 1
+        }
+        Tetris.correctPosition(Tetris.current)
         currentTetromino.forEach((row, row_number) => {
             row.forEach((column, column_number) => {
                 // console.log(row_number, column_number)
