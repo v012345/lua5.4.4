@@ -1,17 +1,18 @@
 xpcall(function()
-    local all_langs = { "zhcn", "en", "id", "th", "vi" }
-    local root_path = "D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea"
+    require "scripts.XLS"
+    -- local all_langs = { "zhcn", "en", "id", "th", "vi" }
+    -- local root_path = "D:\\Closers.cocos\\resource\\ui\\branches\\dzogame_sea"
 
-    for _, lang in ipairs(all_langs) do
-        local plist = string.format("%s\\%s\\Closers_temp_plist.ccs", root_path, lang)
-        local game_res = "D:\\Closers.cocos\\client\\branches\\dzogame_sea\\Resources\\res_" .. lang
-        local cocos_cmd =
-        "\"C:\\Cocos\\Cocos Studio\\Cocos.Tool.exe\" publish -f %s -o %s -s -d Serializer_FlatBuffers"
-        print(string.format(cocos_cmd, plist, game_res))
-        local exe_cmd = io.popen(string.format(cocos_cmd, plist, game_res)) or error("can't execute " .. cocos_cmd)
-        print(exe_cmd:read("a"))
-        exe_cmd:close()
-    end
+    -- for _, lang in ipairs(all_langs) do
+    --     local plist = string.format("%s\\%s\\Closers_temp_plist.ccs", root_path, lang)
+    --     local game_res = "D:\\Closers.cocos\\client\\branches\\dzogame_sea\\Resources\\res_" .. lang
+    --     local cocos_cmd =
+    --     "\"C:\\Cocos\\Cocos Studio\\Cocos.Tool.exe\" publish -f %s -o %s -s -d Serializer_FlatBuffers"
+    --     print(string.format(cocos_cmd, plist, game_res))
+    --     local exe_cmd = io.popen(string.format(cocos_cmd, plist, game_res)) or error("can't execute " .. cocos_cmd)
+    --     print(exe_cmd:read("a"))
+    --     exe_cmd:close()
+    -- end
     -- debug.sethook(function(a, b, c)
     --     -- print(a, b, c)
     -- end, "l", 1)
